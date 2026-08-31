@@ -1264,7 +1264,8 @@ namespace EsmTool
             std::cout << "  Script: " << mData.mScript << std::endl;
         if (!mData.mEnchant.empty())
             std::cout << "  Enchantment: " << mData.mEnchant << std::endl;
-        std::cout << "  Type: " << weaponTypeLabel(mData.mData.mType) << " (" << mData.mData.mType << ")" << std::endl;
+        const int weaponType = ESM::Weapon::refIdToIndex(mData.mData.mType);
+        std::cout << "  Type: " << weaponTypeLabel(weaponType) << " (" << weaponType << ")" << std::endl;
         std::cout << "  Flags: " << weaponFlags(mData.mData.mFlags) << std::endl;
         std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
         std::cout << "  Value: " << mData.mData.mValue << std::endl;

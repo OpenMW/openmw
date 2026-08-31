@@ -618,7 +618,7 @@ namespace ESM
                 .mData = {
                     .mWeight = 0,
                     .mValue = 1,
-                    .mType = 2,
+                    .mType = WeaponType::LongBladeTwoHand,
                     .mHealth = 3,
                     .mSpeed = 4,
                     .mReach = 5,

@@ -390,7 +390,7 @@ namespace MWRender
             if (iter->getType() == ESM::Weapon::sRecordId)
             {
                 MWWorld::LiveCellRef<ESM::Weapon>* ref = iter->get<ESM::Weapon>();
-                int type = ref->mBase->mData.mType;
+                const ESM::RefId type = ref->mBase->mData.mType;
                 const ESM::WeaponType* weaponInfo = MWMechanics::getWeaponType(type);
                 showCarriedLeft = !(weaponInfo->mFlags & ESM::WeaponType::TwoHanded);
 
@@ -403,9 +403,9 @@ namespace MWRender
                 else
                 {
                     static const std::string oneHandFallback
-                        = "inventory" + MWMechanics::getWeaponType(ESM::Weapon::LongBladeOneHand)->mLongGroup;
+                        = "inventory" + MWMechanics::getWeaponType(ESM::WeaponType::LongBladeOneHand)->mLongGroup;
                     static const std::string twoHandFallback
-                        = "inventory" + MWMechanics::getWeaponType(ESM::Weapon::LongBladeTwoHand)->mLongGroup;
+                        = "inventory" + MWMechanics::getWeaponType(ESM::WeaponType::LongBladeTwoHand)->mLongGroup;
 
                     // For real two-handed melee weapons use 2h swords animations as fallback, otherwise use the 1h ones
                     if (weaponInfo->mFlags & ESM::WeaponType::TwoHanded

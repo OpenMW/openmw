@@ -146,6 +146,7 @@ namespace ESM
         REC_RAND = esm3Recname("RAND"), // Random state.
 
         REC_ATTR = esm3Recname("ATTR"), // Attribute
+        REC_WTYP = esm3Recname("WTYP"), // Weapon type
 
         REC_AACT4 = esm4Recname(ESM4::REC_AACT), // Action
         REC_ACHR4 = esm4Recname(ESM4::REC_ACHR), // Actor Reference

@@ -999,6 +999,51 @@ namespace MWWorld
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfLuck") });
     }
 
+    // Weapon type
+    //=========================================================================
+
+    void Store<ESM::WeaponType>::setUp()
+    {
+        using Type = ESM::WeaponType;
+        const Type types[] = {
+            { Type::PickProbe, "1h", "pickprobe", "", "", "", ESM::Skill::Security, Type::Melee, {}, 0 },
+            { Type::HandToHand, "hh", "handtohand", "", "", "", ESM::Skill::HandToHand, Type::Melee, {},
+                Type::TwoHanded },
+            { Type::Spell, "spell", "spellcast", "", "", "", ESM::Skill::HandToHand, Type::Melee, {}, Type::TwoHanded },
+            { {}, "", "", "", "", "", ESM::Skill::HandToHand, Type::Melee, {}, 0 },
+            { Type::ShortBladeOneHand, "1s", "shortbladeonehand", "Item Weapon Shortblade", "Weapon Bone",
+                "Bip01 ShortBladeOneHand", ESM::Skill::ShortBlade, Type::Melee, {}, Type::HasHealth },
+            { Type::LongBladeOneHand, "1h", "weapononehand", "Item Weapon Longblade", "Weapon Bone",
+                "Bip01 LongBladeOneHand", ESM::Skill::LongBlade, Type::Melee, {}, Type::HasHealth },
+            { Type::LongBladeTwoHand, "2c", "weapontwohand", "Item Weapon Longblade", "Weapon Bone",
+                "Bip01 LongBladeTwoClose", ESM::Skill::LongBlade, Type::Melee, {}, Type::HasHealth | Type::TwoHanded },
+            { Type::BluntOneHand, "1b", "bluntonehand", "Item Weapon Blunt", "Weapon Bone", "Bip01 BluntOneHand",
+                ESM::Skill::BluntWeapon, Type::Melee, {}, Type::HasHealth },
+            { Type::BluntTwoClose, "2b", "blunttwohand", "Item Weapon Blunt", "Weapon Bone", "Bip01 BluntTwoClose",
+                ESM::Skill::BluntWeapon, Type::Melee, {}, Type::HasHealth | Type::TwoHanded },
+            { Type::BluntTwoWide, "2w", "weapontwowide", "Item Weapon Blunt", "Weapon Bone", "Bip01 BluntTwoWide",
+                ESM::Skill::BluntWeapon, Type::Melee, {}, Type::HasHealth | Type::TwoHanded },
+            { Type::SpearTwoWide, "2w", "weapontwowide", "Item Weapon Spear", "Weapon Bone", "Bip01 SpearTwoWide",
+                ESM::Skill::Spear, Type::Melee, {}, Type::HasHealth | Type::TwoHanded },
+            { Type::AxeOneHand, "1b", "bluntonehand", "Item Weapon Blunt", "Weapon Bone", "Bip01 LongBladeOneHand",
+                ESM::Skill::Axe, Type::Melee, {}, Type::HasHealth },
+            { Type::AxeTwoHand, "2b", "blunttwohand", "Item Weapon Blunt", "Weapon Bone", "Bip01 AxeTwoClose",
+                ESM::Skill::Axe, Type::Melee, {}, Type::HasHealth | Type::TwoHanded },
+            { Type::MarksmanBow, "bow", "bowandarrow", "Item Weapon Bow", "Weapon Bone Left", "Bip01 MarksmanBow",
+                ESM::Skill::Marksman, Type::Ranged, Type::Arrow, Type::HasHealth | Type::TwoHanded },
+            { Type::MarksmanCrossbow, "crossbow", "crossbow", "Item Weapon Crossbow", "Weapon Bone",
+                "Bip01 MarksmanCrossbow", ESM::Skill::Marksman, Type::Ranged, Type::Bolt,
+                Type::HasHealth | Type::TwoHanded },
+            { Type::MarksmanThrown, "1t", "throwweapon", "Item Weapon Blunt", "Weapon Bone", "Bip01 MarksmanThrown",
+                ESM::Skill::Marksman, Type::Thrown, {}, 0 },
+            { Type::Arrow, "", "", "Item Ammo", "Bip01 Arrow", "", ESM::Skill::Marksman, Type::Ammo, {}, 0 },
+            { Type::Bolt, "", "", "Item Ammo", "ArrowBone", "", ESM::Skill::Marksman, Type::Ammo, {}, 0 },
+        };
+
+        for (const Type& type : types)
+            insertStatic(type);
+    }
+
     // Dialogue
     //=========================================================================
 
@@ -1235,6 +1280,7 @@ template class MWWorld::TypedDynamicStore<ESM::Spell>;
 template class MWWorld::TypedDynamicStore<ESM::StartScript>;
 template class MWWorld::TypedDynamicStore<ESM::Static>;
 template class MWWorld::TypedDynamicStore<ESM::Weapon>;
+template class MWWorld::TypedDynamicStore<ESM::WeaponType>;
 
 template class MWWorld::TypedDynamicStore<ESM4::Reference, ESM::FormId>;
 template class MWWorld::TypedDynamicStore<ESM4::ActorCharacter, ESM::FormId>;

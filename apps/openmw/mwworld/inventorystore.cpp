@@ -267,7 +267,7 @@ void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots)
     {
         const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
 
-        if (esmWeapon->mData.mType == ESM::Weapon::Arrow)
+        if (esmWeapon->mData.mType == ESM::WeaponType::Arrow)
         {
             if (esmWeapon->mData.mChop[1] >= arrowMax)
             {
@@ -275,7 +275,7 @@ void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots)
                 arrow = iter;
             }
         }
-        else if (esmWeapon->mData.mType == ESM::Weapon::Bolt)
+        else if (esmWeapon->mData.mType == ESM::WeaponType::Bolt)
         {
             if (esmWeapon->mData.mChop[1] >= boltMax)
             {
@@ -341,16 +341,16 @@ void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots)
             // Do not equip ranged weapons, if there is no suitable ammo
             bool hasAmmo = true;
             const MWWorld::LiveCellRef<ESM::Weapon>* ref = weapon->get<ESM::Weapon>();
-            int type = ref->mBase->mData.mType;
-            int ammotype = MWMechanics::getWeaponType(type)->mAmmoType;
-            if (ammotype == ESM::Weapon::Arrow)
+            const ESM::RefId type = ref->mBase->mData.mType;
+            const ESM::RefId ammotype = MWMechanics::getWeaponType(type)->mAmmoType;
+            if (ammotype == ESM::WeaponType::Arrow)
             {
                 if (arrow == end())
                     hasAmmo = false;
                 else
                     slots[Slot_Ammunition] = arrow;
             }
-            else if (ammotype == ESM::Weapon::Bolt)
+            else if (ammotype == ESM::WeaponType::Bolt)
             {
                 if (bolt == end())
                     hasAmmo = false;
@@ -375,7 +375,7 @@ void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots)
                     int slot = itemsSlots.first.front();
                     slots[slot] = weapon;
 
-                    if (ammotype == ESM::Weapon::None)
+                    if (ammotype.empty())
                         slots[Slot_Ammunition] = end();
                 }
 

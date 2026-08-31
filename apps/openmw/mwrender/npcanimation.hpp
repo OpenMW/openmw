@@ -141,7 +141,7 @@ namespace MWRender
         bool getWeaponsShown() const override { return mShowWeapons; }
         void showWeapons(bool showWeapon) override;
 
-        bool updateCarriedLeftVisible(const int weaptype) const override;
+        bool updateCarriedLeftVisible(ESM::RefId weaptype) const override;
         bool getCarriedLeftShown() const override { return mShowCarriedLeft; }
         void showCarriedLeft(bool show) override;
 

@@ -41,7 +41,7 @@ namespace MWRender
         void itemRemoved(const MWWorld::ConstPtr& item, int count) override;
         virtual bool isArrowAttached() const { return false; }
         bool useShieldAnimations() const override;
-        bool updateCarriedLeftVisible(const int weaptype) const override;
+        bool updateCarriedLeftVisible(ESM::RefId weaptype) const override;
 
         void removeFromScene() override;
 

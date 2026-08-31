@@ -116,7 +116,7 @@ namespace MWRender
         {
             if (item.getType() == ESM::Weapon::sRecordId)
             {
-                int type = item.get<ESM::Weapon>()->mBase->mData.mType;
+                const ESM::RefId type = item.get<ESM::Weapon>()->mBase->mData.mType;
                 bonename = MWMechanics::getWeaponType(type)->mAttachBone;
                 if (bonename != "Weapon Bone")
                 {
@@ -152,9 +152,9 @@ namespace MWRender
             // Crossbows start out with a bolt attached
             // FIXME: code duplicated from NpcAnimation
             if (slot == MWWorld::InventoryStore::Slot_CarriedRight && item.getType() == ESM::Weapon::sRecordId
-                && item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
+                && item.get<ESM::Weapon>()->mBase->mData.mType == ESM::WeaponType::MarksmanCrossbow)
             {
-                const ESM::WeaponType* weaponInfo = MWMechanics::getWeaponType(ESM::Weapon::MarksmanCrossbow);
+                const ESM::WeaponType* weaponInfo = MWMechanics::getWeaponType(ESM::WeaponType::MarksmanCrossbow);
                 MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
                 if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == weaponInfo->mAmmoType)
                     attachArrow();
@@ -230,9 +230,9 @@ namespace MWRender
         if (weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
             return nullptr;
 
-        int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
-        int ammoType = MWMechanics::getWeaponType(type)->mAmmoType;
-        if (ammoType == ESM::Weapon::None)
+        const ESM::RefId type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
+        const ESM::RefId ammoType = MWMechanics::getWeaponType(type)->mAmmoType;
+        if (ammoType.empty())
             return nullptr;
 
         // Try to find and attachment bone in actor's skeleton, otherwise fall back to the ArrowBone in weapon's mesh

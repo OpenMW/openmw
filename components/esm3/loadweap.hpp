@@ -24,30 +24,6 @@ namespace ESM
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "Weapon"; }
 
-        enum Type
-        {
-            First = -4,
-            PickProbe = -4,
-            HandToHand = -3,
-            Spell = -2,
-            None = -1,
-            ShortBladeOneHand = 0,
-            LongBladeOneHand = 1,
-            LongBladeTwoHand = 2,
-            BluntOneHand = 3,
-            BluntTwoClose = 4,
-            BluntTwoWide = 5,
-            SpearTwoWide = 6,
-            AxeOneHand = 7,
-            AxeTwoHand = 8,
-            MarksmanBow = 9,
-            MarksmanCrossbow = 10,
-            MarksmanThrown = 11,
-            Arrow = 12,
-            Bolt = 13,
-            Last = 13
-        };
-
         enum AttackType
         {
             AT_Chop,
@@ -65,7 +41,7 @@ namespace ESM
         {
             float mWeight;
             int32_t mValue;
-            int16_t mType;
+            RefId mType;
             uint16_t mHealth;
             float mSpeed, mReach;
             uint16_t mEnchant; // Enchantment points. The real value is mEnchant/10.f
@@ -84,12 +60,37 @@ namespace ESM
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;
 
+        static RefId indexToRefId(int index);
+        static int refIdToIndex(RefId id);
+
         void blank();
         ///< Set record to default state (does not touch the ID).
     };
 
     struct WeaponType
     {
+        constexpr static RecNameInts sRecordId = REC_WTYP;
+        static std::string_view getRecordType() { return "WeaponType"; }
+
+        using TypeId = StringRefId;
+        static const TypeId PickProbe;
+        static const TypeId HandToHand;
+        static const TypeId Spell;
+        static const TypeId ShortBladeOneHand;
+        static const TypeId LongBladeOneHand;
+        static const TypeId LongBladeTwoHand;
+        static const TypeId BluntOneHand;
+        static const TypeId BluntTwoClose;
+        static const TypeId BluntTwoWide;
+        static const TypeId SpearTwoWide;
+        static const TypeId AxeOneHand;
+        static const TypeId AxeTwoHand;
+        static const TypeId MarksmanBow;
+        static const TypeId MarksmanCrossbow;
+        static const TypeId MarksmanThrown;
+        static const TypeId Arrow;
+        static const TypeId Bolt;
+
         enum Flags
         {
             TwoHanded = 0x01,
@@ -104,6 +105,7 @@ namespace ESM
             Ammo = 3
         };
 
+        ESM::RefId mId;
         // std::string mDisplayName; // TODO: will be needed later for editor
         std::string mShortGroup;
         std::string mLongGroup;
@@ -112,13 +114,17 @@ namespace ESM
         std::string mAttachBone;
         std::string mSheathingBone;
         ESM::RefId mSkill;
-        Class mWeaponClass;
-        int mAmmoType;
-        int mFlags;
+        Class mWeaponClass = Melee;
+        ESM::RefId mAmmoType;
+        int mFlags = 0;
 
-        WeaponType(std::string shortGroup, std::string longGroup, const std::string& soundId, std::string attachBone,
-            std::string sheathingBone, ESM::RefId skill, Class weaponClass, int ammoType, int flags)
-            : mShortGroup(std::move(shortGroup))
+        WeaponType() = default;
+
+        WeaponType(RefId id, std::string shortGroup, std::string longGroup, const std::string& soundId,
+            std::string attachBone, std::string sheathingBone, ESM::RefId skill, Class weaponClass, ESM::RefId ammoType,
+            int flags)
+            : mId(std::move(id))
+            , mShortGroup(std::move(shortGroup))
             , mLongGroup(std::move(longGroup))
             , mSoundIdDown(ESM::RefId::stringRefId(soundId + " Down"))
             , mSoundIdUp(ESM::RefId::stringRefId(soundId + " Up"))
@@ -126,10 +132,13 @@ namespace ESM
             , mSheathingBone(std::move(sheathingBone))
             , mSkill(skill)
             , mWeaponClass(weaponClass)
-            , mAmmoType(ammoType)
+            , mAmmoType(std::move(ammoType))
             , mFlags(flags)
         {
         }
+
+        void load(ESMReader& esm, bool& isDeleted);
+        void save(ESMWriter& esm, bool isDeleted = false) const;
     };
 
 }

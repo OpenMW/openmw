@@ -202,23 +202,23 @@ namespace MWMechanics
         if (hasInventoryStore)
         {
             MWWorld::Ptr bestArrow;
-            float bestArrowRating = rateAmmo(actor, enemy, bestArrow, ESM::Weapon::Arrow);
+            float bestArrowRating = rateAmmo(actor, enemy, bestArrow, ESM::WeaponType::Arrow);
 
             MWWorld::Ptr bestBolt;
-            float bestBoltRating = rateAmmo(actor, enemy, bestBolt, ESM::Weapon::Bolt);
+            float bestBoltRating = rateAmmo(actor, enemy, bestBolt, ESM::WeaponType::Bolt);
 
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                float rating = rateWeapon(*it, actor, enemy, -1, bestArrowRating, bestBoltRating);
+                float rating = rateWeapon(*it, actor, enemy, {}, bestArrowRating, bestBoltRating);
                 if (rating > bestActionRating)
                 {
                     const ESM::Weapon* weapon = it->get<ESM::Weapon>()->mBase;
-                    int ammotype = getWeaponType(weapon->mData.mType)->mAmmoType;
+                    const ESM::RefId ammotype = getWeaponType(weapon->mData.mType)->mAmmoType;
 
                     MWWorld::Ptr ammo;
-                    if (ammotype == ESM::Weapon::Arrow)
+                    if (ammotype == ESM::WeaponType::Arrow)
                         ammo = bestArrow;
-                    else if (ammotype == ESM::Weapon::Bolt)
+                    else if (ammotype == ESM::WeaponType::Bolt)
                         ammo = bestBolt;
 
                     bestActionRating = rating;

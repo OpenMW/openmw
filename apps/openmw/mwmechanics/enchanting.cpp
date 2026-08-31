@@ -24,14 +24,13 @@ namespace MWMechanics
         : mCastStyle(ESM::Enchantment::CastOnce)
         , mSelfEnchanting(false)
         , mObjectType(0)
-        , mWeaponType(-1)
     {
     }
 
     void Enchanting::setOldItem(const MWWorld::Ptr& oldItem)
     {
         mOldItemPtr = oldItem;
-        mWeaponType = -1;
+        mWeaponType = {};
         mObjectType = 0;
         if (!itemEmpty())
         {
@@ -139,7 +138,7 @@ namespace MWMechanics
                     return;
             }
         }
-        else if (mWeaponType != -1)
+        else if (!mWeaponType.empty())
         { // Weapon
             ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(mWeaponType)->mWeaponClass;
             switch (mCastStyle)
@@ -374,7 +373,7 @@ namespace MWMechanics
     {
         int count = 1;
         float enchantPoints = getEnchantPoints();
-        if (mWeaponType != -1 && enchantPoints > 0)
+        if (!mWeaponType.empty() && enchantPoints > 0)
         {
             ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(mWeaponType)->mWeaponClass;
             if (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo)
@@ -392,7 +391,7 @@ namespace MWMechanics
 
     float Enchanting::getTypeMultiplier() const
     {
-        if (Settings::game().mProjectilesEnchantMultiplier > 0 && mWeaponType != -1 && getEnchantPoints() > 0)
+        if (Settings::game().mProjectilesEnchantMultiplier > 0 && !mWeaponType.empty() && getEnchantPoints() > 0)
         {
             ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(mWeaponType)->mWeaponClass;
             if (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo)
