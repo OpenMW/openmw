@@ -65,7 +65,7 @@ namespace MWRender
         if (weaponSlot->getType() != ESM::Weapon::sRecordId)
             return;
 
-        int type = weaponSlot->get<ESM::Weapon>()->mBase->mData.mType;
+        const ESM::RefId type = weaponSlot->get<ESM::Weapon>()->mBase->mData.mType;
         ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
         if (weapclass == ESM::WeaponType::Thrown)
         {

@@ -310,9 +310,9 @@ namespace MWRender
 
         if (viewChange && Settings::game().mShieldSheathing)
         {
-            int weaptype = ESM::Weapon::None;
-            MWMechanics::getActiveWeapon(mPtr, &weaptype);
-            showCarriedLeft(updateCarriedLeftVisible(weaptype));
+            ESM::RefId weaponTypeId;
+            MWMechanics::getActiveWeapon(mPtr, &weaponTypeId);
+            showCarriedLeft(updateCarriedLeftVisible(weaponTypeId));
         }
     }
 
@@ -783,8 +783,8 @@ namespace MWRender
                 MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                 if (weapon != inv.end() && weapon->getType() == ESM::Weapon::sRecordId)
                 {
-                    int weaponType = weapon->get<ESM::Weapon>()->mBase->mData.mType;
-                    const std::string& weaponBonename = MWMechanics::getWeaponType(weaponType)->mAttachBone;
+                    const ESM::RefId weaponTypeId = weapon->get<ESM::Weapon>()->mBase->mData.mType;
+                    const std::string& weaponBonename = MWMechanics::getWeaponType(weaponTypeId)->mAttachBone;
 
                     if (weaponBonename != bonename)
                     {
@@ -967,9 +967,10 @@ namespace MWRender
 
                 // Crossbows start out with a bolt attached
                 if (weapon->getType() == ESM::Weapon::sRecordId
-                    && weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
+                    && weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::WeaponType::MarksmanCrossbow)
                 {
-                    int ammotype = MWMechanics::getWeaponType(ESM::Weapon::MarksmanCrossbow)->mAmmoType;
+                    const ESM::RefId ammotype
+                        = MWMechanics::getWeaponType(ESM::WeaponType::MarksmanCrossbow)->mAmmoType;
                     MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
                     if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ammotype)
                         attachArrow();
@@ -988,7 +989,7 @@ namespace MWRender
         updateQuiver();
     }
 
-    bool NpcAnimation::updateCarriedLeftVisible(const int weaptype) const
+    bool NpcAnimation::updateCarriedLeftVisible(ESM::RefId weaptype) const
     {
         if (Settings::game().mShieldSheathing)
         {
@@ -1085,9 +1086,9 @@ namespace MWRender
         if (weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
             return nullptr;
 
-        int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
-        int ammoType = MWMechanics::getWeaponType(type)->mAmmoType;
-        if (ammoType == ESM::Weapon::None)
+        const ESM::RefId type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
+        const ESM::RefId ammoType = MWMechanics::getWeaponType(type)->mAmmoType;
+        if (ammoType.empty())
             return nullptr;
 
         // Try to find and attachment bone in actor's skeleton, otherwise fall back to the ArrowBone in weapon's mesh
@@ -1128,9 +1129,9 @@ namespace MWRender
     {
         if (Settings::game().mShieldSheathing)
         {
-            int weaptype = ESM::Weapon::None;
-            MWMechanics::getActiveWeapon(mPtr, &weaptype);
-            showCarriedLeft(updateCarriedLeftVisible(weaptype));
+            ESM::RefId weaponTypeId;
+            MWMechanics::getActiveWeapon(mPtr, &weaponTypeId);
+            showCarriedLeft(updateCarriedLeftVisible(weaponTypeId));
         }
 
         updateParts();

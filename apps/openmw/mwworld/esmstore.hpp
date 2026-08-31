@@ -71,6 +71,7 @@ namespace ESM
     struct StartScript;
     struct Static;
     struct Weapon;
+    struct WeaponType;
 }
 
 namespace ESM4
@@ -133,8 +134,8 @@ namespace MWWorld
             Store<ESM::CreatureLevList>, Store<ESM::ItemLevList>, Store<ESM::Light>, Store<ESM::Lockpick>,
             Store<ESM::Miscellaneous>, Store<ESM::NPC>, Store<ESM::Probe>, Store<ESM::Race>, Store<ESM::Region>,
             Store<ESM::Repair>, Store<ESM::SoundGenerator>, Store<ESM::Sound>, Store<ESM::Spell>,
-            Store<ESM::StartScript>, Store<ESM::Static>, Store<ESM::Weapon>, Store<ESM::GameSetting>,
-            Store<ESM::Script>,
+            Store<ESM::StartScript>, Store<ESM::Static>, Store<ESM::Weapon>, Store<ESM::WeaponType>,
+            Store<ESM::GameSetting>, Store<ESM::Script>,
 
             // Lists that need special rules
             Store<ESM::Cell>, Store<ESM::Land>, Store<ESM::LandTexture>, Store<ESM::Pathgrid>,

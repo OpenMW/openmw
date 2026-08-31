@@ -169,7 +169,7 @@ namespace MWMechanics
         std::string mCurrentJump;
         bool mInJump{ false };
 
-        int mWeaponType{ ESM::Weapon::None };
+        ESM::RefId mWeaponTypeId;
         std::string mCurrentWeapon;
 
         float mAttackWindUp{ -1.f };
@@ -239,13 +239,13 @@ namespace MWMechanics
         /// @param num if non-nullptr, the chosen animation number will be written here
         std::string chooseRandomGroup(const std::string& prefix, int* num = nullptr) const;
 
-        bool updateCarriedLeftVisible(int weaptype) const;
+        bool updateCarriedLeftVisible(ESM::RefId weaptype) const;
 
         std::string fallbackShortWeaponGroup(
             const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask = nullptr) const;
 
-        std::string_view getWeaponAnimation(int weaponType) const;
-        std::string_view getWeaponShortGroup(int weaponType) const;
+        std::string_view getWeaponAnimation(ESM::RefId weaponType) const;
+        std::string_view getWeaponShortGroup(ESM::RefId weaponType) const;
 
         bool getAttackingOrSpell() const;
         void setAttackingOrSpell(bool attackingOrSpell) const;

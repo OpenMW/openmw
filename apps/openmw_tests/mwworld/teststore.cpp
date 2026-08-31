@@ -481,7 +481,7 @@ namespace
             ESM::Dialogue* dialogue = nullptr;
             MWWorld::ESMStore esmStore;
 
-            if constexpr (std::is_same_v<RecordType, ESM::Attribute>)
+            if constexpr (std::is_same_v<RecordType, ESM::Attribute> || std::is_same_v<RecordType, ESM::WeaponType>)
             {
                 ASSERT_ANY_THROW(getEsmFile(record, false, formatVersion));
                 continue;
@@ -590,7 +590,7 @@ namespace
 
     REGISTER_TYPED_TEST_SUITE_P(StoreSaveLoadTest, shouldNotChangeRefId);
 
-    static_assert(std::tuple_size_v<RecordTypesWithSave> == 40);
+    static_assert(std::tuple_size_v<RecordTypesWithSave> == 41);
 
     INSTANTIATE_TYPED_TEST_SUITE_P(
         RecordTypesTest, StoreSaveLoadTest, typename AsTestingTypes<RecordTypesWithSave>::Type);

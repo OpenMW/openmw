@@ -313,12 +313,6 @@ namespace
         return 0.f;
     }
 
-    bool isRealWeapon(int weaponType)
-    {
-        return weaponType != ESM::Weapon::HandToHand && weaponType != ESM::Weapon::Spell
-            && weaponType != ESM::Weapon::None;
-    }
-
 }
 
 namespace MWMechanics
@@ -476,7 +470,7 @@ namespace MWMechanics
             if (mUpperBodyState != UpperBodyState::None)
             {
                 mUpperBodyState = UpperBodyState::WeaponEquipped;
-                if (mWeaponType > ESM::Weapon::None)
+                if (isWeaponType(mWeaponTypeId))
                     mAnimation->showWeapons(true);
             }
         }
@@ -504,7 +498,7 @@ namespace MWMechanics
             return;
         }
 
-        std::string_view weapShortGroup = getWeaponShortGroup(mWeaponType);
+        std::string_view weapShortGroup = getWeaponShortGroup(mWeaponTypeId);
         std::string jumpAnimName = "jump";
         jumpAnimName += weapShortGroup;
         MWRender::Animation::BlendMask jumpmask = MWRender::BlendMask_All;
@@ -570,13 +564,15 @@ namespace MWMechanics
         }
     }
 
-    std::string_view CharacterController::getWeaponAnimation(int weaponType) const
+    std::string_view CharacterController::getWeaponAnimation(ESM::RefId weaponType) const
     {
         std::string_view weaponGroup = getWeaponType(weaponType)->mLongGroup;
-        if (isRealWeapon(weaponType) && !mAnimation->hasAnimation(weaponGroup))
+        if (isWeaponOrToolType(weaponType) && !mAnimation->hasAnimation(weaponGroup))
         {
-            static const std::string_view oneHandFallback = getWeaponType(ESM::Weapon::LongBladeOneHand)->mLongGroup;
-            static const std::string_view twoHandFallback = getWeaponType(ESM::Weapon::LongBladeTwoHand)->mLongGroup;
+            static const std::string_view oneHandFallback
+                = getWeaponType(ESM::WeaponType::LongBladeOneHand)->mLongGroup;
+            static const std::string_view twoHandFallback
+                = getWeaponType(ESM::WeaponType::LongBladeTwoHand)->mLongGroup;
 
             const ESM::WeaponType* weapInfo = getWeaponType(weaponType);
 
@@ -586,15 +582,15 @@ namespace MWMechanics
             else
                 weaponGroup = oneHandFallback;
         }
-        else if (weaponType == ESM::Weapon::HandToHand && !mPtr.getClass().isBipedal(mPtr))
+        else if (weaponType == ESM::WeaponType::HandToHand && !mPtr.getClass().isBipedal(mPtr))
             return "attack1";
 
         return weaponGroup;
     }
 
-    std::string_view CharacterController::getWeaponShortGroup(int weaponType) const
+    std::string_view CharacterController::getWeaponShortGroup(ESM::RefId weaponType) const
     {
-        if (weaponType == ESM::Weapon::HandToHand && !mPtr.getClass().isBipedal(mPtr))
+        if (weaponType == ESM::WeaponType::HandToHand && !mPtr.getClass().isBipedal(mPtr))
             return {};
         return getWeaponType(weaponType)->mShortGroup;
     }
@@ -602,7 +598,7 @@ namespace MWMechanics
     std::string CharacterController::fallbackShortWeaponGroup(
         const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask) const
     {
-        if (!isRealWeapon(mWeaponType))
+        if (!isWeaponOrToolType(mWeaponTypeId))
         {
             if (blendMask != nullptr)
                 *blendMask = MWRender::BlendMask_LowerBody;
@@ -610,11 +606,11 @@ namespace MWMechanics
             return baseGroupName;
         }
 
-        static const std::string_view oneHandFallback = getWeaponShortGroup(ESM::Weapon::LongBladeOneHand);
-        static const std::string_view twoHandFallback = getWeaponShortGroup(ESM::Weapon::LongBladeTwoHand);
+        static const std::string_view oneHandFallback = getWeaponShortGroup(ESM::WeaponType::LongBladeOneHand);
+        static const std::string_view twoHandFallback = getWeaponShortGroup(ESM::WeaponType::LongBladeTwoHand);
 
         std::string groupName = baseGroupName;
-        const ESM::WeaponType* weapInfo = getWeaponType(mWeaponType);
+        const ESM::WeaponType* weapInfo = getWeaponType(mWeaponTypeId);
 
         // For real two-handed melee weapons use 2h swords animations as fallback, otherwise use the 1h ones
         if (weapInfo->mFlags & ESM::WeaponType::TwoHanded && weapInfo->mWeaponClass == ESM::WeaponType::Melee)
@@ -623,7 +619,7 @@ namespace MWMechanics
             groupName += oneHandFallback;
 
         // Special case for crossbows - we should apply 1h animations a fallback only for lower body
-        if (mWeaponType == ESM::Weapon::MarksmanCrossbow && blendMask != nullptr)
+        if (mWeaponTypeId == ESM::WeaponType::MarksmanCrossbow && blendMask != nullptr)
             *blendMask = MWRender::BlendMask_LowerBody;
 
         if (!mAnimation->hasAnimation(groupName))
@@ -665,17 +661,17 @@ namespace MWMechanics
 
         MWRender::Animation::BlendMask movemask = MWRender::BlendMask_All;
 
-        std::string_view weapShortGroup = getWeaponShortGroup(mWeaponType);
+        std::string_view weapShortGroup = getWeaponShortGroup(mWeaponTypeId);
 
         // Non-biped creatures don't use spellcasting-specific movement animations.
-        if (!isRealWeapon(mWeaponType) && !mPtr.getClass().isBipedal(mPtr))
+        if (!isWeaponOrToolType(mWeaponTypeId) && !mPtr.getClass().isBipedal(mPtr))
             weapShortGroup = {};
 
         if (swimpos == std::string::npos && !weapShortGroup.empty())
         {
             std::string weapMovementAnimName;
             // Spellcasting stance turning is a special case
-            if (mWeaponType == ESM::Weapon::Spell && isTurning())
+            if (mWeaponTypeId == ESM::WeaponType::Spell && isTurning())
             {
                 weapMovementAnimName = weapShortGroup;
                 weapMovementAnimName += movementAnimName;
@@ -796,7 +792,7 @@ namespace MWMechanics
 
         if (fallback || mIdleState == CharState_Idle || mIdleState == CharState_SpecialIdle)
         {
-            std::string_view weapShortGroup = getWeaponShortGroup(mWeaponType);
+            std::string_view weapShortGroup = getWeaponShortGroup(mWeaponTypeId);
             if (!weapShortGroup.empty())
             {
                 std::string weapIdleGroup = idleGroup;
@@ -926,26 +922,26 @@ namespace MWMechanics
 
             if (cls.hasInventoryStore(mPtr))
             {
-                getActiveWeapon(mPtr, &mWeaponType);
-                if (mWeaponType != ESM::Weapon::None)
+                getActiveWeapon(mPtr, &mWeaponTypeId);
+                if (!mWeaponTypeId.empty())
                 {
                     mUpperBodyState = UpperBodyState::WeaponEquipped;
-                    mCurrentWeapon = getWeaponAnimation(mWeaponType);
+                    mCurrentWeapon = getWeaponAnimation(mWeaponTypeId);
                 }
 
-                if (mWeaponType != ESM::Weapon::None && mWeaponType != ESM::Weapon::Spell
-                    && mWeaponType != ESM::Weapon::HandToHand)
+                if (!mWeaponTypeId.empty() && mWeaponTypeId != ESM::WeaponType::Spell
+                    && mWeaponTypeId != ESM::WeaponType::HandToHand)
                 {
                     mAnimation->showWeapons(true);
                     // Note: controllers for ranged weapon should use time for beginning of animation to play shooting
                     // properly, for other weapons they should use absolute time. Some mods rely on this behaviour (to
                     // rotate throwing projectiles, for example)
-                    ESM::WeaponType::Class weaponClass = getWeaponType(mWeaponType)->mWeaponClass;
+                    ESM::WeaponType::Class weaponClass = getWeaponType(mWeaponTypeId)->mWeaponClass;
                     bool useRelativeDuration = weaponClass == ESM::WeaponType::Ranged;
                     mAnimation->setWeaponGroup(mCurrentWeapon, useRelativeDuration);
                 }
 
-                mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
+                mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponTypeId));
             }
 
             if (!cls.getCreatureStats(mPtr).isDead())
@@ -1224,7 +1220,7 @@ namespace MWMechanics
         }
     }
 
-    bool CharacterController::updateCarriedLeftVisible(const int weaptype) const
+    bool CharacterController::updateCarriedLeftVisible(ESM::RefId weaptype) const
     {
         // Shields/torches shouldn't be visible during any operation involving two hands
         // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
@@ -1234,7 +1230,7 @@ namespace MWMechanics
 
     float CharacterController::calculateWindUp() const
     {
-        if (!mAnimation || mCurrentWeapon.empty() || mWeaponType == ESM::Weapon::PickProbe
+        if (!mAnimation || mCurrentWeapon.empty() || mWeaponTypeId == ESM::WeaponType::PickProbe
             || isRandomAttackAnimation(mCurrentWeapon))
             return -1.f;
 
@@ -1257,7 +1253,7 @@ namespace MWMechanics
         mAttackWindUp = mAttackStrength;
         if (mAttackStrength == -1.f)
             mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
-        ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
+        ESM::WeaponType::Class weapclass = getWeaponType(mWeaponTypeId)->mWeaponClass;
         if (weapclass != ESM::WeaponType::Ranged)
         {
             if (weapclass != ESM::WeaponType::Thrown)
@@ -1284,11 +1280,11 @@ namespace MWMechanics
 
         const MWWorld::Class& cls = mPtr.getClass();
         CreatureStats& stats = cls.getCreatureStats(mPtr);
-        int weaptype = ESM::Weapon::None;
+        ESM::RefId weaponTypeId;
         if (stats.getDrawState() == DrawState::Weapon)
-            weaptype = ESM::Weapon::HandToHand;
+            weaponTypeId = ESM::WeaponType::HandToHand;
         else if (stats.getDrawState() == DrawState::Spell)
-            weaptype = ESM::Weapon::Spell;
+            weaponTypeId = ESM::WeaponType::Spell;
 
         const bool isWerewolf = cls.isNpc() && cls.getNpcStats(mPtr).isWerewolf();
 
@@ -1299,7 +1295,7 @@ namespace MWMechanics
         if (cls.hasInventoryStore(mPtr))
         {
             MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
-            MWWorld::ContainerStoreIterator weapon = getActiveWeapon(mPtr, &weaptype);
+            MWWorld::ContainerStoreIterator weapon = getActiveWeapon(mPtr, &weaponTypeId);
             if (stats.getDrawState() == DrawState::Spell)
                 weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
@@ -1307,11 +1303,12 @@ namespace MWMechanics
             if (weapon != inv.end())
             {
                 newWeapon = *weapon;
-                if (isRealWeapon(mWeaponType))
+                if (isWeaponOrToolType(mWeaponTypeId))
                     downSoundId = &newWeapon.getClass().getDownSoundId(newWeapon);
             }
             // weapon->HtH switch: weapon is empty already, so we need to take sound from previous weapon
-            else if (!mWeapon.isEmpty() && weaptype == ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell)
+            else if (!mWeapon.isEmpty() && weaponTypeId == ESM::WeaponType::HandToHand
+                && mWeaponTypeId != ESM::WeaponType::Spell)
                 downSoundId = &mWeapon.getClass().getDownSoundId(mWeapon);
 
             if (mWeapon != newWeapon)
@@ -1325,8 +1322,8 @@ namespace MWMechanics
             {
                 weapSpeed = mWeapon.get<ESM::Weapon>()->mBase->mData.mSpeed;
                 MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
-                int ammotype = getWeaponType(mWeapon.get<ESM::Weapon>()->mBase->mData.mType)->mAmmoType;
-                if (ammotype != ESM::Weapon::None)
+                const ESM::RefId ammotype = getWeaponType(mWeapon.get<ESM::Weapon>()->mBase->mData.mType)->mAmmoType;
+                if (!ammotype.empty())
                     ammunition = ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ammotype;
                 // Cancel attack if we no longer have ammunition
                 if (!ammunition)
@@ -1335,7 +1332,7 @@ namespace MWMechanics
 
             MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
             if (torch != inv.end() && torch->getType() == ESM::Light::sRecordId
-                && updateCarriedLeftVisible(mWeaponType))
+                && updateCarriedLeftVisible(mWeaponTypeId))
             {
                 if (mAnimation->isPlaying("shield"))
                     mAnimation->disable("shield");
@@ -1361,13 +1358,13 @@ namespace MWMechanics
         bool forcestateupdate = false;
 
         // We should not play equipping animation and sound during weapon->weapon transition
-        const bool isStillWeapon = isRealWeapon(mWeaponType) && isRealWeapon(weaptype);
+        const bool isStillWeapon = isWeaponOrToolType(mWeaponTypeId) && isWeaponOrToolType(weaponTypeId);
 
         // If the current weapon type was changed in the middle of attack (e.g. by Equip console command or when bound
         // spell expires), we should force actor to the "weapon equipped" state, interrupt attack and update animations.
         // Morrowind does this at the end of the attack (see #4646 and PR 1972).
         // If we decide to cope with the resulting problems, the thrown weapon->H2H case below should be extended.
-        if (isStillWeapon && mWeaponType != weaptype && mUpperBodyState > UpperBodyState::WeaponEquipped)
+        if (isStillWeapon && mWeaponTypeId != weaponTypeId && mUpperBodyState > UpperBodyState::WeaponEquipped)
         {
             forcestateupdate = true;
             if (!mCurrentWeapon.empty())
@@ -1380,27 +1377,28 @@ namespace MWMechanics
         if (!isKnockedOut() && !isKnockedDown() && !isRecovery())
         {
             std::string weapgroup;
-            if (((!isWerewolf && cls.isBipedal(mPtr)) || mWeaponType != ESM::Weapon::Spell) && weaptype != mWeaponType
-                && mUpperBodyState <= UpperBodyState::AttackWindUp && mUpperBodyState != UpperBodyState::Unequipping
-                && !isStillWeapon)
+            if (((!isWerewolf && cls.isBipedal(mPtr)) || mWeaponTypeId != ESM::WeaponType::Spell)
+                && weaponTypeId != mWeaponTypeId && mUpperBodyState <= UpperBodyState::AttackWindUp
+                && mUpperBodyState != UpperBodyState::Unequipping && !isStillWeapon)
             {
                 // We can not play un-equip animation if weapon changed since last update
                 if (!weaponChanged)
                 {
                     // Note: we do not disable the weapon unequipping animation automatically to avoid body desync
-                    weapgroup = getWeaponAnimation(mWeaponType);
+                    weapgroup = getWeaponAnimation(mWeaponTypeId);
                     int unequipMask = MWRender::BlendMask_All;
                     mUpperBodyState = UpperBodyState::Unequipping;
                     bool useShieldAnims = mAnimation->useShieldAnimations();
-                    if (useShieldAnims && mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell
-                        && !(mWeaponType == ESM::Weapon::None && weaptype == ESM::Weapon::Spell))
+                    if (useShieldAnims && mWeaponTypeId != ESM::WeaponType::HandToHand
+                        && mWeaponTypeId != ESM::WeaponType::Spell
+                        && !(mWeaponTypeId.empty() && weaponTypeId == ESM::WeaponType::Spell))
                     {
                         unequipMask = unequipMask | ~MWRender::BlendMask_LeftArm;
                         mAnimation->disable("shield");
                         playBlendedAnimation("shield", Priority_Block, MWRender::BlendMask_LeftArm, true, 1.0f,
                             "unequip start", "unequip stop", 0.0f, 0);
                     }
-                    else if (mWeaponType == ESM::Weapon::HandToHand)
+                    else if (mWeaponTypeId == ESM::WeaponType::HandToHand)
                         mAnimation->showCarriedLeft(false);
 
                     mAnimation->disable(weapgroup);
@@ -1426,19 +1424,19 @@ namespace MWMechanics
             {
                 // Weapon is changed, no current animation (e.g. unequipping or attack).
                 // Start equipping animation now.
-                if (weaptype != mWeaponType && mUpperBodyState <= UpperBodyState::WeaponEquipped)
+                if (weaponTypeId != mWeaponTypeId && mUpperBodyState <= UpperBodyState::WeaponEquipped)
                 {
                     forcestateupdate = true;
                     bool useShieldAnims = mAnimation->useShieldAnimations();
                     if (!useShieldAnims)
-                        mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
+                        mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaponTypeId));
 
-                    weapgroup = getWeaponAnimation(weaptype);
+                    weapgroup = getWeaponAnimation(weaponTypeId);
 
                     // Note: controllers for ranged weapon should use time for beginning of animation to play shooting
                     // properly, for other weapons they should use absolute time. Some mods rely on this behaviour (to
                     // rotate throwing projectiles, for example)
-                    ESM::WeaponType::Class weaponClass = getWeaponType(weaptype)->mWeaponClass;
+                    ESM::WeaponType::Class weaponClass = getWeaponType(weaponTypeId)->mWeaponClass;
                     bool useRelativeDuration = weaponClass == ESM::WeaponType::Ranged;
                     mAnimation->setWeaponGroup(weapgroup, useRelativeDuration);
 
@@ -1446,13 +1444,13 @@ namespace MWMechanics
                     {
                         if (animPlaying)
                             mAnimation->disable(mCurrentWeapon);
-                        if (weaptype != ESM::Weapon::None)
+                        if (!weaponTypeId.empty())
                         {
                             mAnimation->showWeapons(false);
                             int equipMask = MWRender::BlendMask_All;
                             mUpperBodyState = UpperBodyState::Equipping;
                             mResetIdleOnAttackEnd = true;
-                            if (useShieldAnims && weaptype != ESM::Weapon::Spell)
+                            if (useShieldAnims && weaponTypeId != ESM::WeaponType::Spell)
                             {
                                 equipMask = equipMask | ~MWRender::BlendMask_LeftArm;
                                 mAnimation->disable("shield");
@@ -1460,20 +1458,21 @@ namespace MWMechanics
                                     "equip start", "equip stop", 0.0f, 0);
                             }
 
-                            if (weaptype != ESM::Weapon::Spell || cls.isBipedal(mPtr))
+                            if (weaponTypeId != ESM::WeaponType::Spell || cls.isBipedal(mPtr))
                             {
                                 playBlendedAnimation(weapgroup, priorityWeapon, equipMask, false, 1.0f, "equip start",
                                     "equip stop", 0.0f, 0);
                             }
 
                             // If we do not have the "equip attach" key, show weapon manually.
-                            if (weaptype != ESM::Weapon::Spell
+                            if (weaponTypeId != ESM::WeaponType::Spell
                                 && mAnimation->getTextKeyTime(weapgroup + ": equip attach") < 0)
                             {
                                 mAnimation->showWeapons(true);
                             }
 
-                            if (!mWeapon.isEmpty() && mWeaponType != ESM::Weapon::HandToHand && isRealWeapon(weaptype))
+                            if (!mWeapon.isEmpty() && mWeaponTypeId != ESM::WeaponType::HandToHand
+                                && isWeaponOrToolType(weaponTypeId))
                             {
                                 const ESM::RefId& upSoundId = mWeapon.getClass().getUpSoundId(mWeapon);
                                 if (!upSoundId.empty())
@@ -1482,7 +1481,7 @@ namespace MWMechanics
                         }
                     }
 
-                    if (isWerewolf && weaptype != ESM::Weapon::None)
+                    if (isWerewolf && !weaponTypeId.empty())
                     {
                         const MWWorld::ESMStore& store = world->getStore();
                         const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfEquip", prng);
@@ -1492,7 +1491,7 @@ namespace MWMechanics
                         }
                     }
 
-                    mWeaponType = weaptype;
+                    mWeaponTypeId = weaponTypeId;
                     mCurrentWeapon = weapgroup;
                 }
 
@@ -1500,14 +1499,14 @@ namespace MWMechanics
                 if (mUpperBodyState == UpperBodyState::Unequipping)
                 {
                     resetCurrentWeaponState();
-                    mWeaponType = ESM::Weapon::None;
+                    mWeaponTypeId = {};
                 }
             }
         }
 
         float complete = 0.f;
         bool animPlaying = false;
-        ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
+        ESM::WeaponType::Class weapclass = getWeaponType(mWeaponTypeId)->mWeaponClass;
         if (getAttackingOrSpell())
         {
             mResetIdleOnAttackEnd = true;
@@ -1524,7 +1523,7 @@ namespace MWMechanics
                     mCurrentWeapon = chooseRandomAttackAnimation();
                 }
 
-                if (mWeaponType == ESM::Weapon::Spell)
+                if (mWeaponTypeId == ESM::WeaponType::Spell)
                 {
                     // Unset casting flag, otherwise pressing the mouse button down would
                     // continue casting every frame if there is no animation
@@ -1671,7 +1670,7 @@ namespace MWMechanics
                         = MWBase::Environment::get().getLuaManager()->getActorControls(mPtr);
                     const bool aiInactive
                         = actorControls->mDisableAI || !MWBase::Environment::get().getMechanicsManager()->isAIActive();
-                    if (mWeaponType != ESM::Weapon::PickProbe && !isRandomAttackAnimation(mCurrentWeapon))
+                    if (mWeaponTypeId != ESM::WeaponType::PickProbe && !isRandomAttackAnimation(mCurrentWeapon))
                     {
                         if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
                             mAttackType = "shoot";
@@ -1724,12 +1723,12 @@ namespace MWMechanics
         // Random attack and pick/probe animations never have wind up and are played to their end.
         // Other animations must be released when the attack state is unset.
         if (mUpperBodyState == UpperBodyState::AttackWindUp
-            && (mWeaponType == ESM::Weapon::PickProbe || isRandomAttackAnimation(mCurrentWeapon)
+            && (mWeaponTypeId == ESM::WeaponType::PickProbe || isRandomAttackAnimation(mCurrentWeapon)
                 || !getAttackingOrSpell()))
         {
             mUpperBodyState = UpperBodyState::AttackRelease;
             world->breakInvisibility(mPtr);
-            if (mWeaponType == ESM::Weapon::PickProbe)
+            if (mWeaponTypeId == ESM::WeaponType::PickProbe)
             {
                 // TODO: this will only work for the player, and needs to be fixed if NPCs should ever use
                 // lockpicks/probes.
@@ -1755,7 +1754,7 @@ namespace MWMechanics
                 prepareHit();
             }
 
-            if (mWeaponType == ESM::Weapon::PickProbe || isRandomAttackAnimation(mCurrentWeapon))
+            if (mWeaponTypeId == ESM::WeaponType::PickProbe || isRandomAttackAnimation(mCurrentWeapon))
                 mUpperBodyState = UpperBodyState::AttackEnd;
         }
 
@@ -1824,7 +1823,7 @@ namespace MWMechanics
             if (mUpperBodyState == UpperBodyState::Equipping || mUpperBodyState == UpperBodyState::AttackEnd
                 || mUpperBodyState == UpperBodyState::Casting)
             {
-                if (ammunition && mWeaponType == ESM::Weapon::MarksmanCrossbow)
+                if (ammunition && mWeaponTypeId == ESM::WeaponType::MarksmanCrossbow)
                     mAnimation->attachArrow();
 
                 // Cancel stagger animation at the end of an attack to avoid abrupt transitions
@@ -1840,11 +1839,11 @@ namespace MWMechanics
                 // See the weapon->weapon mid-attack skip logic above
                 if (mUpperBodyState == UpperBodyState::AttackEnd)
                 {
-                    if (weapclass == ESM::WeaponType::Thrown && weaptype == ESM::Weapon::HandToHand)
+                    if (weapclass == ESM::WeaponType::Thrown && weaponTypeId == ESM::WeaponType::HandToHand)
                     {
                         forcestateupdate = true;
-                        mWeaponType = weaptype;
-                        mCurrentWeapon = getWeaponAnimation(mWeaponType);
+                        mWeaponTypeId = weaponTypeId;
+                        mCurrentWeapon = getWeaponAnimation(mWeaponTypeId);
                         mAnimation->showWeapons(false);
                     }
                 }
@@ -1861,7 +1860,7 @@ namespace MWMechanics
                 if (animPlaying)
                     mAnimation->disable(mCurrentWeapon);
                 mUpperBodyState = UpperBodyState::None;
-                mWeaponType = ESM::Weapon::None;
+                mWeaponTypeId = {};
             }
         }
 
@@ -1885,7 +1884,7 @@ namespace MWMechanics
             {
                 // technically we do not need a pitch for crossbow reload animation,
                 // but we should avoid abrupt repositioning
-                if (mWeaponType == ESM::Weapon::MarksmanCrossbow)
+                if (mWeaponTypeId == ESM::WeaponType::MarksmanCrossbow)
                     mAnimation->setPitchFactor(std::max(0.f, 1.f - complete * 10.f));
                 else
                     mAnimation->setPitchFactor(1.f - complete);
@@ -2516,7 +2515,7 @@ namespace MWMechanics
             bool playWolfRun = false;
             if (movement != osg::Vec3f() && isMoving && mHitState == CharState_None)
             {
-                if (mWeaponType == ESM::Weapon::None || mUpperBodyState == UpperBodyState::Unequipping)
+                if (mWeaponTypeId.empty() || mUpperBodyState == UpperBodyState::Unequipping)
                 {
                     const NpcStats& stats = cls.getNpcStats(mPtr);
                     if (stats.isWerewolf() && !stats.isDead())
@@ -2833,7 +2832,7 @@ namespace MWMechanics
             return;
 
         resetCurrentDeathState();
-        mWeaponType = ESM::Weapon::None;
+        mWeaponTypeId = {};
     }
 
     void CharacterController::updateContinuousVfx() const
@@ -2949,7 +2948,7 @@ namespace MWMechanics
 
     bool CharacterController::isReadyToBlock() const
     {
-        return mAnimation && updateCarriedLeftVisible(mWeaponType);
+        return mAnimation && updateCarriedLeftVisible(mWeaponTypeId);
     }
 
     bool CharacterController::isKnockedDown() const

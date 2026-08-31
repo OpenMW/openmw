@@ -120,7 +120,7 @@ namespace MWRender
 
         void setTextKeyListener(TextKeyListener* listener);
 
-        virtual bool updateCarriedLeftVisible(const int weaptype) const { return false; }
+        virtual bool updateCarriedLeftVisible(ESM::RefId weaptype) const { return false; }
 
         typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform>, Misc::StringUtils::CiHash,
             Misc::StringUtils::CiEqual>

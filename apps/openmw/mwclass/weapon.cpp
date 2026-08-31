@@ -62,7 +62,7 @@ namespace MWClass
     bool Weapon::hasItemHealth(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
-        int type = ref->mBase->mData.mType;
+        const ESM::RefId type = ref->mBase->mData.mType;
 
         return MWMechanics::getWeaponType(type)->mFlags & ESM::WeaponType::HasHealth;
     }
@@ -108,7 +108,7 @@ namespace MWClass
     ESM::RefId Weapon::getEquipmentSkill(const MWWorld::ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
-        int type = ref->mBase->mData.mType;
+        const ESM::RefId type = ref->mBase->mData.mType;
 
         return MWMechanics::getWeaponType(type)->mSkill;
     }
@@ -123,14 +123,14 @@ namespace MWClass
     const ESM::RefId& Weapon::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
-        int type = ref->mBase->mData.mType;
+        const ESM::RefId type = ref->mBase->mData.mType;
         return MWMechanics::getWeaponType(type)->mSoundIdUp;
     }
 
     const ESM::RefId& Weapon::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
-        int type = ref->mBase->mData.mType;
+        const ESM::RefId type = ref->mBase->mData.mType;
         return MWMechanics::getWeaponType(type)->mSoundIdDown;
     }
 
@@ -270,20 +270,20 @@ namespace MWClass
 
     std::pair<int, std::string_view> Weapon::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
-        int type = ptr.get<ESM::Weapon>()->mBase->mData.mType;
+        const ESM::RefId type = ptr.get<ESM::Weapon>()->mBase->mData.mType;
 
         // Do not allow equip weapons from inventory during attack
         if (npc.isInCell() && MWBase::Environment::get().getWindowManager()->isGuiMode()
             && MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc))
         {
-            int activeWeaponType = ESM::Weapon::None;
-            MWMechanics::getActiveWeapon(npc, &activeWeaponType);
-            if (activeWeaponType > ESM::Weapon::None || activeWeaponType == ESM::Weapon::HandToHand)
+            ESM::RefId activeWeaponTypeId;
+            MWMechanics::getActiveWeapon(npc, &activeWeaponTypeId);
+            if (MWMechanics::isWeaponType(activeWeaponTypeId) || activeWeaponTypeId == ESM::WeaponType::HandToHand)
             {
-                auto* activeWeapon = MWMechanics::getWeaponType(activeWeaponType);
+                auto* activeWeaponInfo = MWMechanics::getWeaponType(activeWeaponTypeId);
                 bool isAmmo = MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Class::Ammo;
-                bool activeWeapUsesAmmo = activeWeapon->mWeaponClass == ESM::WeaponType::Class::Ranged;
-                bool sameAmmoType = activeWeapon->mAmmoType == type;
+                bool activeWeapUsesAmmo = activeWeaponInfo->mWeaponClass == ESM::WeaponType::Class::Ranged;
+                bool sameAmmoType = activeWeaponInfo->mAmmoType == type;
                 // special case for ammo equipping
                 if ((activeWeapUsesAmmo && !sameAmmoType) || !isAmmo)
                     return { 0, "#{sCantEquipWeapWarning}" };

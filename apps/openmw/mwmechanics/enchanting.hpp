@@ -25,7 +25,7 @@ namespace MWMechanics
 
         std::string mNewItemName;
         unsigned int mObjectType;
-        int mWeaponType;
+        ESM::RefId mWeaponType;
 
         const ESM::Enchantment* getRecord(const ESM::Enchantment& newEnchantment) const;
         int getBaseCastCost() const; // To be saved in the enchantment's record

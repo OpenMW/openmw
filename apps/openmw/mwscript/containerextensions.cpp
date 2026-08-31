@@ -504,7 +504,7 @@ namespace MWScript
                     return;
                 }
 
-                runtime.push(it->get<ESM::Weapon>()->mBase->mData.mType);
+                runtime.push(ESM::Weapon::refIdToIndex(it->get<ESM::Weapon>()->mBase->mData.mType));
             }
         };
 

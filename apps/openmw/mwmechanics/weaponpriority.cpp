@@ -19,7 +19,7 @@
 
 namespace MWMechanics
 {
-    float rateWeapon(const MWWorld::Ptr& item, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, int type,
+    float rateWeapon(const MWWorld::Ptr& item, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, ESM::RefId typeId,
         float arrowRating, float boltRating)
     {
         if (enemy.isEmpty() || item.getType() != ESM::Weapon::sRecordId)
@@ -30,14 +30,14 @@ namespace MWMechanics
 
         const ESM::Weapon* weapon = item.get<ESM::Weapon>()->mBase;
 
-        if (type != -1 && weapon->mData.mType != type)
+        if (!typeId.empty() && weapon->mData.mType != typeId)
             return 0.f;
 
         const MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
 
         ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(weapon->mData.mType)->mWeaponClass;
-        if (type == -1 && weapclass == ESM::WeaponType::Ammo)
+        if (typeId.empty() && weapclass == ESM::WeaponType::Ammo)
             return 0.f;
 
         float rating = 0.f;
@@ -86,15 +86,15 @@ namespace MWMechanics
         }
         else
         {
-            int ammotype = MWMechanics::getWeaponType(weapon->mData.mType)->mAmmoType;
-            if (ammotype == ESM::Weapon::Arrow)
+            const ESM::RefId ammotype = MWMechanics::getWeaponType(weapon->mData.mType)->mAmmoType;
+            if (ammotype == ESM::WeaponType::Arrow)
             {
                 if (arrowRating <= 0.f)
                     rating = 0.f;
                 else
                     rating += arrowRating;
             }
-            else if (ammotype == ESM::Weapon::Bolt)
+            else if (ammotype == ESM::WeaponType::Bolt)
             {
                 if (boltRating <= 0.f)
                     rating = 0.f;
@@ -143,7 +143,7 @@ namespace MWMechanics
         return rating * ratingMult;
     }
 
-    float rateAmmo(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, MWWorld::Ptr& bestAmmo, int ammoType)
+    float rateAmmo(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, MWWorld::Ptr& bestAmmo, ESM::RefId ammoType)
     {
         float bestAmmoRating = 0.f;
         if (!actor.getClass().hasInventoryStore(actor))
@@ -164,7 +164,7 @@ namespace MWMechanics
         return bestAmmoRating;
     }
 
-    float rateAmmo(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, int ammoType)
+    float rateAmmo(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, ESM::RefId ammoType)
     {
         MWWorld::Ptr emptyPtr;
         return rateAmmo(actor, enemy, emptyPtr, ammoType);
@@ -188,7 +188,7 @@ namespace MWMechanics
         float bonusDamage = 0.f;
 
         const ESM::Weapon* esmWeap = weapon.get<ESM::Weapon>()->mBase;
-        int type = esmWeap->mData.mType;
+        const ESM::RefId type = esmWeap->mData.mType;
         if (getWeaponType(type)->mWeaponClass != ESM::WeaponType::Melee)
         {
             if (!ammo.isEmpty() && !MWBase::Environment::get().getWorld()->isSwimming(enemy))

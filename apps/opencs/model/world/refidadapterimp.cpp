@@ -1547,7 +1547,7 @@ QVariant CSMWorld::WeaponRefIdAdapter::getData(const RefIdColumn* column, const 
         data.getRecord(RefIdData::LocalIndex(index, UniversalId::Type_Weapon)));
 
     if (column == mColumns.mType)
-        return record.get().mData.mType;
+        return ESM::Weapon::refIdToIndex(record.get().mData.mType);
 
     if (column == mColumns.mHealth)
         return record.get().mData.mHealth;
@@ -1587,7 +1587,7 @@ void CSMWorld::WeaponRefIdAdapter::setData(
     ESM::Weapon weapon = record.get();
 
     if (column == mColumns.mType)
-        weapon.mData.mType = value.toInt();
+        weapon.mData.mType = ESM::Weapon::indexToRefId(value.toInt());
     else if (column == mColumns.mHealth)
         weapon.mData.mHealth = value.toInt();
     else if (column == mColumns.mSpeed)

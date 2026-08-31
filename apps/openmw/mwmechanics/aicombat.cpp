@@ -545,9 +545,9 @@ namespace MWMechanics
 
         if (targetClass.hasInventoryStore(target))
         {
-            int weapType = ESM::Weapon::None;
-            MWWorld::ContainerStoreIterator weaponSlot = MWMechanics::getActiveWeapon(target, &weapType);
-            if (weapType > ESM::Weapon::None)
+            ESM::RefId weaponTypeId;
+            MWWorld::ContainerStoreIterator weaponSlot = MWMechanics::getActiveWeapon(target, &weaponTypeId);
+            if (isWeaponType(weaponTypeId))
                 targetWeapon = *weaponSlot;
         }
 

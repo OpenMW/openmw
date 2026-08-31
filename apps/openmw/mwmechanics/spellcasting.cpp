@@ -239,7 +239,7 @@ namespace MWMechanics
         bool isProjectile = false;
         if (item.getType() == ESM::Weapon::sRecordId)
         {
-            int type = item.get<ESM::Weapon>()->mBase->mData.mType;
+            const ESM::RefId type = item.get<ESM::Weapon>()->mBase->mData.mType;
             ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
             isProjectile = (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo);
         }
