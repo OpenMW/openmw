@@ -138,6 +138,12 @@ Almalinux_Generic:
     - cd build
     - cmake --build . -- -j $(nproc)
     - ccache -svv
+    - |
+      if [[ -v AWS_ACCESS_KEY_ID ]]; then
+          dnf install -y awscli2 jq
+          ../CI/store-symbols.sh
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 sync --size-only SymStore s3://openmw-sym
+      fi
     - cpack -G TXZ -D CPACK_STRIP_FILES=ON -D CPACK_THREADS=0 -D CPACK_INCLUDE_TOPLEVEL_DIRECTORY=0
   artifacts:
     paths:
