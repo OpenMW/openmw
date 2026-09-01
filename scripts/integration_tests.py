@@ -136,7 +136,7 @@ def run_test(
     start = time.time()
     if not args.list_tests:
         print(f'[----------] Running tests from {suite_name}')
-    command = [openmw_binary, "--replace=config", "--config", suite_dir]
+    command = [openmw_binary, "--replace=config"]
     # --config is layered, and settings in a later layer override earlier ones. Pass
     # any caller-supplied directory as its own layer rather than concatenating its
     # settings.cfg into the generated one: two values for one key in a single file
@@ -146,6 +146,8 @@ def run_test(
     # into the final layer, and openmw.log is read back from there below.
     if config_source_dir is not None:
         command += ["--config", config_source_dir]
+    # A suite outranks the shared directory.
+    command += ["--config", suite_dir]
     command += ["--config", config_dir, "--no-grab"]
     for path in data_dirs:
         command += ["--data", path]
