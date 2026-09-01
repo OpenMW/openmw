@@ -32,7 +32,7 @@ try
     $codemodel.configurations | ForEach-Object {
         $_.targets | ForEach-Object {
             $target = Get-Content -Raw $_.jsonFile | ConvertFrom-Json
-            if ($target.type -eq "EXECUTABLE" -or $target.type -eq "SHARED_LIBRARY")
+            if ($target.type -eq "EXECUTABLE" -or $target.type -eq "SHARED_LIBRARY" -or $target.type -eq "MODULE")
             {
                 $targets += $target
             }
