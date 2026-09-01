@@ -123,6 +123,7 @@ Almalinux_Generic:
     CXX: g++
     OPENMW_LOCAL_INSTALL: 1
     CI_OPENMW_USE_VCPKG: true
+    CUSTOM_CPACK_LABEL: $CI_COMMIT_REF_NAME
     CCACHE_SIZE: 1G
   before_script:
     - dnf install -y epel-release

@@ -144,6 +144,12 @@ if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then
     )
 fi
 
+if [[ "${CUSTOM_CPACK_LABEL}" ]]; then
+    CMAKE_CONF_OPTS+=(
+        -DCUSTOM_CPACK_LABEL="${CUSTOM_CPACK_LABEL}"
+    )
+fi
+
 mkdir -p "build${BUILD_DIR_SUFFIX}"
 cd "build${BUILD_DIR_SUFFIX}"
 
