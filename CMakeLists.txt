@@ -1048,10 +1048,6 @@ elseif(NOT APPLE)
                                                                                                                             PATTERN "Testing" EXCLUDE
                                                                                                                             PATTERN "tests_output" EXCLUDE
                                                                                                                             PATTERN "try-compile" EXCLUDE)
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" DESTINATION "." RENAME "AUTHORS.txt")
 
         SET(CPACK_GENERATOR "NSIS")
         SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW")
@@ -1108,6 +1104,13 @@ elseif(NOT APPLE)
         ENDIF(BUILD_OPENCS)
 
     endif(WIN32)
+    
+    install(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" TYPE DOC)
+    install(FILES "${OpenMW_SOURCE_DIR}/README.md" TYPE DOC)
+    install(FILES "${OpenMW_SOURCE_DIR}/LICENSE" TYPE DOC RENAME "LICENSE.txt")
+    install(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" TYPE DOC)
+
+    install(FILES "${RUNTIME_OUTPUT_DIRECTORY}/CI-ID.txt" TYPE DOC OPTIONAL)
 
     install(FILES "${RUNTIME_OUTPUT_DIRECTORY}/defaults.bin"
                   "${RUNTIME_OUTPUT_DIRECTORY}/gamecontrollerdb.txt"
