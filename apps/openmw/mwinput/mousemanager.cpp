@@ -154,16 +154,19 @@ namespace MWInput
         MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::MouseWheel,
             MWBase::LuaManager::InputEvent::WheelChange{ arg.x, arg.y } });
 
-        if (MyGUI::Widget* widget = MyGUI::InputManager::getInstance().getMouseFocusWidget())
+        if (mGuiCursorEnabled)
         {
-            while (widget)
+            if (MyGUI::Widget* widget = MyGUI::InputManager::getInstance().getMouseFocusWidget())
             {
-                if (auto* ext = dynamic_cast<LuaUi::WidgetExtension*>(widget))
+                while (widget)
                 {
-                    ext->mouseWheel(widget, mGuiCursorX, mGuiCursorY, arg.preciseX, arg.preciseY);
-                    break;
+                    if (auto* ext = dynamic_cast<LuaUi::WidgetExtension*>(widget))
+                    {
+                        ext->mouseWheel(widget, mGuiCursorX, mGuiCursorY, arg.preciseX, arg.preciseY);
+                        break;
+                    }
+                    widget = widget->getParent();
                 }
-                widget = widget->getParent();
             }
         }
     }
