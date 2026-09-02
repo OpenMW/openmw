@@ -4,7 +4,7 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
 
-#include <components/lua_ui/widget.hpp>
+#include <components/lua_ui/input.hpp>
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
 #include <components/settings/values.hpp>
@@ -157,17 +157,7 @@ namespace MWInput
         if (mGuiCursorEnabled)
         {
             if (MyGUI::Widget* widget = MyGUI::InputManager::getInstance().getMouseFocusWidget())
-            {
-                while (widget)
-                {
-                    if (auto* ext = dynamic_cast<LuaUi::WidgetExtension*>(widget))
-                    {
-                        ext->mouseWheel(widget, mGuiCursorX, mGuiCursorY, arg.preciseX, arg.preciseY);
-                        break;
-                    }
-                    widget = widget->getParent();
-                }
-            }
+                LuaUi::dispatchMouseWheel(widget, mGuiCursorX, mGuiCursorY, arg.preciseX, arg.preciseY);
         }
     }
 
