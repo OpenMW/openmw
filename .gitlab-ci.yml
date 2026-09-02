@@ -166,6 +166,8 @@ Almalinux_Generic:
           echo "Extracting '$package'..."
           tar -xf "$package" -C install
       done
+    - echo "set debuginfod enabled on" >> ~/.gdbinit
+    - export DEBUGINFOD_URLS="https://openmw-sym.rgw.ctrl-c.liu.se $DEBUGINFOD_URLS https://debuginfod.elfutils.org"
     - CI/run_integration_tests.sh
   after_script:
     - |
