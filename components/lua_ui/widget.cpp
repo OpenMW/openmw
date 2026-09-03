@@ -565,6 +565,18 @@ namespace LuaUi
         });
     }
 
+    void WidgetExtension::mouseWheel(MyGUI::Widget*, float left, float top, float x, float y)
+    {
+        protectedCall([=, this](LuaUtil::LuaView& view) {
+            propagateEvent("mouseWheel", [&](auto w) {
+                sol::table event = view.newTable();
+                event["position"] = osg::Vec2f(left, top);
+                event["delta"] = osg::Vec2f(x, y);
+                return event;
+            });
+        });
+    }
+
     void WidgetExtension::focusGain(MyGUI::Widget*, MyGUI::Widget*)
     {
         propagateEvent("focusGain", [](auto) { return sol::nil; });

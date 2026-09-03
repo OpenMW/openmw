@@ -4,6 +4,7 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
 
+#include <components/lua_ui/input.hpp>
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
 #include <components/settings/values.hpp>
@@ -152,6 +153,12 @@ namespace MWInput
         input->setJoystickLastUsed(false);
         MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::MouseWheel,
             MWBase::LuaManager::InputEvent::WheelChange{ arg.x, arg.y } });
+
+        if (mGuiCursorEnabled)
+        {
+            if (MyGUI::Widget* widget = MyGUI::InputManager::getInstance().getMouseFocusWidget())
+                LuaUi::dispatchMouseWheel(widget, mGuiCursorX, mGuiCursorY, arg.preciseX, arg.preciseY);
+        }
     }
 
     void MouseManager::mousePressed(const SDL_MouseButtonEvent& arg, Uint8 id)
