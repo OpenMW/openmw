@@ -10,6 +10,7 @@
 #include <components/lua_ui/util.hpp>
 
 #include <components/misc/finitevalues.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
