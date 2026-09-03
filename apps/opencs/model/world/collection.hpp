@@ -73,13 +73,6 @@ namespace CSMWorld
         return ESM::RefId::stringRefId(Land::createUniqueRecordId(record.mX, record.mY));
     }
 
-    inline void setRecordId(const ESM::RefId& id, ESM::Skill& record)
-    {
-        if (const auto* skillId = id.getIf<ESM::SkillId>())
-            record.mId = *skillId;
-        throw std::runtime_error("Invalid skill id: " + id.toDebugString());
-    }
-
     /// \brief Single-type record collection
     template <typename ESXRecordT>
     class Collection : public CollectionBase

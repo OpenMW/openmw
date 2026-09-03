@@ -29,22 +29,6 @@ namespace
         }
         return false;
     }
-
-    std::string_view getGMSTString(const MWWorld::Store<ESM::GameSetting>& settings, std::string_view id)
-    {
-        const ESM::GameSetting* setting = settings.search(id);
-        if (setting && setting->mValue.getType() == ESM::VT_String)
-            return setting->mValue.getString();
-        return id;
-    }
-
-    float getGMSTFloat(const MWWorld::Store<ESM::GameSetting>& settings, std::string_view id)
-    {
-        const ESM::GameSetting* setting = settings.search(id);
-        if (setting && (setting->mValue.getType() == ESM::VT_Float || setting->mValue.getType() == ESM::VT_Int))
-            return setting->mValue.getFloat();
-        return {};
-    }
 }
 
 namespace MWWorld
@@ -870,69 +854,6 @@ namespace MWWorld
         return find(cell.mId);
     }
 
-    // Skill
-    //=========================================================================
-
-    void Store<ESM::Skill>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
-    {
-        constexpr std::string_view skillValues[ESM::Skill::Length][4] = {
-            { "sSkillBlock", "icons\\k\\combat_block.dds", "fWerewolfBlock", {} },
-            { "sSkillArmorer", "icons\\k\\combat_armor.dds", "fWerewolfArmorer", {} },
-            { "sSkillMediumarmor", "icons\\k\\combat_mediumarmor.dds", "fWerewolfMediumarmor", {} },
-            { "sSkillHeavyarmor", "icons\\k\\combat_heavyarmor.dds", "fWerewolfHeavyarmor", {} },
-            { "sSkillBluntweapon", "icons\\k\\combat_blunt.dds", "fWerewolfBluntweapon", {} },
-            { "sSkillLongblade", "icons\\k\\combat_longblade.dds", "fWerewolfLongblade", {} },
-            { "sSkillAxe", "icons\\k\\combat_axe.dds", "fWerewolfAxe", {} },
-            { "sSkillSpear", "icons\\k\\combat_spear.dds", "fWerewolfSpear", {} },
-            { "sSkillAthletics", "icons\\k\\combat_athletics.dds", "fWerewolfAthletics", {} },
-            { "sSkillEnchant", "icons\\k\\magic_enchant.dds", "fWerewolfEnchant", {} },
-            { "sSkillDestruction", "icons\\k\\magic_destruction.dds", "fWerewolfDestruction", "destruction" },
-            { "sSkillAlteration", "icons\\k\\magic_alteration.dds", "fWerewolfAlteration", "alteration" },
-            { "sSkillIllusion", "icons\\k\\magic_illusion.dds", "fWerewolfIllusion", "illusion" },
-            { "sSkillConjuration", "icons\\k\\magic_conjuration.dds", "fWerewolfConjuration", "conjuration" },
-            { "sSkillMysticism", "icons\\k\\magic_mysticism.dds", "fWerewolfMysticism", "mysticism" },
-            { "sSkillRestoration", "icons\\k\\magic_restoration.dds", "fWerewolfRestoration", "restoration" },
-            { "sSkillAlchemy", "icons\\k\\magic_alchemy.dds", "fWerewolfAlchemy", {} },
-            { "sSkillUnarmored", "icons\\k\\magic_unarmored.dds", "fWerewolfUnarmored", {} },
-            { "sSkillSecurity", "icons\\k\\stealth_security.dds", "fWerewolfSecurity", {} },
-            { "sSkillSneak", "icons\\k\\stealth_sneak.dds", "fWerewolfSneak", {} },
-            { "sSkillAcrobatics", "icons\\k\\stealth_acrobatics.dds", "fWerewolfAcrobatics", {} },
-            { "sSkillLightarmor", "icons\\k\\stealth_lightarmor.dds", "fWerewolfLightarmor", {} },
-            { "sSkillShortblade", "icons\\k\\stealth_shortblade.dds", "fWerewolfShortblade", {} },
-            { "sSkillMarksman", "icons\\k\\stealth_marksman.dds", "fWerewolfMarksman", {} },
-            // "Mercantile"! >_<
-            { "sSkillMercantile", "icons\\k\\stealth_mercantile.dds", "fWerewolfMerchantile", {} },
-            { "sSkillSpeechcraft", "icons\\k\\stealth_speechcraft.dds", "fWerewolfSpeechcraft", {} },
-            { "sSkillHandtohand", "icons\\k\\stealth_handtohand.dds", "fWerewolfHandtohand", {} },
-        };
-        for (ESM::Skill* skill : mShared)
-        {
-            int index = ESM::Skill::refIdToIndex(skill->mId);
-            if (index >= 0)
-            {
-                const auto& values = skillValues[index];
-                skill->mName = getGMSTString(settings, values[0]);
-                skill->mIcon = values[1];
-                skill->mWerewolfValue = getGMSTFloat(settings, values[2]);
-                const auto& school = values[3];
-                if (!school.empty())
-                {
-                    if (!skill->mSchool)
-                        skill->mSchool = ESM::MagicSchool{};
-                    const std::string id{ school };
-                    skill->mSchool->mAreaSound = ESM::RefId::stringRefId(id + " area");
-                    skill->mSchool->mBoltSound = ESM::RefId::stringRefId(id + " bolt");
-                    skill->mSchool->mCastSound = ESM::RefId::stringRefId(id + " cast");
-                    skill->mSchool->mFailureSound = ESM::RefId::stringRefId("Spell Failure " + id);
-                    skill->mSchool->mHitSound = ESM::RefId::stringRefId(id + " hit");
-                    const std::string name = "sSchool" + id;
-                    skill->mSchool->mName = getGMSTString(settings, name);
-                    skill->mSchool->mAutoCalcMax = int(getGMSTFloat(settings, "iAutoSpell" + id + "Max"));
-                }
-            }
-        }
-    }
-
     // Game Settings
     //=========================================================================
 
@@ -949,54 +870,6 @@ namespace MWWorld
     const ESM::GameSetting* Store<ESM::GameSetting>::search(std::string_view id) const
     {
         return TypedDynamicStore::search(ESM::RefId::stringRefId(id));
-    }
-
-    // Attribute
-    //=========================================================================
-
-    void Store<ESM::Attribute>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
-    {
-        insertStatic({ .mId = ESM::Attribute::Strength,
-            .mName = std::string{ getGMSTString(settings, "sAttributeStrength") },
-            .mDescription = std::string{ getGMSTString(settings, "sStrDesc") },
-            .mIcon = "icons\\k\\attribute_strength.dds",
-            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfStrength") });
-        insertStatic({ .mId = ESM::Attribute::Intelligence,
-            .mName = std::string{ getGMSTString(settings, "sAttributeIntelligence") },
-            .mDescription = std::string{ getGMSTString(settings, "sIntDesc") },
-            .mIcon = "icons\\k\\attribute_int.dds",
-            // Oh, Bethesda. It's "Intelligence".
-            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfIntellegence") });
-        insertStatic({ .mId = ESM::Attribute::Willpower,
-            .mName = std::string{ getGMSTString(settings, "sAttributeWillpower") },
-            .mDescription = std::string{ getGMSTString(settings, "sWilDesc") },
-            .mIcon = "icons\\k\\attribute_wilpower.dds",
-            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfWillpower") });
-        insertStatic({ .mId = ESM::Attribute::Agility,
-            .mName = std::string{ getGMSTString(settings, "sAttributeAgility") },
-            .mDescription = std::string{ getGMSTString(settings, "sAgiDesc") },
-            .mIcon = "icons\\k\\attribute_agility.dds",
-            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfAgility") });
-        insertStatic({ .mId = ESM::Attribute::Speed,
-            .mName = std::string{ getGMSTString(settings, "sAttributeSpeed") },
-            .mDescription = std::string{ getGMSTString(settings, "sSpdDesc") },
-            .mIcon = "icons\\k\\attribute_speed.dds",
-            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfSpeed") });
-        insertStatic({ .mId = ESM::Attribute::Endurance,
-            .mName = std::string{ getGMSTString(settings, "sAttributeEndurance") },
-            .mDescription = std::string{ getGMSTString(settings, "sEndDesc") },
-            .mIcon = "icons\\k\\attribute_endurance.dds",
-            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfEndurance") });
-        insertStatic({ .mId = ESM::Attribute::Personality,
-            .mName = std::string{ getGMSTString(settings, "sAttributePersonality") },
-            .mDescription = std::string{ getGMSTString(settings, "sPerDesc") },
-            .mIcon = "icons\\k\\attribute_personality.dds",
-            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfPersonality") });
-        insertStatic({ .mId = ESM::Attribute::Luck,
-            .mName = std::string{ getGMSTString(settings, "sAttributeLuck") },
-            .mDescription = std::string{ getGMSTString(settings, "sLucDesc") },
-            .mIcon = "icons\\k\\attribute_luck.dds",
-            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfLuck") });
     }
 
     // Weapon type

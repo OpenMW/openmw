@@ -136,13 +136,13 @@ namespace MWGui
             mReviewDialog->setSkillValue(id, value);
     }
 
-    void CharacterCreation::configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor)
+    void CharacterCreation::configureSkills(std::span<const ESM::RefId> major, std::span<const ESM::RefId> minor)
     {
-        if (mReviewDialog)
-            mReviewDialog->configureSkills(major, minor);
+        mPlayerMajorSkills.assign(major.begin(), major.end());
+        mPlayerMinorSkills.assign(minor.begin(), minor.end());
 
-        mPlayerMajorSkills = major;
-        mPlayerMinorSkills = minor;
+        if (mReviewDialog)
+            mReviewDialog->configureSkills(mPlayerMajorSkills, mPlayerMinorSkills);
     }
 
     void CharacterCreation::onFrame(float duration)
@@ -483,13 +483,12 @@ namespace MWGui
 
             std::vector<ESM::RefId> majorSkills = mCreateClassDialog->getMajorSkills();
             std::vector<ESM::RefId> minorSkills = mCreateClassDialog->getMinorSkills();
-            assert(majorSkills.size() >= createdClass.mData.mSkills.size());
-            assert(minorSkills.size() >= createdClass.mData.mSkills.size());
-            for (size_t i = 0; i < createdClass.mData.mSkills.size(); ++i)
-            {
-                createdClass.mData.mSkills[i][1] = majorSkills[i];
-                createdClass.mData.mSkills[i][0] = minorSkills[i];
-            }
+            assert(majorSkills.size() >= createdClass.mData.mMajorSkills.size());
+            assert(minorSkills.size() >= createdClass.mData.mMinorSkills.size());
+            for (size_t i = 0; i < createdClass.mData.mMajorSkills.size(); ++i)
+                createdClass.mData.mMajorSkills[i] = majorSkills[i];
+            for (size_t i = 0; i < createdClass.mData.mMinorSkills.size(); ++i)
+                createdClass.mData.mMinorSkills[i] = minorSkills[i];
 
             MWBase::Environment::get().getMechanicsManager()->setPlayerClass(createdClass);
             mPlayerClass = std::move(createdClass);

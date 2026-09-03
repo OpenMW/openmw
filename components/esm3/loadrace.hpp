@@ -36,9 +36,6 @@ namespace ESM
         {
             int32_t mMale{};
             int32_t mFemale{};
-
-            void load(ESMReader& esm);
-            void save(ESMWriter& esm) const;
         };
 
         enum Flags

@@ -834,7 +834,7 @@ namespace MWGui
         widget->setUserString("Caption_SkillNoProgressDescription", skill->mDescription);
         widget->setUserString("Caption_SkillNoProgressAttribute",
             "#{sGoverningAttribute}: " + MyGUI::TextIterator::toTagsString(attr->mName));
-        widget->setUserString("ImageTexture_SkillNoProgressImage", skill->mIcon);
+        widget->setUserString("ImageTexture_SkillNoProgressImage", skill->mIcon.getNormalized());
     }
 
     void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, ESM::RefId attributeId)
@@ -849,7 +849,7 @@ namespace MWGui
         widget->setUserString("Caption_AttributeName", MyGUI::TextIterator::toTagsString(attribute->mName));
         widget->setUserString(
             "Caption_AttributeDescription", MyGUI::TextIterator::toTagsString(attribute->mDescription));
-        widget->setUserString("ImageTexture_AttributeImage", attribute->mIcon);
+        widget->setUserString("ImageTexture_AttributeImage", attribute->mIcon.getNormalized());
     }
 
     void ToolTips::createSpecializationToolTip(MyGUI::Widget* widget, std::string_view name, int specId)

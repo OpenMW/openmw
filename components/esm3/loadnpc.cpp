@@ -58,6 +58,31 @@ namespace ESM
             dst.mRank = src.mRank;
             dst.mGold = src.mGold;
         }
+
+        void writeBaseStats(ESMWriter& esm, NAME name, const std::map<ESM::RefId, unsigned char>& stats)
+        {
+            for (const auto& [stat, value] : stats)
+            {
+                if (stat.empty() || value == 0)
+                    continue;
+                esm.startSubRecord(name);
+                esm.writeT(value);
+                esm.writeHRefId(stat);
+                esm.endRecord(name);
+            }
+        }
+
+        void readBaseStats(ESMReader& esm, NAME name, std::map<ESM::RefId, unsigned char>& stats)
+        {
+            while (esm.isNextSub(name))
+            {
+                esm.getSubHeader();
+                unsigned char value;
+                esm.getT(value);
+                ESM::RefId stat = esm.getRefId(esm.getSubSize() - sizeof(value));
+                stats.emplace(stat, value);
+            }
+        }
     }
 
     template <Misc::SameAsWithoutCvref<EsmNPDTstruct52> T>
@@ -74,6 +99,12 @@ namespace ESM
     {
         char padding[] = { 0, 0, 0 };
         f(v.mStruct.mLevel, v.mStruct.mDisposition, v.mStruct.mReputation, v.mStruct.mRank, padding, v.mStruct.mGold);
+    }
+
+    template <Misc::SameAsWithoutCvref<NPC::NPDTstruct52> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mLevel, v.mHealth, v.mMana, v.mFatigue, v.mDisposition, v.mReputation, v.mRank, v.mGold);
     }
 
     void NPC::load(ESMReader& esm, bool& isDeleted)
@@ -127,28 +158,37 @@ namespace ESM
                 case fourCC("NPDT"):
                 {
                     hasNpdt = true;
-                    esm.getSubHeader();
-                    EsmNPDTstruct52 esmData;
-                    if (esm.getSubSize() == getCompositeSize(esmData))
+                    if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
                     {
-                        mNpdtType = NPC_DEFAULT;
-                        esm.getComposite(esmData);
+                        esm.getSubHeader();
+                        EsmNPDTstruct52 esmData;
+                        if (esm.getSubSize() == getCompositeSize(esmData))
+                        {
+                            mNpdtType = NPC_DEFAULT;
+                            esm.getComposite(esmData);
+                        }
+                        else
+                        {
+                            NPDTstruct12 data{ esmData };
+                            if (esm.getSubSize() == getCompositeSize(data))
+                            {
+                                mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
+
+                                // Clearing the mNdpt struct to initialize all values
+                                blankNpdt();
+                                esm.getComposite(data);
+                            }
+                            else
+                                esm.fail("NPC_NPDT must be 12 or 52 bytes long");
+                        }
+                        fromBinary(esmData, mNpdt);
                     }
                     else
                     {
-                        NPDTstruct12 data{ esmData };
-                        if (esm.getSubSize() == getCompositeSize(data))
-                        {
-                            mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
-
-                            // Clearing the mNdpt struct to initialize all values
-                            blankNpdt();
-                            esm.getComposite(data);
-                        }
-                        else
-                            esm.fail("NPC_NPDT must be 12 or 52 bytes long");
+                        esm.getSubComposite(mNpdt);
+                        readBaseStats(esm, "ATTR", mNpdt.mAttributes);
+                        readBaseStats(esm, "SKIL", mNpdt.mSkills);
                     }
-                    fromBinary(esmData, mNpdt);
                     break;
                 }
                 case fourCC("FLAG"):
@@ -215,15 +255,24 @@ namespace ESM
         esm.writeHNCRefId("KNAM", mHair);
         esm.writeHNOCRefId("SCRI", mScript);
 
-        EsmNPDTstruct52 data;
-        toBinary(mNpdt, data);
-        if (mNpdtType == NPC_DEFAULT)
+        if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
         {
-            esm.writeNamedComposite("NPDT", data);
+            EsmNPDTstruct52 data;
+            toBinary(mNpdt, data);
+            if (mNpdtType == NPC_DEFAULT)
+            {
+                esm.writeNamedComposite("NPDT", data);
+            }
+            else if (mNpdtType == NPC_WITH_AUTOCALCULATED_STATS)
+            {
+                esm.writeNamedComposite("NPDT", NPDTstruct12{ data });
+            }
         }
-        else if (mNpdtType == NPC_WITH_AUTOCALCULATED_STATS)
+        else
         {
-            esm.writeNamedComposite("NPDT", NPDTstruct12{ data });
+            esm.writeNamedComposite("NPDT", mNpdt);
+            writeBaseStats(esm, "ATTR", mNpdt.mAttributes);
+            writeBaseStats(esm, "SKIL", mNpdt.mSkills);
         }
 
         esm.writeHNT("FLAG", ((mBloodType << 10) + mFlags));

@@ -68,7 +68,7 @@ namespace MWGui
                 widgets.mButton->setUserString("ToolTipLayout", "AttributeToolTip");
                 widgets.mButton->setUserString("Caption_AttributeName", attribute.mName);
                 widgets.mButton->setUserString("Caption_AttributeDescription", attribute.mDescription);
-                widgets.mButton->setUserString("ImageTexture_AttributeImage", attribute.mIcon);
+                widgets.mButton->setUserString("ImageTexture_AttributeImage", attribute.mIcon.getNormalized());
                 widgets.mButton->setCaption(attribute.mName);
                 widgets.mValue = hbox->createWidget<Gui::AutoSizedTextBox>("SandText", {}, MyGUI::Align::Default);
                 mAttributeWidgets.emplace(attribute.mId, widgets);
@@ -266,7 +266,7 @@ namespace MWGui
 
     void LevelupDialog::onAttributeClicked(MyGUI::Widget* sender)
     {
-        auto attribute = *sender->getUserData<ESM::Attribute::AttributeID>();
+        auto attribute = *sender->getUserData<ESM::RefId>();
 
         auto found = std::find(mSpentAttributes.begin(), mSpentAttributes.end(), attribute);
         if (found != mSpentAttributes.end())

@@ -167,6 +167,25 @@ void MWMechanics::NpcStats::setFactionReputation(const ESM::RefId& faction, int 
     mFactionReputation[faction] = value;
 }
 
+namespace
+{
+    float getTypeFactor(ESM::RefId id, const ESM::Class& npcClass)
+    {
+        const auto& gmst = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
+        for (const auto& skill : npcClass.mData.mMinorSkills)
+        {
+            if (skill == id)
+                return gmst.find("fMinorSkillBonus")->mValue.getFloat();
+        }
+        for (const auto& skill : npcClass.mData.mMajorSkills)
+        {
+            if (skill == id)
+                return gmst.find("fMajorSkillBonus")->mValue.getFloat();
+        }
+        return gmst.find("fMiscSkillBonus")->mValue.getFloat();
+    }
+}
+
 float MWMechanics::NpcStats::getSkillProgressRequirement(ESM::RefId id, const ESM::Class& npcClass) const
 {
     float progressRequirement = 1.f + getSkill(id).getBase();
@@ -174,20 +193,7 @@ float MWMechanics::NpcStats::getSkillProgressRequirement(ESM::RefId id, const ES
     const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
     const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(id);
 
-    float typeFactor = gmst.find("fMiscSkillBonus")->mValue.getFloat();
-    for (const auto& skills : npcClass.mData.mSkills)
-    {
-        if (skills[0] == skill->mId)
-        {
-            typeFactor = gmst.find("fMinorSkillBonus")->mValue.getFloat();
-            break;
-        }
-        else if (skills[1] == skill->mId)
-        {
-            typeFactor = gmst.find("fMajorSkillBonus")->mValue.getFloat();
-            break;
-        }
-    }
+    const float typeFactor = getTypeFactor(id, npcClass);
 
     progressRequirement *= typeFactor;
 
@@ -250,7 +256,7 @@ void MWMechanics::NpcStats::updateHealth()
     setHealth(floor(0.5f * (strength + endurance)));
 }
 
-int MWMechanics::NpcStats::getLevelupAttributeMultiplier(ESM::Attribute::AttributeID attribute) const
+int MWMechanics::NpcStats::getLevelupAttributeMultiplier(ESM::RefId attribute) const
 {
     auto it = mSkillIncreases.find(attribute);
     if (it == mSkillIncreases.end() || it->second == 0)
@@ -264,7 +270,7 @@ int MWMechanics::NpcStats::getLevelupAttributeMultiplier(ESM::Attribute::Attribu
     return MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find(gmst.str())->mValue.getInteger();
 }
 
-int MWMechanics::NpcStats::getSkillIncreasesForAttribute(ESM::Attribute::AttributeID attribute) const
+int MWMechanics::NpcStats::getSkillIncreasesForAttribute(ESM::RefId attribute) const
 {
     auto it = mSkillIncreases.find(attribute);
     if (it == mSkillIncreases.end())
@@ -272,7 +278,7 @@ int MWMechanics::NpcStats::getSkillIncreasesForAttribute(ESM::Attribute::Attribu
     return it->second;
 }
 
-void MWMechanics::NpcStats::setSkillIncreasesForAttribute(ESM::Attribute::AttributeID attribute, int increases)
+void MWMechanics::NpcStats::setSkillIncreasesForAttribute(ESM::RefId attribute, int increases)
 {
     if (increases == 0)
         mSkillIncreases.erase(attribute);

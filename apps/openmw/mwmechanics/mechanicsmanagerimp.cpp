@@ -186,16 +186,15 @@ namespace MWMechanics
                     creatureStats.setAttribute(id, creatureStats.getAttribute(id).getBase() + 10);
             }
 
-            for (int i = 0; i < 2; ++i)
+            for (const auto& id : playerClass->mData.mMinorSkills)
             {
-                int bonus = i == 0 ? 10 : 25;
-
-                for (const auto& skills : playerClass->mData.mSkills)
-                {
-                    const ESM::RefId& id = skills[i];
-                    if (!id.empty())
-                        npcStats.getSkill(id).setBase(npcStats.getSkill(id).getBase() + bonus);
-                }
+                if (!id.empty())
+                    npcStats.getSkill(id).setBase(npcStats.getSkill(id).getBase() + 10);
+            }
+            for (const auto& id : playerClass->mData.mMajorSkills)
+            {
+                if (!id.empty())
+                    npcStats.getSkill(id).setBase(npcStats.getSkill(id).getBase() + 25);
             }
 
             for (const ESM::Skill& skill : esmStore.get<ESM::Skill>())

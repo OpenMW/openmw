@@ -1,5 +1,103 @@
 local content = require('openmw.content')
 
+local function asNumber(value)
+    if type(value) ~= 'number' then
+        return 0
+    end
+    return value
+end
+
+local function generateAttributes()
+    local gmsts = content.gameSettings.records
+    local attributes = content.attributes.records
+    local function getString(key)
+        local v = gmsts[key]
+        if type(v) ~= 'string' or v == '' then
+            return key
+        end
+        return v
+    end
+
+    local values = {
+        { id = 'Strength', name = 'sAttributeStrength', description = 'sStrDesc', icon = 'icons/k/attribute_strength.dds', werewolf = 'fWerewolfStrength' },
+        { id = 'Intelligence', name = 'sAttributeIntelligence', description = 'sIntDesc', icon = 'icons/k/attribute_int.dds', werewolf = 'fWerewolfIntellegence' },
+        { id = 'Willpower', name = 'sAttributeWillpower', description = 'sWilDesc', icon = 'icons/k/attribute_wilpower.dds', werewolf = 'fWerewolfWillpower' },
+        { id = 'Agility', name = 'sAttributeAgility', description = 'sAgiDesc', icon = 'icons/k/attribute_agility.dds', werewolf = 'fWerewolfAgility' },
+        { id = 'Speed', name = 'sAttributeSpeed', description = 'sSpdDesc', icon = 'icons/k/attribute_speed.dds', werewolf = 'fWerewolfSpeed' },
+        { id = 'Endurance', name = 'sAttributeEndurance', description = 'sEndDesc', icon = 'icons/k/attribute_endurance.dds', werewolf = 'fWerewolfEndurance' },
+        { id = 'Personality', name = 'sAttributePersonality', description = 'sPerDesc', icon = 'icons/k/attribute_personality.dds', werewolf = 'fWerewolfPersonality' },
+        { id = 'Luck', name = 'sAttributeLuck', description = 'sLucDesc', icon = 'icons/k/attribute_luck.dds', werewolf = 'fWerewolfLuck' },
+    }
+    for _, value in pairs(values) do
+        attributes[value.id] = {
+            name = getString(value.name),
+            description = getString(value.description),
+            icon = value.icon,
+            werewolfValue = asNumber(gmsts[value.werewolf]),
+        }
+    end
+end
+
+local function setSkillProperties()
+    local gmsts = content.gameSettings.records
+    local skills = content.skills.records
+    local function getString(key)
+        local v = gmsts[key]
+        if type(v) ~= 'string' or v == '' then
+            return key
+        end
+        return v
+    end
+
+    local values = {
+        { 'Block', 'sSkillBlock', 'icons/k/combat_block.dds', 'fWerewolfBlock' },
+        { 'Armorer', 'sSkillArmorer', 'icons/k/combat_armor.dds', 'fWerewolfArmorer' },
+        { 'MediumArmor', 'sSkillMediumarmor', 'icons/k/combat_mediumarmor.dds', 'fWerewolfMediumarmor' },
+        { 'HeavyArmor', 'sSkillHeavyarmor', 'icons/k/combat_heavyarmor.dds', 'fWerewolfHeavyarmor' },
+        { 'BluntWeapon', 'sSkillBluntweapon', 'icons/k/combat_blunt.dds', 'fWerewolfBluntweapon' },
+        { 'LongBlade', 'sSkillLongblade', 'icons/k/combat_longblade.dds', 'fWerewolfLongblade' },
+        { 'Axe', 'sSkillAxe', 'icons/k/combat_axe.dds', 'fWerewolfAxe' },
+        { 'Spear', 'sSkillSpear', 'icons/k/combat_spear.dds', 'fWerewolfSpear' },
+        { 'Athletics', 'sSkillAthletics', 'icons/k/combat_athletics.dds', 'fWerewolfAthletics' },
+        { 'Enchant', 'sSkillEnchant', 'icons/k/magic_enchant.dds', 'fWerewolfEnchant' },
+        { 'Destruction', 'sSkillDestruction', 'icons/k/magic_destruction.dds', 'fWerewolfDestruction', 'destruction' },
+        { 'Alteration', 'sSkillAlteration', 'icons/k/magic_alteration.dds', 'fWerewolfAlteration', 'alteration' },
+        { 'Illusion', 'sSkillIllusion', 'icons/k/magic_illusion.dds', 'fWerewolfIllusion', 'illusion' },
+        { 'Conjuration', 'sSkillConjuration', 'icons/k/magic_conjuration.dds', 'fWerewolfConjuration', 'conjuration' },
+        { 'Mysticism', 'sSkillMysticism', 'icons/k/magic_mysticism.dds', 'fWerewolfMysticism', 'mysticism' },
+        { 'Restoration', 'sSkillRestoration', 'icons/k/magic_restoration.dds', 'fWerewolfRestoration', 'restoration' },
+        { 'Alchemy', 'sSkillAlchemy', 'icons/k/magic_alchemy.dds', 'fWerewolfAlchemy' },
+        { 'Unarmored', 'sSkillUnarmored', 'icons/k/magic_unarmored.dds', 'fWerewolfUnarmored' },
+        { 'Security', 'sSkillSecurity', 'icons/k/stealth_security.dds', 'fWerewolfSecurity' },
+        { 'Sneak', 'sSkillSneak', 'icons/k/stealth_sneak.dds', 'fWerewolfSneak' },
+        { 'Acrobatics', 'sSkillAcrobatics', 'icons/k/stealth_acrobatics.dds', 'fWerewolfAcrobatics' },
+        { 'LightArmor', 'sSkillLightarmor', 'icons/k/stealth_lightarmor.dds', 'fWerewolfLightarmor' },
+        { 'ShortBlade', 'sSkillShortblade', 'icons/k/stealth_shortblade.dds', 'fWerewolfShortblade' },
+        { 'Marksman', 'sSkillMarksman', 'icons/k/stealth_marksman.dds', 'fWerewolfMarksman' },
+        { 'Mercantile', 'sSkillMercantile', 'icons/k/stealth_mercantile.dds', 'fWerewolfMerchantile' },
+        { 'Speechcraft', 'sSkillSpeechcraft', 'icons/k/stealth_speechcraft.dds', 'fWerewolfSpeechcraft' },
+        { 'Handtohand', 'sSkillHandtohand', 'icons/k/stealth_handtohand.dds', 'fWerewolfHandtohand' },
+    }
+    for _, value in pairs(values) do
+        local id, name, icon, werewolf, school = unpack(value)
+        local skill = skills[id]
+        skill.name = getString(name)
+        skill.icon = icon
+        skill.werewolfValue = asNumber(gmsts[werewolf])
+        if school then
+            skill.school = {
+                areaSound = school .. ' area',
+                boltSound = school .. ' bolt',
+                castSound = school .. ' cast',
+                failureSound = 'Spell Failure ' .. school,
+                hitSound = school .. ' hit',
+                name = getString('sSchool' .. school),
+                autoCalcMax = asNumber(gmsts['iAutoSpell' .. school .. 'Max']),
+            }
+        end
+    end
+end
+
 local function generateDefaultStatics()
     local statics = {
         -- Total conversions from SureAI lack marker records
@@ -100,6 +198,8 @@ end
 return {
     engineHandlers = {
         onContentFilesLoaded = function()
+            generateAttributes()
+            setSkillProperties()
             generateDefaultDoors()
             generateDefaultGMSTs()
             generateDefaultStatics()

@@ -38,7 +38,8 @@ namespace ESM
         {
             std::array<ESM::RefId, 2> mAttribute; // Attributes that get class bonus
             int32_t mSpecialization; // 0 = Combat, 1 = Magic, 2 = Stealth
-            std::array<std::array<ESM::RefId, 2>, 5> mSkills; // Minor and major skills.
+            std::array<ESM::RefId, 5> mMinorSkills;
+            std::array<ESM::RefId, 5> mMajorSkills;
             bool mIsPlayable; // Playable class
             int32_t mServices;
 
