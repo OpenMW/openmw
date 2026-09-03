@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <fstream>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -122,6 +123,28 @@ namespace
             EXPECT_EQ(get<int>(lua, "permanent:get('x')"), 1);
             EXPECT_TRUE(get<bool>(lua, "permanent:get('z') == nil"));
             EXPECT_TRUE(get<bool>(lua, "temporary:get('y') == nil"));
+        });
+    }
+
+    TEST(LuaUtilStorageTest, InvalidData)
+    {
+        LuaUtil::LuaState luaState{ nullptr, nullptr };
+        luaState.protectedCall([](LuaUtil::LuaView& view) {
+            LuaUtil::LuaStorage::initLuaBindings(view);
+            LuaUtil::LuaStorage storage;
+            auto& lua = view.sol();
+            storage.setActive(true);
+
+            const auto tmpFile = std::filesystem::temp_directory_path() / "test_invalid_storage.bin";
+            {
+                std::ofstream fout(tmpFile, std::ios::binary);
+                const std::string serialized = LuaUtil::serialize(sol::make_object(lua.lua_state(), 1.0));
+                fout.write(serialized.data(), serialized.size());
+            }
+
+            EXPECT_NO_THROW(storage.load(lua, tmpFile));
+            EXPECT_EQ(storage.getAllSections(lua).size(), 0);
+            std::filesystem::remove(tmpFile);
         });
     }
 
