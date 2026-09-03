@@ -34,6 +34,7 @@ namespace LuaUi
         osg::Vec2f mSize;
         osg::Vec2f mHotspot;
         std::string mName;
+        bool mPersistent = false;
     };
 
     using CursorResource = CursorData;
@@ -64,6 +65,17 @@ namespace LuaUi
             return result;
         }
 
+        std::vector<std::string> gameCursorNames() const
+        {
+            std::vector<std::string> result;
+            for (const auto& cursor : mCursors)
+            {
+                if (!cursor->mPersistent)
+                    result.push_back(cursor->mName);
+            }
+            return result;
+        }
+
         std::shared_ptr<CursorResource> findCursor(std::string_view name) const
         {
             for (const auto& cursor : mCursors)
@@ -78,6 +90,12 @@ namespace LuaUi
         {
             mTextures.clear();
             mCursors.clear();
+        }
+
+        void clearGameResources()
+        {
+            mTextures.clear();
+            std::erase_if(mCursors, [](const auto& cursor) { return !cursor->mPersistent; });
         }
 
     private:

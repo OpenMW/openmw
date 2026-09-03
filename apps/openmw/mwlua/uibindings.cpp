@@ -281,7 +281,7 @@ namespace MWLua
             return luaManager->uiResourceManager()->registerTexture(std::move(data));
         };
 
-        api["cursor"] = [luaManager = context.mLuaManager](const sol::table& options) {
+        api["cursor"] = [luaManager = context.mLuaManager, menu](const sol::table& options) {
             LuaUi::CursorData data;
             sol::object path = LuaUtil::getFieldOrNil(options, "path");
             if (path.is<std::string>())
@@ -295,6 +295,7 @@ namespace MWLua
                 throw std::logic_error("Cursor size and hotspot must be vectors");
             data.mSize = size.as<osg::Vec2f>();
             data.mHotspot = hotspot.as<osg::Vec2f>();
+            data.mPersistent = menu;
 
             auto integral = [](float value) { return std::isfinite(value) && std::floor(value) == value; };
             if (!integral(data.mSize.x()) || !integral(data.mSize.y()) || !integral(data.mHotspot.x())
