@@ -37,6 +37,8 @@ namespace MWLua
 {
     namespace
     {
+        constexpr int sMaxCursorSize = 128;
+
         const std::unordered_map<MWGui::GuiMode, std::string_view> modeToName{
             { MWGui::GM_Inventory, "Interface" },
             { MWGui::GM_Container, "Container" },
