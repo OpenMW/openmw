@@ -309,6 +309,8 @@ namespace MWLua
                 || !integral(data.mHotspot.y()) || data.mSize.x() <= 0 || data.mSize.y() <= 0 || data.mHotspot.x() < 0
                 || data.mHotspot.y() < 0 || data.mHotspot.x() >= data.mSize.x() || data.mHotspot.y() >= data.mSize.y())
                 throw std::logic_error("Invalid cursor size or hotspot");
+            if (data.mSize.x() > sMaxCursorSize || data.mSize.y() > sMaxCursorSize)
+                throw std::logic_error("Cursor size cannot exceed 128 pixels");
 
             auto cursor = luaManager->uiResourceManager()->registerCursor(std::move(data));
             luaManager->addAction([cursor] {
