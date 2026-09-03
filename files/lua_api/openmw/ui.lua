@@ -409,7 +409,7 @@
 --- Table with arguments passed to ui.cursor.
 -- @type CursorResourceOptions
 -- @field #string path Path to the cursor texture file. Required
--- @field openmw.util#Vector2 size Size of the cursor in pixels. Required
+-- @field openmw.util#Vector2 size Size of the cursor in pixels, at most 128 by 128. Required
 -- @field openmw.util#Vector2 hotspot Position in pixels within the cursor texture that tracks the mouse pointer. Required
 
 return nil
