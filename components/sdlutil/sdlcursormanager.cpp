@@ -150,6 +150,8 @@ namespace SDLUtil
 
             // set the cursor and store it for later
             SDL_Cursor* curs = SDL_CreateColorCursor(surface.get(), hotspotX, hotspotY);
+            if (curs == nullptr)
+                throw std::runtime_error(std::string("Failed to create cursor: ") + SDL_GetError());
 
             mCursorMap.emplace(name, curs);
         }
