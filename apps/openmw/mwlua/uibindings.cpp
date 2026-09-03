@@ -10,7 +10,9 @@
 #include <components/lua_ui/util.hpp>
 
 #include <components/misc/finitevalues.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/settings/values.hpp>
+#include <components/vfs/manager.hpp>
 
 #include <cmath>
 
@@ -289,6 +291,8 @@ namespace MWLua
                 data.mPath = VFS::Path::Normalized(path.as<std::string>());
             if (data.mPath.empty())
                 throw std::logic_error("Invalid cursor path");
+            if (!MWBase::Environment::get().getResourceSystem()->getVFS()->exists(data.mPath))
+                throw std::logic_error("Cursor texture does not exist: " + std::string(data.mPath));
 
             sol::object size = LuaUtil::getFieldOrNil(options, "size");
             sol::object hotspot = LuaUtil::getFieldOrNil(options, "hotspot");
