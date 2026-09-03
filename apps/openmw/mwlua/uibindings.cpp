@@ -9,6 +9,7 @@
 #include <components/lua_ui/resources.hpp>
 #include <components/lua_ui/util.hpp>
 
+#include <components/misc/finitevalues.hpp>
 #include <components/settings/values.hpp>
 
 #include <cmath>
@@ -93,7 +94,7 @@ namespace MWLua
             luaManager->addAction([mode] { MWBase::Environment::get().getInputManager()->setCursorMode(mode); });
         };
         api["getCursorMode"] = []() { return MWBase::Environment::get().getInputManager()->getCursorMode(); };
-        api["setCursorPosition"] = [luaManager = context.mLuaManager](const osg::Vec2f& position) {
+        api["setCursorPosition"] = [luaManager = context.mLuaManager](const Misc::FiniteVec2f& position) {
             luaManager->addAction(
                 [position] { MWBase::Environment::get().getInputManager()->setCursorPosition(position); });
         };
