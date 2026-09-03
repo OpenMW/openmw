@@ -384,6 +384,7 @@
 
 ---
 -- Register a hardware cursor backed by a texture in the virtual filesystem. Use the result as a widget's `props.cursor`, or pass it to @{openmw.ui#ui.setCursor} to override all widget cursors.
+-- Repeated calls with the same options will return the same CursorResource if it already has been registered.
 -- @function [parent=#ui] cursor
 -- @param #CursorResourceOptions options
 -- @return #CursorResource
