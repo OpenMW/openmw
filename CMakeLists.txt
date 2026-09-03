@@ -327,7 +327,7 @@ add_subdirectory(extern)
 
 # Sound setup
 
-# Require at least ffmpeg 3.2 for now
+# Require at least FFmpeg 4.0
 SET(FFVER_OK FALSE)
 
 find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
@@ -335,29 +335,29 @@ find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMP
 if(FFmpeg_FOUND)
     SET(FFVER_OK TRUE)
 
-    if(FFmpeg_AVFORMAT_VERSION VERSION_LESS "57.56.100")
-        message(STATUS "libavformat is too old! (${FFmpeg_AVFORMAT_VERSION}, wanted 57.56.100)")
+    if(FFmpeg_AVFORMAT_VERSION VERSION_LESS "58.12.100")
+        message(STATUS "libavformat is too old! (${FFmpeg_AVFORMAT_VERSION}, wanted 58.12.100)")
         set(FFVER_OK FALSE)
     endif()
-    if(FFmpeg_AVCODEC_VERSION VERSION_LESS "57.64.100")
-        message(STATUS "libavcodec is too old! (${FFmpeg_AVCODEC_VERSION}, wanted 57.64.100)")
+    if(FFmpeg_AVCODEC_VERSION VERSION_LESS "58.18.100")
+        message(STATUS "libavcodec is too old! (${FFmpeg_AVCODEC_VERSION}, wanted 58.18.100)")
         set(FFVER_OK FALSE)
     endif()
-    if(FFmpeg_AVUTIL_VERSION VERSION_LESS "55.34.100")
-        message(STATUS "libavutil is too old! (${FFmpeg_AVUTIL_VERSION}, wanted 55.34.100)")
+    if(FFmpeg_AVUTIL_VERSION VERSION_LESS "56.14.100")
+        message(STATUS "libavutil is too old! (${FFmpeg_AVUTIL_VERSION}, wanted 56.14.100)")
         set(FFVER_OK FALSE)
     endif()
-    if(FFmpeg_SWSCALE_VERSION VERSION_LESS "4.2.100")
-        message(STATUS "libswscale is too old! (${FFmpeg_SWSCALE_VERSION}, wanted 4.2.100)")
+    if(FFmpeg_SWSCALE_VERSION VERSION_LESS "5.1.100")
+        message(STATUS "libswscale is too old! (${FFmpeg_SWSCALE_VERSION}, wanted 5.1.100)")
         set(FFVER_OK FALSE)
     endif()
-    if(FFmpeg_SWRESAMPLE_VERSION VERSION_LESS "2.3.100")
-        message(STATUS "libswresample is too old! (${FFmpeg_SWRESAMPLE_VERSION}, wanted 2.3.100)")
+    if(FFmpeg_SWRESAMPLE_VERSION VERSION_LESS "3.1.100")
+        message(STATUS "libswresample is too old! (${FFmpeg_SWRESAMPLE_VERSION}, wanted 3.1.100)")
         set(FFVER_OK FALSE)
     endif()
 
     if(NOT FFVER_OK)
-        message(FATAL_ERROR "FFmpeg version is too old, 3.2 is required" )
+        message(FATAL_ERROR "FFmpeg version is too old, 4.0 is required" )
     endif()
 endif()
 

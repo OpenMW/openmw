@@ -101,11 +101,6 @@ VideoState::VideoState()
     , mQuit(false)
 {
     mFlushPktData = flush_pkt.data;
-
-// This is not needed any more above FFMpeg version 4.0
-#if LIBAVCODEC_VERSION_INT < 3805796
-    av_register_all();
-#endif
 }
 
 VideoState::~VideoState()
@@ -586,12 +581,7 @@ public:
                     // we want to seek to any keyframe *before* the given time, so we can continue decoding as normal from there on
                     if(av_seek_frame(self->format_ctx, streamIndex, timestamp, AVSEEK_FLAG_BACKWARD) < 0)
                     {
-// In the FFMpeg 4.0 a "filename" field was replaced by "url"
-#if LIBAVCODEC_VERSION_INT < 3805796
-                        OSG_FATAL << "Error seeking " << self->format_ctx->filename << std::endl;
-#else
                         OSG_FATAL << "Error seeking " << self->format_ctx->url << std::endl;
-#endif
                     }
                     else
                     {
@@ -708,11 +698,6 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         this->audio_ctx = avcodec_alloc_context3(codec);
         avcodec_parameters_to_context(this->audio_ctx, pFormatCtx->streams[stream_index]->codecpar);
 
-// This is not needed any more above FFMpeg version 4.0
-#if LIBAVCODEC_VERSION_INT < 3805796
-        av_codec_set_pkt_timebase(this->audio_ctx, pFormatCtx->streams[stream_index]->time_base);
-#endif
-
         if (avcodec_open2(this->audio_ctx, codec, nullptr) < 0)
         {
             fprintf(stderr, "Unsupported codec!\n");
@@ -744,11 +729,6 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         // Get a pointer to the codec context for the video stream
         this->video_ctx = avcodec_alloc_context3(codec);
         avcodec_parameters_to_context(this->video_ctx, pFormatCtx->streams[stream_index]->codecpar);
-
-// This is not needed any more above FFMpeg version 4.0
-#if LIBAVCODEC_VERSION_INT < 3805796
-        av_codec_set_pkt_timebase(this->video_ctx, pFormatCtx->streams[stream_index]->time_base);
-#endif
 
         if (avcodec_open2(this->video_ctx, codec, nullptr) < 0)
         {
@@ -800,20 +780,12 @@ void VideoState::init(std::unique_ptr<std::istream>&& inputstream, const std::st
           if (this->format_ctx->pb != nullptr)
           {
               av_freep(&this->format_ctx->pb->buffer);
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 80, 100)
               avio_context_free(&this->format_ctx->pb);
-#else
-              av_freep(&this->format_ctx->pb);
-#endif
           }
         }
         // "Note that a user-supplied AVFormatContext will be freed on failure."
         this->format_ctx = nullptr;
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 80, 100)
         avio_context_free(&ioCtx);
-#else
-        av_freep(&ioCtx);
-#endif
         throw std::runtime_error("Failed to open video input");
     }
 
@@ -888,11 +860,7 @@ void VideoState::deinit()
         if (this->format_ctx->pb != nullptr)
         {
             av_freep(&this->format_ctx->pb->buffer);
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 80, 100)
             avio_context_free(&this->format_ctx->pb);
-#else
-            av_freep(&this->format_ctx->pb);
-#endif
         }
         avformat_close_input(&this->format_ctx);
     }
@@ -994,4 +962,3 @@ void ExternalClock::set(uint64_t time)
 }
 
 }
-
