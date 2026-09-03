@@ -263,6 +263,9 @@ namespace MWBase
 
         virtual float getDistanceToFocusObject() = 0;
 
+        virtual const MWPhysics::RayCastingResult& getFocusRay() const = 0;
+        ///< Result of the last focus object lookup
+
         virtual float getMaxActivationDistance() const = 0;
 
         virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) = 0;
