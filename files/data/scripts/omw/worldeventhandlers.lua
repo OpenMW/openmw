@@ -5,7 +5,7 @@ return {
         Pause = function(tag) world.pause(tag) end,
         RemoveVfx = function(vfxId) world.vfx.remove(vfxId) end,
         SetGameTimeScale = function(scale) world.setGameTimeScale(scale) end,
-        SetSaveState = function(objects) for k, v in pairs(objects) do k.saveState = v end end,
+        SetSaveState = function(objects) for k, v in pairs(objects) do k:setSaveState(v) end end,
         SetSimulationTimeScale = function(scale) world.setSimulationTimeScale(scale) end,
         SpawnVfx = function(data) world.vfx.spawn(data.model, data.position, data.options) end,
         Unpause = function(tag) world.unpause(tag) end,
