@@ -218,6 +218,20 @@
 -- @return #string 
 
 ---
+-- Adds a spell-casting glow to the actor.
+-- Can only be used on self.
+-- @function [parent=#animation] addGlow
+-- @param openmw.core#GameObject actor
+-- @param #table options A table of parameters. Must contain the following required parameters:
+--
+--   * `color` - the @{openmw.util#Color} of the glow.
+--   * `duration` - a finite duration in seconds. A negative value makes the glow permanent.
+--
+-- @usage
+-- local util = require('openmw.util')
+-- animation.addGlow(self, { color = util.color.rgb(1, 0, 0), duration = 1.5 })
+
+---
 -- Plays a VFX on the actor.
 -- Can only be used on self. Can also be evoked by sending an AddVfx event to the target actor.
 -- @function [parent=#animation] addVfx
@@ -269,4 +283,3 @@
 
 
 return nil
-
