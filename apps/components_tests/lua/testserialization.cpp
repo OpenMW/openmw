@@ -7,8 +7,8 @@
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
-#include <components/lua/serialization.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/serialization.hpp>
 #include <components/lua/utilpackage.hpp>
 
 #include <components/misc/color.hpp>
