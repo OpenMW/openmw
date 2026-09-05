@@ -79,7 +79,7 @@ fi
 if [[ $CI_OPENMW_USE_VCPKG ]]; then
     . ./CI/linux/deps_versions.sh
 
-    DEPENDENCIES_ROOT_PATH="deps/${VCPKG_FILE}-${VCPKG_TAG}"
+    DEPENDENCIES_ROOT_PATH="${DEPENDENCIES_ROOT_PATH:-deps/${VCPKG_FILE}-${VCPKG_TAG}}"
     VCPKG_TARGET_TRIPLET="x64-linux-dynamic"
     QT_PATH="deps/Qt/$QT_VER/gcc_64"
 
