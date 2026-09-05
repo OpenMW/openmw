@@ -245,6 +245,30 @@ namespace MWSound
             EXPECT_THROW(cache.insert(sFile, *stream), std::invalid_argument);
         }
 
+        TEST(MWSoundHeadCacheTest, findsAnInsertedEntry)
+        {
+            CountingFile file(makeContent(64));
+            const auto vfs = TestingOpenMW::createTestVFS({ { sFile, &file } });
+            HeadCache cache(*vfs, 1024);
+
+            EXPECT_FALSE(cache.contains(sFile));
+
+            warm(cache, sFile, 16, *vfs);
+            EXPECT_TRUE(cache.contains(sFile));
+        }
+
+        TEST(MWSoundHeadCacheTest, reportsFullNearCapacity)
+        {
+            CountingFile file(makeContent(64));
+            const auto vfs = TestingOpenMW::createTestVFS({ { sFile, &file } });
+            HeadCache cache(*vfs, 512 * 1024 + 32);
+
+            EXPECT_FALSE(cache.full());
+
+            warm(cache, sFile, 64, *vfs);
+            EXPECT_TRUE(cache.full());
+        }
+
         TEST(MWSoundHeadCacheTest, shouldNotCacheAHeadOverTheCeiling)
         {
             const std::string content = makeContent(300 * 1024);
