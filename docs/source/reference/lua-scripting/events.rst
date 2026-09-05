@@ -260,8 +260,8 @@ Unlock a container or door
 
 **SetSaveState**
 
-Inverts whether or not an object will be written into the save. For script-spawned objects, this effectively means they are deleted after the game loads. For objects from content files, this will restore them to their original state upon loading.
-Use this as a means to easily reset **individual** objects. To reset all objects in a given cell instead, use `cell:getAll` and set `object.saveState` to `false` instead.
+Sets whether or not an object will be written into the save. For script-spawned objects, setting this to false effectively means they are deleted after the game loads. For objects from content files, setting this to false restores them to their original state upon loading.
+Use this as a means to easily reset **individual** objects. To reset all objects in a given cell instead, use `cell:getAll` and call `object:setSaveState(false)` on each object.
 
 .. code-block:: Lua
 
