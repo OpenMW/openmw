@@ -768,6 +768,9 @@ namespace MWPhysics
         btVector3 pos2 = Misc::Convert::toBullet(
             actor2->getCollisionObjectPosition() + osg::Vec3f(0, 0, actor2->getHalfExtents().z() * 0.9f));
 
+        if ((pos2 - pos1).fuzzyZero())
+            return true;
+
         btCollisionWorld::ClosestRayResultCallback resultCallback(pos1, pos2);
         resultCallback.m_collisionFilterGroup = CollisionType_AnyPhysical;
         resultCallback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap | CollisionType_Door;
