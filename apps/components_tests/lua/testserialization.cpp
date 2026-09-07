@@ -7,6 +7,7 @@
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
+#include <components/lua/luastate.hpp>
 #include <components/lua/serialization.hpp>
 #include <components/lua/utilpackage.hpp>
 
@@ -23,7 +24,10 @@ namespace
     {
         sol::state lua;
         EXPECT_EQ(LuaUtil::serialize(sol::nil), "");
-        EXPECT_EQ(LuaUtil::deserialize(lua, ""), sol::nil);
+        sol::object value = LuaUtil::deserialize(lua, "");
+        EXPECT_EQ(value, sol::nil);
+        EXPECT_EQ(value.lua_state(), lua.lua_state());
+        EXPECT_ERROR(LuaUtil::cast<sol::table>(value), "Value \"nil\" can not be casted to sol::table");
     }
 
     TEST(LuaSerializationTest, Number)

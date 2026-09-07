@@ -370,7 +370,7 @@ namespace LuaUtil
         lua_State* lua, std::string_view binaryData, const UserdataSerializer* customSerializer, bool readOnly)
     {
         if (binaryData.empty())
-            return sol::nil;
+            return sol::make_object(lua, sol::nil);
         if (binaryData[0] != FORMAT_VERSION)
             throw std::runtime_error("Incorrect version of Lua serialization format: "
                 + std::to_string(static_cast<unsigned>(binaryData[0])));
