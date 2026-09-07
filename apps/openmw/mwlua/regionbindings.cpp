@@ -68,10 +68,7 @@ namespace MWLua
             world->modRegion(rec.mId, chances);
         };
         auto resetProbability = [](const ESM::Region& rec) {
-            std::map<ESM::RefId, uint8_t> chances;
-            for (size_t i = 0; i < rec.mData.mProbabilities.size(); ++i)
-                chances.emplace(MWWorld::Weather::indexToRefId(static_cast<int>(i)), rec.mData.mProbabilities[i]);
-            MWBase::Environment::get().getWorld()->modRegion(rec.mId, chances);
+            MWBase::Environment::get().getWorld()->modRegion(rec.mId, rec.mData.mProbabilities);
         };
         regionT["resetProbability"] = resetProbability;
         regionT["sounds"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Region& rec) {

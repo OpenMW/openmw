@@ -1147,11 +1147,8 @@ namespace EsmTool
         std::cout << "  Name: " << mData.mName << std::endl;
 
         std::cout << "  Weather:" << std::endl;
-        std::array<std::string_view, 10> weathers
-            = { "Clear", "Cloudy", "Fog", "Overcast", "Rain", "Thunder", "Ash", "Blight", "Snow", "Blizzard" };
-        for (size_t i = 0; i < weathers.size(); ++i)
-            std::cout << "    " << weathers[i] << ": " << static_cast<unsigned>(mData.mData.mProbabilities[i])
-                      << std::endl;
+        for (const auto& [id, chance] : mData.mData.mProbabilities)
+            std::cout << "    " << id << ": " << static_cast<unsigned>(chance) << std::endl;
         std::cout << "  Map Color: " << mData.mMapColor << std::endl;
         if (!mData.mSleepList.empty())
             std::cout << "  Sleep List: " << mData.mSleepList << std::endl;

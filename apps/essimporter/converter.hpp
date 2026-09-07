@@ -19,6 +19,7 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadglob.hpp>
+#include <components/esm3/loadregn.hpp>
 #include <components/esm3/projectilestate.hpp>
 #include <components/esm3/queststate.hpp>
 #include <components/esm3/stolenitems.hpp>
@@ -539,11 +540,11 @@ namespace ESSImport
             mHasGame = true;
         }
 
-        int validateWeatherID(int weatherID) const
+        ESM::RefId validateWeatherID(int weatherID) const
         {
             if (weatherID >= -1 && weatherID < 10)
             {
-                return weatherID;
+                return ESM::Weather::indexToRefId(weatherID);
             }
             else
             {
@@ -563,7 +564,7 @@ namespace ESSImport
             weather.mTransitionFactor = 1 - (mGame.mGMDT.mWeatherTransition / 100.0f);
             weather.mCurrentWeather = validateWeatherID(mGame.mGMDT.mCurrentWeather);
             weather.mNextWeather = validateWeatherID(mGame.mGMDT.mNextWeather);
-            weather.mQueuedWeather = -1;
+            weather.mQueuedWeather = {};
             // TODO: Determine how ModRegion modifiers are saved in Morrowind.
             weather.save(esm);
             esm.endRecord(ESM::REC_WTHR);

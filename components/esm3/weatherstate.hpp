@@ -13,8 +13,8 @@ namespace ESM
 
     struct RegionWeatherState
     {
-        int32_t mWeather;
-        std::vector<uint8_t> mChances;
+        RefId mWeather;
+        std::map<RefId, uint8_t> mChances;
     };
 
     struct WeatherState
@@ -24,9 +24,9 @@ namespace ESM
         bool mFastForward;
         float mWeatherUpdateTime;
         float mTransitionFactor;
-        int32_t mCurrentWeather;
-        int32_t mNextWeather;
-        int32_t mQueuedWeather;
+        RefId mCurrentWeather;
+        RefId mNextWeather;
+        RefId mQueuedWeather;
         std::map<ESM::RefId, RegionWeatherState> mRegions;
 
         void load(ESMReader& esm);

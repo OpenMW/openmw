@@ -89,7 +89,7 @@ namespace MWScript
 
                 const ESM::Region* reg = MWBase::Environment::get().getESMStore()->get<ESM::Region>().search(region);
                 if (reg)
-                    MWBase::Environment::get().getWorld()->changeWeather(region, MWWorld::Weather::indexToRefId(id));
+                    MWBase::Environment::get().getWorld()->changeWeather(region, ESM::Weather::indexToRefId(id));
                 else
                     runtime.getContext().report("Warning: Region \"" + region.getRefIdString() + "\" was not found");
             }
@@ -106,7 +106,7 @@ namespace MWScript
                 std::map<ESM::RefId, uint8_t> chances;
                 for (int i = 0; i < 10; ++i)
                 {
-                    ESM::RefId id = MWWorld::Weather::indexToRefId(i);
+                    ESM::RefId id = ESM::Weather::indexToRefId(i);
                     uint8_t chance = 0;
                     if (arg0 > 0)
                     {

@@ -2,6 +2,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "loadregn.hpp"
 
 namespace ESM
 {
@@ -30,20 +31,30 @@ namespace ESM
         esm.getHNT(mFastForward, fastForwardRecord);
         esm.getHNT(mWeatherUpdateTime, weatherUpdateTimeRecord);
         esm.getHNT(mTransitionFactor, transitionFactorRecord);
-        esm.getHNT(mCurrentWeather, currentWeatherRecord);
-        esm.getHNT(mNextWeather, nextWeatherRecord);
-        esm.getHNT(mQueuedWeather, queuedWeatherRecord);
+        int currentWeather;
+        esm.getHNT(currentWeather, currentWeatherRecord);
+        mCurrentWeather = ESM::Weather::indexToRefId(currentWeather);
+        int nextWeather;
+        esm.getHNT(nextWeather, nextWeatherRecord);
+        mNextWeather = ESM::Weather::indexToRefId(nextWeather);
+        int queuedWeather;
+        esm.getHNT(queuedWeather, queuedWeatherRecord);
+        mQueuedWeather = ESM::Weather::indexToRefId(queuedWeather);
 
         while (esm.isNextSub(regionNameRecord))
         {
             ESM::RefId regionID = esm.getRefId();
             RegionWeatherState region;
-            esm.getHNT(region.mWeather, regionWeatherRecord);
+            int weatherId;
+            esm.getHNT(weatherId, regionWeatherRecord);
+            region.mWeather = Weather::indexToRefId(weatherId);
+            int index = 0;
             while (esm.isNextSub(regionChanceRecord))
             {
                 uint8_t chance;
                 esm.getHT(chance);
-                region.mChances.push_back(chance);
+                ESM::RefId id = Weather::indexToRefId(index++);
+                region.mChances.emplace(id, chance);
             }
 
             mRegions.insert(std::make_pair(regionID, region));
@@ -57,17 +68,21 @@ namespace ESM
         esm.writeHNT(fastForwardRecord, mFastForward);
         esm.writeHNT(weatherUpdateTimeRecord, mWeatherUpdateTime);
         esm.writeHNT(transitionFactorRecord, mTransitionFactor);
-        esm.writeHNT(currentWeatherRecord, mCurrentWeather);
-        esm.writeHNT(nextWeatherRecord, mNextWeather);
-        esm.writeHNT(queuedWeatherRecord, mQueuedWeather);
+        esm.writeHNT(currentWeatherRecord, Weather::refIdToIndex(mCurrentWeather));
+        esm.writeHNT(nextWeatherRecord, Weather::refIdToIndex(mNextWeather));
+        esm.writeHNT(queuedWeatherRecord, Weather::refIdToIndex(mQueuedWeather));
 
-        auto it = mRegions.begin();
-        for (; it != mRegions.end(); ++it)
+        for (const auto& [region, weather] : mRegions)
         {
-            esm.writeHNCRefId(regionNameRecord, it->first);
-            esm.writeHNT(regionWeatherRecord, it->second.mWeather);
-            for (const uint8_t& chance : it->second.mChances)
+            esm.writeHNCRefId(regionNameRecord, region);
+            esm.writeHNT(regionWeatherRecord, Weather::refIdToIndex(weather.mWeather));
+            for (int i = 0; i < Weather::Length; ++i)
             {
+                ESM::RefId id = Weather::indexToRefId(i);
+                uint8_t chance = 0;
+                const auto found = weather.mChances.find(id);
+                if (found != weather.mChances.end())
+                    chance = found->second;
                 esm.writeHNT(regionChanceRecord, chance);
             }
         }

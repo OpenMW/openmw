@@ -57,19 +57,6 @@ namespace MWWorld
             }
             return stormDirection;
         }
-
-        const static std::array<ESM::RefId, 10> sWeatherIds = {
-            ESM::StringRefId("Clear"),
-            ESM::StringRefId("Cloudy"),
-            ESM::StringRefId("Foggy"),
-            ESM::StringRefId("Overcast"),
-            ESM::StringRefId("Rain"),
-            ESM::StringRefId("Thunderstorm"),
-            ESM::StringRefId("Ashstorm"),
-            ESM::StringRefId("Blight"),
-            ESM::StringRefId("Snow"),
-            ESM::StringRefId("Blizzard"),
-        };
     }
 
     template <typename T>
@@ -151,23 +138,6 @@ namespace MWWorld
     {
         static const osg::Vec3f direction = osg::Vec3f(0.f, 1.f, 0.f);
         return direction;
-    }
-
-    int Weather::refIdToIndex(ESM::RefId id)
-    {
-        for (size_t i = 0; i < sWeatherIds.size(); ++i)
-        {
-            if (id == sWeatherIds[i])
-                return static_cast<int>(i);
-        }
-        return -1;
-    }
-
-    ESM::RefId Weather::indexToRefId(int index)
-    {
-        if (index >= 0 && index < sWeatherIds.size())
-            return sWeatherIds[index];
-        return {};
     }
 
     Weather::Weather(ESM::RefId id, int scriptId, const std::string& name, float stormWindSpeed, float rainSpeed,
@@ -316,27 +286,20 @@ namespace MWWorld
     }
 
     RegionWeather::RegionWeather(const ESM::Region& region)
+        : mChances(region.mData.mProbabilities)
     {
-        for (size_t i = 0; i < region.mData.mProbabilities.size(); ++i)
-            mChances.emplace(Weather::indexToRefId(static_cast<int>(i)), region.mData.mProbabilities[i]);
     }
 
     RegionWeather::RegionWeather(const ESM::RegionWeatherState& state)
-        : mWeather(Weather::indexToRefId(state.mWeather))
+        : mWeather(state.mWeather)
+        , mChances(state.mChances)
     {
-        for (size_t i = 0; i < state.mChances.size(); ++i)
-            mChances.emplace(Weather::indexToRefId(static_cast<int>(i)), state.mChances[i]);
     }
 
     RegionWeather::operator ESM::RegionWeatherState() const
     {
-        ESM::RegionWeatherState state;
-        state.mWeather = Weather::refIdToIndex(mWeather);
-        for (const ESM::RefId& id : sWeatherIds)
-        {
-            const auto it = mChances.find(id);
-            state.mChances.push_back(it == mChances.end() ? 0 : it->second);
-        }
+        ESM::RegionWeatherState state = { mWeather, mChances };
+
         return state;
     }
 
@@ -388,7 +351,7 @@ namespace MWWorld
         }
 
         // if we hit this path then the chances don't add to 100, choose a default weather instead
-        mWeather = Weather::indexToRefId(0);
+        mWeather = ESM::Weather::indexToRefId(0);
     }
 
     MoonModel::MoonModel(float fadeInStart, float fadeInFinish, float fadeOutStart, float fadeOutFinish,
@@ -758,7 +721,7 @@ namespace MWWorld
             mRegions.insert(std::make_pair(it->mId, RegionWeather(*it)));
         }
 
-        forceWeather(Weather::indexToRefId(0));
+        forceWeather(ESM::Weather::indexToRefId(0));
     }
 
     WeatherManager::~WeatherManager()
@@ -1086,9 +1049,9 @@ namespace MWWorld
         state.mFastForward = mFastForward;
         state.mWeatherUpdateTime = mWeatherUpdateTime;
         state.mTransitionFactor = mTransitionFactor;
-        state.mCurrentWeather = Weather::refIdToIndex(mCurrentWeather);
-        state.mNextWeather = Weather::refIdToIndex(mNextWeather);
-        state.mQueuedWeather = Weather::refIdToIndex(mQueuedWeather);
+        state.mCurrentWeather = mCurrentWeather;
+        state.mNextWeather = mNextWeather;
+        state.mQueuedWeather = mQueuedWeather;
 
         auto it = mRegions.begin();
         for (; it != mRegions.end(); ++it)
@@ -1113,9 +1076,9 @@ namespace MWWorld
             mFastForward = state.mFastForward;
             mWeatherUpdateTime = state.mWeatherUpdateTime;
             mTransitionFactor = state.mTransitionFactor;
-            mCurrentWeather = Weather::indexToRefId(state.mCurrentWeather);
-            mNextWeather = Weather::indexToRefId(state.mNextWeather);
-            mQueuedWeather = Weather::indexToRefId(state.mQueuedWeather);
+            mCurrentWeather = state.mCurrentWeather;
+            mNextWeather = state.mNextWeather;
+            mQueuedWeather = state.mQueuedWeather;
 
             mRegions.clear();
             importRegions();
@@ -1142,7 +1105,7 @@ namespace MWWorld
         mCurrentRegion = ESM::RefId();
         mTimePassed = 0.0f;
         mWeatherUpdateTime = 0.0f;
-        forceWeather(Weather::indexToRefId(0));
+        forceWeather(ESM::Weather::indexToRefId(0));
         mRegions.clear();
         importRegions();
     }
@@ -1152,8 +1115,8 @@ namespace MWWorld
     {
         static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
         const int index = static_cast<int>(mWeatherStore.getSize());
-        Weather weather(
-            Weather::indexToRefId(index), index, name, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset, particleEffect);
+        Weather weather(ESM::Weather::indexToRefId(index), index, name, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset,
+            particleEffect);
 
         mWeatherStore.insertStatic(std::move(weather));
     }

@@ -138,8 +138,6 @@ namespace MWWorld
     {
     public:
         static osg::Vec3f defaultDirection();
-        static ESM::RefId indexToRefId(int index);
-        static int refIdToIndex(ESM::RefId id);
 
         Weather(const ESM::RefId id, const int scriptId, const std::string& name, float stormWindSpeed, float rainSpeed,
             float dlFactor, float dlOffset, const std::string& particleEffect);
