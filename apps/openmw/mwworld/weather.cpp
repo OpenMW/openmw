@@ -32,8 +32,6 @@ namespace MWWorld
 {
     namespace
     {
-        static const int invalidWeatherID = -1;
-
         // linear interpolate between x and y based on factor.
         float lerp(float x, float y, float factor)
         {
@@ -59,6 +57,19 @@ namespace MWWorld
             }
             return stormDirection;
         }
+
+        const static std::array<ESM::RefId, 10> sWeatherIds = {
+            ESM::StringRefId("Clear"),
+            ESM::StringRefId("Cloudy"),
+            ESM::StringRefId("Foggy"),
+            ESM::StringRefId("Overcast"),
+            ESM::StringRefId("Rain"),
+            ESM::StringRefId("Thunderstorm"),
+            ESM::StringRefId("Ashstorm"),
+            ESM::StringRefId("Blight"),
+            ESM::StringRefId("Snow"),
+            ESM::StringRefId("Blizzard"),
+        };
     }
 
     template <typename T>
@@ -140,6 +151,23 @@ namespace MWWorld
     {
         static const osg::Vec3f direction = osg::Vec3f(0.f, 1.f, 0.f);
         return direction;
+    }
+
+    int Weather::refIdToIndex(ESM::RefId id)
+    {
+        for (size_t i = 0; i < sWeatherIds.size(); ++i)
+        {
+            if (id == sWeatherIds[i])
+                return static_cast<int>(i);
+        }
+        return -1;
+    }
+
+    ESM::RefId Weather::indexToRefId(int index)
+    {
+        if (index >= 0 && index < sWeatherIds.size())
+            return sWeatherIds[index];
+        return {};
     }
 
     Weather::Weather(ESM::RefId id, int scriptId, const std::string& name, float stormWindSpeed, float rainSpeed,
@@ -288,50 +316,52 @@ namespace MWWorld
     }
 
     RegionWeather::RegionWeather(const ESM::Region& region)
-        : mWeather(invalidWeatherID)
-        , mChances(region.mData.mProbabilities.begin(), region.mData.mProbabilities.end())
     {
+        for (size_t i = 0; i < region.mData.mProbabilities.size(); ++i)
+            mChances.emplace(Weather::indexToRefId(static_cast<int>(i)), region.mData.mProbabilities[i]);
     }
 
     RegionWeather::RegionWeather(const ESM::RegionWeatherState& state)
-        : mWeather(state.mWeather)
-        , mChances(state.mChances)
+        : mWeather(Weather::indexToRefId(state.mWeather))
     {
+        for (size_t i = 0; i < state.mChances.size(); ++i)
+            mChances.emplace(Weather::indexToRefId(static_cast<int>(i)), state.mChances[i]);
     }
 
     RegionWeather::operator ESM::RegionWeatherState() const
     {
-        ESM::RegionWeatherState state = { mWeather, mChances };
-
+        ESM::RegionWeatherState state;
+        state.mWeather = Weather::refIdToIndex(mWeather);
+        for (const ESM::RefId& id : sWeatherIds)
+        {
+            const auto it = mChances.find(id);
+            state.mChances.push_back(it == mChances.end() ? 0 : it->second);
+        }
         return state;
     }
 
-    void RegionWeather::setChances(std::span<const uint8_t> chances)
+    void RegionWeather::setChances(const std::map<ESM::RefId, uint8_t>& chances)
     {
-        mChances.assign(chances.begin(), chances.end());
+        mChances = chances;
 
         // Regional weather no longer supports the current type, select a new weather pattern.
-        if ((static_cast<size_t>(mWeather) >= mChances.size()) || (mChances[mWeather] == 0))
+        const auto current = mChances.find(mWeather);
+        if (current == mChances.end() || current->second == 0)
         {
             chooseNewWeather();
         }
     }
 
-    std::span<const uint8_t> RegionWeather::getChances() const
-    {
-        return mChances;
-    }
-
-    void RegionWeather::setWeather(int weatherID)
+    void RegionWeather::setWeather(ESM::RefId weatherID)
     {
         mWeather = weatherID;
     }
 
-    int RegionWeather::getWeather()
+    ESM::RefId RegionWeather::getWeather()
     {
         // If the region weather was already set (by ChangeWeather, or by a previous call) then just return that value.
         // Note that the region weather will be expired periodically when the weather update timer expires.
-        if (mWeather == invalidWeatherID)
+        if (mWeather.empty())
         {
             chooseNewWeather();
         }
@@ -345,20 +375,20 @@ namespace MWWorld
         // If chances A and B has values 30 and 70 then by generating 100 numbers 1..100, 30% will be lesser or equal 30
         // and 70% will be greater than 30 (in theory).
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        unsigned int chance = static_cast<unsigned int>(Misc::Rng::rollDice(100, prng) + 1); // 1..100
+        unsigned int chance = Misc::Rng::rollDice(100u, prng) + 1u; // 1..100
         unsigned int sum = 0;
-        for (size_t i = 0; i < mChances.size(); ++i)
+        for (const auto& [id, probability] : mChances)
         {
-            sum += mChances[i];
+            sum += probability;
             if (chance <= sum)
             {
-                mWeather = static_cast<int>(i);
+                mWeather = id;
                 return;
             }
         }
 
         // if we hit this path then the chances don't add to 100, choose a default weather instead
-        mWeather = 0;
+        mWeather = Weather::indexToRefId(0);
     }
 
     MoonModel::MoonModel(float fadeInStart, float fadeInFinish, float fadeOutStart, float fadeOutFinish,
@@ -600,6 +630,52 @@ namespace MWWorld
             return 0.0f;
     }
 
+    const Weather* WeatherStore::search(ESM::RefId id) const
+    {
+        const auto it = mStatic.find(id);
+        if (it == mStatic.end())
+            return nullptr;
+        return &it->second;
+    }
+
+    const Weather* WeatherStore::find(ESM::RefId id) const
+    {
+        if (const Weather* weather = search(id))
+            return weather;
+        throw std::runtime_error("Weather " + id.toDebugString() + " not found");
+    }
+
+    Weather* WeatherStore::find(ESM::RefId id)
+    {
+        const auto* self = this;
+        return const_cast<Weather*>(self->find(id));
+    }
+
+    Weather* WeatherStore::insertStatic(Weather&& item)
+    {
+        const auto [it, inserted] = mStatic.insert_or_assign(item.mId, std::move(item));
+        Weather* ptr = &it->second;
+        if (inserted)
+            mShared.push_back(ptr);
+        return ptr;
+    }
+
+    void WeatherStore::eraseStatic(ESM::RefId id)
+    {
+        const auto found = mStatic.find(id);
+        if (found == mStatic.end())
+            return;
+        for (auto it = mShared.begin(); it != mShared.end(); ++it)
+        {
+            if ((*it)->mId == id)
+            {
+                mShared.erase(it);
+                break;
+            }
+        }
+        mStatic.erase(found);
+    }
+
     std::vector<Moon> WeatherManager::getCurrentMoons(const TimeStamp& time) const
     {
         const auto makeMoon = [](std::string_view name, const MoonModel& model, const TimeStamp& timestamp) {
@@ -624,7 +700,6 @@ namespace MWWorld
         , mUnderwaterFog(Fallback::Map::getFloat("Water_UnderwaterSunriseFog"),
               Fallback::Map::getFloat("Water_UnderwaterDayFog"), Fallback::Map::getFloat("Water_UnderwaterSunsetFog"),
               Fallback::Map::getFloat("Water_UnderwaterNightFog"))
-        , mWeatherSettings()
         , mMasser("Masser")
         , mSecunda("Secunda")
         , mWindSpeed(0.f)
@@ -639,9 +714,6 @@ namespace MWWorld
         , mWeatherUpdateTime(mHoursBetweenWeatherChanges)
         , mTransitionFactor(0)
         , mNightDayMode(Default)
-        , mCurrentWeather(0)
-        , mNextWeather(0)
-        , mQueuedWeather(0)
         , mRegions()
         , mResult()
     {
@@ -667,7 +739,6 @@ namespace MWWorld
 
         mTimeSettings.mSunriseTransitions["Stars"] = starSetting;
 
-        mWeatherSettings.reserve(10);
         // These distant land fog factor and offset values are the defaults MGE XE provides. Should be
         // provided by settings somewhere?
         addWeather("Clear", 1.0f, 0.0f); // 0
@@ -687,7 +758,7 @@ namespace MWWorld
             mRegions.insert(std::make_pair(it->mId, RegionWeather(*it)));
         }
 
-        forceWeather(0);
+        forceWeather(Weather::indexToRefId(0));
     }
 
     WeatherManager::~WeatherManager()
@@ -695,42 +766,7 @@ namespace MWWorld
         stopSounds();
     }
 
-    const Weather* WeatherManager::getWeather(size_t index) const
-    {
-        if (index < mWeatherSettings.size())
-            return &mWeatherSettings[index];
-
-        return nullptr;
-    }
-
-    const Weather* WeatherManager::getWeather(const ESM::RefId& id) const
-    {
-        auto it = std::find_if(
-            mWeatherSettings.begin(), mWeatherSettings.end(), [id](const auto& weather) { return weather.mId == id; });
-
-        if (it != mWeatherSettings.end())
-            return &*it;
-
-        return nullptr;
-    }
-
-    void WeatherManager::changeWeather(const ESM::RefId& regionID, const ESM::RefId& weatherID)
-    {
-        auto wIt = std::find_if(mWeatherSettings.begin(), mWeatherSettings.end(),
-            [weatherID](const auto& weather) { return weather.mId == weatherID; });
-
-        if (wIt != mWeatherSettings.end())
-        {
-            auto rIt = mRegions.find(regionID);
-            if (rIt != mRegions.end())
-            {
-                rIt->second.setWeather(wIt->mScriptId);
-                regionalWeatherChanged(rIt->first, rIt->second);
-            }
-        }
-    }
-
-    void WeatherManager::changeWeather(const ESM::RefId& regionID, const unsigned int weatherID)
+    void WeatherManager::changeWeather(ESM::RefId regionID, ESM::RefId weatherID)
     {
         // In Morrowind, this seems to have the following behavior, when applied to the current region:
         // - When there is no transition in progress, start transitioning to the new weather.
@@ -741,18 +777,18 @@ namespace MWWorld
         //   meaning that if there was no transition in progress, only the last ChangeWeather will be processed.
         // If the region isn't current, Morrowind will store the new weather for the region in question.
 
-        if (weatherID < mWeatherSettings.size())
+        if (const Weather* weather = mWeatherStore.search(weatherID))
         {
-            auto it = mRegions.find(regionID);
-            if (it != mRegions.end())
+            auto rIt = mRegions.find(regionID);
+            if (rIt != mRegions.end())
             {
-                it->second.setWeather(weatherID);
-                regionalWeatherChanged(it->first, it->second);
+                rIt->second.setWeather(weather->mId);
+                regionalWeatherChanged(rIt->first, rIt->second);
             }
         }
     }
 
-    void WeatherManager::modRegion(const ESM::RefId& regionID, std::span<const uint8_t> chances)
+    void WeatherManager::modRegion(ESM::RefId regionID, const std::map<ESM::RefId, uint8_t>& chances)
     {
         // Sets the region's probability for various weather patterns. Note that this appears to be saved permanently.
         // In Morrowind, this seems to have the following behavior when applied to the current region:
@@ -770,12 +806,9 @@ namespace MWWorld
         }
     }
 
-    std::span<const uint8_t> WeatherManager::getRegionChances(const ESM::RefId& regionID) const
+    const std::map<ESM::RefId, uint8_t>& WeatherManager::getRegionChances(ESM::RefId regionID) const
     {
-        auto it = mRegions.find(regionID);
-        if (it != mRegions.end())
-            return it->second.getChances();
-        return {};
+        return mRegions.at(regionID).getChances();
     }
 
     void WeatherManager::playerTeleported(const ESM::RefId& playerRegion, bool isExterior)
@@ -792,13 +825,13 @@ namespace MWWorld
         }
     }
 
-    float WeatherManager::calculateWindSpeed(int weatherId, float currentSpeed)
+    float WeatherManager::calculateWindSpeed(const Weather& weather, float currentSpeed)
     {
-        float targetSpeed = std::min(8.0f * mWeatherSettings[weatherId].mWindSpeed, 70.f);
+        float targetSpeed = std::min(8.0f * weather.mWindSpeed, 70.f);
         if (currentSpeed == 0.f)
             currentSpeed = targetSpeed;
 
-        float multiplier = mWeatherSettings[weatherId].mRainEffect.empty() ? 1.f : 0.5f;
+        float multiplier = weather.mRainEffect.empty() ? 1.f : 0.5f;
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         float updatedSpeed = (Misc::Rng::rollClosedProbability(prng) - 0.5f) * multiplier * targetSpeed + currentSpeed;
 
@@ -830,7 +863,7 @@ namespace MWWorld
         bool isDay = time.getHour() >= mSunriseTime && time.getHour() <= mTimeSettings.mNightStart;
         if (isExterior && !isDay)
             mNightDayMode = ExteriorNight;
-        else if (!isExterior && isDay && mWeatherSettings[mCurrentWeather].mGlareView >= 0.5f)
+        else if (!isExterior && isDay && mWeatherStore.find(mCurrentWeather)->mGlareView >= 0.5f)
             mNightDayMode = InteriorDay;
         else
             mNightDayMode = Default;
@@ -975,12 +1008,12 @@ namespace MWWorld
         }
         mPlayingRainSoundID = ESM::RefId();
 
-        for (ESM::RefId soundId : mWeatherSettings[mCurrentWeather].mThunderSoundID)
+        for (ESM::RefId soundId : mWeatherStore.find(mCurrentWeather)->mThunderSoundID)
             if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
                 sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
 
         if (inTransition())
-            for (ESM::RefId soundId : mWeatherSettings[mNextWeather].mThunderSoundID)
+            for (ESM::RefId soundId : mWeatherStore.find(mNextWeather)->mThunderSoundID)
                 if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
                     sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
     }
@@ -1033,13 +1066,16 @@ namespace MWWorld
 
     float WeatherManager::getSunVisibility() const
     {
-        if (inTransition() && mTransitionFactor < mWeatherSettings[mNextWeather].mCloudsMaximumPercent)
+        if (inTransition())
         {
-            float t = mTransitionFactor / mWeatherSettings[mNextWeather].mCloudsMaximumPercent;
-            return (1.f - t) * mWeatherSettings[mCurrentWeather].mGlareView
-                + t * mWeatherSettings[mNextWeather].mGlareView;
+            const Weather& nextWeather = *mWeatherStore.find(mNextWeather);
+            if (mTransitionFactor < nextWeather.mCloudsMaximumPercent)
+            {
+                float t = mTransitionFactor / nextWeather.mCloudsMaximumPercent;
+                return (1.f - t) * nextWeather.mGlareView + t * nextWeather.mGlareView;
+            }
         }
-        return mWeatherSettings[mCurrentWeather].mGlareView;
+        return mWeatherStore.find(mCurrentWeather)->mGlareView;
     }
 
     void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
@@ -1050,9 +1086,9 @@ namespace MWWorld
         state.mFastForward = mFastForward;
         state.mWeatherUpdateTime = mWeatherUpdateTime;
         state.mTransitionFactor = mTransitionFactor;
-        state.mCurrentWeather = mCurrentWeather;
-        state.mNextWeather = mNextWeather;
-        state.mQueuedWeather = mQueuedWeather;
+        state.mCurrentWeather = Weather::refIdToIndex(mCurrentWeather);
+        state.mNextWeather = Weather::refIdToIndex(mNextWeather);
+        state.mQueuedWeather = Weather::refIdToIndex(mQueuedWeather);
 
         auto it = mRegions.begin();
         for (; it != mRegions.end(); ++it)
@@ -1077,9 +1113,9 @@ namespace MWWorld
             mFastForward = state.mFastForward;
             mWeatherUpdateTime = state.mWeatherUpdateTime;
             mTransitionFactor = state.mTransitionFactor;
-            mCurrentWeather = state.mCurrentWeather;
-            mNextWeather = state.mNextWeather;
-            mQueuedWeather = state.mQueuedWeather;
+            mCurrentWeather = Weather::indexToRefId(state.mCurrentWeather);
+            mNextWeather = Weather::indexToRefId(state.mNextWeather);
+            mQueuedWeather = Weather::indexToRefId(state.mQueuedWeather);
 
             mRegions.clear();
             importRegions();
@@ -1106,7 +1142,7 @@ namespace MWWorld
         mCurrentRegion = ESM::RefId();
         mTimePassed = 0.0f;
         mWeatherUpdateTime = 0.0f;
-        forceWeather(0);
+        forceWeather(Weather::indexToRefId(0));
         mRegions.clear();
         importRegions();
     }
@@ -1115,11 +1151,11 @@ namespace MWWorld
         const std::string& name, float dlFactor, float dlOffset, const std::string& particleEffect)
     {
         static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
-        ESM::StringRefId id(name);
-        Weather weather(id, static_cast<int>(mWeatherSettings.size()), name, fStromWindSpeed, mRainSpeed, dlFactor,
-            dlOffset, particleEffect);
+        const int index = static_cast<int>(mWeatherStore.getSize());
+        Weather weather(
+            Weather::indexToRefId(index), index, name, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset, particleEffect);
 
-        mWeatherSettings.push_back(std::move(weather));
+        mWeatherStore.insertStatic(std::move(weather));
     }
 
     inline void WeatherManager::importRegions()
@@ -1153,7 +1189,7 @@ namespace MWWorld
             auto it = mRegions.begin();
             for (; it != mRegions.end(); ++it)
             {
-                it->second.setWeather(invalidWeatherID);
+                it->second.setWeather({});
             }
 
             mWeatherUpdateTime += mHoursBetweenWeatherChanges;
@@ -1182,19 +1218,20 @@ namespace MWWorld
         // weather type set, regardless of the remaining transition time.
         if (!mFastForward && inTransition())
         {
-            const float delta = mWeatherSettings[mNextWeather].transitionDelta();
+
+            const float delta = mWeatherStore.find(mNextWeather)->transitionDelta();
             mTransitionFactor -= elapsedRealSeconds * delta;
             if (mTransitionFactor <= 0.0f)
             {
                 mCurrentWeather = mNextWeather;
                 mNextWeather = mQueuedWeather;
-                mQueuedWeather = invalidWeatherID;
+                mQueuedWeather = {};
 
                 // We may have begun processing the queued transition, so we need to apply the remaining time towards
                 // it.
                 if (inTransition())
                 {
-                    const float newDelta = mWeatherSettings[mNextWeather].transitionDelta();
+                    const float newDelta = mWeatherStore.find(mNextWeather)->transitionDelta();
                     const float remainingSeconds = -(mTransitionFactor / delta);
                     mTransitionFactor = 1.0f - (remainingSeconds * newDelta);
                 }
@@ -1206,40 +1243,40 @@ namespace MWWorld
         }
         else
         {
-            if (mQueuedWeather != invalidWeatherID)
+            if (!mQueuedWeather.empty())
             {
                 mCurrentWeather = mQueuedWeather;
             }
-            else if (mNextWeather != invalidWeatherID)
+            else if (!mNextWeather.empty())
             {
                 mCurrentWeather = mNextWeather;
             }
 
-            mNextWeather = invalidWeatherID;
-            mQueuedWeather = invalidWeatherID;
+            mNextWeather = {};
+            mQueuedWeather = {};
             mFastForward = false;
         }
     }
 
-    inline void WeatherManager::forceWeather(const int weatherID)
+    inline void WeatherManager::forceWeather(ESM::RefId weatherID)
     {
         mTransitionFactor = 0.0f;
         mCurrentWeather = weatherID;
-        mNextWeather = invalidWeatherID;
-        mQueuedWeather = invalidWeatherID;
+        mNextWeather = {};
+        mQueuedWeather = {};
     }
 
     inline bool WeatherManager::inTransition() const
     {
-        return mNextWeather != invalidWeatherID;
+        return !mNextWeather.empty();
     }
 
-    inline void WeatherManager::addWeatherTransition(const int weatherID)
+    inline void WeatherManager::addWeatherTransition(ESM::RefId weatherID)
     {
         // In order to work like ChangeWeather expects, this method begins transitioning to the new weather immediately
         // if no transition is in progress, otherwise it queues it to be transitioned.
 
-        assert(weatherID >= 0 && static_cast<size_t>(weatherID) < mWeatherSettings.size());
+        assert(!weatherID.empty());
 
         if (!inTransition() && (weatherID != mCurrentWeather))
         {
@@ -1258,16 +1295,17 @@ namespace MWWorld
         float flash = 0.0f;
         if (!inTransition())
         {
-            calculateResult(mCurrentWeather, gameHour);
-            flash = mWeatherSettings[mCurrentWeather].calculateThunder(1.0f, elapsedSeconds, isPaused);
+            Weather& current = *mWeatherStore.find(mCurrentWeather);
+            calculateResult(current, gameHour);
+            flash = current.calculateThunder(1.0f, elapsedSeconds, isPaused);
         }
         else
         {
             calculateTransitionResult(1 - mTransitionFactor, gameHour);
-            float currentFlash
-                = mWeatherSettings[mCurrentWeather].calculateThunder(mTransitionFactor, elapsedSeconds, isPaused);
-            float nextFlash
-                = mWeatherSettings[mNextWeather].calculateThunder(1 - mTransitionFactor, elapsedSeconds, isPaused);
+            Weather& current = *mWeatherStore.find(mCurrentWeather);
+            float currentFlash = current.calculateThunder(mTransitionFactor, elapsedSeconds, isPaused);
+            Weather& next = *mWeatherStore.find(mNextWeather);
+            float nextFlash = next.calculateThunder(1 - mTransitionFactor, elapsedSeconds, isPaused);
             flash = currentFlash + nextFlash;
         }
         osg::Vec4f flashColor(flash, flash, flash, 0.0f);
@@ -1277,15 +1315,13 @@ namespace MWWorld
         mResult.mSunColor += flashColor;
     }
 
-    inline void WeatherManager::calculateResult(const int weatherID, const float gameHour)
+    inline void WeatherManager::calculateResult(const Weather& current, const float gameHour)
     {
-        const Weather& current = mWeatherSettings[weatherID];
-
         mResult.mCloudTexture = current.mCloudTexture;
         mResult.mCloudBlendFactor = 0;
         mResult.mNextWindSpeed = 0;
-        mResult.mWindSpeed = mResult.mCurrentWindSpeed = calculateWindSpeed(weatherID, mWindSpeed);
-        mResult.mBaseWindSpeed = mWeatherSettings[weatherID].mWindSpeed;
+        mResult.mWindSpeed = mResult.mCurrentWindSpeed = calculateWindSpeed(current, mWindSpeed);
+        mResult.mBaseWindSpeed = current.mWindSpeed;
 
         mResult.mCloudSpeed = current.mCloudSpeed;
         mResult.mGlareView = current.mGlareView;
@@ -1363,9 +1399,11 @@ namespace MWWorld
 
     inline void WeatherManager::calculateTransitionResult(const float factor, const float gameHour)
     {
-        calculateResult(mCurrentWeather, gameHour);
+        const Weather& currentWeather = *mWeatherStore.find(mCurrentWeather);
+        const Weather& nextWeather = *mWeatherStore.find(mNextWeather);
+        calculateResult(currentWeather, gameHour);
         const MWRender::WeatherResult current = mResult;
-        calculateResult(mNextWeather, gameHour);
+        calculateResult(nextWeather, gameHour);
         const MWRender::WeatherResult other = mResult;
 
         mResult.mStormDirection = current.mStormDirection;
@@ -1373,7 +1411,7 @@ namespace MWWorld
 
         mResult.mCloudTexture = current.mCloudTexture;
         mResult.mNextCloudTexture = other.mCloudTexture;
-        mResult.mCloudBlendFactor = mWeatherSettings[mNextWeather].cloudBlendFactor(factor);
+        mResult.mCloudBlendFactor = nextWeather.cloudBlendFactor(factor);
 
         mResult.mFogColor = lerp(current.mFogColor, other.mFogColor, factor);
         mResult.mSunColor = lerp(current.mSunColor, other.mSunColor, factor);
@@ -1385,8 +1423,8 @@ namespace MWWorld
         mResult.mDLFogFactor = lerp(current.mDLFogFactor, other.mDLFogFactor, factor);
         mResult.mDLFogOffset = lerp(current.mDLFogOffset, other.mDLFogOffset, factor);
 
-        mResult.mCurrentWindSpeed = calculateWindSpeed(mCurrentWeather, mCurrentWindSpeed);
-        mResult.mNextWindSpeed = calculateWindSpeed(mNextWeather, mNextWindSpeed);
+        mResult.mCurrentWindSpeed = calculateWindSpeed(currentWeather, mCurrentWindSpeed);
+        mResult.mNextWindSpeed = calculateWindSpeed(nextWeather, mNextWindSpeed);
         mResult.mBaseWindSpeed = lerp(current.mBaseWindSpeed, other.mBaseWindSpeed, factor);
 
         mResult.mWindSpeed = lerp(mResult.mCurrentWindSpeed, mResult.mNextWindSpeed, factor);
@@ -1396,7 +1434,7 @@ namespace MWWorld
 
         mResult.mNight = current.mNight;
 
-        float threshold = mWeatherSettings[mNextWeather].mRainThreshold;
+        float threshold = nextWeather.mRainThreshold;
         if (threshold <= 0.f)
             threshold = 0.5f;
 

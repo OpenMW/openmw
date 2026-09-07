@@ -14,6 +14,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/weather.hpp"
 
 namespace MWScript
 {
@@ -88,7 +89,7 @@ namespace MWScript
 
                 const ESM::Region* reg = MWBase::Environment::get().getESMStore()->get<ESM::Region>().search(region);
                 if (reg)
-                    MWBase::Environment::get().getWorld()->changeWeather(region, id);
+                    MWBase::Environment::get().getWorld()->changeWeather(region, MWWorld::Weather::indexToRefId(id));
                 else
                     runtime.getContext().report("Warning: Region \"" + region.getRefIdString() + "\" was not found");
             }
@@ -102,13 +103,18 @@ namespace MWScript
                 std::string_view region{ runtime.getStringLiteral(runtime[0].mInteger) };
                 runtime.pop();
 
-                std::vector<uint8_t> chances;
-                chances.reserve(10);
-                while (arg0 > 0)
+                std::map<ESM::RefId, uint8_t> chances;
+                for (int i = 0; i < 10; ++i)
                 {
-                    chances.push_back(static_cast<uint8_t>(std::clamp(runtime[0].mInteger, 0, 100)));
-                    runtime.pop();
-                    arg0--;
+                    ESM::RefId id = MWWorld::Weather::indexToRefId(i);
+                    uint8_t chance = 0;
+                    if (arg0 > 0)
+                    {
+                        chance = static_cast<uint8_t>(std::clamp(runtime[0].mInteger, 0, 100));
+                        runtime.pop();
+                        arg0--;
+                    }
+                    chances.emplace(id, chance);
                 }
 
                 MWBase::Environment::get().getWorld()->modRegion(ESM::RefId::stringRefId(region), chances);

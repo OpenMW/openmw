@@ -1781,7 +1781,7 @@ namespace MWWorld
         return ESM::Cell::sDefaultWorldspaceId;
     }
 
-    const std::vector<MWWorld::Weather>& World::getAllWeather() const
+    const MWWorld::WeatherStore& World::getAllWeather() const
     {
         return mWeatherManager->getAllWeather();
     }
@@ -1794,16 +1794,6 @@ namespace MWWorld
     const MWWorld::Weather& World::getCurrentWeather() const
     {
         return mWeatherManager->getWeather();
-    }
-
-    const MWWorld::Weather* World::getWeather(size_t index) const
-    {
-        return mWeatherManager->getWeather(index);
-    }
-
-    const MWWorld::Weather* World::getWeather(const ESM::RefId& id) const
-    {
-        return mWeatherManager->getWeather(id);
     }
 
     int World::getNextWeatherScriptId() const
@@ -1830,22 +1820,17 @@ namespace MWWorld
         return mWeatherManager->getNightDayMode();
     }
 
-    void World::changeWeather(const ESM::RefId& region, const unsigned int id)
+    void World::changeWeather(ESM::RefId region, ESM::RefId id)
     {
         mWeatherManager->changeWeather(region, id);
     }
 
-    void World::changeWeather(const ESM::RefId& region, const ESM::RefId& id)
-    {
-        mWeatherManager->changeWeather(region, id);
-    }
-
-    void World::modRegion(const ESM::RefId& regionid, std::span<const uint8_t> chances)
+    void World::modRegion(ESM::RefId regionid, const std::map<ESM::RefId, uint8_t>& chances)
     {
         mWeatherManager->modRegion(regionid, chances);
     }
 
-    std::span<const uint8_t> World::getRegionWeatherChances(const ESM::RefId& regionid) const
+    const std::map<ESM::RefId, uint8_t>& World::getRegionWeatherChances(ESM::RefId regionid) const
     {
         return mWeatherManager->getRegionChances(regionid);
     }

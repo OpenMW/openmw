@@ -313,16 +313,12 @@ namespace MWWorld
         bool toggleSky() override;
         ///< \return Resulting mode
 
-        void changeWeather(const ESM::RefId& region, const unsigned int id) override;
+        void changeWeather(ESM::RefId region, ESM::RefId id) override;
 
-        void changeWeather(const ESM::RefId& region, const ESM::RefId& id) override;
-
-        const std::vector<MWWorld::Weather>& getAllWeather() const override;
+        const MWWorld::WeatherStore& getAllWeather() const override;
 
         int getCurrentWeatherScriptId() const override;
         const MWWorld::Weather& getCurrentWeather() const override;
-        const MWWorld::Weather* getWeather(size_t index) const override;
-        const MWWorld::Weather* getWeather(const ESM::RefId& id) const override;
         int getNextWeatherScriptId() const override;
         const MWWorld::Weather* getNextWeather() const override;
 
@@ -338,8 +334,8 @@ namespace MWWorld
 
         void setMoonColour(bool red) override;
 
-        void modRegion(const ESM::RefId& regionid, std::span<const uint8_t> chances) override;
-        std::span<const uint8_t> getRegionWeatherChances(const ESM::RefId& regionid) const override;
+        void modRegion(ESM::RefId regionid, const std::map<ESM::RefId, uint8_t>& chances) override;
+        const std::map<ESM::RefId, uint8_t>& getRegionWeatherChances(ESM::RefId regionid) const override;
 
         void changeToInteriorCell(const std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos,
             bool changeEvent = true) override;
