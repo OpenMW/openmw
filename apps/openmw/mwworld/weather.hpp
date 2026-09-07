@@ -139,8 +139,8 @@ namespace MWWorld
     public:
         static osg::Vec3f defaultDirection();
 
-        Weather(const ESM::RefId id, const int scriptId, const std::string& name, float stormWindSpeed, float rainSpeed,
-            float dlFactor, float dlOffset, const std::string& particleEffect);
+        Weather(const ESM::RefId id, const int scriptId, const std::string& name, float stormWindSpeed, float dlFactor,
+            float dlOffset, std::string_view particleEffect);
 
         ESM::RefId mId;
         int mScriptId;
@@ -309,7 +309,11 @@ namespace MWWorld
         std::unordered_map<ESM::RefId, Weather> mStatic;
         std::vector<Weather*> mShared;
 
+        void addWeather(const std::string& name, float dlFactor, float dlOffset, std::string_view particleEffect = {});
+
     public:
+        void reset();
+
         size_t getSize() const { return mShared.size(); }
         const Weather* at(size_t index) const { return mShared.at(index); }
 
@@ -329,7 +333,8 @@ namespace MWWorld
     {
     public:
         // Have to pass fallback and Store, can't use singleton since World isn't fully constructed yet at the time
-        WeatherManager(MWRender::RenderingManager& rendering, MWWorld::ESMStore& store);
+        WeatherManager(
+            MWRender::RenderingManager& rendering, MWWorld::ESMStore& store, MWWorld::WeatherStore& weatherStore);
         ~WeatherManager();
 
         /**
@@ -361,11 +366,9 @@ namespace MWWorld
 
         void advanceTime(double hours, bool incremental);
 
-        const WeatherStore& getAllWeather() { return mWeatherStore; }
+        const Weather& getWeather() { return *mWeatherStore->find(mCurrentWeather); }
 
-        const Weather& getWeather() { return *mWeatherStore.find(mCurrentWeather); }
-
-        const Weather* getNextWeather() { return mWeatherStore.search(mNextWeather); }
+        const Weather* getNextWeather() { return mWeatherStore->search(mNextWeather); }
 
         float getTransitionFactor() const { return mTransitionFactor; }
 
@@ -398,12 +401,11 @@ namespace MWWorld
         TimeOfDayInterpolator<float> mNightFade;
 
         float mHoursBetweenWeatherChanges;
-        float mRainSpeed;
 
         // underwater fog not really related to weather, but we handle it here because it's convenient
         TimeOfDayInterpolator<float> mUnderwaterFog;
 
-        WeatherStore mWeatherStore;
+        WeatherStore* mWeatherStore;
         MoonModel mMasser;
         MoonModel mSecunda;
 
@@ -430,9 +432,6 @@ namespace MWWorld
         ESM::RefId mPlayingAmbientSoundID;
         MWBase::Sound* mRainSound{ nullptr };
         ESM::RefId mPlayingRainSoundID;
-
-        void addWeather(
-            const std::string& name, float dlFactor, float dlOffset, const std::string& particleEffect = "");
 
         void importRegions();
 

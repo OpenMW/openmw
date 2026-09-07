@@ -140,8 +140,8 @@ namespace MWWorld
         return direction;
     }
 
-    Weather::Weather(ESM::RefId id, int scriptId, const std::string& name, float stormWindSpeed, float rainSpeed,
-        float dlFactor, float dlOffset, const std::string& particleEffect)
+    Weather::Weather(ESM::RefId id, int scriptId, const std::string& name, float stormWindSpeed, float dlFactor,
+        float dlOffset, std::string_view particleEffect)
         : mId(id)
         , mScriptId(scriptId)
         , mName(name)
@@ -171,7 +171,7 @@ namespace MWWorld
         , mCloudSpeed(Fallback::Map::getFloat("Weather_" + name + "_Cloud_Speed"))
         , mGlareView(Fallback::Map::getFloat("Weather_" + name + "_Glare_View"))
         , mIsStorm(mWindSpeed > stormWindSpeed)
-        , mRainSpeed(rainSpeed)
+        , mRainSpeed(Fallback::Map::getFloat("Weather_Precip_Gravity"))
         , mRainEntranceSpeed(Fallback::Map::getFloat("Weather_" + name + "_Rain_Entrance_Speed"))
         , mRainMaxRaindrops(Fallback::Map::getInt("Weather_" + name + "_Max_Raindrops"))
         , mRainDiameter(Fallback::Map::getFloat("Weather_" + name + "_Rain_Diameter"))
@@ -593,6 +593,36 @@ namespace MWWorld
             return 0.0f;
     }
 
+    void WeatherStore::reset()
+    {
+        mShared.clear();
+        mStatic.clear();
+        // These distant land fog factor and offset values are the defaults MGE XE provides. Should be
+        // provided by settings somewhere?
+        addWeather("Clear", 1.0f, 0.0f); // 0
+        addWeather("Cloudy", 0.9f, 0.0f); // 1
+        addWeather("Foggy", 0.2f, 30.0f); // 2
+        addWeather("Overcast", 0.7f, 0.0f); // 3
+        addWeather("Rain", 0.5f, 10.0f); // 4
+        addWeather("Thunderstorm", 0.5f, 20.0f); // 5
+        addWeather("Ashstorm", 0.2f, 50.0f, Settings::models().mWeatherashcloud.get()); // 6
+        addWeather("Blight", 0.2f, 60.0f, Settings::models().mWeatherblightcloud.get()); // 7
+        addWeather("Snow", 0.5f, 40.0f, Settings::models().mWeathersnow.get()); // 8
+        addWeather("Blizzard", 0.16f, 70.0f, Settings::models().mWeatherblizzard.get()); // 9
+    }
+
+    inline void WeatherStore::addWeather(
+        const std::string& name, float dlFactor, float dlOffset, std::string_view particleEffect)
+    {
+        const auto& gmsts = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
+        static const float fStromWindSpeed = gmsts.find("fStromWindSpeed")->mValue.getFloat();
+        const int index = static_cast<int>(getSize());
+        Weather weather(
+            ESM::Weather::indexToRefId(index), index, name, fStromWindSpeed, dlFactor, dlOffset, particleEffect);
+
+        insertStatic(std::move(weather));
+    }
+
     const Weather* WeatherStore::search(ESM::RefId id) const
     {
         const auto it = mStatic.find(id);
@@ -649,7 +679,8 @@ namespace MWWorld
         return { makeMoon("Masser", mMasser, time), makeMoon("Secunda", mSecunda, time) };
     }
 
-    WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, MWWorld::ESMStore& store)
+    WeatherManager::WeatherManager(
+        MWRender::RenderingManager& rendering, MWWorld::ESMStore& store, MWWorld::WeatherStore& weatherStore)
         : mStore(store)
         , mRendering(rendering)
         , mSunriseTime(Fallback::Map::getFloat("Weather_Sunrise_Time"))
@@ -659,10 +690,10 @@ namespace MWWorld
         , mSunPreSunsetTime(Fallback::Map::getFloat("Weather_Sun_Pre-Sunset_Time"))
         , mNightFade(0, 0, 0, 1)
         , mHoursBetweenWeatherChanges(Fallback::Map::getFloat("Weather_Hours_Between_Weather_Changes"))
-        , mRainSpeed(Fallback::Map::getFloat("Weather_Precip_Gravity"))
         , mUnderwaterFog(Fallback::Map::getFloat("Water_UnderwaterSunriseFog"),
               Fallback::Map::getFloat("Water_UnderwaterDayFog"), Fallback::Map::getFloat("Water_UnderwaterSunsetFog"),
               Fallback::Map::getFloat("Water_UnderwaterNightFog"))
+        , mWeatherStore(&weatherStore)
         , mMasser("Masser")
         , mSecunda("Secunda")
         , mWindSpeed(0.f)
@@ -702,18 +733,7 @@ namespace MWWorld
 
         mTimeSettings.mSunriseTransitions["Stars"] = starSetting;
 
-        // These distant land fog factor and offset values are the defaults MGE XE provides. Should be
-        // provided by settings somewhere?
-        addWeather("Clear", 1.0f, 0.0f); // 0
-        addWeather("Cloudy", 0.9f, 0.0f); // 1
-        addWeather("Foggy", 0.2f, 30.0f); // 2
-        addWeather("Overcast", 0.7f, 0.0f); // 3
-        addWeather("Rain", 0.5f, 10.0f); // 4
-        addWeather("Thunderstorm", 0.5f, 20.0f); // 5
-        addWeather("Ashstorm", 0.2f, 50.0f, Settings::models().mWeatherashcloud.get()); // 6
-        addWeather("Blight", 0.2f, 60.0f, Settings::models().mWeatherblightcloud.get()); // 7
-        addWeather("Snow", 0.5f, 40.0f, Settings::models().mWeathersnow.get()); // 8
-        addWeather("Blizzard", 0.16f, 70.0f, Settings::models().mWeatherblizzard.get()); // 9
+        mWeatherStore->reset();
 
         Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
         for (; it != store.get<ESM::Region>().end(); ++it)
@@ -740,7 +760,7 @@ namespace MWWorld
         //   meaning that if there was no transition in progress, only the last ChangeWeather will be processed.
         // If the region isn't current, Morrowind will store the new weather for the region in question.
 
-        if (const Weather* weather = mWeatherStore.search(weatherID))
+        if (const Weather* weather = mWeatherStore->search(weatherID))
         {
             auto rIt = mRegions.find(regionID);
             if (rIt != mRegions.end())
@@ -826,7 +846,7 @@ namespace MWWorld
         bool isDay = time.getHour() >= mSunriseTime && time.getHour() <= mTimeSettings.mNightStart;
         if (isExterior && !isDay)
             mNightDayMode = ExteriorNight;
-        else if (!isExterior && isDay && mWeatherStore.find(mCurrentWeather)->mGlareView >= 0.5f)
+        else if (!isExterior && isDay && mWeatherStore->find(mCurrentWeather)->mGlareView >= 0.5f)
             mNightDayMode = InteriorDay;
         else
             mNightDayMode = Default;
@@ -971,12 +991,12 @@ namespace MWWorld
         }
         mPlayingRainSoundID = ESM::RefId();
 
-        for (ESM::RefId soundId : mWeatherStore.find(mCurrentWeather)->mThunderSoundID)
+        for (ESM::RefId soundId : mWeatherStore->find(mCurrentWeather)->mThunderSoundID)
             if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
                 sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
 
         if (inTransition())
-            for (ESM::RefId soundId : mWeatherStore.find(mNextWeather)->mThunderSoundID)
+            for (ESM::RefId soundId : mWeatherStore->find(mNextWeather)->mThunderSoundID)
                 if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
                     sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
     }
@@ -1031,14 +1051,14 @@ namespace MWWorld
     {
         if (inTransition())
         {
-            const Weather& nextWeather = *mWeatherStore.find(mNextWeather);
+            const Weather& nextWeather = *mWeatherStore->find(mNextWeather);
             if (mTransitionFactor < nextWeather.mCloudsMaximumPercent)
             {
                 float t = mTransitionFactor / nextWeather.mCloudsMaximumPercent;
                 return (1.f - t) * nextWeather.mGlareView + t * nextWeather.mGlareView;
             }
         }
-        return mWeatherStore.find(mCurrentWeather)->mGlareView;
+        return mWeatherStore->find(mCurrentWeather)->mGlareView;
     }
 
     void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
@@ -1110,17 +1130,6 @@ namespace MWWorld
         importRegions();
     }
 
-    inline void WeatherManager::addWeather(
-        const std::string& name, float dlFactor, float dlOffset, const std::string& particleEffect)
-    {
-        static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
-        const int index = static_cast<int>(mWeatherStore.getSize());
-        Weather weather(ESM::Weather::indexToRefId(index), index, name, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset,
-            particleEffect);
-
-        mWeatherStore.insertStatic(std::move(weather));
-    }
-
     inline void WeatherManager::importRegions()
     {
         for (const ESM::Region& region : mStore.get<ESM::Region>())
@@ -1182,7 +1191,7 @@ namespace MWWorld
         if (!mFastForward && inTransition())
         {
 
-            const float delta = mWeatherStore.find(mNextWeather)->transitionDelta();
+            const float delta = mWeatherStore->find(mNextWeather)->transitionDelta();
             mTransitionFactor -= elapsedRealSeconds * delta;
             if (mTransitionFactor <= 0.0f)
             {
@@ -1194,7 +1203,7 @@ namespace MWWorld
                 // it.
                 if (inTransition())
                 {
-                    const float newDelta = mWeatherStore.find(mNextWeather)->transitionDelta();
+                    const float newDelta = mWeatherStore->find(mNextWeather)->transitionDelta();
                     const float remainingSeconds = -(mTransitionFactor / delta);
                     mTransitionFactor = 1.0f - (remainingSeconds * newDelta);
                 }
@@ -1258,16 +1267,16 @@ namespace MWWorld
         float flash = 0.0f;
         if (!inTransition())
         {
-            Weather& current = *mWeatherStore.find(mCurrentWeather);
+            Weather& current = *mWeatherStore->find(mCurrentWeather);
             calculateResult(current, gameHour);
             flash = current.calculateThunder(1.0f, elapsedSeconds, isPaused);
         }
         else
         {
             calculateTransitionResult(1 - mTransitionFactor, gameHour);
-            Weather& current = *mWeatherStore.find(mCurrentWeather);
+            Weather& current = *mWeatherStore->find(mCurrentWeather);
             float currentFlash = current.calculateThunder(mTransitionFactor, elapsedSeconds, isPaused);
-            Weather& next = *mWeatherStore.find(mNextWeather);
+            Weather& next = *mWeatherStore->find(mNextWeather);
             float nextFlash = next.calculateThunder(1 - mTransitionFactor, elapsedSeconds, isPaused);
             flash = currentFlash + nextFlash;
         }
@@ -1362,8 +1371,8 @@ namespace MWWorld
 
     inline void WeatherManager::calculateTransitionResult(const float factor, const float gameHour)
     {
-        const Weather& currentWeather = *mWeatherStore.find(mCurrentWeather);
-        const Weather& nextWeather = *mWeatherStore.find(mNextWeather);
+        const Weather& currentWeather = *mWeatherStore->find(mCurrentWeather);
+        const Weather& nextWeather = *mWeatherStore->find(mNextWeather);
         calculateResult(currentWeather, gameHour);
         const MWRender::WeatherResult current = mResult;
         calculateResult(nextWeather, gameHour);
