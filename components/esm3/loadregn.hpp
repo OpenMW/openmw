@@ -39,7 +39,7 @@ namespace ESM
         {
             // These are probabilities that add up to 100
             std::map<RefId, uint8_t> mProbabilities;
-        }; // 10 bytes
+        };
 
         // Reference to a sound that is played randomly in this region
         struct SoundRef

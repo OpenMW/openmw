@@ -247,6 +247,8 @@ namespace MWWorld
         void lightningAndThunder(void);
     };
 
+    class WeatherStore;
+
     /// A class for storing a region's weather.
     class RegionWeather
     {
@@ -256,18 +258,19 @@ namespace MWWorld
 
         operator ESM::RegionWeatherState() const;
 
-        void setChances(const std::map<ESM::RefId, uint8_t>& chances);
+        void setChances(const std::map<ESM::RefId, uint8_t>& chances, const WeatherStore& store);
         const std::map<ESM::RefId, uint8_t>& getChances() const { return mChances; }
+        uint8_t getChance(ESM::RefId weather) const;
 
         void setWeather(ESM::RefId weatherID);
 
-        ESM::RefId getWeather();
+        ESM::RefId getWeather(const WeatherStore& store);
 
     private:
         ESM::RefId mWeather;
         std::map<ESM::RefId, uint8_t> mChances;
 
-        void chooseNewWeather();
+        void chooseNewWeather(const WeatherStore& store);
     };
 
     /// A class that acts as a model for the moons.
@@ -309,10 +312,8 @@ namespace MWWorld
         std::unordered_map<ESM::RefId, Weather> mStatic;
         std::vector<Weather*> mShared;
 
-        void addWeather(const std::string& name, float dlFactor, float dlOffset, std::string_view particleEffect = {});
-
     public:
-        void reset();
+        void reset(const MWWorld::ESMStore& store);
 
         size_t getSize() const { return mShared.size(); }
         const Weather* at(size_t index) const { return mShared.at(index); }

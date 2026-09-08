@@ -303,16 +303,23 @@ namespace MWWorld
         return state;
     }
 
-    void RegionWeather::setChances(const std::map<ESM::RefId, uint8_t>& chances)
+    void RegionWeather::setChances(const std::map<ESM::RefId, uint8_t>& chances, const WeatherStore& store)
     {
         mChances = chances;
 
         // Regional weather no longer supports the current type, select a new weather pattern.
-        const auto current = mChances.find(mWeather);
-        if (current == mChances.end() || current->second == 0)
+        if (getChance(mWeather) == 0)
         {
-            chooseNewWeather();
+            chooseNewWeather(store);
         }
+    }
+
+    uint8_t RegionWeather::getChance(ESM::RefId weather) const
+    {
+        const auto found = mChances.find(weather);
+        if (found != mChances.end())
+            return found->second;
+        return 0;
     }
 
     void RegionWeather::setWeather(ESM::RefId weatherID)
@@ -320,19 +327,19 @@ namespace MWWorld
         mWeather = weatherID;
     }
 
-    ESM::RefId RegionWeather::getWeather()
+    ESM::RefId RegionWeather::getWeather(const WeatherStore& store)
     {
         // If the region weather was already set (by ChangeWeather, or by a previous call) then just return that value.
         // Note that the region weather will be expired periodically when the weather update timer expires.
         if (mWeather.empty())
         {
-            chooseNewWeather();
+            chooseNewWeather(store);
         }
 
         return mWeather;
     }
 
-    void RegionWeather::chooseNewWeather()
+    void RegionWeather::chooseNewWeather(const WeatherStore& store)
     {
         // All probabilities must add to 100 (responsibility of the user).
         // If chances A and B has values 30 and 70 then by generating 100 numbers 1..100, 30% will be lesser or equal 30
@@ -340,12 +347,12 @@ namespace MWWorld
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         unsigned int chance = Misc::Rng::rollDice(100u, prng) + 1u; // 1..100
         unsigned int sum = 0;
-        for (const auto& [id, probability] : mChances)
+        for (const Weather* weather : store)
         {
-            sum += probability;
+            sum += getChance(weather->mId);
             if (chance <= sum)
             {
-                mWeather = id;
+                mWeather = weather->mId;
                 return;
             }
         }
@@ -593,10 +600,19 @@ namespace MWWorld
             return 0.0f;
     }
 
-    void WeatherStore::reset()
+    void WeatherStore::reset(const MWWorld::ESMStore& store)
     {
         mShared.clear();
         mStatic.clear();
+        static const float fStromWindSpeed = store.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
+        const auto addWeather
+            = [&](const std::string& name, float dlFactor, float dlOffset, std::string_view particleEffect = {}) {
+                  const int index = static_cast<int>(getSize());
+                  Weather weather(ESM::Weather::indexToRefId(index), index, name, fStromWindSpeed, dlFactor, dlOffset,
+                      particleEffect);
+
+                  insertStatic(std::move(weather));
+              };
         // These distant land fog factor and offset values are the defaults MGE XE provides. Should be
         // provided by settings somewhere?
         addWeather("Clear", 1.0f, 0.0f); // 0
@@ -609,18 +625,6 @@ namespace MWWorld
         addWeather("Blight", 0.2f, 60.0f, Settings::models().mWeatherblightcloud.get()); // 7
         addWeather("Snow", 0.5f, 40.0f, Settings::models().mWeathersnow.get()); // 8
         addWeather("Blizzard", 0.16f, 70.0f, Settings::models().mWeatherblizzard.get()); // 9
-    }
-
-    inline void WeatherStore::addWeather(
-        const std::string& name, float dlFactor, float dlOffset, std::string_view particleEffect)
-    {
-        const auto& gmsts = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
-        static const float fStromWindSpeed = gmsts.find("fStromWindSpeed")->mValue.getFloat();
-        const int index = static_cast<int>(getSize());
-        Weather weather(
-            ESM::Weather::indexToRefId(index), index, name, fStromWindSpeed, dlFactor, dlOffset, particleEffect);
-
-        insertStatic(std::move(weather));
     }
 
     const Weather* WeatherStore::search(ESM::RefId id) const
@@ -733,7 +737,7 @@ namespace MWWorld
 
         mTimeSettings.mSunriseTransitions["Stars"] = starSetting;
 
-        mWeatherStore->reset();
+        mWeatherStore->reset(mStore);
 
         Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
         for (; it != store.get<ESM::Region>().end(); ++it)
@@ -784,7 +788,7 @@ namespace MWWorld
         auto it = mRegions.find(regionID);
         if (it != mRegions.end())
         {
-            it->second.setChances(chances);
+            it->second.setChances(chances, *mWeatherStore);
             regionalWeatherChanged(it->first, it->second);
         }
     }
@@ -803,7 +807,7 @@ namespace MWWorld
             if (it != mRegions.end() && playerRegion != mCurrentRegion)
             {
                 mCurrentRegion = playerRegion;
-                forceWeather(it->second.getWeather());
+                forceWeather(it->second.getWeather(*mWeatherStore));
             }
         }
     }
@@ -836,7 +840,7 @@ namespace MWWorld
                 auto it = mRegions.find(mCurrentRegion);
                 if (it != mRegions.end())
                 {
-                    addWeatherTransition(it->second.getWeather());
+                    addWeatherTransition(it->second.getWeather(*mWeatherStore));
                 }
             }
 
@@ -1049,16 +1053,17 @@ namespace MWWorld
 
     float WeatherManager::getSunVisibility() const
     {
+        const Weather& currentWeather = *mWeatherStore->find(mCurrentWeather);
         if (inTransition())
         {
             const Weather& nextWeather = *mWeatherStore->find(mNextWeather);
             if (mTransitionFactor < nextWeather.mCloudsMaximumPercent)
             {
                 float t = mTransitionFactor / nextWeather.mCloudsMaximumPercent;
-                return (1.f - t) * nextWeather.mGlareView + t * nextWeather.mGlareView;
+                return (1.f - t) * currentWeather.mGlareView + t * nextWeather.mGlareView;
             }
         }
-        return mWeatherStore->find(mCurrentWeather)->mGlareView;
+        return currentWeather.mGlareView;
     }
 
     void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
@@ -1146,7 +1151,7 @@ namespace MWWorld
         {
             if (regionID == mCurrentRegion)
             {
-                addWeatherTransition(region.getWeather());
+                addWeatherTransition(region.getWeather(*mWeatherStore));
             }
         }
     }
