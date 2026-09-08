@@ -599,6 +599,10 @@ namespace MWWorld
 
             auto hitPos = !active ? Misc::Convert::makeOsgVec3f(projectile->getHitPosition()) : pos;
             auto hitNormal = Misc::Convert::makeOsgVec3f(projectile->getHitNormal());
+
+            if (projectile->getHitWater())
+                mRendering->emitWaterRipple(hitPos);
+
             if (active)
             {
                 hitNormal = projectile->velocity();
