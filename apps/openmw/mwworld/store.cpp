@@ -29,6 +29,12 @@ namespace
         }
         return false;
     }
+
+    template <class T>
+    concept HasRecordFlags = requires
+    {
+        T::mRecordFlags;
+    };
 }
 
 namespace MWWorld
@@ -325,12 +331,15 @@ namespace MWWorld
     template <class T, class Id>
     void TypedDynamicStore<T, Id>::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
-        for (typename Dynamic::const_iterator iter(mDynamic.begin()); iter != mDynamic.end(); ++iter)
+        for (const auto& [_, record] : mDynamic)
         {
             if constexpr (!ESM::isESM4Rec(T::sRecordId))
             {
-                writer.startRecord(T::sRecordId);
-                iter->second.save(writer);
+                if constexpr (HasRecordFlags<T>)
+                    writer.startRecord(T::sRecordId, record.mRecordFlags);
+                else
+                    writer.startRecord(T::sRecordId);
+                record.save(writer);
                 writer.endRecord(T::sRecordId);
             }
         }
