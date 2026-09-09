@@ -280,29 +280,60 @@ namespace MWWorld
     public:
         MoonModel(const std::string& name);
         MoonModel(float fadeInStart, float fadeInFinish, float fadeOutStart, float fadeOutFinish, float axisOffset,
-            float speed, float dailyIncrement, float fadeStartAngle, float fadeEndAngle,
-            float moonShadowEarlyFadeAngle);
+            float speed, float dailyIncrement, float fadeStartAngle, float fadeEndAngle, float moonShadowEarlyFadeAngle,
+            float sunriseHour, float sunsetHour);
 
         MWRender::MoonState calculateState(const TimeStamp& gameTime) const;
 
     private:
+        struct CycleDay
+        {
+            float mRiseHour;
+            float mHandoverHour;
+        };
+
+        // Time thresholds for Morrowind parity.
+        static constexpr float oneMinute = 0.0167f;
+        static constexpr float oneSecond = oneMinute / 60.0f;
+
+        // The moon repeats itself over this cycle.
+        static constexpr int daysPerPhase = 3;
+        static constexpr int phasesPerCycle = 8;
+        static constexpr int daysPerCycle = daysPerPhase * phasesPerCycle;
+
+        // This arises from the start date of 16 Last Seed, 427 (with 17 increments).
+        // TODO: Find an alternate formula that doesn't rely on this day being fixed.
+        static constexpr int startIncrements = 17;
+
         float mFadeInStart;
         float mFadeInFinish;
         float mFadeOutStart;
         float mFadeOutFinish;
         float mAxisOffset;
         float mSpeed;
+        float mDegreesPerHour;
         float mDailyIncrement;
         float mFadeStartAngle;
         float mFadeEndAngle;
         float mMoonShadowEarlyFadeAngle;
+        float mSunriseHour;
+        float mSunsetHour;
 
-        float angle(int gameDay, float gameHour) const;
-        float moonPhaseHour(int gameDay) const;
-        float moonRiseHour(int gameDay) const;
+        CycleDay mCycle[daysPerCycle];
+
+        static float hourOfDay(float hours);
+        static int dayOfCycle(int gameDay);
+
+        void clampSettings();
+        void buildCycle();
+
+        float hoursUntilVisible() const;
+        float hoursUntilInvisible() const;
+        float riseHour(int gameDay) const;
+        float handoverHour(float prevRiseHour, float nextRiseHour) const;
         float rotation(float hours) const;
-        MWRender::MoonState::Phase phase(const TimeStamp& gameTime) const;
-        bool isVisible(int gameDay, float gameHour) const;
+        float angle(float gameHour, float riseHour) const;
+        MWRender::MoonState::Phase phase(int gameDay, bool postHandover) const;
         float shadowBlend(float angle) const;
         float hourlyAlpha(float gameHour) const;
         float earlyMoonShadowAlpha(float angle) const;
