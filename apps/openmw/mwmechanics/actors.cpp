@@ -640,27 +640,35 @@ namespace MWMechanics
         const std::set<MWWorld::Ptr>& allies1 = cachedAllies.getActorsSidingWith(actor1);
 
         const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
-        // If an ally of actor1 has been attacked by actor2 or has attacked actor2, start combat between actor1 and
-        // actor2
-        for (const MWWorld::Ptr& ally : allies1)
+        const ESM::RefId calmEffect
+            = actor1.getClass().isNpc() ? ESM::MagicEffect::CalmHumanoid : ESM::MagicEffect::CalmCreature;
+        if (creatureStats1.getMagicEffects().getOrDefault(calmEffect).getMagnitude() <= 0.f)
         {
-            if (creatureStats1.getAiSequence().isInCombat(ally))
-                continue;
-
-            ESM::RefNum allyHitNum = ally.getClass().getCreatureStats(ally).getHitAttemptActor();
-            if (allyHitNum.isSet() && actor2.getCellRef().getRefNum() == allyHitNum)
+            // If an ally of actor1 has been attacked by actor2 or has attacked actor2, start combat between actor1 and
+            // actor2
+            for (const MWWorld::Ptr& ally : allies1)
             {
-                mechanicsManager->startCombat(actor1, actor2, &cachedAllies.getActorsSidingWith(actor2));
-                // Also set the same hit attempt actor. Otherwise, if fighting the player, they may stop combat
-                // if the player gets out of reach, while the ally would continue combat with the player
-                creatureStats1.setHitAttemptActor(allyHitNum);
-                return;
-            }
+                if (creatureStats1.getAiSequence().isInCombat(ally))
+                    continue;
+                CreatureStats& allyStats = ally.getClass().getCreatureStats(ally);
+                if (allyStats.isDead())
+                    continue;
 
-            // If there's been no attack attempt yet but an ally of actor1 is in combat with actor2, become aggressive
-            // to actor2
-            if (ally.getClass().getCreatureStats(ally).getAiSequence().isInCombat(actor2))
-                aggressive = true;
+                ESM::RefNum allyHitNum = allyStats.getHitAttemptActor();
+                if (allyHitNum.isSet() && actor2.getCellRef().getRefNum() == allyHitNum)
+                {
+                    mechanicsManager->startCombat(actor1, actor2, &cachedAllies.getActorsSidingWith(actor2));
+                    // Also set the same hit attempt actor. Otherwise, if fighting the player, they may stop combat
+                    // if the player gets out of reach, while the ally would continue combat with the player
+                    creatureStats1.setHitAttemptActor(allyHitNum);
+                    return;
+                }
+
+                // If there's been no attack attempt yet but an ally of actor1 is in combat with actor2, become
+                // aggressive to actor2
+                if (allyStats.getAiSequence().isInCombat(actor2))
+                    aggressive = true;
+            }
         }
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -679,7 +687,10 @@ namespace MWMechanics
                 // Check that an ally of actor2 is also in combat with actor1
                 for (const MWWorld::Ptr& ally2 : allies2)
                 {
-                    if (ally2 != actor2 && ally2.getClass().getCreatureStats(ally2).getAiSequence().isInCombat(actor1))
+                    if (ally2 == actor2)
+                        continue;
+                    CreatureStats& allyStats = ally2.getClass().getCreatureStats(ally2);
+                    if (!allyStats.isDead() && allyStats.getAiSequence().isInCombat(actor1))
                     {
                         mechanicsManager->startCombat(actor1, actor2, &allies2);
                         // Also have actor1's allies start combat
