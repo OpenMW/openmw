@@ -104,7 +104,7 @@ namespace MWScript
                 runtime.pop();
 
                 std::map<ESM::RefId, uint8_t> chances;
-                for (int i = 0; i < 10; ++i)
+                for (int i = 0; i < ESM::Weather::Length; ++i)
                 {
                     ESM::RefId id = ESM::Weather::indexToRefId(i);
                     uint8_t chance = 0;
@@ -115,6 +115,12 @@ namespace MWScript
                         arg0--;
                     }
                     chances.emplace(id, chance);
+                }
+                // pop junk arguments
+                while (arg0 > 0)
+                {
+                    runtime.pop();
+                    arg0--;
                 }
 
                 MWBase::Environment::get().getWorld()->modRegion(ESM::RefId::stringRefId(region), chances);

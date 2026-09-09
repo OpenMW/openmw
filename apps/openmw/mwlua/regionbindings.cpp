@@ -54,9 +54,16 @@ namespace MWLua
 
         regionT["weatherProbabilities"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Region& rec) {
             sol::table res(lua, sol::create);
-            const auto& chances = MWBase::Environment::get().getWorld()->getRegionWeatherChances(rec.mId);
-            for (const auto& [id, probability] : chances)
-                res[id] = probability;
+            const MWBase::World* world = MWBase::Environment::get().getWorld();
+            const auto& chances = world->getRegionWeatherChances(rec.mId);
+            for (const MWWorld::Weather* weather : world->getAllWeather())
+            {
+                const auto found = chances.find(weather->mId);
+                if (found == chances.end())
+                    res[weather->mId] = 0;
+                else
+                    res[weather->mId] = found->second;
+            }
             return LuaUtil::makeReadOnly(res);
         });
         regionT["setProbability"] = [](const ESM::Region& rec, std::string_view weatherId, int value) {
