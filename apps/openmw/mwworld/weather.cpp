@@ -995,14 +995,18 @@ namespace MWWorld
         }
         mPlayingRainSoundID = ESM::RefId();
 
-        for (ESM::RefId soundId : mWeatherStore->find(mCurrentWeather)->mThunderSoundID)
-            if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
-                sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
-
+        const auto stopThunder = [&](ESM::RefId weatherId) {
+            const Weather* weather = mWeatherStore->search(weatherId);
+            if (!weather)
+                return;
+            const ConstPtr target;
+            for (const ESM::RefId& soundId : weather->mThunderSoundID)
+                if (!soundId.empty() && sndMgr->getSoundPlaying(target, soundId))
+                    sndMgr->stopSound3D(target, soundId);
+        };
+        stopThunder(mCurrentWeather);
         if (inTransition())
-            for (ESM::RefId soundId : mWeatherStore->find(mNextWeather)->mThunderSoundID)
-                if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
-                    sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
+            stopThunder(mNextWeather);
     }
 
     float WeatherManager::getWindSpeed() const
@@ -1195,7 +1199,6 @@ namespace MWWorld
         // weather type set, regardless of the remaining transition time.
         if (!mFastForward && inTransition())
         {
-
             const float delta = mWeatherStore->find(mNextWeather)->transitionDelta();
             mTransitionFactor -= elapsedRealSeconds * delta;
             if (mTransitionFactor <= 0.0f)
