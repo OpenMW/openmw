@@ -770,11 +770,11 @@ namespace MWLua
             = lua.new_usertype<SkillIncreasesForAttributeStats>("SkillIncreasesForAttributeStats");
         for (const auto& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
         {
-            skillIncreasesForAttributeStatsT[ESM::RefId(attribute.mId).serializeText()] = sol::property(
-                [=](const SkillIncreasesForAttributeStats& stat) { return stat.get(context, attribute.mId); },
-                [=](const SkillIncreasesForAttributeStats& stat, const sol::object& value) {
-                    stat.set(context, attribute.mId, value);
-                });
+            skillIncreasesForAttributeStatsT[attribute.mId.serializeText()]
+                = sol::property([context, id = attribute.mId](
+                                    const SkillIncreasesForAttributeStats& stat) { return stat.get(context, id); },
+                    [context, id = attribute.mId](const SkillIncreasesForAttributeStats& stat,
+                        const sol::object& value) { stat.set(context, id, value); });
         }
         // ESM::Class::specializationIndexToLuaId.at(rec.mData.mSpecialization)
         auto skillIncreasesForSpecializationStatsT

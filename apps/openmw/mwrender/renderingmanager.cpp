@@ -1461,7 +1461,7 @@ namespace MWRender
                     mViewer->stopThreading();
                     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
                     mViewer->startThreading();
-                    mAppliedShadowDefines = shadowDefines;
+                    mAppliedShadowDefines = std::move(shadowDefines);
                 }
             }
             else if (it->first == "Post Processing" && it->second == "enabled")
