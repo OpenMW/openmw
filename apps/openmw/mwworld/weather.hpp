@@ -313,6 +313,10 @@ namespace MWWorld
         std::vector<Weather*> mShared;
 
     public:
+        WeatherStore() = default;
+        WeatherStore(const WeatherStore&) = delete;
+        WeatherStore& operator=(const WeatherStore&) = delete;
+
         void reset(const MWWorld::ESMStore& store);
 
         size_t getSize() const { return mShared.size(); }
