@@ -322,6 +322,7 @@ namespace LuaUi
         mAnchor = propertyValue("anchor", MyGUI::FloatSize());
         mVisible = propertyValue("visible", true);
         mWidget->setVisible(mVisible);
+        mWidget->setNeedMouseFocus(!propertyValue("ignorePointerEvents", false));
         mWidget->setPointer(propertyValue("pointer", std::string("arrow")));
         mWidget->setAlpha(propertyValue("alpha", 1.f));
         mWidget->setInheritsAlpha(propertyValue("inheritAlpha", true));
@@ -496,6 +497,7 @@ namespace LuaUi
             "relativeSize",
             "anchor",
             "visible",
+            "ignorePointerEvents",
             "pointer",
             "alpha",
             "inheritAlpha",
