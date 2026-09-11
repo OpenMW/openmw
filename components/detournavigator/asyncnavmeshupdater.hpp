@@ -238,6 +238,8 @@ namespace DetourNavigator
 
         JobStatus processJob(Job& job);
 
+        inline JobStatus markAsEmpty(const Job& job, GuardedNavMeshCacheItem& navMeshCacheItem);
+
         inline JobStatus processInitialJob(Job& job, GuardedNavMeshCacheItem& navMeshCacheItem);
 
         inline JobStatus processJobWithDbResult(Job& job, GuardedNavMeshCacheItem& navMeshCacheItem);
