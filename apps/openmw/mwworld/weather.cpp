@@ -474,7 +474,7 @@ namespace MWWorld
         return day < 0 ? day + daysPerCycle : day;
     }
 
-    inline float MoonModel::riseHour(int gameDay) const
+    float MoonModel::riseHour(int gameDay) const
     {
         if (mDailyIncrement == 0.0f)
             return 0.0f;
@@ -499,7 +499,7 @@ namespace MWWorld
         return riseHour;
     }
 
-    inline float MoonModel::handoverHour(float prevRiseHour, float nextRiseHour) const
+    float MoonModel::handoverHour(float prevRiseHour, float nextRiseHour) const
     {
         // The handover hour is the point where the moon's rise hour switches to the next day's.
         // This makes the moon "jump" from one position to another, so Morrowind waits
@@ -561,7 +561,7 @@ namespace MWWorld
         return rotationFromHorizon < 180.0f ? rotationFromHorizon : 0.0f;
     }
 
-    inline MWRender::MoonState::Phase MoonModel::phase(int gameDay, bool postHandover) const
+    inline MWRender::MoonState::Phase MoonModel::phase(int gameDay, bool postHandover)
     {
         // Morrowind starts with a full moon on 16 Last Seed and then begins to wane 17 Last Seed, working on 3 day
         // phase cycle.

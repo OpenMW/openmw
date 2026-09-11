@@ -323,6 +323,7 @@ namespace MWWorld
 
         static float hourOfDay(float hours);
         static int dayOfCycle(int gameDay);
+        static MWRender::MoonState::Phase phase(int gameDay, bool postHandover);
 
         void clampSettings();
         void buildCycle();
@@ -333,7 +334,6 @@ namespace MWWorld
         float handoverHour(float prevRiseHour, float nextRiseHour) const;
         float rotation(float hours) const;
         float angle(float gameHour, float riseHour) const;
-        MWRender::MoonState::Phase phase(int gameDay, bool postHandover) const;
         float shadowBlend(float angle) const;
         float hourlyAlpha(float gameHour) const;
         float earlyMoonShadowAlpha(float angle) const;
