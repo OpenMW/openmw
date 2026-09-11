@@ -214,7 +214,7 @@ This example demonstrates creating a horizontal flex widget that incorporates wr
 
    .. tab-item:: Result
 
-      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/ui-wrapping-gap-alignment.webp
+      .. figure:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/lua-scripting/_static/ui-wrapping-gap-alignment.webp
          :alt: Example of a horizontal wrapping flex with gap and alignment
 
 Arranging Column Children and Stretching Width Along the Cross-Axis
@@ -298,7 +298,7 @@ The second flex child has an external stretch property set. It is set to *1* so 
 
    .. tab-item:: Result
 
-      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/vertical-flex-arrange-grow.webp
+      .. figure:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/lua-scripting/_static/vertical-flex-arrange-grow.webp
          :alt: Example of a vertical flex with arrangement and stretch
 
 Distributing Remaining Space to Child Widgets
@@ -363,7 +363,7 @@ This example uses the `MWUI Interface <./../interface_mwui.html>`_ to style widg
 
    .. tab-item:: Result
 
-      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/flex-grow-example-1.png
+      .. figure:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/lua-scripting/_static/flex-grow-example-1.png
          :alt: Example of a horizontal flex with a growing child
 
 To better understand how the external grow property works, another example is provided below with two white-image widgets both with grow set to "1". Because they are on the same track (there is only one track as *wrap* is not enabled), they will add up the total "grow" value (to be "2") and then their individual grow values are divided by that total to determine how much of the remaining space they will take. In this case, both widgets have the same grow value, so they will each take up 50% of the remaining space on that track.
@@ -434,5 +434,5 @@ To better understand how the external grow property works, another example is pr
 
    .. tab-item:: Result
 
-      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/flex-grow-example-2.png
+      .. figure:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/lua-scripting/_static/flex-grow-example-2.png
          :alt: Example of a horizontal flex with two growing children

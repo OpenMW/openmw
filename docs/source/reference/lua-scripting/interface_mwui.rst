@@ -50,7 +50,7 @@ The transparency of the black background will match the transparency setting tha
    
    .. tab-item:: Result
 
-      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/mwui-transparent-box-example.webp
+      .. figure:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/lua-scripting/_static/mwui-transparent-box-example.webp
          :alt: Example of a box created using the boxTransparentThick template
 
 Box With Text
@@ -101,5 +101,5 @@ Similar to the above example, a box will be rendered with text all styled in Mor
    
    .. tab-item:: Result
 
-      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/mwui-box-with-text-example.png
+      .. figure:: https://gitlab.com/OpenMW/openmw-docs/-/raw/master/docs/source/reference/lua-scripting/_static/mwui-box-with-text-example.png
          :alt: Example of a box and text created using the boxTransparentThick and textNormal templates
