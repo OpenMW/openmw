@@ -91,11 +91,6 @@ MovieAudioDecoder::MovieAudioDecoder(VideoState* videoState)
     AVCodecContext *avctx = avcodec_alloc_context3(codec);
     avcodec_parameters_to_context(avctx, mAVStream->codecpar);
 
-// This is not needed anymore above FFMpeg version 4.0
-#if LIBAVCODEC_VERSION_INT < 3805796
-    av_codec_set_pkt_timebase(avctx, mAVStream->time_base);
-#endif
-
     mAudioContext = avctx;
 
     if(avcodec_open2(mAudioContext, codec, nullptr) < 0)

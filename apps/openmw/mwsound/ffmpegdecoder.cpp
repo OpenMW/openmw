@@ -24,11 +24,7 @@ namespace MWSound
         if (ptr->buffer != nullptr)
             av_freep(&ptr->buffer);
 
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 80, 100)
         avio_context_free(&ptr);
-#else
-        av_free(ptr);
-#endif
     }
 
     void AVFormatContextDeleter::operator()(AVFormatContext* ptr) const
@@ -296,7 +292,12 @@ namespace MWSound
         }
 
         // avformat_open_input frees the user supplied AVFormatContext on failure
+#if OPENMW_FFMPEG_CONST_INPUTFORMAT
         if (avformat_open_input(&ctx, name, fmt, nullptr) != 0)
+#else
+        // FFmpeg 4 returns non-const input formats.
+        if (avformat_open_input(&ctx, name, const_cast<AVInputFormat*>(fmt), nullptr) != 0)
+#endif
             return false;
 
         formatCtx.reset(std::exchange(ctx, nullptr));
@@ -375,11 +376,6 @@ namespace MWSound
 
         avcodec_parameters_to_context(codecCtx, (*stream)->codecpar);
 
-// This is not needed anymore above FFMpeg version 4.0
-#if LIBAVCODEC_VERSION_INT < 3805796
-        av_codec_set_pkt_timebase(avctx, (*stream)->time_base);
-#endif
-
         AVCodecContextPtr codecCtxPtr(std::exchange(codecCtx, nullptr));
 
         if (avcodec_open2(codecCtxPtr.get(), codec, nullptr) < 0)
@@ -435,12 +431,7 @@ namespace MWSound
 
     std::string FFmpegDecoder::getName()
     {
-// In the FFMpeg 4.0 a "filename" field was replaced by "url"
-#if LIBAVCODEC_VERSION_INT < 3805796
-        return mFormatCtx->filename;
-#else
         return mFormatCtx->url;
-#endif
     }
 
     void FFmpegDecoder::getInfo(int* samplerate, ChannelConfig* chans, SampleType* type)
@@ -625,10 +616,6 @@ namespace MWSound
         /* We need to make sure ffmpeg is initialized. Optionally silence warning
          * output from the lib */
         [[maybe_unused]] static const bool doneInit = [] {
-// This is not needed anymore above FFMpeg version 4.0
-#if LIBAVCODEC_VERSION_INT < 3805796
-            av_register_all();
-#endif
             av_log_set_level(AV_LOG_ERROR);
             return true;
         }();
