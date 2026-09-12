@@ -1766,8 +1766,7 @@ namespace MWRender
         {
             // Morrowind has a white ambient light attached to the root VFX node of the scenegraph
             SceneUtil::configureSunAmbientOverride(osg::Vec4f(1, 1, 1, 1), node->getOrCreateStateSet());
-            node->getOrCreateStateSet()->addUniform(
-                new osg::Uniform("alpha", 1.f), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            node->getOrCreateStateSet()->addUniform(new osg::Uniform("alpha", 1.f), osg::StateAttribute::ON);
         }
 
         mResourceSystem->getSceneManager()->setUpNormalsRTForStateSet(node->getOrCreateStateSet(), false);
