@@ -630,10 +630,15 @@ namespace MWRender
             return;
         }
 
-        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
+        // Saves at or below ESM::MaxOldFogOfWarFormatVersion hold TGA here, newer ones PNG.
+        // Decoding the legacy format directly is why components/esm3 no longer has to
+        // transcode it to PNG on load, which cost a decode and a re-encode per tile.
+        const std::string extension = esm.mLegacyTgaImageData ? "tga" : "png";
+
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension(extension);
         if (!readerwriter)
         {
-            Log(Debug::Error) << "Error: Unable to load fog, can't find a png ReaderWriter";
+            Log(Debug::Error) << "Error: Unable to load fog, can't find a " << extension << " ReaderWriter";
             return;
         }
 
