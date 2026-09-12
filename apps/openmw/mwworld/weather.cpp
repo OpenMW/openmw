@@ -414,8 +414,8 @@ namespace MWWorld
 
         // Morrowind appears to have a minimum speed to avoid situations where the moon can't
         // complete a full rotation in a single 24-hour period. The minimum is 1 rotation in 23 hours.
-        // Also weirdly, the minimum only applies to positive moon speeds.
-        if (mDegreesPerHour >= 0.0f)
+        // Also weirdly, the minimum only applies to moon speeds that aren't literally signed negative.
+        if (!std::signbit(mDegreesPerHour))
             mDegreesPerHour = std::max(mDegreesPerHour, 180.0f / 23.0f);
 
         // Morrowind appears to reduce mDailyIncrement with modulo 24.0f to avoid situations where
@@ -512,15 +512,19 @@ namespace MWWorld
 
         // Whether the time elapsed since the rise hour places the moon in an invisible hour range.
         auto isInvisibleHour = [&](float gameHour, float riseHour) {
+            // Negative moonShadowEarlyFadeAngle1 Leaves no invisible hour.
+            if (mFadeEndAngle < mMoonShadowEarlyFadeAngle)
+                return false;
+
             float travelled = hourOfDay(gameHour - riseHour);
             return travelled < hoursUntilVisible() || travelled >= hoursUntilInvisible() - oneSecond;
         };
 
         // Whether the moon is invisible by alpha or by fade angle at both the old and new positions.
         auto isInvisible = [&](float gameHour) {
-            bool alphaInvisible = hourlyAlpha(gameHour) <= 0.0f;
-            return (alphaInvisible || isInvisibleHour(gameHour, prevRiseHour))
-                && (isInvisibleHour(gameHour, nextRiseHour) || (alphaInvisible && gameHour < mSunriseHour));
+            bool transparent = hourlyAlpha(gameHour) <= 0.0f;
+            return (transparent || isInvisibleHour(gameHour, prevRiseHour))
+                && (isInvisibleHour(gameHour, nextRiseHour) || (transparent && gameHour < mSunriseHour));
         };
 
         // Midnight is the earliest possible invisible time.
@@ -626,7 +630,8 @@ namespace MWWorld
     inline float MoonModel::earlyMoonShadowAlpha(float angle) const
     {
         // A moon at the horizon has either not yet risen or has finished its arc.
-        if (angle <= 0.0f)
+        // A negative moonShadowEarlyFadeAngle1 keeps the horizon permanently lit.
+        if (angle <= 0.0f && mFadeEndAngle >= mMoonShadowEarlyFadeAngle)
             return 0.0f;
 
         // The Moon Shadow Early Fade Angle describes an arc relative to Fade End Angle.
