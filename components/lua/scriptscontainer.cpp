@@ -746,9 +746,10 @@ namespace LuaUtil
     {
         while (!timerQueue.empty() && timerQueue.front().mTime <= time)
         {
-            callTimer(timerQueue.front());
             std::pop_heap(timerQueue.begin(), timerQueue.end());
+            Timer timer = std::move(timerQueue.back());
             timerQueue.pop_back();
+            callTimer(timer);
         }
     }
 
