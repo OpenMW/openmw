@@ -325,7 +325,7 @@ namespace MWWorld
         static int dayOfCycle(int gameDay);
         static MWRender::MoonState::Phase phase(int gameDay, bool postHandover);
 
-        void clampSettings();
+        void calculateSettings();
         void buildCycle();
 
         float hoursUntilVisible() const;

@@ -382,7 +382,7 @@ namespace MWWorld
         , mSunriseHour(sunriseHour)
         , mSunsetHour(sunsetHour)
     {
-        clampSettings();
+        calculateSettings();
         buildCycle();
     }
 
@@ -400,11 +400,11 @@ namespace MWWorld
         , mSunriseHour(Fallback::Map::getFloat("Weather_Sunrise_Time"))
         , mSunsetHour(Fallback::Map::getFloat("Weather_Sunset_Time"))
     {
-        clampSettings();
+        calculateSettings();
         buildCycle();
     }
 
-    void MoonModel::clampSettings()
+    void MoonModel::calculateSettings()
     {
         // Morrowind's moon speed is tied to day length. A shorter day means a faster sun and
         // (weirdly) a faster moon too. The reverse-engineered formula is
@@ -572,7 +572,7 @@ namespace MWWorld
 
     inline MWRender::MoonState::Phase MoonModel::phase(int gameDay, bool postHandover)
     {
-        // Morrowind starts with a full moon on 16 Last Seed and then begins to wane 17 Last Seed, working on 3 day
+        // Morrowind starts with a full moon on 16 Last Seed and then begins to wane 17 Last Seed, working on a 3 day
         // phase cycle.
 
         // The phase changes when the active rise hour changes.
@@ -607,7 +607,7 @@ namespace MWWorld
     inline float MoonModel::hourlyAlpha(float gameHour) const
     {
         // Morrowind culls the moon one minute before mFadeOutFinish, but only when the moon has
-        // a transparent period. If #2 below is <= 0, the early minute is skipped.
+        // a transparent hour range. If #2 below is <= 0, the early minute is skipped.
         float adjustedFadeOutFinish = mFadeInStart > mFadeOutFinish ? mFadeOutFinish - oneMinute : mFadeOutFinish;
 
         // The Fade Out Start / Finish and Fade In Start / Finish describe the hours at which the moon
