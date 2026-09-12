@@ -16,7 +16,7 @@ else
 fi
 
 pip install aqtinstall
-aqt install-qt -O /tmp/qt mac desktop $QT_VER && rm aqtinstall.log
+aqt install-qt -O /tmp/Qt mac desktop $QT_VER && rm aqtinstall.log
 
 curl "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/${VCPKG_FILE}-${VCPKG_TAG}-manifest.txt" -o $DEPS_DIR/openmw-manifest.txt
 
