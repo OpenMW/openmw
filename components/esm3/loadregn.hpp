@@ -2,6 +2,7 @@
 #define OPENMW_ESM_REGN_H
 
 #include <array>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -13,6 +14,15 @@ namespace ESM
 
     class ESMReader;
     class ESMWriter;
+
+    namespace Weather
+    {
+        // Clear, Cloudy, Foggy, Overcast, Rain, Thunder, Ash, Blight, Snow, Blizzard
+        ESM::RefId indexToRefId(int index);
+        int refIdToIndex(ESM::RefId id);
+
+        constexpr int Length = 10;
+    }
 
     /*
      * Region data
@@ -28,9 +38,8 @@ namespace ESM
         struct WEATstruct
         {
             // These are probabilities that add up to 100
-            // Clear, Cloudy, Foggy, Overcast, Rain, Thunder, Ash, Blight, Snow, Blizzard
-            std::array<uint8_t, 10> mProbabilities;
-        }; // 10 bytes
+            std::map<RefId, uint8_t> mProbabilities;
+        };
 
         // Reference to a sound that is played randomly in this region
         struct SoundRef

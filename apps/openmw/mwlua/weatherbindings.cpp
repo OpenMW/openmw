@@ -20,23 +20,10 @@
 
 #include "context.hpp"
 #include "object.hpp"
+#include "recordstore.hpp"
 
 namespace
 {
-    class WeatherStore
-    {
-    public:
-        const MWWorld::Weather* get(size_t index) const
-        {
-            return MWBase::Environment::get().getWorld()->getWeather(index);
-        }
-        const MWWorld::Weather* get(const ESM::RefId& id) const
-        {
-            return MWBase::Environment::get().getWorld()->getWeather(id);
-        }
-        size_t size() const { return MWBase::Environment::get().getWorld()->getAllWeather().size(); }
-    };
-
     template <class Cell>
     bool hasWeather(const Cell& cell, bool requireExterior)
     {
@@ -120,7 +107,7 @@ namespace sol
     {
     };
     template <>
-    struct is_automagical<WeatherStore> : std::false_type
+    struct is_automagical<MWWorld::WeatherStore> : std::false_type
     {
     };
 }
@@ -243,22 +230,10 @@ namespace MWLua
             MWBase::Environment::get().getWorld()->changeWeather(region, weather.mId);
         };
 
-        sol::usertype<WeatherStore> storeT = lua.new_usertype<WeatherStore>("WeatherWorldStore");
-        storeT[sol::meta_function::to_string]
-            = [](const WeatherStore& store) { return "{" + std::to_string(store.size()) + " Weather records}"; };
-        storeT[sol::meta_function::length] = [](const WeatherStore& store) { return store.size(); };
-        storeT[sol::meta_function::index] = sol::overload(
-            [](const WeatherStore& store, size_t index) -> const MWWorld::Weather* {
-                return store.get(LuaUtil::fromLuaIndex(index));
-            },
-            [](const WeatherStore& store, std::string_view id) -> const MWWorld::Weather* {
-                return store.get(ESM::RefId::deserializeText(id));
-            });
-        storeT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
-        storeT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
+        addRecordStoreType<MWWorld::WeatherStore, MWWorld::Weather>(lua, "Weather");
 
         // Provide access to the store.
-        api["records"] = WeatherStore{};
+        api["records"] = &MWBase::Environment::get().getWorld()->getAllWeather();
 
         using Phase = MWRender::MoonState::Phase;
         api["MOON_PHASE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, Phase>(lua,

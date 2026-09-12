@@ -24,17 +24,6 @@ namespace sol
     };
 }
 
-namespace
-{
-    std::span<const uint8_t> getRegionWeatherChances(const ESM::Region& rec)
-    {
-        const auto chances = MWBase::Environment::get().getWorld()->getRegionWeatherChances(rec.mId);
-        if (!chances.empty())
-            return chances;
-        return rec.mData.mProbabilities;
-    }
-}
-
 namespace MWLua
 {
     sol::table initCoreRegionBindings(const Context& context)
@@ -65,30 +54,24 @@ namespace MWLua
 
         regionT["weatherProbabilities"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Region& rec) {
             sol::table res(lua, sol::create);
-            const auto chances = getRegionWeatherChances(rec);
-            for (size_t i = 0; i < chances.size(); ++i)
+            const MWBase::World* world = MWBase::Environment::get().getWorld();
+            const auto& chances = world->getRegionWeatherChances(rec.mId);
+            for (const MWWorld::Weather* weather : world->getAllWeather())
             {
-                const MWWorld::Weather* weather = MWBase::Environment::get().getWorld()->getWeather(i);
-                if (weather != nullptr)
-                    res[weather->mId.serializeText()] = chances[i];
+                const auto found = chances.find(weather->mId);
+                if (found == chances.end())
+                    res[weather->mId] = 0;
+                else
+                    res[weather->mId] = found->second;
             }
             return LuaUtil::makeReadOnly(res);
         });
         regionT["setProbability"] = [](const ESM::Region& rec, std::string_view weatherId, int value) {
             MWBase::World* world = MWBase::Environment::get().getWorld();
             ESM::RefId id = ESM::RefId::deserializeText(weatherId);
-            const auto& allWeather = world->getAllWeather();
-            auto it = std::find_if(allWeather.begin(), allWeather.end(),
-                [id](const MWWorld::Weather& weather) { return weather.mId == id; });
-            if (it == allWeather.end())
-                throw std::runtime_error("Weather \"" + std::string(weatherId) + "\" not found");
-
-            const auto current = getRegionWeatherChances(rec);
-            std::vector<uint8_t> chances(current.begin(), current.end());
-            const size_t index = std::distance(allWeather.begin(), it);
-            if (chances.size() <= index)
-                chances.resize(index + 1, 0);
-            chances[index] = static_cast<uint8_t>(std::clamp(value, 0, 100));
+            const MWWorld::Weather* weather = world->getAllWeather().find(id);
+            auto chances = world->getRegionWeatherChances(rec.mId);
+            chances[weather->mId] = static_cast<uint8_t>(std::clamp(value, 0, 100));
             world->modRegion(rec.mId, chances);
         };
         auto resetProbability = [](const ESM::Region& rec) {

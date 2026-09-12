@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <map>
-#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -140,8 +139,8 @@ namespace MWWorld
     public:
         static osg::Vec3f defaultDirection();
 
-        Weather(const ESM::RefId id, const int scriptId, const std::string& name, float stormWindSpeed, float rainSpeed,
-            float dlFactor, float dlOffset, const std::string& particleEffect);
+        Weather(const ESM::RefId id, const int scriptId, const std::string& name, float stormWindSpeed, float dlFactor,
+            float dlOffset, std::string_view particleEffect);
 
         ESM::RefId mId;
         int mScriptId;
@@ -248,6 +247,8 @@ namespace MWWorld
         void lightningAndThunder(void);
     };
 
+    class WeatherStore;
+
     /// A class for storing a region's weather.
     class RegionWeather
     {
@@ -257,18 +258,19 @@ namespace MWWorld
 
         operator ESM::RegionWeatherState() const;
 
-        void setChances(std::span<const uint8_t> chances);
-        std::span<const uint8_t> getChances() const;
+        void setChances(const std::map<ESM::RefId, uint8_t>& chances, const WeatherStore& store);
+        const std::map<ESM::RefId, uint8_t>& getChances() const { return mChances; }
+        uint8_t getChance(ESM::RefId weather) const;
 
-        void setWeather(int weatherID);
+        void setWeather(ESM::RefId weatherID);
 
-        int getWeather();
+        ESM::RefId getWeather(const WeatherStore& store);
 
     private:
-        int mWeather;
-        std::vector<uint8_t> mChances;
+        ESM::RefId mWeather;
+        std::map<ESM::RefId, uint8_t> mChances;
 
-        void chooseNewWeather();
+        void chooseNewWeather(const WeatherStore& store);
     };
 
     /// A class that acts as a model for the moons.
@@ -305,12 +307,39 @@ namespace MWWorld
         float earlyMoonShadowAlpha(float angle) const;
     };
 
+    class WeatherStore
+    {
+        std::unordered_map<ESM::RefId, Weather> mStatic;
+        std::vector<Weather*> mShared;
+
+    public:
+        WeatherStore() = default;
+        WeatherStore(const WeatherStore&) = delete;
+        WeatherStore& operator=(const WeatherStore&) = delete;
+
+        void reset(const MWWorld::ESMStore& store);
+
+        size_t getSize() const { return mShared.size(); }
+        const Weather* at(size_t index) const { return mShared.at(index); }
+
+        const Weather* search(ESM::RefId id) const;
+        const Weather* find(ESM::RefId id) const;
+        Weather* find(ESM::RefId id);
+
+        Weather* insertStatic(Weather&& item);
+        void eraseStatic(ESM::RefId id);
+
+        auto begin() const { return mShared.begin(); }
+        auto end() const { return mShared.end(); }
+    };
+
     /// Interface for weather settings
     class WeatherManager
     {
     public:
         // Have to pass fallback and Store, can't use singleton since World isn't fully constructed yet at the time
-        WeatherManager(MWRender::RenderingManager& rendering, MWWorld::ESMStore& store);
+        WeatherManager(
+            MWRender::RenderingManager& rendering, MWWorld::ESMStore& store, MWWorld::WeatherStore& weatherStore);
         ~WeatherManager();
 
         /**
@@ -318,10 +347,9 @@ namespace MWWorld
          * @param region that should be changed
          * @param ID of the weather setting to shift to
          */
-        void changeWeather(const ESM::RefId& regionID, const unsigned int weatherID);
-        void changeWeather(const ESM::RefId& regionID, const ESM::RefId& weatherID);
-        void modRegion(const ESM::RefId& regionID, std::span<const uint8_t> chances);
-        std::span<const uint8_t> getRegionChances(const ESM::RefId& regionID) const;
+        void changeWeather(ESM::RefId regionID, ESM::RefId weatherID);
+        void modRegion(ESM::RefId regionID, const std::map<ESM::RefId, uint8_t>& chances);
+        const std::map<ESM::RefId, uint8_t>& getRegionChances(ESM::RefId regionID) const;
         void playerTeleported(const ESM::RefId& playerRegion, bool isExterior);
 
         /**
@@ -343,24 +371,9 @@ namespace MWWorld
 
         void advanceTime(double hours, bool incremental);
 
-        const std::vector<Weather>& getAllWeather() { return mWeatherSettings; }
+        const Weather& getWeather() { return *mWeatherStore->find(mCurrentWeather); }
 
-        const Weather& getWeather() { return mWeatherSettings[mCurrentWeather]; }
-
-        const Weather* getWeather(size_t index) const;
-
-        const Weather* getWeather(const ESM::RefId& id) const;
-
-        int getWeatherID() const { return mCurrentWeather; }
-
-        const Weather* getNextWeather()
-        {
-            if (mNextWeather > -1)
-                return &mWeatherSettings[mNextWeather];
-            return nullptr;
-        }
-
-        int getNextWeatherID() const { return mNextWeather; }
+        const Weather* getNextWeather() { return mWeatherStore->search(mNextWeather); }
 
         float getTransitionFactor() const { return mTransitionFactor; }
 
@@ -393,12 +406,11 @@ namespace MWWorld
         TimeOfDayInterpolator<float> mNightFade;
 
         float mHoursBetweenWeatherChanges;
-        float mRainSpeed;
 
         // underwater fog not really related to weather, but we handle it here because it's convenient
         TimeOfDayInterpolator<float> mUnderwaterFog;
 
-        std::vector<Weather> mWeatherSettings;
+        WeatherStore* mWeatherStore;
         MoonModel mMasser;
         MoonModel mSecunda;
 
@@ -415,9 +427,9 @@ namespace MWWorld
         float mWeatherUpdateTime;
         float mTransitionFactor;
         NightDayMode mNightDayMode;
-        int mCurrentWeather;
-        int mNextWeather;
-        int mQueuedWeather;
+        ESM::RefId mCurrentWeather;
+        ESM::RefId mNextWeather;
+        ESM::RefId mQueuedWeather;
         std::map<ESM::RefId, RegionWeather> mRegions;
         MWRender::WeatherResult mResult;
 
@@ -426,24 +438,21 @@ namespace MWWorld
         MWBase::Sound* mRainSound{ nullptr };
         ESM::RefId mPlayingRainSoundID;
 
-        void addWeather(
-            const std::string& name, float dlFactor, float dlOffset, const std::string& particleEffect = "");
-
         void importRegions();
 
         void regionalWeatherChanged(const ESM::RefId& regionID, RegionWeather& region);
         bool updateWeatherTime();
         bool updateWeatherRegion(const ESM::RefId& playerRegion);
         void updateWeatherTransitions(const float elapsedRealSeconds);
-        void forceWeather(const int weatherID);
+        void forceWeather(ESM::RefId weatherID);
 
         bool inTransition() const;
-        void addWeatherTransition(const int weatherID);
+        void addWeatherTransition(ESM::RefId weatherID);
 
         void calculateWeatherResult(const float gameHour, const float elapsedSeconds, const bool isPaused);
-        void calculateResult(const int weatherID, const float gameHour);
+        void calculateResult(const Weather& weather, const float gameHour);
         void calculateTransitionResult(const float factor, const float gameHour);
-        float calculateWindSpeed(int weatherId, float currentSpeed);
+        float calculateWindSpeed(const Weather& weather, float currentSpeed);
     };
 }
 

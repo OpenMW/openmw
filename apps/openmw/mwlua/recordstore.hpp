@@ -33,19 +33,9 @@ namespace sol
 
 namespace MWLua
 {
-    template <class T>
-    void addRecordFunctionBinding(
-        sol::table& table, const Context& context, const std::string& recordName = std::string(T::getRecordType()))
+    template <class StoreT, class T>
+    void addRecordStoreType(sol::state_view lua, const std::string& recordName)
     {
-        const MWWorld::Store<T>& store = MWBase::Environment::get().getESMStore()->get<T>();
-
-        table["record"] = sol::overload([](const Object& obj) -> const T* { return obj.ptr().get<T>()->mBase; },
-            [&store](std::string_view id) -> const T* { return store.search(ESM::RefId::deserializeText(id)); });
-
-        // Define a custom user type for the store.
-        // Provide the interface of a read-only array.
-        using StoreT = MWWorld::Store<T>;
-        sol::state_view lua = context.sol();
         sol::usertype<StoreT> storeT = lua.new_usertype<StoreT>(recordName + "WorldStore");
         storeT[sol::meta_function::to_string] = [recordName](const StoreT& self) {
             return "{" + std::to_string(self.getSize()) + " " + recordName + " records}";
@@ -62,6 +52,21 @@ namespace MWLua
             });
         storeT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
         storeT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
+    }
+
+    template <class T>
+    void addRecordFunctionBinding(
+        sol::table& table, const Context& context, const std::string& recordName = std::string(T::getRecordType()))
+    {
+        const MWWorld::Store<T>& store = MWBase::Environment::get().getESMStore()->get<T>();
+
+        table["record"] = sol::overload([](const Object& obj) -> const T* { return obj.ptr().get<T>()->mBase; },
+            [&store](std::string_view id) -> const T* { return store.search(ESM::RefId::deserializeText(id)); });
+
+        // Define a custom user type for the store.
+        // Provide the interface of a read-only array.
+        using StoreT = MWWorld::Store<T>;
+        addRecordStoreType<StoreT, T>(context.sol(), recordName);
 
         // Provide access to the store.
         table["records"] = &store;
