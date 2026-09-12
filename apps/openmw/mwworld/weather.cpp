@@ -512,10 +512,6 @@ namespace MWWorld
 
         // Whether the time elapsed since the rise hour places the moon in an invisible hour range.
         auto isInvisibleHour = [&](float gameHour, float riseHour) {
-            // Negative moonShadowEarlyFadeAngle1 Leaves no invisible hour.
-            if (mFadeEndAngle < mMoonShadowEarlyFadeAngle)
-                return false;
-
             float travelled = hourOfDay(gameHour - riseHour);
             return travelled < hoursUntilVisible() || travelled >= hoursUntilInvisible() - oneSecond;
         };
