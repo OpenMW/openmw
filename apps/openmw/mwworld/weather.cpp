@@ -406,12 +406,17 @@ namespace MWWorld
 
     void MoonModel::clampSettings()
     {
-        // Morrowind appears to have a minimum speed to avoid situations where the moon can't
-        // complete a full rotation in a single 24-hour period. The speed also scales by day length;
-        // a shorter day means a faster sun and weirdly a faster moon. The reverse-engineered formula is
-        // mSpeed * 180 degrees (a full hemisphere) / day length (vanilla 12); and at least 1 rotation per 23 hours.
+        // Morrowind's moon speed is tied to day length. A shorter day means a faster sun and
+        // (weirdly) a faster moon too. The reverse-engineered formula is
+        // mSpeed * 180 degrees (a full hemisphere) / day length (vanilla is 12 hours).
         float dayLength = mSunsetHour - mSunriseHour;
-        mDegreesPerHour = std::max(mSpeed * 180.0f / dayLength, 180.0f / 23.0f);
+        mDegreesPerHour = mSpeed * 180.0f / dayLength;
+
+        // Morrowind appears to have a minimum speed to avoid situations where the moon can't
+        // complete a full rotation in a single 24-hour period. The minimum is 1 rotation in 23 hours.
+        // Also weirdly, the minimum only applies to positive moon speeds.
+        if (mDegreesPerHour >= 0.0f)
+            mDegreesPerHour = std::max(mDegreesPerHour, 180.0f / 23.0f);
 
         // Morrowind appears to reduce mDailyIncrement with modulo 24.0f to avoid situations where
         // the moon would increment more than an entire rotation in a single day.
@@ -597,8 +602,9 @@ namespace MWWorld
 
     inline float MoonModel::hourlyAlpha(float gameHour) const
     {
-        // Morrowind culls the moon one minute before mFadeOutFinish
-        float adjustedFadeOutFinish = mFadeOutFinish - oneMinute;
+        // Morrowind culls the moon one minute before mFadeOutFinish, but only when the moon has
+        // a transparent period. If #2 below is <= 0, the early minute is skipped.
+        float adjustedFadeOutFinish = mFadeInStart > mFadeOutFinish ? mFadeOutFinish - oneMinute : mFadeOutFinish;
 
         // The Fade Out Start / Finish and Fade In Start / Finish describe the hours at which the moon
         // appears and disappears.
@@ -619,6 +625,10 @@ namespace MWWorld
 
     inline float MoonModel::earlyMoonShadowAlpha(float angle) const
     {
+        // A moon at the horizon has either not yet risen or has finished its arc.
+        if (angle <= 0.0f)
+            return 0.0f;
+
         // The Moon Shadow Early Fade Angle describes an arc relative to Fade End Angle.
         // Depending on the current angle, the following values describe how transparent the moon is.
         // 1. From Moon Shadow Early Fade Angle 1 to Fade End Angle 1 (during moon rise): 0..1
