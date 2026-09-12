@@ -4,8 +4,11 @@
 #include "luamanagerimp.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwinput/actions.hpp"
 
 #include "../mwrender/postprocessor.hpp"
 #include "../mwrender/renderingmanager.hpp"
@@ -56,6 +59,13 @@ namespace MWLua
         api["isMWScriptEnabled"] = []() { return MWBase::Environment::get().getWorld()->getScriptsEnabled(); };
 
         api["reloadLua"] = []() { MWBase::Environment::get().getLuaManager()->reloadAllScripts(); };
+
+        // Same code path as the screenshot key. Deferred, because the screenshot is captured
+        // on the next frame and the input manager is not safe to touch from a Lua thread.
+        api["takeScreenshot"] = [context]() {
+            context.mLuaManager->addAction(
+                [] { MWBase::Environment::get().getInputManager()->executeAction(MWInput::A_Screenshot); });
+        };
 
         api["NAV_MESH_RENDER_MODE"]
             = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, Settings::NavMeshRenderMode>(view,

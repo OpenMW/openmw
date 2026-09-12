@@ -67,6 +67,13 @@
 -- @function [parent=#Debug] reloadLua
 
 ---
+-- Takes a screenshot, as if the screenshot key had been pressed. The screenshot is
+-- captured on the next frame and written asynchronously to the screenshots directory
+-- in the user data folder, using the configured screenshot format. Quitting the game
+-- immediately afterwards discards a screenshot that has not finished writing.
+-- @function [parent=#Debug] takeScreenshot
+
+---
 -- Navigation mesh rendering modes
 -- @type NAV_MESH_RENDER_MODE
 -- @field [parent=#NAV_MESH_RENDER_MODE] #number AreaType
