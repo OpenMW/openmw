@@ -340,7 +340,7 @@ namespace MWRender
     void Camera::attachTo(const MWWorld::Ptr& ptr)
     {
         mTrackingPtr = ptr;
-        if (mMode == Mode::Static)
+        if (mMode == Mode::Static || ptr.isEmpty())
             return;
         // Scripts read position before the first update.
         mTrackedPosition = ptr.getRefData().getPosition().asVec3();
