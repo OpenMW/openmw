@@ -952,7 +952,7 @@ elseif(NOT APPLE)
                                                                                         PATTERN "symstore-venv" EXCLUDE
                                                                                         PATTERN "Testing" EXCLUDE
                                                                                         PATTERN "tests_output" EXCLUDE
-                                                                                        PATTERN "try-compile")
+                                                                                        PATTERN "try-compile" EXCLUDE)
         INSTALL(DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}/" DESTINATION "." CONFIGURATIONS Debug;RelWithDebInfo FILES_MATCHING PATTERN "*.pdb"
                                                                                                                             PATTERN ".cmake" EXCLUDE
                                                                                                                             PATTERN ".qt" EXCLUDE
@@ -971,7 +971,7 @@ elseif(NOT APPLE)
                                                                                                                             PATTERN "symstore-venv" EXCLUDE
                                                                                                                             PATTERN "Testing" EXCLUDE
                                                                                                                             PATTERN "tests_output" EXCLUDE
-                                                                                                                            PATTERN "try-compile")
+                                                                                                                            PATTERN "try-compile" EXCLUDE)
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
