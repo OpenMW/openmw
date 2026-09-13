@@ -619,9 +619,9 @@ namespace MWWorld
             EXPECT_EQ(afterStatePostLoop.mPhase, static_cast<MWRender::MoonState::Phase>(0));
         }
 
-        // OFFSETS
+        // 24-DAY LOOP
 
-        TEST(MWWorldWeatherTest, secundaShouldApplyIncrementOffsetAfterFirstLoop)
+        TEST(MWWorldWeatherTest, moonShouldApplyIncrementOffsetAfterFirstLoop)
         {
             float dailyIncrement = 1.2f;
             float speed = 0.6f;
@@ -658,155 +658,7 @@ namespace MWWorld
             EXPECT_GT(afterStatePostLoop.mMoonAlpha, 0.0f);
         }
 
-        TEST(MWWorldWeatherTest, moonWithLowIncrementShouldApplyIncrementOffsetAfterCycle)
-        {
-            float dailyIncrement = 0.9f;
-            float speed = 0.5f;
-            float fadeEndAngle = 40.0f;
-            float fadeStartAngle = 50.0f;
-            float moonShadowEarlyFadeAngle = 0.5f;
-            float fadeInStart = 0.0f;
-            float fadeInFinish = 0.0f;
-            float fadeOutStart = 0.0f;
-            float fadeOutFinish = 0.0f;
-            float sunriseHour = 6.0f;
-            float sunsetHour = 18.0f;
-            float axisOffset = 35.0f;
-
-            // Days 7 and 31, 1:44
-            TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
-            timeStampBefore += (24.0f * 7 + 1.0f + 43.0f / 60.0f);
-            timeStampAfter += (24.0f * 7 + 1.0f + 45.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 31 + 1.0f + 43.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 31 + 1.0f + 45.0f / 60.0f);
-
-            MWWorld::MoonModel moon
-                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
-                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
-
-            MWRender::MoonState beforeState = moon.calculateState(timeStampBefore);
-            MWRender::MoonState afterState = moon.calculateState(timeStampAfter);
-            MWRender::MoonState beforeStatePostLoop = moon.calculateState(timeStampBeforePostLoop);
-            MWRender::MoonState afterStatePostLoop = moon.calculateState(timeStampAfterPostLoop);
-
-            EXPECT_LE(beforeState.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterState.mMoonAlpha, 0.0f);
-            EXPECT_LE(beforeStatePostLoop.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterStatePostLoop.mMoonAlpha, 0.0f);
-        }
-
-        TEST(MWWorldWeatherTest, masserShouldApplyIncrementOffsetAfterCycle)
-        {
-            float dailyIncrement = 1.0f;
-            float speed = 0.5f;
-            float fadeEndAngle = 40.0f;
-            float fadeStartAngle = 50.0f;
-            float moonShadowEarlyFadeAngle = 0.5f;
-            float fadeInStart = 0.0f;
-            float fadeInFinish = 0.0f;
-            float fadeOutStart = 0.0f;
-            float fadeOutFinish = 0.0f;
-            float sunriseHour = 6.0f;
-            float sunsetHour = 18.0f;
-            float axisOffset = 35.0f;
-
-            // Days 4 and 28, 1:02
-            TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
-            timeStampBefore += (24.0f * 4 + 1.0f + 1.0f / 60.0f);
-            timeStampAfter += (24.0f * 4 + 1.0f + 3.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 28 + 1.0f + 1.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 28 + 1.0f + 3.0f / 60.0f);
-
-            MWWorld::MoonModel moon
-                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
-                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
-
-            MWRender::MoonState beforeState = moon.calculateState(timeStampBefore);
-            MWRender::MoonState afterState = moon.calculateState(timeStampAfter);
-            MWRender::MoonState beforeStatePostLoop = moon.calculateState(timeStampBeforePostLoop);
-            MWRender::MoonState afterStatePostLoop = moon.calculateState(timeStampAfterPostLoop);
-
-            EXPECT_LE(beforeState.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterState.mMoonAlpha, 0.0f);
-            EXPECT_LE(beforeStatePostLoop.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterStatePostLoop.mMoonAlpha, 0.0f);
-        }
-
-        TEST(MWWorldWeatherTest, secundaShouldApplyIncrementOffsetAfterCycle)
-        {
-            float dailyIncrement = 1.2f;
-            float speed = 0.6f;
-            float fadeEndAngle = 30.0f;
-            float fadeStartAngle = 50.0f;
-            float moonShadowEarlyFadeAngle = 0.5f;
-            float fadeInStart = 0.0f;
-            float fadeInFinish = 0.0f;
-            float fadeOutStart = 0.0f;
-            float fadeOutFinish = 0.0f;
-            float sunriseHour = 6.0f;
-            float sunsetHour = 18.0f;
-            float axisOffset = 50.0f;
-
-            // Days 3 and 27, 2:04
-            TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
-            timeStampBefore += (24.0f * 3 + 2.0f + 3.0f / 60.0f);
-            timeStampAfter += (24.0f * 3 + 2.0f + 5.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 27 + 2.0f + 3.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 27 + 2.0f + 5.0f / 60.0f);
-
-            MWWorld::MoonModel moon
-                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
-                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
-
-            MWRender::MoonState beforeState = moon.calculateState(timeStampBefore);
-            MWRender::MoonState afterState = moon.calculateState(timeStampAfter);
-            MWRender::MoonState beforeStatePostLoop = moon.calculateState(timeStampBeforePostLoop);
-            MWRender::MoonState afterStatePostLoop = moon.calculateState(timeStampAfterPostLoop);
-
-            EXPECT_LE(beforeState.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterState.mMoonAlpha, 0.0f);
-            EXPECT_LE(beforeStatePostLoop.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterStatePostLoop.mMoonAlpha, 0.0f);
-        }
-
-        TEST(MWWorldWeatherTest, moonWithIncreasedSpeedShouldApplyIncrementOffsetAfterCycle)
-        {
-            float dailyIncrement = 1.2f;
-            float speed = 1.6f;
-            float fadeEndAngle = 30.0f;
-            float fadeStartAngle = 50.0f;
-            float moonShadowEarlyFadeAngle = 0.5f;
-            float fadeInStart = 0.0f;
-            float fadeInFinish = 0.0f;
-            float fadeOutStart = 0.0f;
-            float fadeOutFinish = 0.0f;
-            float sunriseHour = 6.0f;
-            float sunsetHour = 18.0f;
-            float axisOffset = 50.0f;
-
-            // Days 4 and 28, 1:13
-            TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
-            timeStampBefore += (24.0f * 4 + 1.0f + 12.0f / 60.0f);
-            timeStampAfter += (24.0f * 4 + 1.0f + 14.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 28 + 1.0f + 12.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 28 + 1.0f + 14.0f / 60.0f);
-
-            MWWorld::MoonModel moon
-                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
-                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
-
-            MWRender::MoonState beforeState = moon.calculateState(timeStampBefore);
-            MWRender::MoonState afterState = moon.calculateState(timeStampAfter);
-            MWRender::MoonState beforeStatePostLoop = moon.calculateState(timeStampBeforePostLoop);
-            MWRender::MoonState afterStatePostLoop = moon.calculateState(timeStampAfterPostLoop);
-
-            EXPECT_LE(beforeState.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterState.mMoonAlpha, 0.0f);
-            EXPECT_LE(beforeStatePostLoop.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterStatePostLoop.mMoonAlpha, 0.0f);
-        }
-
-        // HIGH AND NEGATIVE INCREMENTS
+        // FIXED RISE HOURS
 
         TEST(MWWorldWeatherTest, moonWithHalfDayIncrementShouldRiseAtTheSameHourEveryDay)
         {
@@ -823,7 +675,7 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 3 and 27, 17:03 (a daily increment of 12 hours leaves the moon rise hour where it is)
+            // Days 3 and 27, 17:03 (a daily increment of 12 hours doesn't advance the moon rise hour)
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 3 + 17.0f + 2.0f / 60.0f);
             timeStampAfter += (24.0f * 3 + 17.0f + 4.0f / 60.0f);
@@ -860,7 +712,7 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 4 and 28, 5:57
+            // Days 4 and 28, 5:57 (a daily increment of 12 hours doesn't advance the moon set hour)
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 4 + 5.0f + 56.0f / 60.0f);
             timeStampAfter += (24.0f * 4 + 5.0f + 58.0f / 60.0f);
@@ -882,7 +734,9 @@ namespace MWWorld
             EXPECT_LE(afterStatePostLoop.mMoonAlpha, 0.0f);
         }
 
-        TEST(MWWorldWeatherTest, moonWithNegativeIncrementShouldRiseEarlierEachDay)
+        // NEGATIVE INCREMENT RISE HOURS
+
+        TEST(MWWorldWeatherTest, moonWithNegativeNonZeroIncrementRisesEarlierEachDay)
         {
             float dailyIncrement = -1.0f;
             float speed = 0.6f;
@@ -896,30 +750,34 @@ namespace MWWorld
             float sunriseHour = 6.0f;
             float sunsetHour = 18.0f;
             float axisOffset = 50.0f;
-
-            // Days 9 and 33, 2:17 (the moon rose an hour before midnight)
-            TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
-            timeStampBefore += (24.0f * 9 + 2.0f + 16.0f / 60.0f);
-            timeStampAfter += (24.0f * 9 + 2.0f + 18.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 33 + 2.0f + 16.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 33 + 2.0f + 18.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
                     dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
 
-            MWRender::MoonState beforeState = moon.calculateState(timeStampBefore);
-            MWRender::MoonState afterState = moon.calculateState(timeStampAfter);
-            MWRender::MoonState beforeStatePostLoop = moon.calculateState(timeStampBeforePostLoop);
-            MWRender::MoonState afterStatePostLoop = moon.calculateState(timeStampAfterPostLoop);
+            // The moon appears an hour earlier for three consecutive days
+            const float appearanceTimes[] = { 2.0f + 17.0f / 60.0f, 1.0f + 17.0f / 60.0f, 0.0f + 17.0f / 60.0f };
+            int day = 9;
+            for (float hour : appearanceTimes)
+            {
+                TimeStamp before, after;
+                before += (24.0f * day + hour - 1.5f / 60.0f);
+                after += (24.0f * day + hour + 1.5f / 60.0f);
 
-            EXPECT_LE(beforeState.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterState.mMoonAlpha, 0.0f);
-            EXPECT_LE(beforeStatePostLoop.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterStatePostLoop.mMoonAlpha, 0.0f);
+                EXPECT_LE(moon.calculateState(before).mMoonAlpha, 0.0f) << "day " << day;
+                EXPECT_GT(moon.calculateState(after).mMoonAlpha, 0.0f) << "day " << day;
+                ++day;
+            }
+
+            TimeStamp beforePostLoop, afterPostLoop;
+            beforePostLoop += (24.0f * 33 + 2.0f + 15.5f / 60.0f);
+            afterPostLoop += (24.0f * 33 + 2.0f + 18.5f / 60.0f);
+
+            EXPECT_LE(moon.calculateState(beforePostLoop).mMoonAlpha, 0.0f);
+            EXPECT_GT(moon.calculateState(afterPostLoop).mMoonAlpha, 0.0f);
         }
 
-        TEST(MWWorldWeatherTest, moonWithNegativeIncrementShouldApplyCycleOffsetAfterCrossingMidnight)
+        TEST(MWWorldWeatherTest, moonWithNegativeNonZeroIncrementKeepsRisingWhenItsRiseHourCrossesMidnight)
         {
             float dailyIncrement = -1.0f;
             float speed = 0.6f;
@@ -934,7 +792,7 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 50.0f;
 
-            // Days 12 and 36, 0:17 (the increment is skipped once the moon becomes visible before midnight)
+            // Days 12 and 36, 0:17
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 12 + 0.0f + 16.0f / 60.0f);
             timeStampAfter += (24.0f * 12 + 0.0f + 18.0f / 60.0f);
@@ -993,164 +851,6 @@ namespace MWWorld
             EXPECT_EQ(afterStatePostLoop.mPhase, static_cast<MWRender::MoonState::Phase>(6));
         }
 
-        // LARGE AND FRACTIONAL NEGATIVE INCREMENTS
-
-        TEST(MWWorldWeatherTest, moonWithLargeIncrementShouldRiseLaterEachDay)
-        {
-            float dailyIncrement = 8.0f;
-            float speed = 0.5f;
-            float fadeEndAngle = 40.0f;
-            float fadeStartAngle = 50.0f;
-            float moonShadowEarlyFadeAngle = 0.5f;
-            float fadeInStart = 14.0f;
-            float fadeInFinish = 15.0f;
-            float fadeOutStart = 7.0f;
-            float fadeOutFinish = 10.0f;
-            float sunriseHour = 6.0f;
-            float sunsetHour = 18.0f;
-            float axisOffset = 35.0f;
-
-            // Days 4 and 28, 21:03 (the moon rose at 16:00, eight hours after the previous day)
-            TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
-            timeStampBefore += (24.0f * 4 + 21.0f + 2.0f / 60.0f);
-            timeStampAfter += (24.0f * 4 + 21.0f + 4.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 28 + 21.0f + 2.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 28 + 21.0f + 4.0f / 60.0f);
-
-            MWWorld::MoonModel moon
-                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
-                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
-
-            MWRender::MoonState beforeState = moon.calculateState(timeStampBefore);
-            MWRender::MoonState afterState = moon.calculateState(timeStampAfter);
-            MWRender::MoonState beforeStatePostLoop = moon.calculateState(timeStampBeforePostLoop);
-            MWRender::MoonState afterStatePostLoop = moon.calculateState(timeStampAfterPostLoop);
-
-            EXPECT_LE(beforeState.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterState.mMoonAlpha, 0.0f);
-            EXPECT_LE(beforeStatePostLoop.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterStatePostLoop.mMoonAlpha, 0.0f);
-        }
-
-        TEST(MWWorldWeatherTest, moonWithLargeIncrementShouldNotRiseOnEveryDay)
-        {
-            float dailyIncrement = 8.0f;
-            float speed = 0.5f;
-            float fadeEndAngle = 40.0f;
-            float fadeStartAngle = 50.0f;
-            float moonShadowEarlyFadeAngle = 0.5f;
-            float fadeInStart = 14.0f;
-            float fadeInFinish = 15.0f;
-            float fadeOutStart = 7.0f;
-            float fadeOutFinish = 10.0f;
-            float sunriseHour = 6.0f;
-            float sunsetHour = 18.0f;
-            float axisOffset = 35.0f;
-
-            // Days 5 and 29, 9:57 (the rise hour reached 24, so the moon only sets on this day)
-            TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
-            timeStampBefore += (24.0f * 5 + 9.0f + 56.0f / 60.0f);
-            timeStampAfter += (24.0f * 5 + 9.0f + 58.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 29 + 9.0f + 56.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 29 + 9.0f + 58.0f / 60.0f);
-
-            MWWorld::MoonModel moon
-                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
-                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
-
-            MWRender::MoonState beforeState = moon.calculateState(timeStampBefore);
-            MWRender::MoonState afterState = moon.calculateState(timeStampAfter);
-            MWRender::MoonState beforeStatePostLoop = moon.calculateState(timeStampBeforePostLoop);
-            MWRender::MoonState afterStatePostLoop = moon.calculateState(timeStampAfterPostLoop);
-
-            EXPECT_GT(beforeState.mMoonAlpha, 0.0f);
-            EXPECT_LE(afterState.mMoonAlpha, 0.0f);
-            EXPECT_GT(beforeStatePostLoop.mMoonAlpha, 0.0f);
-            EXPECT_LE(afterStatePostLoop.mMoonAlpha, 0.0f);
-
-            TimeStamp timeStampEvening, timeStampEveningPostLoop;
-            timeStampEvening += (24.0f * 5 + 21.0f + 4.0f / 60.0f);
-            timeStampEveningPostLoop += (24.0f * 29 + 21.0f + 4.0f / 60.0f);
-
-            EXPECT_LE(moon.calculateState(timeStampEvening).mMoonAlpha, 0.0f);
-            EXPECT_LE(moon.calculateState(timeStampEveningPostLoop).mMoonAlpha, 0.0f);
-        }
-
-        TEST(MWWorldWeatherTest, moonWithNegativeIncrementShouldDeferTheDailyUpdatePastMidnight)
-        {
-            float dailyIncrement = -1.2f;
-            float speed = 0.6f;
-            float fadeEndAngle = 30.0f;
-            float fadeStartAngle = 50.0f;
-            float moonShadowEarlyFadeAngle = 0.5f;
-            float fadeInStart = 14.0f;
-            float fadeInFinish = 15.0f;
-            float fadeOutStart = 7.0f;
-            float fadeOutFinish = 10.0f;
-            float sunriseHour = 6.0f;
-            float sunsetHour = 18.0f;
-            float axisOffset = 50.0f;
-
-            // Days 7 and 31, 0:53 (the increment that would make the moon rise before midnight waits)
-            TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
-            timeStampBefore += (24.0f * 7 + 0.0f + 52.0f / 60.0f);
-            timeStampAfter += (24.0f * 7 + 0.0f + 54.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 31 + 0.0f + 52.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 31 + 0.0f + 54.0f / 60.0f);
-
-            MWWorld::MoonModel moon
-                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
-                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
-
-            MWRender::MoonState beforeState = moon.calculateState(timeStampBefore);
-            MWRender::MoonState afterState = moon.calculateState(timeStampAfter);
-            MWRender::MoonState beforeStatePostLoop = moon.calculateState(timeStampBeforePostLoop);
-            MWRender::MoonState afterStatePostLoop = moon.calculateState(timeStampAfterPostLoop);
-
-            EXPECT_LE(beforeState.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterState.mMoonAlpha, 0.0f);
-            EXPECT_LE(beforeStatePostLoop.mMoonAlpha, 0.0f);
-            EXPECT_GT(afterStatePostLoop.mMoonAlpha, 0.0f);
-        }
-
-        TEST(MWWorldWeatherTest, moonWithNegativeIncrementShouldApplyTheDeferredUpdateWhenTheMoonFadesOut)
-        {
-            float dailyIncrement = -1.2f;
-            float speed = 0.6f;
-            float fadeEndAngle = 30.0f;
-            float fadeStartAngle = 50.0f;
-            float moonShadowEarlyFadeAngle = 0.5f;
-            float fadeInStart = 14.0f;
-            float fadeInFinish = 15.0f;
-            float fadeOutStart = 7.0f;
-            float fadeOutFinish = 10.0f;
-            float sunriseHour = 6.0f;
-            float sunsetHour = 18.0f;
-            float axisOffset = 50.0f;
-
-            // Days 6 and 7 (and 30 and 31), 14:05: the moon reappears after fading in on the day the
-            // increment is applied at midnight, but not on the day it is deferred to the fade out.
-            TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
-            timeStampBefore += (24.0f * 6 + 14.0f + 5.0f / 60.0f);
-            timeStampAfter += (24.0f * 7 + 14.0f + 5.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 30 + 14.0f + 5.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 31 + 14.0f + 5.0f / 60.0f);
-
-            MWWorld::MoonModel moon
-                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
-                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
-
-            MWRender::MoonState beforeState = moon.calculateState(timeStampBefore);
-            MWRender::MoonState afterState = moon.calculateState(timeStampAfter);
-            MWRender::MoonState beforeStatePostLoop = moon.calculateState(timeStampBeforePostLoop);
-            MWRender::MoonState afterStatePostLoop = moon.calculateState(timeStampAfterPostLoop);
-
-            EXPECT_GT(beforeState.mMoonAlpha, 0.0f);
-            EXPECT_LE(afterState.mMoonAlpha, 0.0f);
-            EXPECT_GT(beforeStatePostLoop.mMoonAlpha, 0.0f);
-            EXPECT_LE(afterStatePostLoop.mMoonAlpha, 0.0f);
-        }
-
         TEST(MWWorldWeatherTest, moonWithNegativeIncrementPhasesThirdQuarterToWaningCrescentAtCorrectTimes)
         {
             float dailyIncrement = -1.2f;
@@ -1188,7 +888,74 @@ namespace MWWorld
             EXPECT_EQ(afterStatePostLoop.mPhase, static_cast<MWRender::MoonState::Phase>(3));
         }
 
-        // HANDOVER OF THE DAY'S RISE HOUR
+        // RISE HOURS THAT SKIP A DAY
+
+        TEST(MWWorldWeatherTest, moonWithLargeIncrementSkipsTheDayItsRiseHourReachesMidnight)
+        {
+            float dailyIncrement = 8.0f;
+            float speed = 0.5f;
+            float fadeEndAngle = 40.0f;
+            float fadeStartAngle = 50.0f;
+            float moonShadowEarlyFadeAngle = 0.5f;
+            float fadeInStart = 14.0f;
+            float fadeInFinish = 15.0f;
+            float fadeOutStart = 7.0f;
+            float fadeOutFinish = 10.0f;
+            float sunriseHour = 6.0f;
+            float sunsetHour = 18.0f;
+            float axisOffset = 35.0f;
+
+            TimeStamp dayThreeMoonSetting, dayThreeMoonDark, dayFourMoonDark, dayFourMoonVisible, dayFourMoonSetting,
+                dayFourMoonDarkAgain, dayFiveMoonNight;
+
+            // Day's 3 moon rose at 08:00 and sets at at 01:58.
+            dayThreeMoonSetting += (24.0f * 4 + 1.0f + 57.0f / 60.0f);
+            dayThreeMoonDark += (24.0f * 4 + 1.0f + 59.0f / 60.0f);
+
+            // Day 4's moon rose at 16:00 and becomes visible at 21:03.
+            dayFourMoonDark += (24.0f * 4 + 21.0f + 2.0f / 60.0f);
+            dayFourMoonVisible += (24.0f * 4 + 21.0f + 4.0f / 60.0f);
+
+            // Day 4's moon is still up, so Day 5's 24:00 rise is skipped.
+            dayFourMoonSetting += (24.0f * 5 + 9.0f + 56.0f / 60.0f);
+            dayFourMoonDarkAgain += (24.0f * 5 + 9.0f + 58.0f / 60.0f);
+
+            // Day 5's moon is still dark through the night
+            dayFiveMoonNight += (24.0f * 5 + 21.0f + 4.0f / 60.0f);
+
+            TimeStamp dayThreeMoonSettingPostLoop, dayThreeMoonDarkPostLoop, dayFourMoonDarkPostLoop,
+                dayFourMoonVisiblePostLoop, dayFourMoonSettingPostLoop, dayFourMoonDarkAgainPostLoop,
+                dayFiveMoonNightPostLoop;
+            dayThreeMoonSettingPostLoop += (24.0f * 28 + 1.0f + 57.0f / 60.0f);
+            dayThreeMoonDarkPostLoop += (24.0f * 28 + 1.0f + 59.0f / 60.0f);
+            dayFourMoonDarkPostLoop += (24.0f * 28 + 21.0f + 2.0f / 60.0f);
+            dayFourMoonVisiblePostLoop += (24.0f * 28 + 21.0f + 4.0f / 60.0f);
+            dayFourMoonSettingPostLoop += (24.0f * 29 + 9.0f + 56.0f / 60.0f);
+            dayFourMoonDarkAgainPostLoop += (24.0f * 29 + 9.0f + 58.0f / 60.0f);
+            dayFiveMoonNightPostLoop += (24.0f * 29 + 21.0f + 4.0f / 60.0f);
+
+            MWWorld::MoonModel moon
+                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
+                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
+
+            EXPECT_GT(moon.calculateState(dayThreeMoonSetting).mMoonAlpha, 0.0f);
+            EXPECT_LE(moon.calculateState(dayThreeMoonDark).mMoonAlpha, 0.0f);
+            EXPECT_LE(moon.calculateState(dayFourMoonDark).mMoonAlpha, 0.0f);
+            EXPECT_GT(moon.calculateState(dayFourMoonVisible).mMoonAlpha, 0.0f);
+            EXPECT_GT(moon.calculateState(dayFourMoonSetting).mMoonAlpha, 0.0f);
+            EXPECT_LE(moon.calculateState(dayFourMoonDarkAgain).mMoonAlpha, 0.0f);
+            EXPECT_LE(moon.calculateState(dayFiveMoonNight).mMoonAlpha, 0.0f);
+
+            EXPECT_GT(moon.calculateState(dayThreeMoonSettingPostLoop).mMoonAlpha, 0.0f);
+            EXPECT_LE(moon.calculateState(dayThreeMoonDarkPostLoop).mMoonAlpha, 0.0f);
+            EXPECT_LE(moon.calculateState(dayFourMoonDarkPostLoop).mMoonAlpha, 0.0f);
+            EXPECT_GT(moon.calculateState(dayFourMoonVisiblePostLoop).mMoonAlpha, 0.0f);
+            EXPECT_GT(moon.calculateState(dayFourMoonSettingPostLoop).mMoonAlpha, 0.0f);
+            EXPECT_LE(moon.calculateState(dayFourMoonDarkAgainPostLoop).mMoonAlpha, 0.0f);
+            EXPECT_LE(moon.calculateState(dayFiveMoonNightPostLoop).mMoonAlpha, 0.0f);
+        }
+
+        // RISE HOUR HANDOVER
 
         TEST(MWWorldWeatherTest, moonHandsOverBehindTheDaytimeFadeBeforeSunrise)
         {
@@ -1205,8 +972,8 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 5 and 17, 7:00. The moon is out of sight from 2:59, so the day's rise hour takes over there and the
-            // moon is well up when the fade lets it show again.
+            // Days 5 and 17, 7:00. This moon's handover should be at 2:59, so it wouldn't become visible at this point
+            // unless the moon has correctly switched to Day 5's rise hour.
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 5 + 6.0f + 59.0f / 60.0f);
             timeStampAfter += (24.0f * 5 + 7.0f + 1.0f / 60.0f);
@@ -1243,8 +1010,8 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 50.0f;
 
-            // Days 6 and 18, 11:57. The fade at 9:59 is after sunrise, so it isn't cover enough. The moon keeps
-            // yesterday's rise hour and sets on it.
+            // Days 6 and 18, 11:57. The fade at 9:59 is after sunrise, so it isn't enough for handover. The moon keeps
+            // yesterday's rise hour until it sets.
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 6 + 11.0f + 56.0f / 60.0f);
             timeStampAfter += (24.0f * 6 + 11.0f + 58.0f / 60.0f);
@@ -1281,7 +1048,7 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 5 and 29, 2:59
+            // Days 5 and 29, 2:59. The moon phase should change at the same moment as the rise hour.
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 5 + 2.0f + 57.0f / 60.0f);
             timeStampAfter += (24.0f * 5 + 3.0f + 1.0f / 60.0f);
@@ -1305,7 +1072,7 @@ namespace MWWorld
 
         // DAY LENGTH
 
-        TEST(MWWorldWeatherTest, moonCrossesTheSkyAtAMultipleOfTheSunsSpeed)
+        TEST(MWWorldWeatherTest, moonCrossesTheSkyAtAMultipleOfDayLength)
         {
             float dailyIncrement = 10.0f;
             float speed = 5.0f;
@@ -1320,7 +1087,7 @@ namespace MWWorld
             float sunriseHour = 5.0f;
             float sunsetHour = 19.0f;
 
-            // Days 2 and 14, 14:13. A 14 hour day makes the sun, and so the moon, slower than it is on a 12 hour one.
+            // Days 2 and 14, 14:13. A 14 hour day makes the moon slower than a 12 hour day.
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 2 + 14.0f + 11.0f / 60.0f);
             timeStampAfter += (24.0f * 2 + 14.0f + 15.0f / 60.0f);
@@ -1357,8 +1124,7 @@ namespace MWWorld
             float sunriseHour = 10.0f;
             float sunsetHour = 18.0f;
 
-            // Days 3 and 15, 10:00. The fade at 6:59 is before this sunrise, so it is cover enough for the day's rise
-            // hour to take over there.
+            // Days 3 and 15, 10:00. The fade at 6:59 is before the sunrise, so the handover occurs.
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 3 + 9.0f + 58.0f / 60.0f);
             timeStampAfter += (24.0f * 3 + 10.0f + 2.0f / 60.0f);
@@ -1378,6 +1144,151 @@ namespace MWWorld
             EXPECT_GT(afterState.mMoonAlpha, 0.0f);
             EXPECT_LE(beforeStatePostLoop.mMoonAlpha, 0.0f);
             EXPECT_GT(afterStatePostLoop.mMoonAlpha, 0.0f);
+        }
+
+        // SPEED LIMITS
+
+        TEST(MWWorldWeatherTest, moonSlowerThanTheMinimumCrossesTheSkyAtTheMinimumRate)
+        {
+            float dailyIncrement = 10.0f;
+            float speed = 0.1f;
+            float fadeEndAngle = 40.0f;
+            float fadeStartAngle = 50.0f;
+            float moonShadowEarlyFadeAngle = 0.5f;
+            float fadeInStart = 10.0f;
+            float fadeInFinish = 11.0f;
+            float fadeOutStart = 6.0f;
+            float fadeOutFinish = 7.0f;
+            float sunriseHour = 6.0f;
+            float sunsetHour = 18.0f;
+            float axisOffset = 35.0f;
+
+            // Day 2, 17:04. The moon needs minimum speed to become visible in the evening.
+            TimeStamp timeStampBefore, timeStampAfter;
+            timeStampBefore += (24.0f * 2 + 17.0f + 2.0f / 60.0f);
+            timeStampAfter += (24.0f * 2 + 17.0f + 5.0f / 60.0f);
+
+            MWWorld::MoonModel moon
+                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
+                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
+
+            EXPECT_LE(moon.calculateState(timeStampBefore).mMoonAlpha, 0.0f);
+            EXPECT_GT(moon.calculateState(timeStampAfter).mMoonAlpha, 0.0f);
+        }
+
+        TEST(MWWorldWeatherTest, moonWithNegativeSpeedNeverRises)
+        {
+            float dailyIncrement = 1.2f;
+            float speed = -15.0f;
+            float fadeEndAngle = 30.0f;
+            float fadeStartAngle = 50.0f;
+            float moonShadowEarlyFadeAngle = 0.5f;
+            float fadeInStart = 14.0f;
+            float fadeInFinish = 15.0f;
+            float fadeOutStart = 7.0f;
+            float fadeOutFinish = 10.0f;
+            float sunriseHour = 6.0f;
+            float sunsetHour = 18.0f;
+            float axisOffset = 50.0f;
+
+            MWWorld::MoonModel moon
+                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
+                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
+
+            // A moon with negative non-zero speed never rises throughout the day.
+            for (int minute = 0; minute < 24 * 60; ++minute)
+            {
+                TimeStamp time;
+                time += (24.0f * 3 + minute / 60.0f);
+                EXPECT_LE(moon.calculateState(time).mMoonAlpha, 0.0f) << "minute " << minute;
+            }
+        }
+
+        TEST(MWWorldWeatherTest, moonWithZeroSpeedRisesAtMinimumButNegativeZeroSpeedDoesNot)
+        {
+            float dailyIncrement = 1.0f;
+            float fadeEndAngle = 40.0f;
+            float fadeStartAngle = 50.0f;
+            float moonShadowEarlyFadeAngle = 0.5f;
+            float fadeInStart = 14.0f;
+            float fadeInFinish = 15.0f;
+            float fadeOutStart = 7.0f;
+            float fadeOutFinish = 10.0f;
+            float sunriseHour = 6.0f;
+            float sunsetHour = 18.0f;
+            float axisOffset = 35.0f;
+
+            // Day 3, 02:00. Morrowind treats -0.0 speed differently than 0.0
+            TimeStamp time;
+            time += (24.0f * 3 + 2.0f);
+
+            MWWorld::MoonModel noSpeed
+                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, 0.0f,
+                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
+            MWWorld::MoonModel negativeZeroSpeed
+                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, -0.0f,
+                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
+
+            EXPECT_GT(noSpeed.calculateState(time).mMoonAlpha, 0.0f);
+            EXPECT_LE(negativeZeroSpeed.calculateState(time).mMoonAlpha, 0.0f);
+        }
+
+        // FADE ANGLES
+
+        TEST(MWWorldWeatherTest, moonWithEarlyFadeAnglePastFadeEndAngleIsNeverOutOfSight)
+        {
+            float dailyIncrement = 1.2f;
+            float speed = 0.6f;
+            float fadeEndAngle = 1.0f;
+            float fadeStartAngle = 50.0f;
+            float moonShadowEarlyFadeAngle = 10.0f;
+            float fadeInStart = 0.0f;
+            float fadeInFinish = 0.0f;
+            float fadeOutStart = 0.0f;
+            float fadeOutFinish = 0.0f;
+            float sunriseHour = 6.0f;
+            float sunsetHour = 18.0f;
+            float axisOffset = 50.0f;
+
+            MWWorld::MoonModel moon
+                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
+                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
+
+            // An early fade angle > fade end angle leaves no unlit angle, so this moon is never transparent.
+            for (int minute = 0; minute < 24 * 60; ++minute)
+            {
+                TimeStamp time;
+                time += (24.0f * 3 + minute / 60.0f);
+                EXPECT_GT(moon.calculateState(time).mMoonAlpha, 0.0f) << "minute " << minute;
+            }
+        }
+
+        TEST(MWWorldWeatherTest, moonAtTheHorizonIsInvisibleWithEarlyFadeAngleEqualToFadeEndAngle)
+        {
+            float dailyIncrement = 0.0f;
+            float speed = 0.0f;
+            float fadeEndAngle = 0.0f;
+            float fadeStartAngle = 0.0f;
+            float moonShadowEarlyFadeAngle = 0.0f;
+            float fadeInStart = 0.0f;
+            float fadeInFinish = 0.0f;
+            float fadeOutStart = 0.0f;
+            float fadeOutFinish = 0.0f;
+            float sunriseHour = 6.0f;
+            float sunsetHour = 18.0f;
+            float axisOffset = 0.0f;
+
+            // Day 3, 12:00. With every angle at zero the moon can still reach invisiblity at the horizon.
+            TimeStamp midCrossing, pastTheHorizon;
+            midCrossing += (24.0f * 3 + 12.0f);
+            pastTheHorizon += (24.0f * 3 + 23.0f + 30.0f / 60.0f);
+
+            MWWorld::MoonModel moon
+                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
+                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
+
+            EXPECT_GT(moon.calculateState(midCrossing).mMoonAlpha, 0.0f);
+            EXPECT_LE(moon.calculateState(pastTheHorizon).mMoonAlpha, 0.0f);
         }
     }
 }
