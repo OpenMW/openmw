@@ -621,7 +621,7 @@ namespace MWWorld
 
         // 24-DAY LOOP
 
-        TEST(MWWorldWeatherTest, moonShouldApplyIncrementOffsetAfterFirstLoop)
+        TEST(MWWorldWeatherTest, moonShouldApplySkippedIncrementsAfterFirstLoop)
         {
             float dailyIncrement = 1.2f;
             float speed = 0.6f;
@@ -908,7 +908,7 @@ namespace MWWorld
             TimeStamp dayThreeMoonSetting, dayThreeMoonDark, dayFourMoonDark, dayFourMoonVisible, dayFourMoonSetting,
                 dayFourMoonDarkAgain, dayFiveMoonNight;
 
-            // Day's 3 moon rose at 08:00 and sets at at 01:58.
+            // Day 3's moon rose at 08:00 and sets at 01:58.
             dayThreeMoonSetting += (24.0f * 4 + 1.0f + 57.0f / 60.0f);
             dayThreeMoonDark += (24.0f * 4 + 1.0f + 59.0f / 60.0f);
 
@@ -916,11 +916,11 @@ namespace MWWorld
             dayFourMoonDark += (24.0f * 4 + 21.0f + 2.0f / 60.0f);
             dayFourMoonVisible += (24.0f * 4 + 21.0f + 4.0f / 60.0f);
 
-            // Day 4's moon is still up, so Day 5's 24:00 rise is skipped.
+            // Day 4's moon sets, but the handover is delayed until 17:57, so no new rise.
             dayFourMoonSetting += (24.0f * 5 + 9.0f + 56.0f / 60.0f);
             dayFourMoonDarkAgain += (24.0f * 5 + 9.0f + 58.0f / 60.0f);
 
-            // Day 5's moon is still dark through the night
+            // Day 5's moon remains dark after the handover because it's past the new visible range.
             dayFiveMoonNight += (24.0f * 5 + 21.0f + 4.0f / 60.0f);
 
             TimeStamp dayThreeMoonSettingPostLoop, dayThreeMoonDarkPostLoop, dayFourMoonDarkPostLoop,
@@ -1235,7 +1235,7 @@ namespace MWWorld
 
         // FADE ANGLES
 
-        TEST(MWWorldWeatherTest, moonWithEarlyFadeAnglePastFadeEndAngleIsNeverOutOfSight)
+        TEST(MWWorldWeatherTest, moonWithEarlyFadeAngleGreaterThanFadeEndAngleIsNeverInvisible)
         {
             float dailyIncrement = 1.2f;
             float speed = 0.6f;
@@ -1254,7 +1254,7 @@ namespace MWWorld
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
                     dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
 
-            // An early fade angle > fade end angle leaves no unlit angle, so this moon is never transparent.
+            // An early fade angle > fade end angle leaves no unlit angle, so this moon is never fully transparent.
             for (int minute = 0; minute < 24 * 60; ++minute)
             {
                 TimeStamp time;
@@ -1278,7 +1278,7 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 0.0f;
 
-            // Day 3, 12:00. With every angle at zero the moon can still reach invisiblity at the horizon.
+            // Day 3, 12:00 and 23:30. With every angle at zero the moon can still reach invisibility past the horizon.
             TimeStamp midCrossing, pastTheHorizon;
             midCrossing += (24.0f * 3 + 12.0f);
             pastTheHorizon += (24.0f * 3 + 23.0f + 30.0f / 60.0f);
