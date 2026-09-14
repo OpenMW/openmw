@@ -10,8 +10,6 @@
 #include <components/detournavigator/collisionshapetype.hpp>
 #include <components/vfs/pathutil.hpp>
 
-#include <osg/io_utils>
-
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -386,6 +384,19 @@ namespace Settings
                             stream << v;
                         else
                             stream << "," << v;
+                    }
+                    return stream;
+                }
+                else if constexpr (requires { T::num_components; })
+                {
+                    // Vector types have no operator<< of their own. <osg/io_utils>
+                    // supplies one, but pulling a rendering library into the settings
+                    // headers for the sake of one warning message is not worth it.
+                    for (int i = 0; i < T::num_components; ++i)
+                    {
+                        if (i != 0)
+                            stream << ' ';
+                        stream << value.mValue[i];
                     }
                     return stream;
                 }
