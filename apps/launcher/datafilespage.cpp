@@ -510,6 +510,29 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     }
     mSelector->setNonUserContent(nonUserContent);
     mSelector->setProfileContent(mLauncherSettings.getContentListFiles(contentModelName));
+
+    // Restore where the user left every file, including the disabled ones, which
+    // setProfileContent() cannot do because it only knows about the enabled ones.
+    //
+    // The list handed to setContentList() must be a complete permutation of the files the
+    // user may reorder. It only ever moves a listed file earlier, and never moves an
+    // unlisted one, so a partial list does not reorder the model: it interleaves. A file
+    // that appeared on disk since the order was saved would be dragged ahead of remembered
+    // files, which can put a plugin before its own master.
+    const QStringList saved = mLauncherSettings.getContentListOrder(contentModelName);
+    if (!saved.isEmpty())
+    {
+        const QStringList current = mSelector->allFilesInOrder();
+        QStringList order;
+        order.reserve(current.size());
+        for (const QString& file : saved)
+            if (current.contains(file, Qt::CaseInsensitive) && !order.contains(file, Qt::CaseInsensitive))
+                order.append(file);
+        for (const QString& file : current)
+            if (!order.contains(file, Qt::CaseInsensitive))
+                order.append(file); // appeared since the order was saved, so it goes last
+        mSelector->setContentList(order, true);
+    }
 }
 
 void Launcher::DataFilesPage::saveSettings(const QString& profile)
@@ -548,7 +571,7 @@ void Launcher::DataFilesPage::saveSettings(const QString& profile)
         if (mGameSettings.isUserSetting(archive))
             archiveNames.push_back(archive.originalRepresentation);
     }
-    mLauncherSettings.setContentList(profileName, dirNames, archiveNames, fileNames);
+    mLauncherSettings.setContentList(profileName, dirNames, archiveNames, fileNames, mSelector->allFilesInOrder());
     mGameSettings.setContentList(dirList, selectedArchivePaths(), fileNames);
 
     QString language(mSelector->languageBox()->currentData().toString());
@@ -755,7 +778,8 @@ void Launcher::DataFilesPage::on_cloneProfileAction_triggered()
         if (mGameSettings.isUserSetting(archive))
             archiveNames.push_back(archive.originalRepresentation);
     }
-    mLauncherSettings.setContentList(profile, dirNames, archiveNames, selectedFilePaths());
+    mLauncherSettings.setContentList(
+        profile, dirNames, archiveNames, selectedFilePaths(), mSelector->allFilesInOrder());
     addProfile(profile, true);
 }
 

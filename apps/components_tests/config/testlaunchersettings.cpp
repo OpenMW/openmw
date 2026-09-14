@@ -148,4 +148,42 @@ thing=5
 
         EXPECT_TRUE(write(settings).contains("Default/future=one\nDefault/future=two\nDefault/future=three\n"));
     }
+
+    TEST(LauncherSettingsTest, ContentOrderSurvivesAWriteAndRead)
+    {
+        Config::LauncherSettings settings;
+        settings.setContentList("Default", { "/games/morrowind/Data Files" }, { "Morrowind.bsa" },
+            { "Morrowind.esm", "Tribunal.esm" }, { "Morrowind.esm", "SomethingDisabled.esp", "Tribunal.esm" });
+
+        const Config::LauncherSettings reread = parse(write(settings));
+
+        EXPECT_EQ(reread.getContentListOrder("Default"),
+            QStringList({ "Morrowind.esm", "SomethingDisabled.esp", "Tribunal.esm" }));
+        // the enabled list is unchanged: it is what openmw.cfg needs and must not gain the disabled entry
+        EXPECT_EQ(reread.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
+    }
+
+    TEST(LauncherSettingsTest, ALauncherConfigWrittenBeforeTheOrderKeyStillLoads)
+    {
+        const Config::LauncherSettings settings = parse(QString::fromUtf8(sConfig));
+
+        EXPECT_EQ(settings.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
+        EXPECT_EQ(settings.getDataDirectoryList("Default"), QStringList({ "/games/morrowind/Data Files" }));
+        // no order was recorded, so nothing is restored and the launcher behaves as it did
+        EXPECT_TRUE(settings.getContentListOrder("Default").isEmpty());
+    }
+
+    TEST(LauncherSettingsTest, TheOrderKeyDoesNotLeakIntoTheOtherProfileLists)
+    {
+        const Config::LauncherSettings settings = parse(QString::fromUtf8(sConfig)
+            + "Default/order=Morrowind.esm\n"
+              "Default/order=SomethingDisabled.esp\n"
+              "Default/order=Tribunal.esm\n");
+
+        EXPECT_EQ(settings.getContentListOrder("Default"),
+            QStringList({ "Morrowind.esm", "SomethingDisabled.esp", "Tribunal.esm" }));
+        EXPECT_EQ(settings.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
+        EXPECT_EQ(settings.getDataDirectoryList("Default"), QStringList({ "/games/morrowind/Data Files" }));
+        EXPECT_EQ(settings.getArchiveList("Default"), QStringList({ "Morrowind.bsa" }));
+    }
 }

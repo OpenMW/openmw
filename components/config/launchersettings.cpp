@@ -26,6 +26,7 @@ namespace Config
         constexpr char sDataKey[] = "data";
         constexpr char sArchiveKey[] = "fallback-archive";
         constexpr char sContentKey[] = "content";
+        constexpr char sOrderKey[] = "order";
         constexpr char sFirstRunKey[] = "firstrun";
         constexpr char sImportContentSetupKey[] = "importcontentsetup";
         constexpr char sImportFontSetupKey[] = "importfontsetup";
@@ -98,6 +99,11 @@ namespace Config
             if (suffix == sDataKey)
             {
                 profiles[profileName].mData.append(value);
+                return true;
+            }
+            if (suffix == sOrderKey)
+            {
+                profiles[profileName].mOrder.append(value);
                 return true;
             }
             if (suffix == sContentKey)
@@ -216,6 +222,7 @@ namespace Config
                 writeKeyValues(it->first, sArchiveKey, it->second.mArchives, stream);
                 writeKeyValues(it->first, sDataKey, it->second.mData, stream);
                 writeKeyValues(it->first, sContentKey, it->second.mContent, stream);
+                writeKeyValues(it->first, sOrderKey, it->second.mOrder, stream);
             }
             writeUnknownKeys(value.mUnknown, stream);
         }
@@ -344,16 +351,25 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     QStringList newListDirs;
     for (const auto& dir : dirs)
         newListDirs.push_back(dir.originalRepresentation);
-    setContentList(newContentListName, newListDirs, archives, files);
+    setContentList(newContentListName, newListDirs, archives, files, {}); // new list, no saved order yet
 }
 
 void Config::LauncherSettings::setContentList(const QString& contentListName, const QStringList& dirNames,
-    const QStringList& archiveNames, const QStringList& fileNames)
+    const QStringList& archiveNames, const QStringList& fileNames, const QStringList& order)
 {
     Profile& profile = mProfiles.mValues[contentListName];
     profile.mData = dirNames;
     profile.mArchives = archiveNames;
     profile.mContent = fileNames;
+    profile.mOrder = order;
+}
+
+QStringList Config::LauncherSettings::getContentListOrder(const QString& contentListName) const
+{
+    const Profile* profile = findProfile(contentListName);
+    if (profile == nullptr)
+        return {};
+    return profile->mOrder;
 }
 
 QStringList Config::LauncherSettings::getDataDirectoryList(const QString& contentListName) const

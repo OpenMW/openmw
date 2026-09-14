@@ -49,6 +49,17 @@ namespace Config
             QStringList mArchives;
             QStringList mData;
             QStringList mContent;
+            /// Every content file in the order the user left it, enabled or not.
+            ///
+            /// mContent holds only the enabled files, because openmw.cfg is the engine's
+            /// file and the engine only loads those. A disabled file's position is a
+            /// launcher concern, so it is recorded here, where the launcher already keeps
+            /// its own per-profile state. Both lists cover exactly the files the user is
+            /// allowed to reorder, so their membership stays consistent.
+            ///
+            /// Absent from any launcher.cfg written before this key existed; such a file
+            /// still loads and simply restores nothing.
+            QStringList mOrder;
         };
 
         struct Profiles
@@ -79,7 +90,7 @@ namespace Config
 
         /// Create a Content List (or replace if it already exists)
         void setContentList(const QString& contentListName, const QStringList& dirNames,
-            const QStringList& archiveNames, const QStringList& fileNames);
+            const QStringList& archiveNames, const QStringList& fileNames, const QStringList& order);
 
         void removeContentList(const QString& value);
 
@@ -88,6 +99,10 @@ namespace Config
         QString getCurrentContentListName() const { return mProfiles.mCurrentProfile; }
 
         QStringList getDataDirectoryList(const QString& contentListName) const;
+
+        /// Full content order for a list, including disabled files. Empty for a
+        /// launcher.cfg written before this existed, in which case nothing is restored.
+        QStringList getContentListOrder(const QString& contentListName) const;
         QStringList getArchiveList(const QString& contentListName) const;
         QStringList getContentListFiles(const QString& contentListName) const;
 
