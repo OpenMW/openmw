@@ -44,7 +44,18 @@ def parse_args():
         "--ini", type=str, default=None,
         help="INI file to import fallback values from via openmw-iniimporter (found next to --omw)",
     )
+    parser.add_argument(
+        "--resolution", type=str, default="640x480",
+        help="window resolution as WIDTHxHEIGHT",
+    )
     return parser.parse_args()
+
+
+def parse_resolution(value):
+    width, _, height = value.partition("x")
+    if not height or not width.isdigit() or not height.isdigit():
+        sys.exit(f"invalid --resolution {value!r}, expected WIDTHxHEIGHT")
+    return int(width), int(height)
 
 
 def lua_string_literal(value):
@@ -85,7 +96,7 @@ def parse_test_name(status, line):
 
 
 def write_generated_config(
-    config_dir, userdata_dir, data_local_dir, test_config_dir, config_source_dir, args, iniimporter_binary, ini_path
+    config_dir, userdata_dir, data_local_dir, test_config_dir, args, iniimporter_binary, ini_path
 ):
     shutil.rmtree(config_dir, ignore_errors=True)
     config_dir.mkdir(parents=True)
@@ -105,14 +116,11 @@ def write_generated_config(
             check=True,
         )
     with open(config_dir / "settings.cfg", "w", encoding="utf-8") as settings_cfg:
-        if config_source_dir is not None:
-            source_settings = config_source_dir / "settings.cfg"
-            if source_settings.is_file():
-                settings_cfg.write(source_settings.read_text(encoding="utf-8"))
+        width, height = parse_resolution(args.resolution)
         settings_cfg.write(
             "[Video]\n"
-            "resolution x = 640\n"
-            "resolution y = 480\n"
+            f"resolution x = {width}\n"
+            f"resolution y = {height}\n"
             "framerate limit = 60\n"
             "[Game]\n"
             "smooth animation transitions = true\n"
@@ -122,11 +130,23 @@ def write_generated_config(
         )
 
 
-def run_test(suite_name, suite_dir, config_dir, log_dir, time_str, data_dirs, args, openmw_binary):
+def run_test(
+    suite_name, suite_dir, config_dir, config_source_dir, log_dir, time_str, data_dirs, args, openmw_binary
+):
     start = time.time()
     if not args.list_tests:
         print(f'[----------] Running tests from {suite_name}')
-    command = [openmw_binary, "--replace=config", "--config", suite_dir, "--config", config_dir, "--no-grab"]
+    command = [openmw_binary, "--replace=config", "--config", suite_dir]
+    # --config is layered, and settings in a later layer override earlier ones. Pass
+    # any caller-supplied directory as its own layer rather than concatenating its
+    # settings.cfg into the generated one: two values for one key in a single file
+    # is a duplicate and openmw rejects it outright.
+    #
+    # The generated directory stays last because openmw writes its runtime files
+    # into the final layer, and openmw.log is read back from there below.
+    if config_source_dir is not None:
+        command += ["--config", config_source_dir]
+    command += ["--config", config_dir, "--no-grab"]
     for path in data_dirs:
         command += ["--data", path]
     stdout_lines = list()
@@ -242,7 +262,6 @@ def main():
             userdata_dir=suite_work_dir / "userdata",
             data_local_dir=suite_work_dir / "data-local",
             test_config_dir=test_config_dir,
-            config_source_dir=config_source_dir,
             args=args,
             iniimporter_binary=iniimporter_binary,
             ini_path=ini_path,
@@ -251,6 +270,7 @@ def main():
             suite_name=name,
             suite_dir=all_suites[name],
             config_dir=suite_work_dir,
+            config_source_dir=config_source_dir,
             log_dir=work_dir,
             time_str=time_str,
             data_dirs=data_dirs,
