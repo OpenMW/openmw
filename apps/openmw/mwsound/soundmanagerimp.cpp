@@ -193,7 +193,8 @@ namespace MWSound
             // Music is independent of cell changes.
             constexpr VFS::Path::NormalizedView musicDir("music/");
             for (const VFS::Path::Normalized& name : vfs->getRecursiveDirectoryIterator(musicDir))
-                mWarmQueue->enqueueStreamed(name);
+                if (hasAudioExtension(name))
+                    mWarmQueue->enqueueStreamed(name);
         }
     }
 

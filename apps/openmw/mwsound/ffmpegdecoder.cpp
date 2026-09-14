@@ -261,6 +261,12 @@ namespace MWSound
         }
     }
 
+    bool hasAudioExtension(VFS::Path::NormalizedView fname)
+    {
+        const auto ext = fname.extension();
+        return ext == "mp3" || ext == "ogg" || ext == "wav" || ext == "flac" || ext == "opus";
+    }
+
     bool FFmpegDecoder::openContext(const char* name, const AVInputFormat* fmt, bool limitProbe, AVIOContextPtr& ioCtx,
         AVFormatContextPtr& formatCtx, AVStream**& stream)
     {

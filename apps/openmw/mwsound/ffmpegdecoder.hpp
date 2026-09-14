@@ -35,6 +35,8 @@ extern "C"
 
 namespace MWSound
 {
+    bool hasAudioExtension(VFS::Path::NormalizedView fname);
+
     class HeadCache;
 
     struct AVIOContextDeleter
