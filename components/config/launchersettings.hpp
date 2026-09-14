@@ -1,6 +1,9 @@
 #ifndef LAUNCHERSETTINGS_HPP
 #define LAUNCHERSETTINGS_HPP
 
+#include <QList>
+#include <QMap>
+#include <QPair>
 #include <QString>
 #include <QStringList>
 
@@ -17,9 +20,13 @@ namespace Config
     public:
         static constexpr char sLauncherConfigFileName[] = "launcher.cfg";
 
+        /// Keys of a section this version does not use, in file order, written back as read
+        using UnknownKeys = QList<QPair<QString, QString>>;
+
         struct Settings
         {
             QString mLanguage;
+            UnknownKeys mUnknown;
         };
 
         struct MainWindow
@@ -34,6 +41,7 @@ namespace Config
         {
             bool mFirstRun = true;
             MainWindow mMainWindow;
+            UnknownKeys mUnknown;
         };
 
         struct Profile
@@ -47,12 +55,14 @@ namespace Config
         {
             QString mCurrentProfile;
             std::map<QString, Profile> mValues;
+            UnknownKeys mUnknown;
         };
 
         struct Importer
         {
             bool mImportContentSetup = true;
             bool mImportFontSetup = true;
+            UnknownKeys mUnknown;
         };
 
         void readFile(QTextStream& stream);
@@ -71,7 +81,7 @@ namespace Config
         void setContentList(const QString& contentListName, const QStringList& dirNames,
             const QStringList& archiveNames, const QStringList& fileNames);
 
-        void removeContentList(const QString& value) { mProfiles.mValues.erase(value); }
+        void removeContentList(const QString& value);
 
         void setCurrentContentListName(const QString& value) { mProfiles.mCurrentProfile = value; }
 
@@ -106,6 +116,8 @@ namespace Config
         Profiles mProfiles;
         General mGeneral;
         Importer mImporter;
+        /// Sections this version does not know at all, in name order, written back as read
+        QMap<QString, UnknownKeys> mUnknownSections;
 
         bool setValue(const QString& sectionPrefix, const QString& key, const QString& value);
 
