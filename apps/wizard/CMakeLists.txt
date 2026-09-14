@@ -86,18 +86,14 @@ if (WIN32)
     target_sources(openmw-wizard PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
 endif()
 
-if(DPKG_PROGRAM)
-    INSTALL(TARGETS openmw-wizard RUNTIME DESTINATION games COMPONENT openmw-wizard)
-endif()
-
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(openmw-wizard PRIVATE --coverage)
     target_link_libraries(openmw-wizard gcov)
 endif()
 
-if (WIN32)
-    INSTALL(TARGETS openmw-wizard RUNTIME DESTINATION ".")
-endif(WIN32)
+if (NOT APPLE)
+    INSTALL(TARGETS openmw-wizard)
+endif()
 
 if(USE_QT)
     set_property(TARGET openmw-wizard PROPERTY AUTOMOC ON)

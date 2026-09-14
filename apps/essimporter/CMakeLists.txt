@@ -46,9 +46,9 @@ if (BUILD_WITH_CODE_COVERAGE)
     target_link_libraries(openmw-essimporter gcov)
 endif()
 
-if (WIN32)
-    INSTALL(TARGETS openmw-essimporter RUNTIME DESTINATION ".")
-endif(WIN32)
+if (NOT APPLE)
+    INSTALL(TARGETS openmw-essimporter)
+endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-essimporter PRIVATE

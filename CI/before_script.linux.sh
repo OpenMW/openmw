@@ -31,6 +31,12 @@ if [[ $CI_OPENMW_USE_STATIC_DEPS ]]; then
     )
 fi
 
+if [[ $OPENMW_LOCAL_INSTALL ]]; then
+    CMAKE_CONF_OPTS+=(
+        -DOPENMW_LOCAL_INSTALL=ON
+    )
+fi
+
 if [[ $CI_CLANG_TIDY ]]; then
     CMAKE_CONF_OPTS+=(
         -DCMAKE_CXX_CLANG_TIDY=${CMAKE_CXX_CLANG_TIDY}

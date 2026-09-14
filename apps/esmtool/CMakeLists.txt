@@ -29,8 +29,8 @@ if (BUILD_WITH_CODE_COVERAGE)
     target_link_libraries(esmtool gcov)
 endif()
 
-if (WIN32)
-    install(TARGETS esmtool RUNTIME DESTINATION ".")
+if (NOT APPLE)
+    install(TARGETS esmtool)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
