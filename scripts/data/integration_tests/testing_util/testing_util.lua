@@ -179,8 +179,8 @@ function M.updateGlobal()
     end
 end
 
-function M.runLocalTest(obj, name)
-    runRemoteTest(currentLocalTest, name, function() obj:sendEvent('runLocalTest', name) end)
+function M.runLocalTest(obj, name, arg)
+    runRemoteTest(currentLocalTest, name, function() obj:sendEvent('runLocalTest', {name=name, arg=arg}) end)
 end
 
 function M.registerLocalTest(name, fn)
@@ -361,14 +361,15 @@ M.globalEventHandlers = {
 
 -- used only in local scripts
 M.localEventHandlers = {
-    runLocalTest = function(name)
+    runLocalTest = function(data)
+        local name = data.name
         local fn = localTests[name]
         if not fn then
             core.sendGlobalEvent('localTestFinished', {name=name, errMsg='Local test is not found'})
             return
         end
         localTestRunner = coroutine.create(function()
-            local status, err = pcall(fn)
+            local status, err = pcall(fn, data.arg)
             if status then
                 err = nil
             end

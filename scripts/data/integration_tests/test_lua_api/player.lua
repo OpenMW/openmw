@@ -286,7 +286,7 @@ testing.registerLocalTest('player memory limit',
         testing.expectEqual(err, 'not enough memory')
     end)
 
-testing.registerLocalTestStep('player with equipped weapon on attack should damage health of other actors',
+testing.registerLocalTestStep('player approaches and attacks a creature',
     function()
         camera.setMode(camera.MODE.ThirdPerson)
 
@@ -394,6 +394,74 @@ testing.registerLocalTestStep('player with equipped weapon on attack should dama
         for k, v in pairs(types.Actor.stats.attributes) do
             v(self).base = attributes[k]
         end
+    end)
+
+testing.registerLocalTestStep('equipped weapon damages a stationary target',
+    function(targetActor)
+        camera.setMode(camera.MODE.ThirdPerson)
+        self.controls.movement = 0
+        self.controls.sideMovement = 0
+        self.controls.use = self.ATTACK_TYPE.NoAttack
+
+        local attributes = types.Actor.stats.attributes
+        local strength = attributes.strength(self).base
+        local agility = attributes.agility(self).base
+        attributes.strength(self).base = 1000
+        attributes.agility(self).base = 1000
+
+        local weaponId = 'basic_dagger1h'
+        local setupDeadline = core.getRealTime() + 10
+        local weapon
+        while weapon == nil do
+            testing.expectLessOrEqual(core.getRealTime(), setupDeadline, 'Attack setup timed out')
+            weapon = types.Actor.inventory(self):find(weaponId)
+            coroutine.yield()
+        end
+
+        types.Actor.setEquipment(self, {[types.Actor.EQUIPMENT_SLOT.CarriedRight] = weapon})
+        types.Actor.setStance(self, types.Actor.STANCE.Weapon)
+
+        while not targetActor:isValid()
+            or not types.Actor.isOnGround(self)
+            or not types.Actor.isOnGround(targetActor)
+            or types.Actor.getEquipment(self, types.Actor.EQUIPMENT_SLOT.CarriedRight) ~= weapon
+            or types.Actor.getStance(self) ~= types.Actor.STANCE.Weapon do
+            testing.expectLessOrEqual(core.getRealTime(), setupDeadline, 'Attack setup timed out')
+            coroutine.yield()
+        end
+
+        local previousHealth = types.Actor.stats.dynamic.health(targetActor).current
+        local endTime = core.getSimulationTime() + 10
+        local nextTime = 0
+        local use = self.ATTACK_TYPE.NoAttack
+        while types.Actor.stats.dynamic.health(targetActor).current >= previousHealth do
+            local time = core.getSimulationTime()
+            testing.expectLessOrEqual(time, endTime, 'Attack did not damage the target')
+            testing.expectLessOrEqual((targetActor.position - self.position):length(), 100, 'Target left melee reach')
+
+            if nextTime < time then
+                if use == self.ATTACK_TYPE.NoAttack then
+                    use = self.ATTACK_TYPE.Any
+                    nextTime = time + 0.5
+                else
+                    use = self.ATTACK_TYPE.NoAttack
+                end
+            end
+            self.controls.use = use
+
+            local halfExtents = types.Actor.getPathfindingAgentBounds(targetActor).halfExtents
+            local destination = targetActor.position - util.vector3(0, 0, halfExtents.z)
+            local direction = destination - self.position
+            direction = direction:normalize()
+            self.controls.yawChange = util.normalizeAngle(math.atan2(direction.x, direction.y) - self.rotation:getYaw())
+            self.controls.pitchChange = util.normalizeAngle(math.asin(util.clamp(-direction.z, -1, 1)) - self.rotation:getPitch())
+
+            coroutine.yield()
+        end
+
+        self.controls.use = self.ATTACK_TYPE.NoAttack
+        attributes.strength(self).base = strength
+        attributes.agility(self).base = agility
     end)
 
 return {
