@@ -49,17 +49,7 @@ namespace Config
             QStringList mArchives;
             QStringList mData;
             QStringList mContent;
-            /// Every content file in the order the user left it, enabled or not.
-            ///
-            /// mContent holds only the enabled files, because openmw.cfg is the engine's
-            /// file and the engine only loads those. A disabled file's position is a
-            /// launcher concern, so it is recorded here, where the launcher already keeps
-            /// its own per-profile state. Both lists cover exactly the files the user is
-            /// allowed to reorder, so their membership stays consistent.
-            ///
-            /// Absent from any launcher.cfg written before this key existed; such a file
-            /// still loads and simply restores nothing.
-            QStringList mOrder;
+            QStringList mAllContent;
         };
 
         struct Profiles

@@ -103,7 +103,7 @@ namespace Config
             }
             if (suffix == sOrderKey)
             {
-                profiles[profileName].mOrder.append(value);
+                profiles[profileName].mAllContent.append(value);
                 return true;
             }
             if (suffix == sContentKey)
@@ -222,7 +222,7 @@ namespace Config
                 writeKeyValues(it->first, sArchiveKey, it->second.mArchives, stream);
                 writeKeyValues(it->first, sDataKey, it->second.mData, stream);
                 writeKeyValues(it->first, sContentKey, it->second.mContent, stream);
-                writeKeyValues(it->first, sOrderKey, it->second.mOrder, stream);
+                writeKeyValues(it->first, sOrderKey, it->second.mAllContent, stream);
             }
             writeUnknownKeys(value.mUnknown, stream);
         }
@@ -361,7 +361,7 @@ void Config::LauncherSettings::setContentList(const QString& contentListName, co
     profile.mData = dirNames;
     profile.mArchives = archiveNames;
     profile.mContent = fileNames;
-    profile.mOrder = order;
+    profile.mAllContent = order;
 }
 
 QStringList Config::LauncherSettings::getContentListOrder(const QString& contentListName) const
@@ -369,7 +369,7 @@ QStringList Config::LauncherSettings::getContentListOrder(const QString& content
     const Profile* profile = findProfile(contentListName);
     if (profile == nullptr)
         return {};
-    return profile->mOrder;
+    return profile->mAllContent;
 }
 
 QStringList Config::LauncherSettings::getDataDirectoryList(const QString& contentListName) const
