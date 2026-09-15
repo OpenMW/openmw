@@ -652,7 +652,7 @@ bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile* file) c
     return !errors.empty();
 }
 
-QStringList ContentSelectorModel::ContentModel::allFilesInOrder() const
+QStringList ContentSelectorModel::ContentModel::userFilesInOrder() const
 {
     QStringList result;
     result.reserve(mFiles.size());

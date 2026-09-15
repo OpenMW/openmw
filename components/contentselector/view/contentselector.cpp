@@ -152,7 +152,7 @@ void ContentSelectorView::ContentSelector::setProfileContent(const QStringList& 
 
     // setContentList() only moves a listed file earlier and never moves an unlisted one, so hand it every file: those
     // that appeared since the order was saved go last, after the ones the user placed.
-    const QStringList current = allFilesInOrder();
+    const QStringList current = userFilesInOrder();
     QStringList complete;
     complete.reserve(current.size());
     for (const QString& file : order)
@@ -194,9 +194,9 @@ void ContentSelectorView::ContentSelector::setEncoding(const QString& encoding)
     mContentModel->setEncoding(encoding);
 }
 
-QStringList ContentSelectorView::ContentSelector::allFilesInOrder() const
+QStringList ContentSelectorView::ContentSelector::userFilesInOrder() const
 {
-    return mContentModel->allFilesInOrder();
+    return mContentModel->userFilesInOrder();
 }
 
 void ContentSelectorView::ContentSelector::setContentList(const QStringList& list, bool orderOnly)

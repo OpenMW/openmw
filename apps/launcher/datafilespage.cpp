@@ -549,7 +549,7 @@ void Launcher::DataFilesPage::saveSettings(const QString& profile)
         if (mGameSettings.isUserSetting(archive))
             archiveNames.push_back(archive.originalRepresentation);
     }
-    mLauncherSettings.setContentList(profileName, dirNames, archiveNames, fileNames, mSelector->allFilesInOrder());
+    mLauncherSettings.setContentList(profileName, dirNames, archiveNames, fileNames, mSelector->userFilesInOrder());
     mGameSettings.setContentList(dirList, selectedArchivePaths(), fileNames);
 
     QString language(mSelector->languageBox()->currentData().toString());
@@ -757,7 +757,7 @@ void Launcher::DataFilesPage::on_cloneProfileAction_triggered()
             archiveNames.push_back(archive.originalRepresentation);
     }
     mLauncherSettings.setContentList(
-        profile, dirNames, archiveNames, selectedFilePaths(), mSelector->allFilesInOrder());
+        profile, dirNames, archiveNames, selectedFilePaths(), mSelector->userFilesInOrder());
     addProfile(profile, true);
 }
 

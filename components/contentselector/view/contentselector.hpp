@@ -48,7 +48,7 @@ namespace ContentSelectorView
         void clearCheckStates();
         void setEncoding(const QString& encoding);
         void setContentList(const QStringList& list, bool orderOnly = false);
-        QStringList allFilesInOrder() const;
+        QStringList userFilesInOrder() const;
 
         ContentSelectorModel::ContentFileList selectedFiles() const;
 

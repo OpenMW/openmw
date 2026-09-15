@@ -66,10 +66,7 @@ namespace ContentSelectorModel
         void setNonUserContent(const QStringList& fileList);
         void setContentList(const QStringList& fileList, bool orderOnly = false);
 
-        /// Every file the user is free to reorder, in the order shown. Built-in and
-        /// non-user content are excluded: sortFiles() pins them and they are not ours to
-        /// remember. Feed the result back through setContentList(order, true) to restore.
-        QStringList allFilesInOrder() const;
+        QStringList userFilesInOrder() const;
         ContentFileList checkedItems() const;
         void uncheckAll();
 
