@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_BULLETSHAPEMANAGER_H
 #define OPENMW_COMPONENTS_BULLETSHAPEMANAGER_H
 
+#include <memory>
+
 #include <osg/ref_ptr>
 
 #include <components/vfs/pathutil.hpp>
@@ -50,7 +52,7 @@ namespace Resource
     private:
         osg::ref_ptr<BulletShapeInstance> createInstance(VFS::Path::NormalizedView name);
 
-        osg::ref_ptr<MultiObjectCache> mInstanceCache;
+        std::unique_ptr<MultiObjectCache> mInstanceCache;
         SceneManager* mSceneManager;
         NifFileManager* mNifFileManager;
     };

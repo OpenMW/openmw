@@ -4,7 +4,6 @@
 #include <map>
 #include <mutex>
 
-#include <osg/Referenced>
 #include <osg/ref_ptr>
 
 #include <components/vfs/pathutil.hpp>
@@ -21,7 +20,7 @@ namespace Resource
 {
 
     /// @brief Cache for "non reusable" objects.
-    class MultiObjectCache : public osg::Referenced
+    class MultiObjectCache
     {
     public:
         void removeUnreferencedObjectsInCache();

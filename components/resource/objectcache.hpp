@@ -23,7 +23,6 @@
 #include "cachestats.hpp"
 
 #include <osg/Node>
-#include <osg/Referenced>
 #include <osg/ref_ptr>
 
 #include <algorithm>
@@ -50,7 +49,7 @@ namespace Resource
     };
 
     template <typename KeyType>
-    class GenericObjectCache : public osg::Referenced
+    class GenericObjectCache
     {
     public:
         /*

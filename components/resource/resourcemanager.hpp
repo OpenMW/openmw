@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_MANAGER_H
 #define OPENMW_COMPONENTS_RESOURCE_MANAGER_H
 
+#include <memory>
+
 #include <osg/ref_ptr>
 
 #include <components/vfs/pathutil.hpp>
@@ -43,7 +45,7 @@ namespace Resource
 
         explicit GenericResourceManager(const VFS::Manager* vfs, double expiryDelay)
             : mVFS(vfs)
-            , mCache(new CacheType)
+            , mCache(std::make_unique<CacheType>())
             , mExpiryDelay(expiryDelay)
         {
         }
@@ -68,7 +70,7 @@ namespace Resource
 
     protected:
         const VFS::Manager* mVFS;
-        osg::ref_ptr<CacheType> mCache;
+        std::unique_ptr<CacheType> mCache;
         double mExpiryDelay;
     };
 
