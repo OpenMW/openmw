@@ -386,6 +386,8 @@ namespace MWLua
 
     void LuaManager::clear()
     {
+        mActionQueue.clear();
+        mTeleportPlayerAction.reset();
         LuaUi::clearGameInterface();
         mUiResourceManager.clear();
         MWBase::Environment::get().getWorld()->getPostProcessor()->disableDynamicShaders();
