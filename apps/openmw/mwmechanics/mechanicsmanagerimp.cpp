@@ -1510,15 +1510,16 @@ namespace MWMechanics
         if (target == player || !attacker.getClass().isActor())
             return false;
 
+        MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
+        AiSequence& seq = statsTarget.getAiSequence();
+        const bool inCombat = seq.isInCombat(attacker);
+
         if (canCommitCrimeAgainst(target, attacker))
             commitCrime(attacker, target, MWBase::MechanicsManager::OT_Assault);
 
-        MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
-        AiSequence& seq = statsTarget.getAiSequence();
-
         if (!attacker.isEmpty()
             && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(target) || attacker == player)
-            && !seq.isInCombat(attacker))
+            && !inCombat)
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
