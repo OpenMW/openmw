@@ -3,8 +3,7 @@
 #include <cmath>
 
 #include "scripttracker.hpp"
-
-#include <chrono>
+#include "util.hpp"
 
 #include <components/esm/luascripts.hpp>
 
@@ -423,8 +422,7 @@ namespace LuaUtil
             return;
         }
         const auto& loadedData = std::get<LoadedData>(mData);
-        const auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
-        const double currentRealTime = std::chrono::duration<double>(now).count();
+        const double currentRealTime = getRealTime();
         std::map<int, std::vector<ESM::LuaTimer>> timers;
         auto saveTimerFn = [&](const Timer& timer, TimerType timerType) {
             if (!timer.mSerializable)
@@ -564,8 +562,7 @@ namespace LuaUtil
             data.mPublicInterfaces = sol::table(view.sol(), sol::create);
             addPackage("openmw.interfaces", makeReadOnly(data.mPublicInterfaces));
 
-            const auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
-            const double currentRealTime = std::chrono::duration<double>(now).count();
+            const double currentRealTime = getRealTime();
 
             for (const auto& [scriptId, scriptInfo] : scripts)
             {

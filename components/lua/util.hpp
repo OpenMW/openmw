@@ -1,6 +1,7 @@
 #ifndef COMPONENTS_LUA_UTIL_H
 #define COMPONENTS_LUA_UTIL_H
 
+#include <chrono>
 #include <cstdint>
 
 #include <sol/sol.hpp>
@@ -9,6 +10,11 @@
 
 namespace LuaUtil
 {
+    inline double getRealTime()
+    {
+        return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    }
+
     // Lua arrays index from 1
     constexpr inline std::int64_t fromLuaIndex(std::int64_t i)
     {

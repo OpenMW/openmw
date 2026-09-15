@@ -22,6 +22,7 @@
 
 #include <components/l10n/manager.hpp>
 
+#include <components/lua/util.hpp>
 #include <components/lua_ui/registerscriptsettings.hpp>
 #include <components/lua_ui/util.hpp>
 
@@ -276,8 +277,7 @@ namespace MWLua
         mLuaEvents.finalizeEventBatch();
 
         MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
-        auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
-        double realTime = std::chrono::duration<double>(now).count();
+        const double realTime = LuaUtil::getRealTime();
 
         double simulationTime = timeManager.isPaused() ? 0 : timeManager.getSimulationTime();
         double gameTime = timeManager.isPaused() ? 0 : timeManager.getGameTime();

@@ -1,6 +1,5 @@
 #include "corebindings.hpp"
 
-#include <chrono>
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
@@ -65,9 +64,7 @@ namespace MWLua
         api["getGameTime"] = [timeManager]() { return timeManager->getGameTime(); };
         api["getGameTimeScale"] = [timeManager]() { return timeManager->getGameTimeScale(); };
         api["isWorldPaused"] = [timeManager]() { return timeManager->isPaused(); };
-        api["getRealTime"] = []() {
-            return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
-        };
+        api["getRealTime"] = []() { return LuaUtil::getRealTime(); };
 
         if (context.mType != Context::Global)
             api["getRealFrameDuration"] = []() { return MWBase::Environment::get().getFrameDuration(); };
