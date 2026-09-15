@@ -418,28 +418,28 @@ namespace MWWorld
         if (!std::signbit(mDegreesPerHour))
             mDegreesPerHour = std::max(mDegreesPerHour, 180.0f / 23.0f);
 
-        // Morrowind appears to reduce mDailyIncrement with modulo 24.0f to avoid situations where
+        // Morrowind appears to reduce mDailyIncrement with mod 24.0f to avoid situations where
         // the moon would increment more than an entire rotation in a single day.
         mDailyIncrement = std::fmod(mDailyIncrement, 24.0f);
     }
 
     void MoonModel::buildCycle()
     {
-        // We change to the next day's rise hour when the moon is out of sight, so each day depends
-        // on the previous.
-        int firstDay = 1 - daysPerCycle;
-        float riseHourNow = riseHour(firstDay);
+        // The moon change to the next day's rise hour when it's out of sight, so each day depends
+        // on the previous. We calculate an extra week to make the cached cycle accurate.
+        constexpr int firstDay = -7;
+        float currentRiseHour = riseHour(firstDay);
 
         for (int day = firstDay + 1; day <= daysPerCycle; ++day)
         {
             float nextRiseHour = riseHour(day);
-            float handover = handoverHour(riseHourNow, nextRiseHour);
+            float handover = handoverHour(currentRiseHour, nextRiseHour);
 
             if (day >= 1)
-                mCycle[dayOfCycle(day)] = { riseHourNow, handover };
+                mCycle[dayOfCycle(day)] = { currentRiseHour, handover };
 
             if (handover < 24.0f)
-                riseHourNow = nextRiseHour;
+                currentRiseHour = nextRiseHour;
         }
     }
 
@@ -447,8 +447,8 @@ namespace MWWorld
     {
         const CycleDay& today = mCycle[dayOfCycle(gameTime.getDay())];
         bool postHandover = gameTime.getHour() >= today.mHandoverHour;
-        float riseHour = postHandover ? mCycle[dayOfCycle(gameTime.getDay() + 1)].mRiseHour : today.mRiseHour;
-        float rotationFromHorizon = angle(gameTime.getHour(), riseHour);
+        float currentRiseHour = postHandover ? mCycle[dayOfCycle(gameTime.getDay() + 1)].mRiseHour : today.mRiseHour;
+        float rotationFromHorizon = angle(gameTime.getHour(), currentRiseHour);
 
         return { rotationFromHorizon,
             mAxisOffset, // Reverse engineered from Morrowind's scene graph rotation matrices.
@@ -468,8 +468,8 @@ namespace MWWorld
 
     inline float MoonModel::hourOfDay(float hours)
     {
-        float time = std::fmod(hours, 24.0f);
-        return time < 0.0f ? time + 24.0f : time;
+        float hour = std::fmod(hours, 24.0f);
+        return hour < 0.0f ? hour + 24.0f : hour;
     }
 
     inline int MoonModel::dayOfCycle(int gameDay)
@@ -484,7 +484,7 @@ namespace MWWorld
         if (mDailyIncrement == 0.0f)
             return 0.0f;
 
-        // Skip enough increments that the rise hour maintains a 24-day loop.
+        // Skip enough increments that the rise hour maintains a 24-day cycle.
         float skippedIncrements = (daysPerCycle - std::abs(daysPerCycle / mDailyIncrement))
             * std::floor(static_cast<float>(gameDay + startIncrements - 1) / daysPerCycle);
         float riseHour = mDailyIncrement * (gameDay + startIncrements - 1 - skippedIncrements);
