@@ -351,20 +351,20 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     QStringList newListDirs;
     for (const auto& dir : dirs)
         newListDirs.push_back(dir.originalRepresentation);
-    setContentList(newContentListName, newListDirs, archives, files, {}); // new list, no saved order yet
+    setContentList(newContentListName, newListDirs, archives, files, {});
 }
 
 void Config::LauncherSettings::setContentList(const QString& contentListName, const QStringList& dirNames,
-    const QStringList& archiveNames, const QStringList& fileNames, const QStringList& order)
+    const QStringList& archiveNames, const QStringList& fileNames, const QStringList& allFileNames)
 {
     Profile& profile = mProfiles.mValues[contentListName];
     profile.mData = dirNames;
     profile.mArchives = archiveNames;
     profile.mContent = fileNames;
-    profile.mAllContent = order;
+    profile.mAllContent = allFileNames;
 }
 
-QStringList Config::LauncherSettings::getContentListOrder(const QString& contentListName) const
+QStringList Config::LauncherSettings::getAllContentListFiles(const QString& contentListName) const
 {
     const Profile* profile = findProfile(contentListName);
     if (profile == nullptr)

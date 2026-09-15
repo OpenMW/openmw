@@ -80,7 +80,7 @@ namespace Config
 
         /// Create a Content List (or replace if it already exists)
         void setContentList(const QString& contentListName, const QStringList& dirNames,
-            const QStringList& archiveNames, const QStringList& fileNames, const QStringList& order);
+            const QStringList& archiveNames, const QStringList& fileNames, const QStringList& allFileNames);
 
         void removeContentList(const QString& value);
 
@@ -89,10 +89,7 @@ namespace Config
         QString getCurrentContentListName() const { return mProfiles.mCurrentProfile; }
 
         QStringList getDataDirectoryList(const QString& contentListName) const;
-
-        /// Full content order for a list, including disabled files. Empty for a
-        /// launcher.cfg written before this existed, in which case nothing is restored.
-        QStringList getContentListOrder(const QString& contentListName) const;
+        QStringList getAllContentListFiles(const QString& contentListName) const;
         QStringList getArchiveList(const QString& contentListName) const;
         QStringList getContentListFiles(const QString& contentListName) const;
 

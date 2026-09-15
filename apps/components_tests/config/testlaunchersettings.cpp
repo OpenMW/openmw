@@ -157,9 +157,8 @@ thing=5
 
         const Config::LauncherSettings reread = parse(write(settings));
 
-        EXPECT_EQ(reread.getContentListOrder("Default"),
+        EXPECT_EQ(reread.getAllContentListFiles("Default"),
             QStringList({ "Morrowind.esm", "SomethingDisabled.esp", "Tribunal.esm" }));
-        // the enabled list is unchanged: it is what openmw.cfg needs and must not gain the disabled entry
         EXPECT_EQ(reread.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
     }
 
@@ -169,8 +168,7 @@ thing=5
 
         EXPECT_EQ(settings.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
         EXPECT_EQ(settings.getDataDirectoryList("Default"), QStringList({ "/games/morrowind/Data Files" }));
-        // no order was recorded, so nothing is restored and the launcher behaves as it did
-        EXPECT_TRUE(settings.getContentListOrder("Default").isEmpty());
+        EXPECT_TRUE(settings.getAllContentListFiles("Default").isEmpty());
     }
 
     TEST(LauncherSettingsTest, TheOrderKeyDoesNotLeakIntoTheOtherProfileLists)
@@ -180,7 +178,7 @@ thing=5
               "Default/order=SomethingDisabled.esp\n"
               "Default/order=Tribunal.esm\n");
 
-        EXPECT_EQ(settings.getContentListOrder("Default"),
+        EXPECT_EQ(settings.getAllContentListFiles("Default"),
             QStringList({ "Morrowind.esm", "SomethingDisabled.esp", "Tribunal.esm" }));
         EXPECT_EQ(settings.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
         EXPECT_EQ(settings.getDataDirectoryList("Default"), QStringList({ "/games/morrowind/Data Files" }));

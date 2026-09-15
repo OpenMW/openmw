@@ -131,11 +131,11 @@ void ContentSelectorView::ContentSelector::setNonUserContent(const QStringList& 
     mContentModel->setNonUserContent(fileList);
 }
 
-void ContentSelectorView::ContentSelector::setProfileContent(const QStringList& fileList, const QStringList& order)
+void ContentSelectorView::ContentSelector::setProfileContent(const QStringList& enabledFiles, const QStringList& order)
 {
     clearCheckStates();
 
-    for (const QString& filepath : fileList)
+    for (const QString& filepath : enabledFiles)
     {
         const ContentSelectorModel::EsmFile* file = mContentModel->item(filepath);
         if (file && file->isGameFile())
@@ -145,13 +145,12 @@ void ContentSelectorView::ContentSelector::setProfileContent(const QStringList& 
         }
     }
 
-    setContentList(fileList);
+    setContentList(enabledFiles);
 
     if (order.isEmpty())
         return;
 
-    // setContentList() only moves a listed file earlier and never moves an unlisted one, so hand it every file: those
-    // that appeared since the order was saved go last, after the ones the user placed.
+    // files added since the order was saved go after the ones the user placed
     const QStringList current = userFilesInOrder();
     QStringList complete;
     complete.reserve(current.size());

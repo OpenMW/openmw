@@ -41,9 +41,7 @@ namespace ContentSelectorView
         bool containsDataFiles(const QString& path);
         void clearFiles();
         void setNonUserContent(const QStringList& fileList);
-        /// Checks the files in fileList and, when order is not empty, puts every file the user may reorder where
-        /// order says, enabled or not.
-        void setProfileContent(const QStringList& fileList, const QStringList& order);
+        void setProfileContent(const QStringList& enabledFiles, const QStringList& order);
 
         void clearCheckStates();
         void setEncoding(const QString& encoding);
