@@ -5,6 +5,7 @@
 #include <numeric>
 #include <set>
 #include <sstream>
+#include <unordered_map>
 
 #include <osg/Matrixf>
 
@@ -17,6 +18,7 @@
 #include <components/esm3/loadsoun.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
+#include <components/sceneutil/textkeymap.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/pathutil.hpp>
@@ -896,7 +898,8 @@ namespace MWSound
 
         // Soundgen keys resolve through matching models.
         std::set<VFS::Path::NormalizedView> soundGenModels;
-        std::vector<std::string_view> textKeys; // reused by every animation below
+        std::unordered_map<const SceneUtil::TextKeyMap*, bool> soundGenSources;
+        std::vector<const SceneUtil::TextKeyMap*> keyMaps;
         for (MWWorld::CellStore* cellStore : world->getActiveCells())
         {
             if (const ESM::Region* region = store.get<ESM::Region>().search(cellStore->getCell()->getRegion()))
@@ -912,13 +915,23 @@ namespace MWSound
                 {
                     constexpr std::string_view soundPrefix = "sound: ";
                     constexpr std::string_view soundGenPrefix = "soundgen: ";
-                    textKeys.clear();
-                    anim->getTextKeys(textKeys);
-                    for (std::string_view key : textKeys)
+                    keyMaps.clear();
+                    anim->getTextKeyMaps(keyMaps);
+                    for (const SceneUtil::TextKeyMap* keys : keyMaps)
                     {
-                        if (key.starts_with(soundPrefix))
-                            enqueueWarmSound(ESM::RefId::stringRefId(key.substr(soundPrefix.size())));
-                        else if (key.starts_with(soundGenPrefix))
+                        const auto [it, inserted] = soundGenSources.try_emplace(keys, false);
+                        if (inserted)
+                        {
+                            for (const auto& [time, key] : *keys)
+                            {
+                                if (key.starts_with(soundPrefix))
+                                    enqueueWarmSound(
+                                        ESM::RefId::stringRefId(std::string_view(key).substr(soundPrefix.size())));
+                                else if (key.starts_with(soundGenPrefix))
+                                    it->second = true;
+                            }
+                        }
+                        if (it->second)
                             soundGenModels.insert(ptr.getClass().getModel(ptr));
                     }
                 }
