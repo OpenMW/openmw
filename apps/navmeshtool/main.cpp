@@ -256,40 +256,39 @@ namespace NavMeshTool
 
                 Log(Debug::Info) << "Using " << threadsNumber << " parallel workers...";
 
+                const GenerateAllNavMeshTilesOptions generateAllNavMeshTilesOptions{
+                    .mRemoveUnusedTiles = removeUnusedTiles,
+                    .mWriteBinaryLog = writeBinaryLog,
+                    .mCollectStats = collectStats,
+                };
+
+                NavMeshTilesGenerator generator(
+                    agentBounds, navigatorSettings, generateAllNavMeshTilesOptions, db, workQueue);
+
                 for (const auto& [worldspace, cells] : worldspaceCells)
                 {
-                    const WorldspaceData worldspaceData = gatherWorldspaceData(navigatorSettings, readers, vfs,
+                    WorldspaceData worldspaceData = gatherWorldspaceData(navigatorSettings, readers, vfs,
                         bulletShapeManager, esmData, writeBinaryLog, worldspace, cells);
 
-                    const GenerateAllNavMeshTilesOptions generateAllNavMeshTilesOptions{
-                        .mRemoveUnusedTiles = removeUnusedTiles,
-                        .mWriteBinaryLog = writeBinaryLog,
-                        .mCollectStats = collectStats,
-                    };
-
-                    const GenerateTilesResult result = generateAllNavMeshTiles(
-                        agentBounds, navigatorSettings, generateAllNavMeshTilesOptions, worldspaceData, db, workQueue);
+                    const Status worldspaceStatus = generator.addWorldspace(std::move(worldspaceData));
 
                     ++count;
 
                     Log(Debug::Info) << "Processed worldspace (" << count << "/" << worldspaceCells.size() << ") "
                                      << worldspace;
 
-                    status = result.mStatus;
-                    provided += result.mProvided;
-                    inserted += result.mInserted;
-                    updated += result.mUpdated;
-                    deleted += result.mDeleted;
-
-                    if (collectStats)
-                    {
-                        stats.mMaxPolyCountPerTile
-                            = std::max(stats.mMaxPolyCountPerTile, result.mStats.mMaxPolyCountPerTile);
-                    }
-
-                    if (status != Status::Ok)
+                    if (worldspaceStatus != Status::Ok)
                         break;
                 }
+
+                const GenerateTilesResult result = generator.finish();
+
+                status = result.mStatus;
+                provided = result.mProvided;
+                inserted = result.mInserted;
+                updated = result.mUpdated;
+                deleted = result.mDeleted;
+                stats = result.mStats;
             }
 
             Log(Debug::Info) << "Generated navmesh for " << provided << " tiles: " << inserted << " inserted, "
