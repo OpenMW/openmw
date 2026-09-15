@@ -103,7 +103,7 @@ namespace Config
             }
             if (suffix == sOrderKey)
             {
-                profiles[profileName].mAllContent.append(value);
+                profiles[profileName].mUserFilesInOrder.append(value);
                 return true;
             }
             if (suffix == sContentKey)
@@ -222,7 +222,7 @@ namespace Config
                 writeKeyValues(it->first, sArchiveKey, it->second.mArchives, stream);
                 writeKeyValues(it->first, sDataKey, it->second.mData, stream);
                 writeKeyValues(it->first, sContentKey, it->second.mContent, stream);
-                writeKeyValues(it->first, sOrderKey, it->second.mAllContent, stream);
+                writeKeyValues(it->first, sOrderKey, it->second.mUserFilesInOrder, stream);
             }
             writeUnknownKeys(value.mUnknown, stream);
         }
@@ -355,21 +355,21 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
 }
 
 void Config::LauncherSettings::setContentList(const QString& contentListName, const QStringList& dirNames,
-    const QStringList& archiveNames, const QStringList& fileNames, const QStringList& allFileNames)
+    const QStringList& archiveNames, const QStringList& fileNames, const QStringList& userFilesInOrder)
 {
     Profile& profile = mProfiles.mValues[contentListName];
     profile.mData = dirNames;
     profile.mArchives = archiveNames;
     profile.mContent = fileNames;
-    profile.mAllContent = allFileNames;
+    profile.mUserFilesInOrder = userFilesInOrder;
 }
 
-QStringList Config::LauncherSettings::getAllContentListFiles(const QString& contentListName) const
+QStringList Config::LauncherSettings::getUserFilesInOrder(const QString& contentListName) const
 {
     const Profile* profile = findProfile(contentListName);
     if (profile == nullptr)
         return {};
-    return profile->mAllContent;
+    return profile->mUserFilesInOrder;
 }
 
 QStringList Config::LauncherSettings::getDataDirectoryList(const QString& contentListName) const

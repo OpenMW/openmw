@@ -157,7 +157,7 @@ thing=5
 
         const Config::LauncherSettings reread = parse(write(settings));
 
-        EXPECT_EQ(reread.getAllContentListFiles("Default"),
+        EXPECT_EQ(reread.getUserFilesInOrder("Default"),
             QStringList({ "Morrowind.esm", "SomethingDisabled.esp", "Tribunal.esm" }));
         EXPECT_EQ(reread.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
     }
@@ -168,7 +168,7 @@ thing=5
 
         EXPECT_EQ(settings.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
         EXPECT_EQ(settings.getDataDirectoryList("Default"), QStringList({ "/games/morrowind/Data Files" }));
-        EXPECT_TRUE(settings.getAllContentListFiles("Default").isEmpty());
+        EXPECT_TRUE(settings.getUserFilesInOrder("Default").isEmpty());
     }
 
     TEST(LauncherSettingsTest, TheOrderKeyDoesNotLeakIntoTheOtherProfileLists)
@@ -178,7 +178,7 @@ thing=5
               "Default/order=SomethingDisabled.esp\n"
               "Default/order=Tribunal.esm\n");
 
-        EXPECT_EQ(settings.getAllContentListFiles("Default"),
+        EXPECT_EQ(settings.getUserFilesInOrder("Default"),
             QStringList({ "Morrowind.esm", "SomethingDisabled.esp", "Tribunal.esm" }));
         EXPECT_EQ(settings.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
         EXPECT_EQ(settings.getDataDirectoryList("Default"), QStringList({ "/games/morrowind/Data Files" }));

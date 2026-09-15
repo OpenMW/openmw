@@ -49,7 +49,7 @@ namespace Config
             QStringList mArchives;
             QStringList mData;
             QStringList mContent;
-            QStringList mAllContent;
+            QStringList mUserFilesInOrder;
         };
 
         struct Profiles
@@ -80,7 +80,7 @@ namespace Config
 
         /// Create a Content List (or replace if it already exists)
         void setContentList(const QString& contentListName, const QStringList& dirNames,
-            const QStringList& archiveNames, const QStringList& fileNames, const QStringList& allFileNames);
+            const QStringList& archiveNames, const QStringList& fileNames, const QStringList& userFilesInOrder);
 
         void removeContentList(const QString& value);
 
@@ -89,7 +89,7 @@ namespace Config
         QString getCurrentContentListName() const { return mProfiles.mCurrentProfile; }
 
         QStringList getDataDirectoryList(const QString& contentListName) const;
-        QStringList getAllContentListFiles(const QString& contentListName) const;
+        QStringList getUserFilesInOrder(const QString& contentListName) const;
         QStringList getArchiveList(const QString& contentListName) const;
         QStringList getContentListFiles(const QString& contentListName) const;
 
