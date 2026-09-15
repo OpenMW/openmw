@@ -292,9 +292,10 @@ namespace MWWorld
             float mHandoverHour;
         };
 
-        // Time thresholds for Morrowind parity.
+        // Time constant for Morrowind parity.
         static constexpr float oneMinute = 0.0167f;
-        static constexpr float oneSecond = oneMinute / 60.0f;
+
+        static constexpr float riseHourEpsilon = 1e-4f;
 
         // The moon repeats itself over this cycle.
         static constexpr int daysPerPhase = 3;

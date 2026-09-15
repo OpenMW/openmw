@@ -489,16 +489,12 @@ namespace MWWorld
             * std::floor(static_cast<float>(gameDay + startIncrements - 1) / daysPerCycle);
         float riseHour = mDailyIncrement * (gameDay + startIncrements - 1 - skippedIncrements);
 
-        // We need to keep the moon's rise hour between 0,24 or -24,0 depending on daily increment's sign.
+        // We need to wrap the moon's rise hour between about 0,24 or -24,0 depending on daily increment.
         riseHour = std::fmod(riseHour, 24.0f);
-        if (mDailyIncrement < 0.0f)
-        {
-            if (riseHour > 0.0f)
-                riseHour -= 24.0f;
-            if (riseHour <= -24.0f + oneSecond)
-                riseHour += 24.0f;
-        }
-        else if (riseHour <= oneSecond)
+        if (mDailyIncrement < 0.0f && riseHour > riseHourEpsilon)
+            riseHour -= 24.0f;
+
+        if (mDailyIncrement >= 0.0f && riseHour <= riseHourEpsilon)
             riseHour += 24.0f;
 
         return riseHour;
@@ -513,7 +509,7 @@ namespace MWWorld
         // Whether the time elapsed since the rise hour places the moon in an invisible hour range.
         auto isInvisibleHour = [&](float gameHour, float riseHour) {
             float travelled = hourOfDay(gameHour - riseHour);
-            return travelled < hoursUntilVisible() || travelled >= hoursUntilInvisible() - oneSecond;
+            return travelled < hoursUntilVisible() || travelled >= hoursUntilInvisible() - riseHourEpsilon;
         };
 
         // Whether the moon is invisible by alpha or by fade angle at both the old and new positions.
