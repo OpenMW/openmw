@@ -349,7 +349,6 @@ namespace ESSImport
         {
             ESM::Cell mCell;
             std::vector<CellRef> mRefs;
-            std::vector<unsigned int> mFogOfWar;
         };
 
         std::map<std::string, Cell, Misc::StringUtils::CiComp> mIntCells;
