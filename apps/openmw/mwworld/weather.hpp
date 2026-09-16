@@ -293,18 +293,18 @@ namespace MWWorld
         };
 
         // Time constant for Morrowind parity.
-        static constexpr float oneMinute = 0.0167f;
+        static constexpr float sOneMinute = 0.0167f;
 
-        static constexpr float riseHourEpsilon = 1e-4f;
+        static constexpr float sRiseHourEpsilon = 1e-4f;
 
         // The moon repeats itself over this cycle.
-        static constexpr int daysPerPhase = 3;
-        static constexpr int phasesPerCycle = 8;
-        static constexpr int daysPerCycle = daysPerPhase * phasesPerCycle;
+        static constexpr int sDaysPerPhase = 3;
+        static constexpr int sPhasesPerCycle = 8;
+        static constexpr int sDaysPerCycle = sDaysPerPhase * sPhasesPerCycle;
 
         // This arises from the start date of 16 Last Seed, 427 (with 17 increments).
         // TODO: Find an alternate formula that doesn't rely on this day being fixed.
-        static constexpr int startIncrements = 17;
+        static constexpr int sStartIncrements = 17;
 
         float mFadeInStart;
         float mFadeInFinish;
@@ -320,7 +320,7 @@ namespace MWWorld
         float mSunriseHour;
         float mSunsetHour;
 
-        CycleDay mCycle[daysPerCycle];
+        CycleDay mCycle[sDaysPerCycle];
 
         static float hourOfDay(float hours);
         static int dayOfCycle(int gameDay);

@@ -441,7 +441,7 @@ namespace MWWorld
         constexpr int firstDay = -7;
         float currentRiseHour = riseHour(firstDay);
 
-        for (int day = firstDay + 1; day <= daysPerCycle; ++day)
+        for (int day = firstDay + 1; day <= sDaysPerCycle; ++day)
         {
             float nextRiseHour = riseHour(day);
             float handover = handoverHour(currentRiseHour, nextRiseHour);
@@ -486,8 +486,8 @@ namespace MWWorld
     inline int MoonModel::dayOfCycle(int gameDay)
     {
         // Get the current day's placement in the cycle.
-        int day = (gameDay - 1) % daysPerCycle;
-        return day < 0 ? day + daysPerCycle : day;
+        int day = (gameDay - 1) % sDaysPerCycle;
+        return day < 0 ? day + sDaysPerCycle : day;
     }
 
     float MoonModel::riseHour(int gameDay) const
@@ -496,16 +496,16 @@ namespace MWWorld
             return 0.0f;
 
         // Skip enough increments that the rise hour maintains a 24-day cycle.
-        float skippedIncrements = (daysPerCycle - std::abs(daysPerCycle / mDailyIncrement))
-            * std::floor(static_cast<float>(gameDay + startIncrements - 1) / daysPerCycle);
-        float riseHour = mDailyIncrement * (gameDay + startIncrements - 1 - skippedIncrements);
+        float skippedIncrements = (sDaysPerCycle - std::abs(sDaysPerCycle / mDailyIncrement))
+            * std::floor(static_cast<float>(gameDay + sStartIncrements - 1) / sDaysPerCycle);
+        float riseHour = mDailyIncrement * (gameDay + sStartIncrements - 1 - skippedIncrements);
 
         // We need to wrap the moon's rise hour between about 0,24 or -24,0 depending on daily increment.
         riseHour = std::fmod(riseHour, 24.0f);
-        if (mDailyIncrement < 0.0f && riseHour > riseHourEpsilon)
+        if (mDailyIncrement < 0.0f && riseHour > sRiseHourEpsilon)
             riseHour -= 24.0f;
 
-        if (mDailyIncrement >= 0.0f && riseHour <= riseHourEpsilon)
+        if (mDailyIncrement >= 0.0f && riseHour <= sRiseHourEpsilon)
             riseHour += 24.0f;
 
         return riseHour;
@@ -520,7 +520,7 @@ namespace MWWorld
         // Whether the time elapsed since the rise hour places the moon in an invisible hour range.
         auto isInvisibleHour = [&](float gameHour, float riseHour) {
             float travelled = hourOfDay(gameHour - riseHour);
-            return travelled < hoursUntilVisible() || travelled >= hoursUntilInvisible() - riseHourEpsilon;
+            return travelled < hoursUntilVisible() || travelled >= hoursUntilInvisible() - sRiseHourEpsilon;
         };
 
         // Whether the moon is invisible by alpha or by fade angle at both the old and new positions.
@@ -536,7 +536,7 @@ namespace MWWorld
 
         // Get the moon fadeout point and both days' invisible times, then find the earliest.
         // Moon settings can lead to no invisible times, which means no handover.
-        float daytimeFade = mFadeOutFinish - oneMinute;
+        float daytimeFade = mFadeOutFinish - sOneMinute;
         float prevRiseInvisibleHour = hourOfDay(prevRiseHour + hoursUntilInvisible());
         float nextRiseInvisibleHour = hourOfDay(nextRiseHour + hoursUntilInvisible());
 
@@ -582,7 +582,7 @@ namespace MWWorld
         // The phase changes when the active rise hour changes.
         int phaseDay = postHandover ? gameDay + 1 : gameDay;
 
-        return static_cast<MWRender::MoonState::Phase>((phaseDay / daysPerPhase) % phasesPerCycle);
+        return static_cast<MWRender::MoonState::Phase>((phaseDay / sDaysPerPhase) % sPhasesPerCycle);
     }
 
     inline float MoonModel::shadowBlend(float angle) const
@@ -612,7 +612,7 @@ namespace MWWorld
     {
         // Morrowind culls the moon one minute before mFadeOutFinish, but only when the moon has
         // a transparent hour range. If #2 below is <= 0, the early minute is skipped.
-        float adjustedFadeOutFinish = mFadeInStart > mFadeOutFinish ? mFadeOutFinish - oneMinute : mFadeOutFinish;
+        float adjustedFadeOutFinish = mFadeInStart > mFadeOutFinish ? mFadeOutFinish - sOneMinute : mFadeOutFinish;
 
         // The Fade Out Start / Finish and Fade In Start / Finish describe the hours at which the moon
         // appears and disappears.
