@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace MWWorld
 {
@@ -43,6 +44,16 @@ namespace MWWorld
         osg::Vec4f lerp(const osg::Vec4f& x, const osg::Vec4f& y, float factor)
         {
             return x * (1 - factor) + y * factor;
+        }
+
+        // Sign-safe and finite-safe division.
+        float safeDivide(float numerator, float divisor)
+        {
+            if (divisor != 0.0f)
+                return numerator / divisor;
+
+            float magnitude = numerator != 0.0f ? std::numeric_limits<float>::max() : 0.0f;
+            return std::signbit(numerator) != std::signbit(divisor) ? -magnitude : magnitude;
         }
 
         osg::Vec3f calculateStormDirection(VFS::Path::NormalizedView particleEffect)
@@ -410,7 +421,7 @@ namespace MWWorld
         // (weirdly) a faster moon too. The reverse-engineered formula is
         // mSpeed * 180 degrees (a full hemisphere) / day length (vanilla is 12 hours).
         float dayLength = mSunsetHour - mSunriseHour;
-        mDegreesPerHour = mSpeed * 180.0f / dayLength;
+        mDegreesPerHour = safeDivide(mSpeed * 180.0f, dayLength);
 
         // Morrowind appears to have a minimum speed to avoid situations where the moon can't
         // complete a full rotation in a single 24-hour period. The minimum is 1 rotation in 23 hours.
@@ -458,12 +469,12 @@ namespace MWWorld
 
     inline float MoonModel::hoursUntilVisible() const
     {
-        return (mFadeEndAngle - mMoonShadowEarlyFadeAngle) / rotation(1.0f);
+        return safeDivide(mFadeEndAngle - mMoonShadowEarlyFadeAngle, rotation(1.0f));
     }
 
     inline float MoonModel::hoursUntilInvisible() const
     {
-        return (180.0f - mFadeEndAngle + mMoonShadowEarlyFadeAngle) / rotation(1.0f);
+        return safeDivide(180.0f - mFadeEndAngle + mMoonShadowEarlyFadeAngle, rotation(1.0f));
     }
 
     inline float MoonModel::hourOfDay(float hours)
