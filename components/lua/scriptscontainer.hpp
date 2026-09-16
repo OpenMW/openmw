@@ -175,17 +175,6 @@ namespace LuaUtil
         // REAL_TIME timers run even when the game is paused.
         void setupUnsavableTimer(TimerType type, double time, int scriptId, sol::main_protected_function callback);
 
-        // Sets up a real-time timer, that can be automatically saved and loaded.
-        //   time - the absolute real time (in seconds, system clock) when the timer should be executed.
-        //   scriptPath - script path in VFS is used as script id. The script with the given path should already present
-        //   in the container. callbackName - callback (should be registered in advance) for this timer. callbackArg -
-        //   parameter for the callback (should be serializable).
-        void setupSerializableRealTimeTimer(
-            double time, int scriptId, std::string_view callbackName, sol::main_object callbackArg);
-
-        // Creates an unsavable real-time timer. Real-time timers run even when the game is paused.
-        void setupUnsavableRealTimeTimer(double time, int scriptId, sol::main_protected_function callback);
-
         // decayedInstructionCount applies deferred decay.
         void statsNextFrame() { ++mStatsFrame; }
 
