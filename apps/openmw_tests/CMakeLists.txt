@@ -18,6 +18,8 @@ file(GLOB UNITTEST_SRC_FILES
     mwgui/tooltips.cpp
     mwgui/weightedsearch.cpp
 
+    mwlua/testobjectcache.cpp
+
     mwscript/testscripts.cpp
 
     mwsound/testheadcache.cpp

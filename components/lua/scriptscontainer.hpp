@@ -24,9 +24,6 @@ namespace LuaUtil
         ScriptsContainerLifetime mWeakPtr;
 
     public:
-        ScriptsContainerWeakPtr(const ScriptsContainerWeakPtr&) = default;
-        ScriptsContainerWeakPtr(ScriptsContainerWeakPtr&&) = default;
-
         explicit ScriptsContainerWeakPtr(ScriptsContainerLifetime ptr)
             : mWeakPtr(std::move(ptr))
         {
@@ -40,16 +37,6 @@ namespace LuaUtil
             return nullptr;
         }
     };
-
-    inline auto operator<=>(const ScriptsContainerWeakPtr& lhs, const ScriptsContainerWeakPtr& rhs)
-    {
-        return *lhs <=> *rhs;
-    }
-
-    inline auto operator<=>(const ScriptsContainerWeakPtr& lhs, ScriptsContainer* rhs)
-    {
-        return *lhs <=> rhs;
-    }
 
     // ScriptsContainer is a base class for all scripts containers (LocalScripts,
     // GlobalScripts, PlayerScripts, etc). Each script runs in a separate sandbox.
@@ -186,8 +173,8 @@ namespace LuaUtil
         // because they can not be stored in saves. I.e. loading a saved game will not fully restore the state.
         void setupUnsavableTimer(TimerType type, double time, int scriptId, sol::main_protected_function callback);
 
-        // Informs that new frame is started. Needed to track Lua instruction count per frame.
-        void statsNextFrame();
+        // decayedInstructionCount applies deferred decay.
+        void statsNextFrame() { ++mStatsFrame; }
 
         struct ScriptStats
         {
@@ -281,6 +268,7 @@ namespace LuaUtil
             std::map<int64_t, sol::main_protected_function> mTemporaryCallbacks;
             VFS::Path::Normalized mPath;
             ScriptStats mStats;
+            int64_t mStatsFrame = 0; // frame mStats was last brought up to date
 
             ~Script();
         };
@@ -355,6 +343,9 @@ namespace LuaUtil
         int64_t mTemporaryCallbackCounter = 0;
 
         std::map<int, int64_t> mRemovedScriptsMemoryUsage;
+        int64_t mStatsFrame = 0;
+
+        float decayedInstructionCount(const Script& script) const;
         ScriptsContainerLifetime mThis; // used by LuaState to track ownership of memory allocations
 
         ScriptTracker* mTracker;
