@@ -286,9 +286,8 @@ namespace MWLua
         // paused
         mMenuScripts.processTimers(simulationTime, gameTime, realTime);
         mGlobalScripts.processTimers(simulationTime, gameTime, realTime);
-        forEachActive(mActiveLocalScripts, [&](LocalScripts* scripts) {
-          scripts->processTimers(simulationTime, gameTime, realTime);
-        });
+        forEachActive(mActiveLocalScripts,
+            [&](LocalScripts* scripts) { scripts->processTimers(simulationTime, gameTime, realTime); });
 
         // Run event handlers for events that were sent before `finalizeEventBatch`.
         mLuaEvents.callEventHandlers();
