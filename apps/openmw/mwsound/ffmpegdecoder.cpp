@@ -1,6 +1,7 @@
 #include "ffmpegdecoder.hpp"
 
 #include <algorithm>
+#include <cstring>
 #include <memory>
 #include <stdexcept>
 #include <utility>
@@ -46,14 +47,19 @@ namespace MWSound
     {
         try
         {
-            std::istream& stream = *static_cast<FFmpegDecoder*>(userData)->mDataStream;
+            FFmpegDecoder& self = *static_cast<FFmpegDecoder*>(userData);
+            std::istream& stream = *self.mDataStream;
             stream.clear();
+            const std::streamoff pos = stream.tellg();
             stream.read((char*)buf, bufSize);
             std::streamsize count = stream.gcount();
             if (count == 0)
                 return AVERROR_EOF;
             if (count > std::numeric_limits<int>::max())
                 return AVERROR_BUG;
+            for (const auto& [offset, value] : self.mPatchedBytes)
+                if (offset >= pos && offset < pos + count)
+                    buf[offset - pos] = static_cast<uint8_t>(value);
             return static_cast<int>(count);
         }
         catch (std::exception&)
@@ -74,7 +80,8 @@ namespace MWSound
 
     int64_t FFmpegDecoder::seek(void* userData, int64_t offset, int whence)
     {
-        std::istream& stream = *static_cast<FFmpegDecoder*>(userData)->mDataStream;
+        FFmpegDecoder& self = *static_cast<FFmpegDecoder*>(userData);
+        std::istream& stream = *self.mDataStream;
 
         whence &= ~AVSEEK_FORCE;
 
@@ -86,11 +93,11 @@ namespace MWSound
             stream.seekg(0, std::ios_base::end);
             size_t size = stream.tellg();
             stream.seekg(prev, std::ios_base::beg);
-            return size;
+            return size - self.mStreamBase;
         }
 
         if (whence == SEEK_SET)
-            stream.seekg(offset, std::ios_base::beg);
+            stream.seekg(offset + self.mStreamBase, std::ios_base::beg);
         else if (whence == SEEK_CUR)
             stream.seekg(offset, std::ios_base::cur);
         else if (whence == SEEK_END)
@@ -98,7 +105,7 @@ namespace MWSound
         else
             return -1;
 
-        return stream.tellg();
+        return std::streamoff(stream.tellg()) - self.mStreamBase;
     }
 
     /* Used by getAV*Data to search for more compressed data, and buffer it in the
@@ -319,6 +326,69 @@ namespace MWSound
         return stream != nullptr;
     }
 
+    void FFmpegDecoder::applyArtShims()
+    {
+        mStreamBase = 0;
+        mPatchedBytes.clear();
+
+        std::istream& stream = *mDataStream;
+        stream.seekg(0, std::ios_base::end);
+        const std::streamoff fileSize = stream.tellg();
+        stream.seekg(0);
+
+        unsigned char header[10];
+        stream.read(reinterpret_cast<char*>(header), sizeof(header));
+        if (stream.gcount() == sizeof(header))
+        {
+            if (std::memcmp(header, "ID3", 3) == 0)
+            {
+                // 10-byte header with a syncsafe 28-bit tag size, identical in
+                // 2.2, 2.3 and 2.4; the version only matters inside the tag,
+                // which is skipped whole. A footer adds another 10 bytes, and
+                // its flag bit is 2.4's alone: 2.2 and 2.3 leave that bit
+                // undefined. Starting the window past the tag means the
+                // demuxer never reads it (cover art included).
+                const std::streamoff tagSize = (std::streamoff(header[6] & 0x7f) << 21)
+                    | (std::streamoff(header[7] & 0x7f) << 14) | (std::streamoff(header[8] & 0x7f) << 7)
+                    | std::streamoff(header[9] & 0x7f);
+                const bool hasFooter = header[3] >= 4 && (header[5] & 0x10) != 0;
+                const std::streamoff base = 10 + tagSize + (hasFooter ? 10 : 0);
+                if (base < fileSize)
+                    mStreamBase = base;
+            }
+            else if (std::memcmp(header, "fLaC", 4) == 0)
+            {
+                // Metadata blocks: 4-byte headers (is-last bit, 7-bit type,
+                // 24-bit length), no checksum over them. Serving PICTURE
+                // headers with the type relabelled to PADDING makes the
+                // demuxer seek over the art instead of reading it. Only the
+                // served bytes change; the file is never written.
+                constexpr unsigned char picture = 6;
+                constexpr unsigned char padding = 1;
+                std::streamoff pos = 4;
+                stream.seekg(pos);
+                unsigned char block[4];
+                while (pos < fileSize)
+                {
+                    stream.read(reinterpret_cast<char*>(block), sizeof(block));
+                    if (stream.gcount() != sizeof(block))
+                        break;
+                    if ((block[0] & 0x7f) == picture)
+                        mPatchedBytes.emplace_back(pos, static_cast<char>((block[0] & 0x80) | padding));
+                    if (block[0] & 0x80)
+                        break;
+                    pos += 4
+                        + ((std::streamoff(block[1]) << 16) | (std::streamoff(block[2]) << 8)
+                            | std::streamoff(block[3]));
+                    stream.seekg(pos);
+                }
+            }
+        }
+
+        stream.clear();
+        stream.seekg(mStreamBase);
+    }
+
     void FFmpegDecoder::open(VFS::Path::NormalizedView fname)
     {
         close();
@@ -335,6 +405,7 @@ namespace MWSound
         }
         else
             mDataStream = mResourceMgr->get(fname);
+        applyArtShims();
 
         AVIOContextPtr ioCtx;
         AVFormatContextPtr formatCtxPtr;
@@ -355,7 +426,7 @@ namespace MWSound
             if (!opened)
             {
                 mDataStream->clear();
-                mDataStream->seekg(0);
+                mDataStream->seekg(mStreamBase);
             }
         }
 
@@ -427,6 +498,8 @@ namespace MWSound
         mFormatCtx.reset();
         mIoCtx.reset();
         mDataStream.reset();
+        mStreamBase = 0;
+        mPatchedBytes.clear();
     }
 
     std::string FFmpegDecoder::getName()
