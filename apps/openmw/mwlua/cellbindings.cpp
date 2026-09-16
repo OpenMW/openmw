@@ -106,6 +106,8 @@ namespace MWLua
             return c.mStore->getCell()->isExterior() || (c.mStore->getCell()->isQuasiExterior()) != 0;
         });
         cellT["isExterior"] = sol::readonly_property([](const CellT& c) { return c.mStore->isExterior(); });
+        cellT["hasBeenLoaded"] = sol::readonly_property(
+            [](const CellT& c) -> bool { return c.mStore->getState() == MWWorld::CellStore::State::State_Loaded; });
 
         // deprecated, use cell:hasTag("QuasiExterior") instead
         cellT["isQuasiExterior"]
