@@ -569,8 +569,9 @@ namespace MWWorld
         if (travelled < 0.0f)
             travelled += 24.0f;
 
+        // Absolute value to account for negative non-zero speed moons
         float rotationFromHorizon = rotation(travelled);
-        return rotationFromHorizon < 180.0f ? rotationFromHorizon : 0.0f;
+        return std::abs(rotationFromHorizon) < 180.0f ? rotationFromHorizon : 0.0f;
     }
 
     inline MWRender::MoonState::Phase MoonModel::phase(int gameDay, bool postHandover)
