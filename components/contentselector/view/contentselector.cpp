@@ -131,11 +131,11 @@ void ContentSelectorView::ContentSelector::setNonUserContent(const QStringList& 
     mContentModel->setNonUserContent(fileList);
 }
 
-void ContentSelectorView::ContentSelector::setProfileContent(const QStringList& fileList)
+void ContentSelectorView::ContentSelector::setProfileContent(const QStringList& enabledFiles, const QStringList& order)
 {
     clearCheckStates();
 
-    for (const QString& filepath : fileList)
+    for (const QString& filepath : enabledFiles)
     {
         const ContentSelectorModel::EsmFile* file = mContentModel->item(filepath);
         if (file && file->isGameFile())
@@ -145,7 +145,22 @@ void ContentSelectorView::ContentSelector::setProfileContent(const QStringList& 
         }
     }
 
-    setContentList(fileList);
+    setContentList(enabledFiles);
+
+    if (order.isEmpty())
+        return;
+
+    // files added since the order was saved go after the ones the user placed
+    const QStringList current = userFilesInOrder();
+    QStringList complete;
+    complete.reserve(current.size());
+    for (const QString& file : order)
+        if (current.contains(file, Qt::CaseInsensitive) && !complete.contains(file, Qt::CaseInsensitive))
+            complete.append(file);
+    for (const QString& file : current)
+        if (!complete.contains(file, Qt::CaseInsensitive))
+            complete.append(file);
+    setContentList(complete, true);
 }
 
 void ContentSelectorView::ContentSelector::setGameFile(const QString& filename)
@@ -176,6 +191,11 @@ void ContentSelectorView::ContentSelector::clearCheckStates()
 void ContentSelectorView::ContentSelector::setEncoding(const QString& encoding)
 {
     mContentModel->setEncoding(encoding);
+}
+
+QStringList ContentSelectorView::ContentSelector::userFilesInOrder() const
+{
+    return mContentModel->userFilesInOrder();
 }
 
 void ContentSelectorView::ContentSelector::setContentList(const QStringList& list, bool orderOnly)

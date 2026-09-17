@@ -41,11 +41,12 @@ namespace ContentSelectorView
         bool containsDataFiles(const QString& path);
         void clearFiles();
         void setNonUserContent(const QStringList& fileList);
-        void setProfileContent(const QStringList& fileList);
+        void setProfileContent(const QStringList& enabledFiles, const QStringList& order);
 
         void clearCheckStates();
         void setEncoding(const QString& encoding);
         void setContentList(const QStringList& list, bool orderOnly = false);
+        QStringList userFilesInOrder() const;
 
         ContentSelectorModel::ContentFileList selectedFiles() const;
 
