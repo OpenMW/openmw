@@ -898,7 +898,7 @@ namespace MWSound
 
         // Soundgen keys resolve through matching models.
         std::set<VFS::Path::NormalizedView> soundGenModels;
-        std::unordered_map<const SceneUtil::TextKeyMap*, bool> soundGenSources;
+        std::unordered_map<const SceneUtil::TextKeyMap*, decltype(soundGenModels)::iterator> soundGenSources;
         std::vector<const SceneUtil::TextKeyMap*> keyMaps;
         for (MWWorld::CellStore* cellStore : world->getActiveCells())
         {
@@ -919,20 +919,27 @@ namespace MWSound
                     anim->getTextKeyMaps(keyMaps);
                     for (const SceneUtil::TextKeyMap* keys : keyMaps)
                     {
-                        const auto [it, inserted] = soundGenSources.try_emplace(keys, false);
+                        const auto [it, inserted] = soundGenSources.try_emplace(keys, soundGenModels.end());
                         if (inserted)
                         {
+                            bool hasSoundGen = false;
                             for (const auto& [time, key] : *keys)
                             {
                                 if (key.starts_with(soundPrefix))
                                     enqueueWarmSound(
                                         ESM::RefId::stringRefId(std::string_view(key).substr(soundPrefix.size())));
                                 else if (key.starts_with(soundGenPrefix))
-                                    it->second = true;
+                                    hasSoundGen = true;
                             }
+                            if (hasSoundGen)
+                                it->second = soundGenModels.insert(ptr.getClass().getModel(ptr)).first;
                         }
-                        if (it->second)
-                            soundGenModels.insert(ptr.getClass().getModel(ptr));
+                        else if (it->second != soundGenModels.end())
+                        {
+                            const VFS::Path::NormalizedView model = ptr.getClass().getModel(ptr);
+                            if (model != *it->second)
+                                it->second = soundGenModels.insert(model).first;
+                        }
                     }
                 }
                 return true;
