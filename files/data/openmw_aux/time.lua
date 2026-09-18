@@ -12,6 +12,7 @@ local time = {
     day = 3600 * 24,
     GameTime = 'GameTime',
     SimulationTime = 'SimulationTime',
+    RealTime = 'RealTime',
 }
 
 ---
@@ -50,6 +51,19 @@ function time.newSimulationTimer(delay, callback, callbackArg)
 end
 
 ---
+-- Alias of async:newRealTimeTimer ; call callback(arg) in `delay` real seconds.
+-- Real-time timers run even when the game is paused.
+-- Callback must be registered in advance.
+-- @function [parent=#time] newRealTimeTimer
+-- @param #number delay
+-- @param openmw.async#TimerCallback callback A callback returned by `registerTimerCallback`
+-- @param arg An argument for `callback`; can be `nil`.
+function time.newRealTimeTimer(delay, callback, callbackArg)
+    local async = require('openmw.async')
+    return async:newRealTimeTimer(delay, callback, callbackArg)
+end
+
+---
 -- Run given function repeatedly.
 -- Note that loading a save stops the evaluation. If it should always work, call it during the initialization of the script (i.e. not in a handler)
 -- @function [parent=#time] runRepeatedly
@@ -57,7 +71,7 @@ end
 -- @param #number period interval
 -- @param #table options additional options `initialDelay` and `type`.
 -- `initialDelay` - delay before the first call. If missed then the delay is a random number in range [0, N]. Randomization is used for performance reasons -- to prevent all scripts from doing time consuming operations at the same time.
--- `type` - either `time.SimulationTime` (by default, timer uses simulation time) or `time.GameTime` (timer uses game time).
+-- `type` - either `time.SimulationTime` (by default, timer uses simulation time) or `time.GameTime` (timer uses game time) or `time.RealTime` (timer uses real time).
 -- @return #function a function without arguments that can be used to stop the periodical evaluation.
 -- @usage
 -- local stopFn = time.runRepeatedly(function() print('Test') end,
@@ -81,7 +95,13 @@ function time.runRepeatedly(fn, period, options)
     local core = require('openmw.core')
     local initialDelay = (options and options.initialDelay) or math.random() * period
     local getTimeFn, newTimerFn
-    if (options and options.type) == time.GameTime then
+    if (options and options.type) == time.RealTime then
+        getTimeFn = function()
+            local now = os.time()
+            return tonumber(now)
+        end
+        newTimerFn = async.newUnsavableRealTimeTimer
+    elseif (options and options.type) == time.GameTime then
         getTimeFn = core.getGameTime
         newTimerFn = async.newUnsavableGameTimer
     else

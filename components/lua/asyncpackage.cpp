@@ -1,5 +1,7 @@
 #include "asyncpackage.hpp"
 
+#include "util.hpp"
+
 namespace sol
 {
     template <>
@@ -90,6 +92,16 @@ namespace LuaUtil
             = [gameTimeFn](const AsyncPackageId& asyncId, double delay, sol::main_protected_function callback) {
                   asyncId.mContainer->setupUnsavableTimer(
                       TimerType::GAME_TIME, gameTimeFn() + delay, asyncId.mScriptId, std::move(callback));
+              };
+        api["newRealTimeTimer"]
+            = [](const AsyncPackageId&, double delay, const TimerCallback& callback, sol::main_object callbackArg) {
+                  callback.mAsyncId.mContainer->setupSerializableTimer(TimerType::REAL_TIME, getRealTime() + delay,
+                      callback.mAsyncId.mScriptId, callback.mName, std::move(callbackArg));
+              };
+        api["newUnsavableRealTimeTimer"]
+            = [](const AsyncPackageId& asyncId, double delay, sol::main_protected_function callback) {
+                  asyncId.mContainer->setupUnsavableTimer(
+                      TimerType::REAL_TIME, getRealTime() + delay, asyncId.mScriptId, std::move(callback));
               };
 
         sol::table callbackMeta = Callback::makeMetatable(state);

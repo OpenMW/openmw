@@ -34,6 +34,15 @@
 -- @param arg An argument for `callback`; can be `nil`.
 
 ---
+-- Calls callback(arg) in `delay` real time seconds.
+-- The callback must be registered in advance.
+-- @function [parent=#async] newRealTimeTimer
+-- @param self
+-- @param #number delay In seconds
+-- @param #TimerCallback callback A callback returned by `registerTimerCallback`
+-- @param arg An argument for `callback`; can be `nil`.
+
+---
 -- Calls `func()` in `delay` simulation seconds.
 -- The timer will be lost if the game is saved and loaded.
 -- @function [parent=#async] newUnsavableSimulationTimer
@@ -47,6 +56,14 @@
 -- @function [parent=#async] newUnsavableGameTimer
 -- @param self
 -- @param #number delay
+-- @param #function func
+
+---
+-- Calls `func()` in `delay` real time seconds.
+-- The timer will be lost if the game is saved and loaded.
+-- @function [parent=#async] newUnsavableRealTimeTimer
+-- @param self
+-- @param #number delay In seconds
 -- @param #function func
 
 ---

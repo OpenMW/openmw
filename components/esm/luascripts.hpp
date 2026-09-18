@@ -74,10 +74,11 @@ namespace ESM
 
     struct LuaTimer
     {
-        enum class Type : bool
+        enum class Type : unsigned char
         {
             SIMULATION_TIME = 0,
             GAME_TIME = 1,
+            REAL_TIME = 2,
         };
 
         Type mType;

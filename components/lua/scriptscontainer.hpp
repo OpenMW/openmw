@@ -123,7 +123,7 @@ namespace LuaUtil
         bool hasScript(int scriptId) const;
         void removeScript(int scriptId);
 
-        void processTimers(double simulationTime, double gameTime);
+        void processTimers(double simulationTime, double gameTime, double realTime);
 
         // Calls `onUpdate` (if present) for every script in the container.
         // Handlers are called in the same order as scripts were added.
@@ -161,8 +161,8 @@ namespace LuaUtil
         void registerTimerCallback(int scriptId, std::string_view callbackName, sol::main_protected_function callback);
 
         // Sets up a timer, that can be automatically saved and loaded.
-        //   type - the type of timer, either SIMULATION_TIME or GAME_TIME.
-        //   time - the absolute game time (in seconds or in hours) when the timer should be executed.
+        //   type - the type of timer: SIMULATION_TIME, GAME_TIME, or REAL_TIME.
+        //   time - the absolute time (in seconds) when the timer should be executed.
         //   scriptPath - script path in VFS is used as script id. The script with the given path should already present
         //   in the container. callbackName - callback (should be registered in advance) for this timer. callbackArg -
         //   parameter for the callback (should be serializable).
@@ -171,6 +171,8 @@ namespace LuaUtil
 
         // Creates a timer. `callback` is an arbitrary Lua function. These timers are called "unsavable"
         // because they can not be stored in saves. I.e. loading a saved game will not fully restore the state.
+        // type can be SIMULATION_TIME, GAME_TIME, or REAL_TIME.
+        // REAL_TIME timers run even when the game is paused.
         void setupUnsavableTimer(TimerType type, double time, int scriptId, sol::main_protected_function callback);
 
         // decayedInstructionCount applies deferred decay.
@@ -327,6 +329,7 @@ namespace LuaUtil
 
             std::vector<Timer> mSimulationTimersQueue;
             std::vector<Timer> mGameTimersQueue;
+            std::vector<Timer> mRealTimeTimersQueue;
         };
         using UnloadedData = ESM::LuaScripts;
 
