@@ -312,11 +312,11 @@ namespace LuaUtil
                 [](const TransformM& a, const TransformM& b) { return TransformM{ a.mM * b.mM }; },
                 [](const TransformM& a, const TransformQ& b) { return TransformM{ a.mM * glm::mat4_cast(b.mQ) }; });
         transMType[sol::meta_function::to_string] = [](const TransformM& m) {
-            glm::vec3 scale;
-            glm::quat rotation;
-            glm::vec3 trans;
-            glm::vec3 skew;
-            glm::vec4 perspective;
+            glm::vec3 scale{};
+            glm::quat rotation{};
+            glm::vec3 trans{};
+            glm::vec3 skew{};
+            glm::vec4 perspective{};
             glm::decompose(m.mM, scale, rotation, trans, skew, perspective);
             const float rotationAngle = glm::angle(rotation);
             const glm::vec3 rotationAxis = glm::axis(rotation);
@@ -334,7 +334,8 @@ namespace LuaUtil
         };
         transMType["apply"] = [](const TransformM& a, const Vec3& b) { return Vec3(a.mM * glm::vec4(b, 1.0f)); };
         transMType["inverse"] = [](const TransformM& m) {
-            if (glm::determinant(m.mM) == 0.0f)
+            const float det = glm::determinant(m.mM);
+            if (std::abs(det) <= std::numeric_limits<float>::epsilon())
                 throw std::runtime_error("This Transform is not invertible");
             return TransformM{ glm::inverse(m.mM) };
         };
