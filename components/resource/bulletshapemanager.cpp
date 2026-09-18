@@ -99,7 +99,7 @@ namespace Resource
     BulletShapeManager::BulletShapeManager(
         const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager, double expiryDelay)
         : ResourceManager(vfs, expiryDelay)
-        , mInstanceCache(new MultiObjectCache)
+        , mInstanceCache(std::make_unique<MultiObjectCache>())
         , mSceneManager(sceneMgr)
         , mNifFileManager(nifFileManager)
     {
