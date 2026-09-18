@@ -7,7 +7,7 @@
 
 namespace SceneUtil
 {
-    class KeyframeHolder;
+    struct KeyframeHolder;
 }
 
 namespace osg

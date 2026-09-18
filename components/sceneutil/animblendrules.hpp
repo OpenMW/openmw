@@ -1,17 +1,16 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_ANIMBLENDRULES_HPP
 #define OPENMW_COMPONENTS_SCENEUTIL_ANIMBLENDRULES_HPP
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
-
-#include <osg/Object>
 
 #include <components/vfs/manager.hpp>
 
 namespace SceneUtil
 {
-    class AnimBlendRules : public osg::Object
+    class AnimBlendRules
     {
     public:
         struct BlendRule
@@ -25,10 +24,7 @@ namespace SceneUtil
         };
 
         AnimBlendRules() = default;
-        AnimBlendRules(const std::vector<BlendRule>& rules);
-        AnimBlendRules(const AnimBlendRules& copy, const osg::CopyOp& copyop);
-
-        META_Object(SceneUtil, AnimBlendRules)
+        explicit AnimBlendRules(std::vector<BlendRule> rules);
 
         void addOverrideRules(const AnimBlendRules& overrideRules);
 
@@ -37,7 +33,7 @@ namespace SceneUtil
 
         const std::vector<BlendRule>& getRules() const { return mRules; }
 
-        static osg::ref_ptr<AnimBlendRules> fromFile(const VFS::Manager* vfs, VFS::Path::NormalizedView yamlpath);
+        static std::shared_ptr<AnimBlendRules> fromFile(const VFS::Manager* vfs, VFS::Path::NormalizedView yamlpath);
 
     private:
         std::vector<BlendRule> mRules;
