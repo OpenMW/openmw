@@ -1,8 +1,7 @@
 #include "npcstats.hpp"
 
 #include <cassert>
-#include <iomanip>
-#include <sstream>
+#include <format>
 
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadfact.hpp>
@@ -258,16 +257,19 @@ void MWMechanics::NpcStats::updateHealth()
 
 int MWMechanics::NpcStats::getLevelupAttributeMultiplier(ESM::RefId attribute) const
 {
-    auto it = mSkillIncreases.find(attribute);
-    if (it == mSkillIncreases.end() || it->second == 0)
+    const auto it = mSkillIncreases.find(attribute);
+    if (it == mSkillIncreases.end())
         return 1;
-    int num = std::min(10, it->second);
+    const int num = std::clamp(it->second, 0, 10);
+    if (num == 0)
+        return 1;
 
     // iLevelUp01Mult - iLevelUp10Mult
-    std::stringstream gmst;
-    gmst << "iLevelUp" << std::setfill('0') << std::setw(2) << num << "Mult";
+    const std::string id = std::format("iLevelUp{:0>2}Mult", num);
+    if (const ESM::GameSetting* gmst = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().search(id))
+        return gmst->mValue.getInteger();
 
-    return MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find(gmst.str())->mValue.getInteger();
+    return 1;
 }
 
 int MWMechanics::NpcStats::getSkillIncreasesForAttribute(ESM::RefId attribute) const
