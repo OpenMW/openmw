@@ -40,20 +40,29 @@ namespace Misc
         return osg::Vec3f(x, 0, z);
     }
 
+    inline osg::Vec3f toEulerAnglesXZ(const glm::quat& quat)
+    {
+        const glm::vec3 forward = glm::normalize(quat * glm::vec3(0, 1, 0));
+        return toEulerAnglesXZ(Misc::Convert::toOsg(forward));
+    }
+
     inline osg::Vec3f toEulerAnglesXZ(const osg::Quat& quat)
     {
-        const glm::vec3 forward = glm::normalize(Misc::Convert::toGlm(quat) * glm::vec3(0, 1, 0));
+        return toEulerAnglesXZ(Misc::Convert::toGlm(quat));
+    }
+
+    inline osg::Vec3f toEulerAnglesXZ(const glm::mat4& m)
+    {
+        // OSG stores row-major with row-vector semantics: row 1 is the image of the
+        // local +Y axis under M. In glm::make_mat4(osg.ptr()) column-major storage,
+        // that same row is column 1.
+        const glm::vec3 forward = glm::normalize(glm::vec3(m[1]));
         return toEulerAnglesXZ(Misc::Convert::toOsg(forward));
     }
 
     inline osg::Vec3f toEulerAnglesXZ(const osg::Matrixf& m)
     {
-        // OSG stores row-major with row-vector semantics: row 1 is the image of the
-        // local +Y axis under M. In glm::make_mat4(osg.ptr()) column-major storage,
-        // that same row is column 1.
-        const glm::mat4 gm = Misc::Convert::toGlm(m);
-        const glm::vec3 forward = glm::normalize(glm::vec3(gm[1]));
-        return toEulerAnglesXZ(Misc::Convert::toOsg(forward));
+        return toEulerAnglesXZ(Misc::Convert::toGlm(m));
     }
 
     inline osg::Vec3f toEulerAnglesZYX(osg::Vec3f forward, osg::Vec3f up)
@@ -70,20 +79,28 @@ namespace Misc
         return osg::Vec3f(x, y, z);
     }
 
+    inline osg::Vec3f toEulerAnglesZYX(const glm::quat& quat)
+    {
+        const glm::vec3 forward = glm::normalize(quat * glm::vec3(0, 1, 0));
+        const glm::vec3 up = glm::normalize(quat * glm::vec3(0, 0, 1));
+        return toEulerAnglesZYX(Misc::Convert::toOsg(forward), Misc::Convert::toOsg(up));
+    }
+
     inline osg::Vec3f toEulerAnglesZYX(const osg::Quat& quat)
     {
-        const glm::quat q = Misc::Convert::toGlm(quat);
-        const glm::vec3 forward = glm::normalize(q * glm::vec3(0, 1, 0));
-        const glm::vec3 up = glm::normalize(q * glm::vec3(0, 0, 1));
+        return toEulerAnglesZYX(Misc::Convert::toGlm(quat));
+    }
+
+    inline osg::Vec3f toEulerAnglesZYX(const glm::mat4& m)
+    {
+        const glm::vec3 forward = glm::normalize(glm::vec3(m[1]));
+        const glm::vec3 up = glm::normalize(glm::vec3(m[2]));
         return toEulerAnglesZYX(Misc::Convert::toOsg(forward), Misc::Convert::toOsg(up));
     }
 
     inline osg::Vec3f toEulerAnglesZYX(const osg::Matrixf& m)
     {
-        const glm::mat4 gm = Misc::Convert::toGlm(m);
-        const glm::vec3 forward = glm::normalize(glm::vec3(gm[1]));
-        const glm::vec3 up = glm::normalize(glm::vec3(gm[2]));
-        return toEulerAnglesZYX(Misc::Convert::toOsg(forward), Misc::Convert::toOsg(up));
+        return toEulerAnglesZYX(Misc::Convert::toGlm(m));
     }
 
     template <class T>
