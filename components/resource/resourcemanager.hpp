@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include <osg/Node>
 #include <osg/ref_ptr>
 
 #include <components/vfs/pathutil.hpp>
@@ -37,11 +38,11 @@ namespace Resource
     /// @brief Base class for managers that require a virtual file system and object cache.
     /// @par This base class implements clearing of the cache, but populating it and what it's used for is up to the
     /// individual sub classes.
-    template <class KeyType>
+    template <class KeyType, class ValueType>
     class GenericResourceManager : public BaseResourceManager
     {
     public:
-        typedef GenericObjectCache<KeyType> CacheType;
+        typedef GenericObjectCache<KeyType, ValueType> CacheType;
 
         explicit GenericResourceManager(const VFS::Manager* vfs, double expiryDelay)
             : mVFS(vfs)
@@ -66,7 +67,12 @@ namespace Resource
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override {}
 
-        void releaseGLObjects(osg::State* state) override { mCache->releaseGLObjects(state); }
+        void releaseGLObjects(osg::State* state) override
+        {
+            // Only meaningful for caches whose values are GL-backed; see objectcache.hpp.
+            if constexpr (requires { mCache->releaseGLObjects(state); })
+                mCache->releaseGLObjects(state);
+        }
 
     protected:
         const VFS::Manager* mVFS;
@@ -74,13 +80,23 @@ namespace Resource
         double mExpiryDelay;
     };
 
-    class ResourceManager : public GenericResourceManager<std::string>
+    /// Caching a scene graph is the common case, so it gets a name rather than the
+    /// same template arguments at every use.
+    template <class KeyType>
+    using NodeResourceManager = GenericResourceManager<KeyType, osg::ref_ptr<osg::Node>>;
+
+    template <class ValueType>
+    class ResourceManager : public GenericResourceManager<std::string, ValueType>
     {
     public:
         explicit ResourceManager(const VFS::Manager* vfs, double expiryDelay)
-            : GenericResourceManager(vfs, expiryDelay)
+            : GenericResourceManager<std::string, ValueType>(vfs, expiryDelay)
         {
         }
+
+    protected:
+        using GenericResourceManager<std::string, ValueType>::mCache;
+        using GenericResourceManager<std::string, ValueType>::mVFS;
     };
 
 }

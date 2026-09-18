@@ -10,7 +10,7 @@ namespace Terrain
 {
 
     TextureManager::TextureManager(Resource::SceneManager* sceneMgr, double expiryDelay)
-        : ResourceManager(sceneMgr->getVFS(), expiryDelay)
+        : ResourceManager<osg::ref_ptr<osg::Texture2D>>(sceneMgr->getVFS(), expiryDelay)
         , mSceneManager(sceneMgr)
     {
     }

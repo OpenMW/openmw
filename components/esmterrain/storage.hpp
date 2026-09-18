@@ -38,16 +38,13 @@ namespace ESMTerrain
 
     class LandCache;
 
-    /// @brief Wrapper around Land Data with reference counting. The wrapper needs to be held as long as the data is
-    /// still in use
-    class LandObject : public osg::Object
+    /// @brief Wrapper around Land Data. Held as long as the data is still in use.
+    class LandObject
     {
     public:
         LandObject() = default;
         LandObject(const ESM::Land& land, int loadFlags);
         LandObject(const ESM4::Land& land, int loadFlags);
-
-        META_Object(ESMTerrain, LandObject)
 
         const ESM::LandData* getData(int flags) const
         {
@@ -65,8 +62,6 @@ namespace ESMTerrain
         ESM::LandData mData;
 
         Terrain::LayerInfo mEsm4DefaultLayerInfo;
-
-        LandObject(const LandObject& copy, const osg::CopyOp& copyOp);
     };
 
     // Since plugins can define new texture palettes, we need to know the plugin index too
@@ -84,7 +79,7 @@ namespace ESMTerrain
             std::string_view specularMapPattern = {}, bool autoUseSpecularMaps = false);
 
         // Not implemented in this class, because we need different Store implementations for game and editor
-        virtual osg::ref_ptr<const LandObject> getLand(ESM::ExteriorCellLocation cellLocation) = 0;
+        virtual std::shared_ptr<const LandObject> getLand(ESM::ExteriorCellLocation cellLocation) = 0;
         virtual const VFS::Path::Normalized* getLandTexture(std::uint16_t index, int plugin) = 0;
 
         // Not implemented in this class because requires ESMStore

@@ -1,4 +1,5 @@
 #include "tilecachedrecastmeshmanager.hpp"
+#include <memory>
 
 #include "changetype.hpp"
 #include "gettilespositions.hpp"
@@ -515,7 +516,7 @@ namespace DetourNavigator
     std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::makeMesh(const TilePosition& tilePosition) const
     {
         RecastMeshBuilder builder(makeRealTileBoundsWithBorder(mSettings, tilePosition));
-        using Object = std::tuple<osg::ref_ptr<const Resource::BulletShapeInstance>, ObjectTransform,
+        using Object = std::tuple<std::shared_ptr<const Resource::BulletShapeInstance>, ObjectTransform,
             std::reference_wrapper<const btCollisionShape>, btTransform, AreaType>;
         std::vector<Object> objects;
         Version version;

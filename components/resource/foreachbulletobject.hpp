@@ -3,6 +3,7 @@
 
 #include <components/esm/position.hpp>
 #include <components/resource/bulletshape.hpp>
+#include <memory>
 
 #include <osg/ref_ptr>
 
@@ -34,7 +35,7 @@ namespace Resource
 {
     struct BulletObject
     {
-        osg::ref_ptr<const Resource::BulletShape> mShape;
+        std::shared_ptr<const Resource::BulletShape> mShape;
         ESM::Position mPosition;
         float mScale;
     };

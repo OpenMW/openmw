@@ -102,7 +102,7 @@ namespace MWRender
         return mLandManager.get();
     }
 
-    osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(ESM::ExteriorCellLocation cellLocation)
+    std::shared_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(ESM::ExteriorCellLocation cellLocation)
     {
         return mLandManager->getLand(cellLocation);
     }

@@ -461,7 +461,7 @@ namespace MWRender
     }
 
     ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager, ESM::RefId worldspace)
-        : GenericResourceManager<ChunkId>(nullptr, Settings::cells().mCacheExpiryDelay)
+        : Resource::NodeResourceManager<ChunkId>(nullptr, Settings::cells().mCacheExpiryDelay)
         , Terrain::QuadTreeWorld::ChunkManager(worldspace)
         , mSceneManager(sceneManager)
         , mActiveGrid(Settings::terrain().mObjectPagingActiveGrid)

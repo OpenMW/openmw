@@ -1,4 +1,5 @@
 #include "settings.hpp"
+#include <memory>
 
 #include <components/detournavigator/asyncnavmeshupdater.hpp>
 #include <components/detournavigator/dbrefgeometryobject.hpp>
@@ -34,7 +35,7 @@ namespace
     void addObject(const btBoxShape& shape, TileCachedRecastMeshManager& recastMeshManager)
     {
         const ObjectId id(&shape);
-        osg::ref_ptr<Resource::BulletShape> bulletShape(new Resource::BulletShape);
+        auto bulletShape = std::make_shared<Resource::BulletShape>();
         constexpr VFS::Path::NormalizedView test("test.nif");
         bulletShape->mFileName = test;
         bulletShape->mFileHash = "test_hash";
@@ -43,8 +44,7 @@ namespace
         std::fill(std::begin(objectTransform.mPosition.rot), std::end(objectTransform.mPosition.rot), 0.2f);
         objectTransform.mScale = 3.14f;
         const CollisionShape collisionShape(
-            osg::ref_ptr<Resource::BulletShapeInstance>(new Resource::BulletShapeInstance(bulletShape)), shape,
-            objectTransform);
+            std::make_shared<Resource::BulletShapeInstance>(bulletShape), shape, objectTransform);
         recastMeshManager.addObject(id, collisionShape, btTransform::getIdentity(), AreaType_ground, nullptr);
     }
 

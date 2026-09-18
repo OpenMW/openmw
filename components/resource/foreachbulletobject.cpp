@@ -1,4 +1,5 @@
 #include "foreachbulletobject.hpp"
+#include <memory>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/cellref.hpp>
@@ -100,7 +101,7 @@ namespace Resource
                 if (cellRef.mType != ESM::REC_STAT)
                     model = Misc::ResourceHelpers::correctActorModelPath(model, &vfs);
 
-                osg::ref_ptr<const Resource::BulletShape> shape = [&] {
+                std::shared_ptr<const Resource::BulletShape> shape = [&] {
                     try
                     {
                         constexpr VFS::Path::NormalizedView prefix("meshes");
@@ -110,7 +111,7 @@ namespace Resource
                     {
                         Log(Debug::Warning) << "Failed to load cell ref \"" << cellRef.mRefId << "\" model \"" << model
                                             << "\": " << e.what();
-                        return osg::ref_ptr<const Resource::BulletShape>();
+                        return std::shared_ptr<const Resource::BulletShape>();
                     }
                 }();
 

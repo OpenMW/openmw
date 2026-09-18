@@ -4,6 +4,7 @@
 #include "areatype.hpp"
 #include "objecttransform.hpp"
 #include "version.hpp"
+#include <memory>
 
 #include <components/resource/bulletshape.hpp>
 
@@ -119,7 +120,7 @@ namespace DetourNavigator
 
     struct MeshSource
     {
-        osg::ref_ptr<const Resource::BulletShape> mShape;
+        std::shared_ptr<const Resource::BulletShape> mShape;
         ObjectTransform mObjectTransform;
         AreaType mAreaType;
     };

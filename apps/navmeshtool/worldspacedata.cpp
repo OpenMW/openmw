@@ -148,7 +148,7 @@ namespace NavMeshTool
                 if (cellRef.mType != ESM::REC_STAT)
                     model = Misc::ResourceHelpers::correctActorModelPath(model, &vfs);
 
-                osg::ref_ptr<const Resource::BulletShape> shape = [&] {
+                std::shared_ptr<const Resource::BulletShape> shape = [&] {
                     try
                     {
                         return bulletShapeManager.getShape(Misc::ResourceHelpers::correctMeshPath(model));
@@ -157,14 +157,14 @@ namespace NavMeshTool
                     {
                         Log(Debug::Warning) << "Failed to load cell ref \"" << cellRef.mRefId << "\" model \"" << model
                                             << "\": " << e.what();
-                        return osg::ref_ptr<const Resource::BulletShape>();
+                        return std::shared_ptr<const Resource::BulletShape>();
                     }
                 }();
 
                 if (shape == nullptr || shape->mCollisionShape == nullptr)
                     continue;
 
-                osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance(
+                std::shared_ptr<Resource::BulletShapeInstance> shapeInstance(
                     new Resource::BulletShapeInstance(std::move(shape)));
 
                 switch (cellRef.mType)

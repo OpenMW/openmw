@@ -38,7 +38,7 @@ namespace Terrain
 
     ChunkManager::ChunkManager(Storage* storage, Resource::SceneManager* sceneMgr, TextureManager* textureManager,
         CompositeMapRenderer* renderer, ESM::RefId worldspace, double expiryDelay)
-        : GenericResourceManager<ChunkKey>(nullptr, expiryDelay)
+        : Resource::NodeResourceManager<ChunkKey>(nullptr, expiryDelay)
         , QuadTreeWorld::ChunkManager(worldspace)
         , mStorage(storage)
         , mSceneManager(sceneMgr)
@@ -93,14 +93,14 @@ namespace Terrain
 
     void ChunkManager::clearCache()
     {
-        GenericResourceManager<ChunkKey>::clearCache();
+        Resource::NodeResourceManager<ChunkKey>::clearCache();
 
         mBufferCache.clearCache();
     }
 
     void ChunkManager::releaseGLObjects(osg::State* state)
     {
-        GenericResourceManager<ChunkKey>::releaseGLObjects(state);
+        Resource::NodeResourceManager<ChunkKey>::releaseGLObjects(state);
         mBufferCache.releaseGLObjects(state);
     }
 

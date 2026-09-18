@@ -3,6 +3,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <memory>
+
 #include <osg/Object>
 
 namespace Resource
@@ -11,15 +13,22 @@ namespace Resource
     {
         using namespace ::testing;
 
+        using ObjectCache = GenericObjectCache<int, osg::ref_ptr<osg::Object>>;
+        using StringObjectCache = GenericObjectCache<std::string, osg::ref_ptr<osg::Object>>;
+
+        // The point of the value type parameter: a type that derives from nothing at all
+        // is cacheable, and expiry still knows whether anything outside holds it.
+        using SharedCache = GenericObjectCache<int, std::shared_ptr<const std::string>>;
+
         TEST(ResourceGenericObjectCacheTest, getRefFromObjectCacheShouldReturnNullptrByDefault)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
             EXPECT_EQ(cache.getRefFromObjectCache(42), nullptr);
         }
 
         TEST(ResourceGenericObjectCacheTest, getRefFromObjectCacheOrNoneShouldReturnNulloptByDefault)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
             EXPECT_EQ(cache.getRefFromObjectCacheOrNone(42), std::nullopt);
         }
 
@@ -35,9 +44,40 @@ namespace Resource
             META_Object(ResourceTest, Object)
         };
 
+        TEST(ResourceGenericObjectCacheTest, shouldStoreValuesThatAreNotOsgObjects)
+        {
+            SharedCache cache;
+            const auto value = std::make_shared<const std::string>("value");
+            cache.addEntryToObjectCache(42, value);
+            EXPECT_EQ(cache.getRefFromObjectCache(42), value);
+        }
+
+        TEST(ResourceGenericObjectCacheTest, updateShouldNotDereferenceNullValues)
+        {
+            ObjectCache cache;
+            cache.addEntryToObjectCache(42, nullptr);
+            cache.update(1000, 1);
+            EXPECT_THAT(cache.getRefFromObjectCacheOrNone(42), Optional(nullptr));
+        }
+
+        TEST(ResourceGenericObjectCacheTest, updateShouldKeepSharedPtrValuesHeldElsewhere)
+        {
+            SharedCache cache;
+            const auto held = std::make_shared<const std::string>("held");
+            cache.addEntryToObjectCache(1, held);
+            cache.addEntryToObjectCache(2, std::make_shared<const std::string>("dropped"));
+
+            const double referenceTime = 1000;
+            cache.update(referenceTime, 1);
+            cache.update(referenceTime + 10, 1);
+
+            EXPECT_THAT(cache.getRefFromObjectCacheOrNone(1), Optional(held));
+            EXPECT_EQ(cache.getRefFromObjectCacheOrNone(2), std::nullopt);
+        }
+
         TEST(ResourceGenericObjectCacheTest, shouldStoreValues)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
             const int key = 42;
             osg::ref_ptr<Object> value(new Object);
             cache.addEntryToObjectCache(key, value);
@@ -46,7 +86,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, shouldStoreNullptrValues)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
             const int key = 42;
             cache.addEntryToObjectCache(key, nullptr);
             EXPECT_THAT(cache.getRefFromObjectCacheOrNone(key), Optional(nullptr));
@@ -54,7 +94,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, updateShouldExtendLifetimeForItemsWithZeroTimestamp)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             const int key = 42;
             osg::ref_ptr<Object> value(new Object);
@@ -69,7 +109,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, addEntryToObjectCacheShouldReplaceExistingItemByKey)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             const int key = 42;
             osg::ref_ptr<Object> value1(new Object);
@@ -82,7 +122,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, addEntryToObjectCacheShouldMarkLifetime)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             const double referenceTime = 1;
             const double expiryDelay = 2;
@@ -102,7 +142,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, updateShouldRemoveExpiredItems)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             const double referenceTime = 1;
             const double expiryDelay = 1;
@@ -123,7 +163,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, updateShouldKeepExternallyReferencedItems)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             const double referenceTime = 1;
             const double expiryDelay = 1;
@@ -141,7 +181,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, updateShouldKeepNotExpiredItems)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             const double referenceTime = 1;
             const double expiryDelay = 2;
@@ -160,7 +200,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, updateShouldKeepNotExpiredNullptrItems)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             const double referenceTime = 1;
             const double expiryDelay = 2;
@@ -177,7 +217,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, getRefFromObjectCacheOrNoneShouldNotExtendItemLifetime)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             const double referenceTime = 1;
             const double expiryDelay = 2;
@@ -197,7 +237,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, lowerBoundShouldSupportHeterogeneousLookup)
         {
-            GenericObjectCache<std::string> cache;
+            StringObjectCache cache;
             cache.addEntryToObjectCache("a", nullptr);
             cache.addEntryToObjectCache("c", nullptr);
             EXPECT_THAT(cache.lowerBound(std::string_view("b")), Optional(Pair("c", _)));
@@ -205,7 +245,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, shouldSupportRemovingItems)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
             const int key = 42;
             osg::ref_ptr<Object> value(new Object);
             cache.addEntryToObjectCache(key, value);
@@ -216,7 +256,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, clearShouldRemoveAllItems)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             const int key1 = 42;
             const int key2 = 13;
@@ -236,7 +276,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, callShouldIterateOverAllItems)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             osg::ref_ptr<Object> value1(new Object);
             osg::ref_ptr<Object> value2(new Object);
@@ -253,7 +293,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, getStatsShouldReturnNumberOrAddedItems)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             osg::ref_ptr<Object> value1(new Object);
             osg::ref_ptr<Object> value2(new Object);
@@ -267,7 +307,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, getStatsShouldReturnNumberOrGetsAndHits)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             {
                 const CacheStats stats = cache.getStats();
@@ -291,7 +331,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, lowerBoundShouldReturnFirstNotLessThatGivenKey)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             osg::ref_ptr<Object> value1(new Object);
             osg::ref_ptr<Object> value2(new Object);
@@ -305,7 +345,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, lowerBoundShouldReturnNulloptWhenKeyIsGreaterThanAnyOther)
         {
-            GenericObjectCache<int> cache;
+            ObjectCache cache;
 
             osg::ref_ptr<Object> value1(new Object);
             osg::ref_ptr<Object> value2(new Object);
@@ -319,7 +359,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, addEntryToObjectCacheShouldSupportHeterogeneousLookup)
         {
-            GenericObjectCache<std::string> cache;
+            StringObjectCache cache;
             const std::string key = "key";
             osg::ref_ptr<Object> value(new Object);
             cache.addEntryToObjectCache(std::string_view("key"), value);
@@ -328,7 +368,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, addEntryToObjectCacheShouldKeyMoving)
         {
-            GenericObjectCache<std::string> cache;
+            StringObjectCache cache;
             std::string key(128, 'a');
             osg::ref_ptr<Object> value(new Object);
             cache.addEntryToObjectCache(std::move(key), value);
@@ -338,7 +378,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, removeFromObjectCacheShouldSupportHeterogeneousLookup)
         {
-            GenericObjectCache<std::string> cache;
+            StringObjectCache cache;
             const std::string key = "key";
             osg::ref_ptr<Object> value(new Object);
             cache.addEntryToObjectCache(key, value);
@@ -349,7 +389,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, getRefFromObjectCacheShouldSupportHeterogeneousLookup)
         {
-            GenericObjectCache<std::string> cache;
+            StringObjectCache cache;
             const std::string key = "key";
             osg::ref_ptr<Object> value(new Object);
             cache.addEntryToObjectCache(key, value);
@@ -358,7 +398,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, getRefFromObjectCacheOrNoneShouldSupportHeterogeneousLookup)
         {
-            GenericObjectCache<std::string> cache;
+            StringObjectCache cache;
             const std::string key = "key";
             osg::ref_ptr<Object> value(new Object);
             cache.addEntryToObjectCache(key, value);
@@ -367,7 +407,7 @@ namespace Resource
 
         TEST(ResourceGenericObjectCacheTest, checkInObjectCacheShouldSupportHeterogeneousLookup)
         {
-            GenericObjectCache<std::string> cache;
+            StringObjectCache cache;
             const std::string key = "key";
             osg::ref_ptr<Object> value(new Object);
             cache.addEntryToObjectCache(key, value);

@@ -3,6 +3,7 @@
 
 #include "areatype.hpp"
 #include "objecttransform.hpp"
+#include <memory>
 
 #include <components/resource/bulletshape.hpp>
 
@@ -21,7 +22,7 @@ namespace DetourNavigator
     class CollisionShape
     {
     public:
-        CollisionShape(osg::ref_ptr<const Resource::BulletShapeInstance> instance, const btCollisionShape& shape,
+        CollisionShape(std::shared_ptr<const Resource::BulletShapeInstance> instance, const btCollisionShape& shape,
             const ObjectTransform& transform)
             : mInstance(std::move(instance))
             , mShape(shape)
@@ -29,12 +30,12 @@ namespace DetourNavigator
         {
         }
 
-        const osg::ref_ptr<const Resource::BulletShapeInstance>& getInstance() const { return mInstance; }
+        const std::shared_ptr<const Resource::BulletShapeInstance>& getInstance() const { return mInstance; }
         const btCollisionShape& getShape() const { return mShape; }
         const ObjectTransform& getObjectTransform() const { return mObjectTransform; }
 
     private:
-        osg::ref_ptr<const Resource::BulletShapeInstance> mInstance;
+        std::shared_ptr<const Resource::BulletShapeInstance> mInstance;
         std::reference_wrapper<const btCollisionShape> mShape;
         ObjectTransform mObjectTransform;
     };
@@ -67,7 +68,7 @@ namespace DetourNavigator
 
         bool update(const btTransform& transform, const AreaType areaType) { return mImpl.update(transform, areaType); }
 
-        const osg::ref_ptr<const Resource::BulletShapeInstance>& getInstance() const { return mInstance; }
+        const std::shared_ptr<const Resource::BulletShapeInstance>& getInstance() const { return mInstance; }
 
         const btCollisionShape& getShape() const { return mImpl.getShape(); }
 
@@ -78,7 +79,7 @@ namespace DetourNavigator
         const ObjectTransform& getObjectTransform() const { return mObjectTransform; }
 
     private:
-        osg::ref_ptr<const Resource::BulletShapeInstance> mInstance;
+        std::shared_ptr<const Resource::BulletShapeInstance> mInstance;
         ObjectTransform mObjectTransform;
         ChildRecastMeshObject mImpl;
     };

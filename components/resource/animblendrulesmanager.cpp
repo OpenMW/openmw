@@ -57,11 +57,8 @@ namespace Resource
 
     osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::loadRules(VFS::Path::NormalizedView path)
     {
-        std::optional<osg::ref_ptr<osg::Object>> obj = mCache->getRefFromObjectCacheOrNone(path);
-        if (obj.has_value())
-        {
-            return osg::ref_ptr<AnimBlendRules>(static_cast<AnimBlendRules*>(obj->get()));
-        }
+        if (std::optional<osg::ref_ptr<const AnimBlendRules>> cached = mCache->getRefFromObjectCacheOrNone(path))
+            return *cached;
 
         osg::ref_ptr<AnimBlendRules> blendRules = AnimBlendRules::fromFile(mVFS, path);
         mCache->addEntryToObjectCache(path.value(), blendRules);

@@ -97,7 +97,7 @@ namespace MWWorld
                 try
                 {
                     mTerrain->cacheCell(mTerrainView.get(), mCellLocation.mX, mCellLocation.mY);
-                    mPreloadedObjects.insert(mLandManager->getLand(mCellLocation));
+                    mPreloadedOwnedObjects.insert(mLandManager->getLand(mCellLocation));
                 }
                 catch (const std::exception& e)
                 {
@@ -134,9 +134,9 @@ namespace MWWorld
 
                     mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
                     if (mPreloadInstances)
-                        mPreloadedObjects.insert(mBulletShapeManager->cacheInstance(mesh));
+                        mPreloadedOwnedObjects.insert(mBulletShapeManager->cacheInstance(mesh));
                     else
-                        mPreloadedObjects.insert(mBulletShapeManager->getShape(mesh));
+                        mPreloadedOwnedObjects.insert(mBulletShapeManager->getShape(mesh));
                 }
                 catch (const std::exception& e)
                 {
@@ -162,8 +162,11 @@ namespace MWWorld
 
         osg::ref_ptr<Terrain::View> mTerrainView;
 
-        // keep a ref to the loaded objects to make sure it stays loaded as long as this cell is in the preloaded state
+        // Keep the loaded objects alive for as long as this cell is preloaded. Two sets
+        // because the render-owned ones are still osg::Object; they merge once those move
+        // behind the render backend.
         std::set<osg::ref_ptr<const osg::Object>> mPreloadedObjects;
+        std::set<std::shared_ptr<const void>> mPreloadedOwnedObjects;
     };
 
     class TerrainPreloadItem : public SceneUtil::WorkItem

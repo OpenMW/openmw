@@ -209,10 +209,8 @@ namespace Resource
 
     osg::ref_ptr<const SceneUtil::KeyframeHolder> KeyframeManager::get(VFS::Path::NormalizedView name)
     {
-        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(name);
-
-        if (obj != nullptr)
-            return osg::ref_ptr<const SceneUtil::KeyframeHolder>(static_cast<SceneUtil::KeyframeHolder*>(obj.get()));
+        if (osg::ref_ptr<const SceneUtil::KeyframeHolder> cached = mCache->getRefFromObjectCache(name))
+            return cached;
 
         osg::ref_ptr<SceneUtil::KeyframeHolder> loaded(new SceneUtil::KeyframeHolder);
         constexpr VFS::Path::ExtensionView kf("kf");

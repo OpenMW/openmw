@@ -10,7 +10,7 @@ namespace Resource
 
     /// @brief Handles caching of material files.
     /// @note May be used from any thread.
-    class BgsmFileManager : public ResourceManager
+    class BgsmFileManager : public ResourceManager<Bgsm::MaterialFilePtr>
     {
     public:
         BgsmFileManager(const VFS::Manager* vfs, double expiryDelay);
