@@ -394,6 +394,49 @@ testing.registerGlobalTest('mwscript magic interactions', function()
     testing.expectEqual(globals.OpenMW_Tests_Failed, 0, 'OpenMW_Tests should run without issue')
 end)
 
+testing.registerGlobalTest('openmw.util math conventions', function()
+    -- Pins the semantics openmw.util exposes to mods, so any change to the
+    -- underlying C++ math implementation or to the utilpackage bindings
+    -- that alters observable Lua behaviour is caught here rather than
+    -- silently breaking existing mods. See components/lua/utilpackage.cpp.
+
+    -- v1 * v2 returns the DOT PRODUCT (a number). Not component-wise.
+    local a = util.vector3(1, 2, 3)
+    local b = util.vector3(4, 5, 6)
+    testing.expectEqual(a * b, 32, 'util.vector3 * util.vector3 must be the dot product')
+    testing.expectEqual(a:dot(b), 32, 'util.vector3:dot must equal *')
+
+    -- v:length() returns the MAGNITUDE, not the component count.
+    testing.expectEqualWithDelta(util.vector3(3, 4, 0):length(), 5, 1e-5, 'util.vector3:length is magnitude')
+    testing.expectEqual(util.vector3(3, 4, 0):length2(), 25, 'util.vector3:length2 is magnitude squared')
+
+    -- Cross product is exposed as :cross and is right-handed.
+    local c = util.vector3(1, 0, 0):cross(util.vector3(0, 1, 0))
+    testing.expectEqualWithDelta(c.x, 0, 1e-5, 'cross x')
+    testing.expectEqualWithDelta(c.y, 0, 1e-5, 'cross y')
+    testing.expectEqualWithDelta(c.z, 1, 1e-5, 'cross z (right-handed)')
+
+    -- Vec2 * Vec2 is also the dot product.
+    testing.expectEqual(util.vector2(1, 2) * util.vector2(3, 4), 11, 'util.vector2 * util.vector2 must be the dot product')
+
+    -- Transform composition applies in REVERSE order (right-to-left).
+    -- Documented at files/lua_api/openmw/util.lua:608-609.
+    local rotPi = util.transform.rotateZ(math.pi)
+    local move10x = util.transform.move(util.vector3(10, 0, 0))
+    local v = util.vector3(1, 0, 0)
+    -- (rotPi * move10x) applied to v: move10x first (v -> (11,0,0)), then rotPi (x flips -> -11).
+    local moveThenRotate = (rotPi * move10x) * v
+    testing.expectEqualWithDelta(moveThenRotate.x, -11, 1e-5, 'composition applies right operand first')
+    -- (move10x * rotPi) applied to v: rotPi first ((1,0,0) -> (-1,0,0)), then move10x (+10 -> 9).
+    local rotateThenMove = (move10x * rotPi) * v
+    testing.expectEqualWithDelta(rotateThenMove.x, 9, 1e-5, 'composition applies right operand first (reverse case)')
+
+    -- Transform:inverse round-trip.
+    local roundTrip = rotPi:inverse() * (rotPi * v)
+    testing.expectEqualWithDelta(roundTrip.x, 1, 1e-5, 'inverse round-trip x')
+    testing.expectEqualWithDelta(roundTrip.y, 0, 1e-5, 'inverse round-trip y')
+end)
+
 testing.registerGlobalTest('load script generated static', function()
     local record = types.Static.records.OMW_Generated_Static
     testing.expectNotEqual(record, nil, 'OMW_Generated_Static should have been generated')
