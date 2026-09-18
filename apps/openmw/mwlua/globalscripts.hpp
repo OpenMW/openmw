@@ -33,12 +33,12 @@ namespace MWLua
             callEngineHandlers(mOnActivateHandlers, obj, actor);
         }
         void onPlaced(
-            const GObject& obj, const GObject& actor, const osg::Vec3f& position, const LuaUtil::TransformQ& rotation)
+            const GObject& obj, const GObject& actor, const glm::vec3& position, const LuaUtil::TransformQ& rotation)
         {
             callEngineHandlers(mOnPlacedHandlers, obj, actor, position, rotation);
         }
         void onDropped(
-            const GObject& obj, const GObject& actor, const osg::Vec3f& position, const LuaUtil::TransformQ& rotation)
+            const GObject& obj, const GObject& actor, const glm::vec3& position, const LuaUtil::TransformQ& rotation)
         {
             callEngineHandlers(mOnDroppedHandlers, obj, actor, position, rotation);
         }

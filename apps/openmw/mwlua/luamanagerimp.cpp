@@ -27,6 +27,8 @@
 #include <components/lua_ui/registerscriptsettings.hpp>
 #include <components/lua_ui/util.hpp>
 
+#include <components/misc/convert.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -627,16 +629,16 @@ namespace MWLua
         const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const osg::Vec3f& position, const osg::Quat& rotation)
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(object);
-        mEngineEvents.addToQueue(
-            EngineEvents::OnDropped{ getId(object), getId(actor), position, LuaUtil::asTransform(rotation) });
+        mEngineEvents.addToQueue(EngineEvents::OnDropped{ getId(object), getId(actor), Misc::Convert::toGlm(position),
+            LuaUtil::asTransform(Misc::Convert::toGlm(rotation)) });
     }
 
     void LuaManager::objectPlaced(
         const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const osg::Vec3f& position, const osg::Quat& rotation)
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(object);
-        mEngineEvents.addToQueue(
-            EngineEvents::OnPlaced{ getId(object), getId(actor), position, LuaUtil::asTransform(rotation) });
+        mEngineEvents.addToQueue(EngineEvents::OnPlaced{ getId(object), getId(actor), Misc::Convert::toGlm(position),
+            LuaUtil::asTransform(Misc::Convert::toGlm(rotation)) });
     }
 
     void LuaManager::animationTextKey(const MWWorld::Ptr& actor, const std::string& key)
