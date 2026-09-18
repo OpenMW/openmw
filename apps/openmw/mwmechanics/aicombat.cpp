@@ -61,11 +61,6 @@ namespace MWMechanics
         return target;
     }
 
-    bool AiCombat::targetIs(const MWWorld::Ptr& ptr) const
-    {
-        return AiPackage::targetIs(ptr) && getTarget() == ptr;
-    }
-
     void AiCombat::init() {}
 
     /*

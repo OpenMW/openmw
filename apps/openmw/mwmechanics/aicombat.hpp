@@ -102,9 +102,6 @@ namespace MWMechanics
         /// Return the combat target if it is an actor, otherwise an empty Ptr.
         MWWorld::Ptr getTarget() const override;
 
-        /// Return whether ptr matches the resolved combat target.
-        bool targetIs(const MWWorld::Ptr& ptr) const override;
-
         void writeState(ESM::AiSequence::AiSequence& sequence) const override;
 
     private:
