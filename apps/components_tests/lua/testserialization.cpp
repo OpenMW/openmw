@@ -1,11 +1,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <osg/Matrixf>
-#include <osg/Quat>
-#include <osg/Vec2f>
-#include <osg/Vec3f>
-#include <osg/Vec4f>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 #include <components/lua/luastate.hpp>
 #include <components/lua/serialization.hpp>
@@ -94,30 +94,30 @@ namespace
     TEST(LuaSerializationTest, Vector)
     {
         sol::state lua;
-        osg::Vec2f vec2(1, 2);
-        osg::Vec3f vec3(1, 2, 3);
-        osg::Vec4f vec4(1, 2, 3, 4);
+        glm::vec2 vec2(1, 2);
+        glm::vec3 vec3(1, 2, 3);
+        glm::vec4 vec4(1, 2, 3, 4);
 
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, vec2));
             EXPECT_EQ(serialized.size(), 18); // version, type, 2x double
             sol::object value = LuaUtil::deserialize(lua, serialized);
-            ASSERT_TRUE(value.is<osg::Vec2f>());
-            EXPECT_EQ(value.as<osg::Vec2f>(), vec2);
+            ASSERT_TRUE(value.is<glm::vec2>());
+            EXPECT_EQ(value.as<glm::vec2>(), vec2);
         }
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, vec3));
             EXPECT_EQ(serialized.size(), 26); // version, type, 3x double
             sol::object value = LuaUtil::deserialize(lua, serialized);
-            ASSERT_TRUE(value.is<osg::Vec3f>());
-            EXPECT_EQ(value.as<osg::Vec3f>(), vec3);
+            ASSERT_TRUE(value.is<glm::vec3>());
+            EXPECT_EQ(value.as<glm::vec3>(), vec3);
         }
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, vec4));
             EXPECT_EQ(serialized.size(), 34); // version, type, 4x double
             sol::object value = LuaUtil::deserialize(lua, serialized);
-            ASSERT_TRUE(value.is<osg::Vec4f>());
-            EXPECT_EQ(value.as<osg::Vec4f>(), vec4);
+            ASSERT_TRUE(value.is<glm::vec4>());
+            EXPECT_EQ(value.as<glm::vec4>(), vec4);
         }
     }
 
@@ -138,9 +138,11 @@ namespace
     TEST(LuaSerializationTest, Transform)
     {
         sol::state lua;
-        osg::Matrixf matrix(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+        // glm::mat4 initializer lists columns (not rows) in the ctor; keep the wire test
+        // simple with a distinct-value matrix so any byte reordering would be caught.
+        glm::mat4 matrix(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
         LuaUtil::TransformM transM = LuaUtil::asTransform(matrix);
-        osg::Quat quat(1, 2, 3, 4);
+        glm::quat quat(4, 1, 2, 3); // glm::quat(w, x, y, z)
         LuaUtil::TransformQ transQ = LuaUtil::asTransform(quat);
 
         {
@@ -170,8 +172,8 @@ namespace
         table["nested"]["bb"] = "something";
         table["nested"][5] = -0.5;
         table["nested_empty"] = sol::table(lua, sol::create);
-        table[1] = osg::Vec2f(1, 2);
-        table[2] = osg::Vec2f(2, 1);
+        table[1] = glm::vec2(1, 2);
+        table[2] = glm::vec2(2, 1);
 
         std::string serialized = LuaUtil::serialize(table);
         EXPECT_EQ(serialized.size(), 139);
@@ -185,8 +187,8 @@ namespace
             EXPECT_EQ(t.get<sol::table>("nested").get<int>("aa"), 2);
             EXPECT_EQ(t.get<sol::table>("nested").get<std::string>("bb"), "something");
             EXPECT_DOUBLE_EQ(t.get<sol::table>("nested").get<double>(5), -0.5);
-            EXPECT_EQ(t.get<osg::Vec2f>(1), osg::Vec2f(1, 2));
-            EXPECT_EQ(t.get<osg::Vec2f>(2), osg::Vec2f(2, 1));
+            EXPECT_EQ(t.get<glm::vec2>(1), glm::vec2(1, 2));
+            EXPECT_EQ(t.get<glm::vec2>(2), glm::vec2(2, 1));
         }
 
         lua["t"] = resTable;
