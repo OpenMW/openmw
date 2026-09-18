@@ -53,7 +53,7 @@ namespace
 namespace MWPhysics
 {
     HeightField::HeightField(const float* heights, int x, int y, int size, int verts, float minH, float maxH,
-        const osg::Object* holdObject, PhysicsTaskScheduler* scheduler)
+        std::shared_ptr<const ESMTerrain::LandObject> holdObject, PhysicsTaskScheduler* scheduler)
         : mHoldObject(holdObject)
 #if BT_BULLET_VERSION < 310
         , mHeights(makeHeights(heights, verts))

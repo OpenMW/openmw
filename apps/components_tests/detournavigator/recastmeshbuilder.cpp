@@ -1,4 +1,5 @@
 #include "operators.hpp"
+#include <memory>
 
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/recastmeshbuilder.hpp>
@@ -52,7 +53,7 @@ namespace
     {
         TileBounds mBounds;
         const Version mVersion{ 0, 0 };
-        const osg::ref_ptr<const Resource::BulletShape> mSource{ nullptr };
+        const std::shared_ptr<const Resource::BulletShape> mSource{ nullptr };
         const ObjectTransform mObjectTransform{ ESM::Position{ { 0, 0, 0 }, { 0, 0, 0 } }, 0.0f };
 
         DetourNavigatorRecastMeshBuilderTest()

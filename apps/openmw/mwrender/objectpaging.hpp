@@ -17,7 +17,7 @@ namespace MWRender
 
     typedef std::tuple<osg::Vec2f, float, bool> ChunkId; // Center, Size, ActiveGrid
 
-    class ObjectPaging : public Resource::GenericResourceManager<ChunkId>, public Terrain::QuadTreeWorld::ChunkManager
+    class ObjectPaging : public Resource::NodeResourceManager<ChunkId>, public Terrain::QuadTreeWorld::ChunkManager
     {
     public:
         ObjectPaging(Resource::SceneManager* sceneManager, ESM::RefId worldspace);

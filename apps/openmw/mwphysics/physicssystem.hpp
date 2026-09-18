@@ -49,6 +49,11 @@ class btCollisionObject;
 class btCollisionShape;
 class btVector3;
 
+namespace ESMTerrain
+{
+    class LandObject;
+}
+
 namespace MWPhysics
 {
     class HeightField;
@@ -187,7 +192,7 @@ namespace MWPhysics
         void updatePosition(const MWWorld::Ptr& ptr);
 
         void addHeightField(const float* heights, int x, int y, int size, int verts, float minH, float maxH,
-            const osg::Object* holdObject);
+            std::shared_ptr<const ESMTerrain::LandObject> holdObject);
 
         void removeHeightField(int x, int y);
 

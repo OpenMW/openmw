@@ -115,11 +115,11 @@ namespace
     }
 
     template <class T>
-    osg::ref_ptr<const Resource::BulletShapeInstance> makeBulletShapeInstance(std::unique_ptr<T>&& shape)
+    std::shared_ptr<const Resource::BulletShapeInstance> makeBulletShapeInstance(std::unique_ptr<T>&& shape)
     {
-        osg::ref_ptr<Resource::BulletShape> bulletShape(new Resource::BulletShape);
+        auto bulletShape = std::make_shared<Resource::BulletShape>();
         bulletShape->mCollisionShape.reset(std::move(shape).release());
-        return new Resource::BulletShapeInstance(bulletShape);
+        return std::make_shared<Resource::BulletShapeInstance>(bulletShape);
     }
 
     template <class T>
@@ -132,10 +132,10 @@ namespace
         }
 
         T& shape() const { return static_cast<T&>(*mInstance->mCollisionShape); }
-        const osg::ref_ptr<const Resource::BulletShapeInstance>& instance() const { return mInstance; }
+        const std::shared_ptr<const Resource::BulletShapeInstance>& instance() const { return mInstance; }
 
     private:
-        osg::ref_ptr<const Resource::BulletShapeInstance> mInstance;
+        std::shared_ptr<const Resource::BulletShapeInstance> mInstance;
     };
 
     btVector3 getHeightfieldShift(const osg::Vec2i& cellPosition, int cellSize, float minHeight, float maxHeight)
@@ -368,7 +368,7 @@ namespace
 
     TEST_F(DetourNavigatorNavigatorTest, path_should_be_around_avoid_shape)
     {
-        osg::ref_ptr<Resource::BulletShape> bulletShape(new Resource::BulletShape);
+        auto bulletShape = std::make_shared<Resource::BulletShape>();
 
         std::unique_ptr<btHeightfieldTerrainShape> shapePtr
             = makeSquareHeightfieldTerrainShape(defaultHeightfieldDataScalar);
@@ -387,7 +387,7 @@ namespace
         shapeAvoidPtr->setLocalScaling(btVector3(128, 128, 1));
         bulletShape->mAvoidCollisionShape.reset(shapeAvoidPtr.release());
 
-        osg::ref_ptr<const Resource::BulletShapeInstance> instance(new Resource::BulletShapeInstance(bulletShape));
+        auto instance = std::make_shared<const Resource::BulletShapeInstance>(bulletShape);
 
         ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
         mNavigator->addObject(

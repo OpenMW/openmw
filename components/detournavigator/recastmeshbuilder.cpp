@@ -1,5 +1,6 @@
 #include "recastmeshbuilder.hpp"
 #include "exceptions.hpp"
+#include <memory>
 
 #include <components/bullethelpers/heightfield.hpp>
 #include <components/bullethelpers/processtrianglecallback.hpp>
@@ -138,7 +139,7 @@ namespace DetourNavigator
     }
 
     void RecastMeshBuilder::addObject(const btCollisionShape& shape, const btTransform& transform,
-        const AreaType areaType, osg::ref_ptr<const Resource::BulletShape> source,
+        const AreaType areaType, std::shared_ptr<const Resource::BulletShape> source,
         const ObjectTransform& objectTransform)
     {
         addObject(shape, transform, areaType);

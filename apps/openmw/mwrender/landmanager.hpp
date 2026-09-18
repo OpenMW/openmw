@@ -15,13 +15,14 @@ namespace ESM
 namespace MWRender
 {
 
-    class LandManager : public Resource::GenericResourceManager<ESM::ExteriorCellLocation>
+    class LandManager : public Resource::GenericResourceManager<ESM::ExteriorCellLocation,
+                            std::shared_ptr<const ESMTerrain::LandObject>>
     {
     public:
         LandManager(int loadFlags);
 
         /// @note Will return nullptr if not found.
-        osg::ref_ptr<ESMTerrain::LandObject> getLand(ESM::ExteriorCellLocation cellIndex);
+        std::shared_ptr<const ESMTerrain::LandObject> getLand(ESM::ExteriorCellLocation cellIndex);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 

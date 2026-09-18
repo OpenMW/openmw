@@ -47,7 +47,7 @@ namespace NavMeshTool
     class BulletObject
     {
     public:
-        BulletObject(osg::ref_ptr<Resource::BulletShapeInstance>&& shapeInstance, const ESM::Position& position,
+        BulletObject(std::shared_ptr<Resource::BulletShapeInstance>&& shapeInstance, const ESM::Position& position,
             float localScaling)
             : mShapeInstance(std::move(shapeInstance))
             , mObjectTransform{ position, localScaling }
@@ -58,12 +58,15 @@ namespace NavMeshTool
             mShapeInstance->setLocalScaling(btVector3(localScaling, localScaling, localScaling));
         }
 
-        const osg::ref_ptr<Resource::BulletShapeInstance>& getShapeInstance() const noexcept { return mShapeInstance; }
+        const std::shared_ptr<Resource::BulletShapeInstance>& getShapeInstance() const noexcept
+        {
+            return mShapeInstance;
+        }
         const DetourNavigator::ObjectTransform& getObjectTransform() const noexcept { return mObjectTransform; }
         btCollisionObject& getCollisionObject() const noexcept { return *mCollisionObject; }
 
     private:
-        osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
+        std::shared_ptr<Resource::BulletShapeInstance> mShapeInstance;
         DetourNavigator::ObjectTransform mObjectTransform;
         std::unique_ptr<btCollisionObject> mCollisionObject;
     };

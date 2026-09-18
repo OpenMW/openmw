@@ -4,9 +4,7 @@
 #include <map>
 #include <memory>
 
-#include <osg/Object>
 #include <osg/Vec3f>
-#include <osg/ref_ptr>
 
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
@@ -42,7 +40,7 @@ namespace Resource
         Camera
     };
 
-    struct BulletShape : public osg::Object
+    struct BulletShape
     {
         CollisionShapePtr mCollisionShape;
         CollisionShapePtr mAvoidCollisionShape;
@@ -64,9 +62,7 @@ namespace Resource
 
         BulletShape() = default;
         // Note this is always a shallow copy and the copy will not autodelete underlying vertex data
-        BulletShape(const BulletShape& other, const osg::CopyOp& copyOp = osg::CopyOp());
-
-        META_Object(Resource, BulletShape)
+        BulletShape(const BulletShape& other);
 
         void setLocalScaling(const btVector3& scale);
 
@@ -74,20 +70,20 @@ namespace Resource
     };
 
     // An instance of a BulletShape that may have its own unique scaling set on collision shapes.
-    // Vertex data is shallow-copied where possible. A ref_ptr to the original shape is held to keep vertex pointers
+    // Vertex data is shallow-copied where possible. A shared_ptr to the original shape is held to keep vertex pointers
     // intact.
     class BulletShapeInstance : public BulletShape
     {
     public:
-        explicit BulletShapeInstance(osg::ref_ptr<const BulletShape> source);
+        explicit BulletShapeInstance(std::shared_ptr<const BulletShape> source);
 
-        const osg::ref_ptr<const BulletShape>& getSource() const { return mSource; }
+        const std::shared_ptr<const BulletShape>& getSource() const { return mSource; }
 
     private:
-        osg::ref_ptr<const BulletShape> mSource;
+        std::shared_ptr<const BulletShape> mSource;
     };
 
-    osg::ref_ptr<BulletShapeInstance> makeInstance(osg::ref_ptr<const BulletShape> source);
+    std::shared_ptr<BulletShapeInstance> makeInstance(std::shared_ptr<const BulletShape> source);
 
     // Subclass btBhvTriangleMeshShape to auto-delete the meshInterface
     struct TriangleMeshShape : public btBvhTriangleMeshShape

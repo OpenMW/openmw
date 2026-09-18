@@ -1,4 +1,5 @@
 #include "bulletnifloader.hpp"
+#include <memory>
 
 #include <cassert>
 #include <sstream>
@@ -30,9 +31,9 @@ namespace
 namespace NifBullet
 {
 
-    osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(Nif::FileView nif)
+    std::shared_ptr<Resource::BulletShape> BulletNifLoader::load(Nif::FileView nif)
     {
-        mShape = new Resource::BulletShape;
+        mShape = std::make_shared<Resource::BulletShape>();
 
         mCompoundShape.reset();
         mAvoidCompoundShape.reset();

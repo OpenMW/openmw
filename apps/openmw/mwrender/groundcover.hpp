@@ -19,7 +19,7 @@ namespace osg
 namespace MWRender
 {
     typedef std::tuple<osg::Vec2f, float> GroundcoverChunkId; // Center, Size
-    class Groundcover : public Resource::GenericResourceManager<GroundcoverChunkId>,
+    class Groundcover : public Resource::NodeResourceManager<GroundcoverChunkId>,
                         public Terrain::QuadTreeWorld::ChunkManager
     {
     public:

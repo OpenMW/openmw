@@ -19,14 +19,14 @@
 namespace MWPhysics
 {
 
-    Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler,
+    Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape& shape, PhysicsTaskScheduler* scheduler,
         bool canWaterWalk, DetourNavigator::CollisionShapeType collisionShapeType)
         : PtrHolder(ptr, ptr.getRefData().getPosition().asVec3())
         , mStandingOnPtr(nullptr)
         , mCanWaterWalk(canWaterWalk)
         , mWalkingOnWater(false)
-        , mMeshTranslation(shape->mCollisionBox.mCenter)
-        , mOriginalHalfExtents(shape->mCollisionBox.mExtents)
+        , mMeshTranslation(shape.mCollisionBox.mCenter)
+        , mOriginalHalfExtents(shape.mCollisionBox.mExtents)
         , mStuckFrames(0)
         , mLastStuckPosition{ 0, 0, 0 }
         , mForce(0.f, 0.f, 0.f)
@@ -42,14 +42,14 @@ namespace MWPhysics
         // (NPCs have bodyparts and use a different approach)
         if (!ptr.getClass().isNpc() && mOriginalHalfExtents.length2() == 0.f)
         {
-            if (shape->mCollisionShape)
+            if (shape.mCollisionShape)
             {
                 btTransform transform;
                 transform.setIdentity();
                 btVector3 min;
                 btVector3 max;
 
-                shape->mCollisionShape->getAabb(transform, min, max);
+                shape.mCollisionShape->getAabb(transform, min, max);
                 mOriginalHalfExtents.x() = static_cast<float>((max[0] - min[0]) / 2.f);
                 mOriginalHalfExtents.y() = static_cast<float>((max[1] - min[1]) / 2.f);
                 mOriginalHalfExtents.z() = static_cast<float>((max[2] - min[2]) / 2.f);

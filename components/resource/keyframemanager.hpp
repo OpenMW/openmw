@@ -47,7 +47,7 @@ namespace Resource
 
     /// @brief Managing of keyframe resources
     /// @note May be used from any thread.
-    class KeyframeManager : public ResourceManager
+    class KeyframeManager : public ResourceManager<osg::ref_ptr<const SceneUtil::KeyframeHolder>>
     {
     public:
         explicit KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay,

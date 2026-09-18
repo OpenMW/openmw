@@ -19,7 +19,7 @@ namespace Resource
 
     /// @brief Handles loading/caching of Images.
     /// @note May be used from any thread.
-    class ImageManager : public ResourceManager
+    class ImageManager : public ResourceManager<osg::ref_ptr<osg::Image>>
     {
     public:
         explicit ImageManager(const VFS::Manager* vfs, double expiryDelay);

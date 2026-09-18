@@ -494,7 +494,7 @@ namespace Resource
 
     SceneManager::SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
         Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* bgsmFileManager, double expiryDelay)
-        : ResourceManager(vfs, expiryDelay)
+        : NodeResourceManager<std::string>(vfs, expiryDelay)
         , mShaderManager(new Shader::ShaderManager)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
@@ -1197,7 +1197,7 @@ namespace Resource
 
     void SceneManager::updateCache(double referenceTime)
     {
-        ResourceManager::updateCache(referenceTime);
+        NodeResourceManager<std::string>::updateCache(referenceTime);
 
         mSharedStateMutex.lock();
         mSharedStateManager->prune();
@@ -1225,7 +1225,7 @@ namespace Resource
 
     void SceneManager::clearCache()
     {
-        ResourceManager::clearCache();
+        NodeResourceManager<std::string>::clearCache();
 
         std::lock_guard<std::mutex> lock(mSharedStateMutex);
         mSharedStateManager->clearCache();

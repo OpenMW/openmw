@@ -12,12 +12,13 @@ namespace MWRender
 {
 
     LandManager::LandManager(int loadFlags)
-        : GenericResourceManager<ESM::ExteriorCellLocation>(nullptr, Settings::cells().mCacheExpiryDelay)
+        : GenericResourceManager<ESM::ExteriorCellLocation, std::shared_ptr<const ESMTerrain::LandObject>>(
+            nullptr, Settings::cells().mCacheExpiryDelay)
         , mLoadFlags(loadFlags)
     {
     }
 
-    osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(ESM::ExteriorCellLocation cellIndex)
+    std::shared_ptr<const ESMTerrain::LandObject> LandManager::getLand(ESM::ExteriorCellLocation cellIndex)
     {
         const MWBase::World& world = *MWBase::Environment::get().getWorld();
         if (ESM::isEsm4Ext(cellIndex.mWorldspace))
@@ -27,25 +28,25 @@ namespace MWRender
                 cellIndex.mWorldspace = worldspace->mParent;
         }
 
-        if (const std::optional<osg::ref_ptr<osg::Object>> obj = mCache->getRefFromObjectCacheOrNone(cellIndex))
-            return static_cast<ESMTerrain::LandObject*>(obj->get());
+        if (const auto cached = mCache->getRefFromObjectCacheOrNone(cellIndex))
+            return *cached;
 
-        osg::ref_ptr<ESMTerrain::LandObject> landObj = nullptr;
+        std::shared_ptr<const ESMTerrain::LandObject> landObj = nullptr;
 
         if (ESM::isEsm4Ext(cellIndex.mWorldspace))
         {
             const ESM4::Land* land = world.getStore().get<ESM4::Land>().search(cellIndex);
             if (land != nullptr)
-                landObj = new ESMTerrain::LandObject(*land, mLoadFlags);
+                landObj = std::make_shared<const ESMTerrain::LandObject>(*land, mLoadFlags);
         }
         else
         {
             const ESM::Land* land = world.getStore().get<ESM::Land>().search(cellIndex.mX, cellIndex.mY);
             if (land != nullptr)
-                landObj = new ESMTerrain::LandObject(*land, mLoadFlags);
+                landObj = std::make_shared<const ESMTerrain::LandObject>(*land, mLoadFlags);
         }
 
-        mCache->addEntryToObjectCache(cellIndex, landObj.get());
+        mCache->addEntryToObjectCache(cellIndex, landObj);
         return landObj;
     }
 

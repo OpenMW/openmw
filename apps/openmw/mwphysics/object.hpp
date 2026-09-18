@@ -2,6 +2,7 @@
 #define OPENMW_MWPHYSICS_OBJECT_H
 
 #include "ptrholder.hpp"
+#include <memory>
 
 #include <LinearMath/btTransform.h>
 #include <osg/Node>
@@ -29,11 +30,11 @@ namespace MWPhysics
     class Object final : public PtrHolder
     {
     public:
-        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, osg::Quat rotation,
-            int collisionType, PhysicsTaskScheduler* scheduler);
+        Object(const MWWorld::Ptr& ptr, std::shared_ptr<Resource::BulletShapeInstance> shapeInstance,
+            osg::Quat rotation, int collisionType, PhysicsTaskScheduler* scheduler);
         ~Object() override;
 
-        const Resource::BulletShapeInstance* getShapeInstance() const;
+        const std::shared_ptr<Resource::BulletShapeInstance>& getShapeInstance() const;
         void setScale(float scale);
         void setRotation(osg::Quat quat);
         void updatePosition();
@@ -51,7 +52,7 @@ namespace MWPhysics
         void resetCollisions();
 
     private:
-        osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
+        std::shared_ptr<Resource::BulletShapeInstance> mShapeInstance;
         std::map<int, osg::NodePath> mRecordIndexToNodePath;
         bool mSolid;
         btVector3 mScale;

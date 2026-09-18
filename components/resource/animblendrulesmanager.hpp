@@ -12,7 +12,7 @@ namespace Resource
 {
     /// @brief Managing of keyframe resources
     /// @note May be used from any thread.
-    class AnimBlendRulesManager : public ResourceManager
+    class AnimBlendRulesManager : public ResourceManager<osg::ref_ptr<const SceneUtil::AnimBlendRules>>
     {
     public:
         explicit AnimBlendRulesManager(const VFS::Manager* vfs, double expiryDelay);

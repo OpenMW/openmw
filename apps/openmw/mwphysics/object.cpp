@@ -1,5 +1,6 @@
 #include "object.hpp"
 #include "mtphysics.hpp"
+#include <memory>
 
 #include <components/bullethelpers/collisionobject.hpp>
 #include <components/debug/debuglog.hpp>
@@ -14,7 +15,7 @@
 
 namespace MWPhysics
 {
-    Object::Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance,
+    Object::Object(const MWWorld::Ptr& ptr, std::shared_ptr<Resource::BulletShapeInstance> shapeInstance,
         osg::Quat rotation, int collisionType, PhysicsTaskScheduler* scheduler)
         : PtrHolder(ptr, osg::Vec3f())
         , mShapeInstance(std::move(shapeInstance))
@@ -38,9 +39,9 @@ namespace MWPhysics
         mTaskScheduler->removeCollisionObject(mCollisionObject.get());
     }
 
-    const Resource::BulletShapeInstance* Object::getShapeInstance() const
+    const std::shared_ptr<Resource::BulletShapeInstance>& Object::getShapeInstance() const
     {
-        return mShapeInstance.get();
+        return mShapeInstance;
     }
 
     void Object::setScale(float scale)

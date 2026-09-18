@@ -64,7 +64,7 @@ namespace ESMTerrain
             return std::nullopt;
         }
 
-        void insert(int x, int y, osg::ref_ptr<const LandObject>&& value)
+        void insert(int x, int y, std::shared_ptr<const LandObject>&& value)
         {
             const std::size_t index = getIndex(x, y);
             mValues[index] = std::move(value);
@@ -74,7 +74,7 @@ namespace ESMTerrain
         int mOffsetX;
         int mOffsetY;
         std::size_t mSize;
-        std::vector<std::optional<osg::ref_ptr<const LandObject>>> mValues;
+        std::vector<std::optional<std::shared_ptr<const LandObject>>> mValues;
 
         std::size_t getIndex(int x, int y) const
         {
@@ -101,11 +101,6 @@ namespace ESMTerrain
     {
     }
 
-    LandObject::LandObject(const LandObject& /*copy*/, const osg::CopyOp& /*copyOp*/)
-    {
-        throw std::logic_error("LandObject copy constructor is not implemented");
-    }
-
     const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
 
     Storage::Storage(const VFS::Manager* vfs, std::string_view normalMapPattern,
@@ -128,7 +123,7 @@ namespace ESMTerrain
 
         int cellX = static_cast<int>(std::floor(origin.x()));
         int cellY = static_cast<int>(std::floor(origin.y()));
-        osg::ref_ptr<const LandObject> land = getLand(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
+        std::shared_ptr<const LandObject> land = getLand(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
         const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
         const int landSize = ESM::getLandSize(worldspace);
         int startRow = static_cast<int>((origin.x() - cellX) * landSize);
@@ -573,7 +568,7 @@ namespace ESMTerrain
         int cellX = static_cast<int>(std::floor(worldPos.x() / cellSize));
         int cellY = static_cast<int>(std::floor(worldPos.y() / cellSize));
 
-        osg::ref_ptr<const LandObject> land = getLand(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
+        std::shared_ptr<const LandObject> land = getLand(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
         if (!land)
             return ESM::isEsm4Ext(worldspace) ? std::numeric_limits<float>::lowest() : defaultHeight;
 
@@ -655,7 +650,7 @@ namespace ESMTerrain
     {
         if (const auto land = cache.find(cellLocation.mX, cellLocation.mY))
             return *land;
-        osg::ref_ptr<const LandObject> land = getLand(cellLocation);
+        std::shared_ptr<const LandObject> land = getLand(cellLocation);
         const LandObject* result = land.get();
         cache.insert(cellLocation.mX, cellLocation.mY, std::move(land));
         return result;
