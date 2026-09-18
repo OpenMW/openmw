@@ -184,12 +184,12 @@ namespace MWLua
         {
             if (transform.is<LuaUtil::TransformQ>())
             {
-                const osg::Quat& q = transform.as<LuaUtil::TransformQ>().mQ;
+                const glm::quat& q = transform.as<LuaUtil::TransformQ>().mQ;
                 return isActor ? Misc::toEulerAnglesXZ(q) : Misc::toEulerAnglesZYX(q);
             }
             else
             {
-                const osg::Matrixf& m = LuaUtil::cast<LuaUtil::TransformM>(transform).mM;
+                const glm::mat4& m = LuaUtil::cast<LuaUtil::TransformM>(transform).mM;
                 return isActor ? Misc::toEulerAnglesXZ(m) : Misc::toEulerAnglesZYX(m);
             }
         }
@@ -312,12 +312,14 @@ namespace MWLua
                 else
                     return sol::nullopt;
             });
-            objectT["position"] = sol::readonly_property(
-                [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asVec3(); });
+            objectT["position"] = sol::readonly_property([](const ObjectT& o) -> glm::vec3 {
+                return Misc::Convert::toGlm(o.ptr().getRefData().getPosition().asVec3());
+            });
             objectT["scale"]
                 = sol::readonly_property([](const ObjectT& o) -> float { return o.ptr().getCellRef().getScale(); });
             objectT["rotation"] = sol::readonly_property([](const ObjectT& o) -> LuaUtil::TransformQ {
-                return { toQuat(o.ptr().getRefData().getPosition(), o.ptr().getClass().isActor()) };
+                return { Misc::Convert::toGlm(
+                    toQuat(o.ptr().getRefData().getPosition(), o.ptr().getClass().isActor())) };
             });
             objectT["startingCell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
                 const MWWorld::Ptr& ptr = o.ptr();
@@ -326,16 +328,20 @@ namespace MWLua
                     return Cell<ObjectT>{ ptr.getCell()->getOriginCell(ptr) };
                 return sol::nullopt;
             });
-            objectT["startingPosition"] = sol::readonly_property(
-                [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getCellRef().getPosition().asVec3(); });
+            objectT["startingPosition"] = sol::readonly_property([](const ObjectT& o) -> glm::vec3 {
+                return Misc::Convert::toGlm(o.ptr().getCellRef().getPosition().asVec3());
+            });
             objectT["startingRotation"] = sol::readonly_property([](const ObjectT& o) -> LuaUtil::TransformQ {
-                return { toQuat(o.ptr().getCellRef().getPosition(), o.ptr().getClass().isActor()) };
+                return { Misc::Convert::toGlm(
+                    toQuat(o.ptr().getCellRef().getPosition(), o.ptr().getClass().isActor())) };
             });
             objectT["getBoundingBox"] = [](const ObjectT& o) {
                 MWRender::RenderingManager* renderingManager
                     = MWBase::Environment::get().getWorld()->getRenderingManager();
                 osg::BoundingBox bb = renderingManager->getCullSafeBoundingBox(o.ptr());
-                return LuaUtil::Box{ bb.center(), bb._max - bb.center() };
+                const glm::vec3 center = Misc::Convert::toGlm(bb.center());
+                const glm::vec3 halfSize = Misc::Convert::toGlm(bb._max) - center;
+                return LuaUtil::Box{ center, halfSize };
             };
 
             objectT["type"] = sol::readonly_property(
