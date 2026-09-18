@@ -172,6 +172,13 @@ option(RECASTNAVIGATION_STATIC "Build recastnavigation static libraries" ${_reca
 
 option(OPENMW_USE_SYSTEM_SQLITE3 "Use system provided SQLite3 library" ON)
 
+option(OPENMW_USE_SYSTEM_GLM "Use system provided OpenGL Mathematics (glm) library" OFF)
+if(OPENMW_USE_SYSTEM_GLM)
+    find_package(glm 1.0 CONFIG REQUIRED)
+    # Match the vendored branch: unlock glm's gtx/ headers everywhere.
+    set_property(TARGET glm::glm APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS GLM_ENABLE_EXPERIMENTAL)
+endif()
+
 option(OPENMW_USE_SYSTEM_BENCHMARK "Use system Google Benchmark library." OFF)
 option(OPENMW_USE_SYSTEM_GOOGLETEST "Use system Google Test library." OFF)
 

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-set_directory_properties(PROPERTIES EXCLUDE_FROM_ALL on)
+set_directory_properties(PROPERTIES EXCLUDE_FROM_ALL on SYSTEM on)
 set(CMAKE_CXX_CLANG_TIDY "")
 
 if(NOT OPENMW_USE_SYSTEM_BULLET)
@@ -186,6 +186,20 @@ if (NOT OPENMW_USE_SYSTEM_SQLITE3)
 endif()
 
 add_subdirectory(smhasher)
+
+if(NOT OPENMW_USE_SYSTEM_GLM)
+    include(FetchContent)
+    FetchContent_Declare(glm
+        URL https://github.com/g-truc/glm/archive/refs/tags/1.0.1.tar.gz
+        URL_HASH SHA512=c6c6fa1ea7a7e97820e36ee042a78be248ae828c99c1b1111080d9bf334a5160c9993a70312351c92a867cd49907c95f9f357c8dfe2bc29946da6e83e27ba20c
+        SOURCE_DIR fetched/glm
+    )
+    FetchContent_MakeAvailable(glm)
+    # GLM_ENABLE_EXPERIMENTAL unlocks gtx/ headers (we use gtx/rotate_vector).
+    # Same flag is applied to the system-provided target in the top-level
+    # CMakeLists so both paths behave the same.
+    set_property(TARGET glm APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS GLM_ENABLE_EXPERIMENTAL)
+endif()
 
 if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
 
