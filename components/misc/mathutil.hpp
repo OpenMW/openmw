@@ -1,11 +1,19 @@
 #ifndef MISC_MATHUTIL_H
 #define MISC_MATHUTIL_H
 
+#include <components/misc/convert.hpp>
+
 #include <osg/Math>
 #include <osg/Matrixf>
 #include <osg/Quat>
 #include <osg/Vec2f>
 #include <osg/Vec3f>
+
+#include <glm/geometric.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 #include <cmath>
 #include <type_traits>
@@ -22,9 +30,7 @@ namespace Misc
     /// Rotates given 2d vector counterclockwise. Angle is in radians.
     inline osg::Vec2f rotateVec2f(osg::Vec2f vec, float angle)
     {
-        float s = std::sin(angle);
-        float c = std::cos(angle);
-        return osg::Vec2f(vec.x() * c + vec.y() * -s, vec.x() * s + vec.y() * c);
+        return Misc::Convert::toOsg(glm::rotate(Misc::Convert::toGlm(vec), angle));
     }
 
     inline osg::Vec3f toEulerAnglesXZ(osg::Vec3f forward)
@@ -36,43 +42,48 @@ namespace Misc
 
     inline osg::Vec3f toEulerAnglesXZ(const osg::Quat& quat)
     {
-        osg::Vec3f forward = quat * osg::Vec3f(0, 1, 0);
-        forward.normalize();
-        return toEulerAnglesXZ(forward);
+        const glm::vec3 forward = glm::normalize(Misc::Convert::toGlm(quat) * glm::vec3(0, 1, 0));
+        return toEulerAnglesXZ(Misc::Convert::toOsg(forward));
     }
 
     inline osg::Vec3f toEulerAnglesXZ(const osg::Matrixf& m)
     {
-        osg::Vec3f forward(m(1, 0), m(1, 1), m(1, 2));
-        forward.normalize();
-        return toEulerAnglesXZ(forward);
+        // OSG stores row-major with row-vector semantics: row 1 is the image of the
+        // local +Y axis under M. In glm::make_mat4(osg.ptr()) column-major storage,
+        // that same row is column 1.
+        const glm::mat4 gm = Misc::Convert::toGlm(m);
+        const glm::vec3 forward = glm::normalize(glm::vec3(gm[1]));
+        return toEulerAnglesXZ(Misc::Convert::toOsg(forward));
     }
 
     inline osg::Vec3f toEulerAnglesZYX(osg::Vec3f forward, osg::Vec3f up)
     {
-        float y = -std::asin(up.x());
-        float x = std::atan2(up.y(), up.z());
-        osg::Vec3f forwardZ = (osg::Quat(x, osg::Vec3f(1, 0, 0)) * osg::Quat(y, osg::Vec3f(0, 1, 0))) * forward;
-        float z = std::atan2(forwardZ.x(), forwardZ.y());
+        const float y = -std::asin(up.x());
+        const float x = std::atan2(up.y(), up.z());
+        // OSG's Quat::operator*(Quat) is Hamilton-reversed w.r.t. glm's:
+        // OSG's (q1*q2)*v applies q1 first, then q2; glm's applies q2 first.
+        // Preserve the original composition order (X then Y) by swapping the
+        // operands in glm.
+        const glm::quat q = glm::angleAxis(y, glm::vec3(0, 1, 0)) * glm::angleAxis(x, glm::vec3(1, 0, 0));
+        const glm::vec3 forwardZ = q * Misc::Convert::toGlm(forward);
+        const float z = std::atan2(forwardZ.x, forwardZ.y);
         return osg::Vec3f(x, y, z);
     }
 
     inline osg::Vec3f toEulerAnglesZYX(const osg::Quat& quat)
     {
-        osg::Vec3f forward = quat * osg::Vec3f(0, 1, 0);
-        forward.normalize();
-        osg::Vec3f up = quat * osg::Vec3f(0, 0, 1);
-        up.normalize();
-        return toEulerAnglesZYX(forward, up);
+        const glm::quat q = Misc::Convert::toGlm(quat);
+        const glm::vec3 forward = glm::normalize(q * glm::vec3(0, 1, 0));
+        const glm::vec3 up = glm::normalize(q * glm::vec3(0, 0, 1));
+        return toEulerAnglesZYX(Misc::Convert::toOsg(forward), Misc::Convert::toOsg(up));
     }
 
     inline osg::Vec3f toEulerAnglesZYX(const osg::Matrixf& m)
     {
-        osg::Vec3f forward(m(1, 0), m(1, 1), m(1, 2));
-        osg::Vec3f up(m(2, 0), m(2, 1), m(2, 2));
-        forward.normalize();
-        up.normalize();
-        return toEulerAnglesZYX(forward, up);
+        const glm::mat4 gm = Misc::Convert::toGlm(m);
+        const glm::vec3 forward = glm::normalize(glm::vec3(gm[1]));
+        const glm::vec3 up = glm::normalize(glm::vec3(gm[2]));
+        return toEulerAnglesZYX(Misc::Convert::toOsg(forward), Misc::Convert::toOsg(up));
     }
 
     template <class T>
