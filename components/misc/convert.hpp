@@ -135,6 +135,18 @@ namespace Misc::Convert
     {
         return osg::Quat(q.x, q.y, q.z, q.w);
     }
+
+    // Composes the same rotation as makeOsgQuat but returns it as a glm::quat. Handy at
+    // Lua boundaries where the mod-facing value type is a glm::quat.
+    inline glm::quat makeGlmQuat(const float (&rotation)[3])
+    {
+        return toGlm(makeOsgQuat(rotation));
+    }
+
+    inline glm::quat makeGlmQuat(const ESM::Position& position)
+    {
+        return makeGlmQuat(position.rot);
+    }
 }
 
 #endif
