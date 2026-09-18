@@ -23,7 +23,7 @@ namespace SDLUtil
 
     VideoWrapper::~VideoWrapper()
     {
-         // Only exclusive fullscreen needs an early display-mode reset. Leaving desktop fullscreen here
+        // Only exclusive fullscreen needs an early display-mode reset. Leaving desktop fullscreen here
         // can bring a background window to the foreground on macOS; let window destruction handle it.
         const Uint32 fullscreenFlags = SDL_GetWindowFlags(mWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP;
         if (fullscreenFlags == SDL_WINDOW_FULLSCREEN)
