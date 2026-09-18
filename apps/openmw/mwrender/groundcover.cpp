@@ -16,6 +16,7 @@
 #include <components/misc/convert.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
+#include <components/sceneutil/templateref.hpp>
 #include <components/settings/values.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/terrain/quadtreenode.hpp>
@@ -441,7 +442,7 @@ namespace MWRender
                 | osg::CopyOp::DEEP_COPY_PRIMITIVES));
 
             // Keep link to original mesh to keep it in cache
-            group->getOrCreateUserDataContainer()->addUserObject(const_cast<osg::Node*>(temp));
+            SceneUtil::addTemplateRef(*group, temp);
 
             InstancingVisitor visitor(entries, worldCenter);
             node->accept(visitor);

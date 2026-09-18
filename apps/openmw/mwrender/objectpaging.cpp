@@ -39,6 +39,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/templateref.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
@@ -938,7 +939,7 @@ namespace MWRender
             group->addCullCallback(new SceneUtil::LightListCallback);
         }
         for (const auto& ref : templateRefs)
-            udc->addUserObject(const_cast<osg::Node*>(ref.get()));
+            SceneUtil::addTemplateRef(*group, ref.get());
 
         return group;
     }

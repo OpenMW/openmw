@@ -47,6 +47,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/templateref.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/visitor.hpp>
 
@@ -1073,7 +1074,7 @@ namespace Resource
         // add a ref to the original template to help verify the safety of shallow cloning operations
         // in addition, if this node is managed by a cache, we hint to the cache that it's still being used and should
         // be kept in cache
-        cloned->getOrCreateUserDataContainer()->addUserObject(const_cast<osg::Node*>(base));
+        SceneUtil::addTemplateRef(*cloned, base);
         return cloned;
     }
 
