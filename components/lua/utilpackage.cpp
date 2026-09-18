@@ -7,8 +7,17 @@
 #include <sstream>
 
 #include <components/misc/color.hpp>
+#include <components/misc/convert.hpp>
 #include <components/misc/mathutil.hpp>
 #include <components/misc/strings/algorithm.hpp>
+
+#include <glm/geometric.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/norm.hpp>
 
 #include <MyGUI_StringUtility.h>
 
@@ -81,25 +90,28 @@ namespace LuaUtil
         template <typename T>
         void addSwizzleFields(sol::usertype<T>& type)
         {
+            // glm::vec* exposes the component count via a constexpr static length() method.
+            constexpr int kN = static_cast<int>(T::length());
+
             // Generate mapping of swizzle characters to their getter functions
             constexpr auto components = []() {
-                std::array<std::pair<char, float (*)(const T&)>, T::num_components + 2> arr;
+                std::array<std::pair<char, float (*)(const T&)>, kN + 2> arr;
 
                 // 0/1 Components
-                arr[T::num_components] = { '0', zero<T> };
-                arr[T::num_components + 1] = { '1', one<T> };
+                arr[kN] = { '0', zero<T> };
+                arr[kN + 1] = { '1', one<T> };
 
                 // x,y,z,w components
-                if constexpr (T::num_components > 1)
+                if constexpr (kN > 1)
                 {
                     arr[0] = { 'x', get<T, 0> };
                     arr[1] = { 'y', get<T, 1> };
                 }
 
-                if constexpr (T::num_components > 2)
+                if constexpr (kN > 2)
                     arr[2] = { 'z', get<T, 2> };
 
-                if constexpr (T::num_components > 3)
+                if constexpr (kN > 3)
                     arr[3] = { 'w', get<T, 3> };
 
                 return arr;
@@ -139,40 +151,35 @@ namespace LuaUtil
         template <typename T>
         void addVectorMethods(sol::usertype<T>& vectorType)
         {
+            constexpr int kN = static_cast<int>(T::length());
             vectorType[sol::meta_function::unary_minus] = [](const T& a) { return -a; };
             vectorType[sol::meta_function::addition] = [](const T& a, const T& b) { return a + b; };
             vectorType[sol::meta_function::subtraction] = [](const T& a, const T& b) { return a - b; };
             vectorType[sol::meta_function::equal_to] = [](const T& a, const T& b) { return a == b; };
+            // Lua contract: v * v is the DOT PRODUCT (pinned by the openmw.util math conventions
+            // integration test). glm's operator* on vectors is component-wise, so route through
+            // glm::dot explicitly.
             vectorType[sol::meta_function::multiplication] = sol::overload(
-                [](const T& a, float c) { return a * c; }, [](const T& a, const T& b) { return a * b; });
+                [](const T& a, float c) { return a * c; }, [](const T& a, const T& b) { return glm::dot(a, b); });
             vectorType[sol::meta_function::division] = [](const T& a, float c) { return a / c; };
-            vectorType["dot"] = [](const T& a, const T b) { return a * b; };
-            vectorType["length"] = &T::length;
-            vectorType["length2"] = &T::length2;
+            vectorType["dot"] = [](const T& a, const T& b) { return glm::dot(a, b); };
+            vectorType["length"] = [](const T& v) { return glm::length(v); };
+            vectorType["length2"] = [](const T& v) { return glm::length2(v); };
             vectorType["normalize"] = [](const T& v) {
-                float len = v.length();
+                float len = glm::length(v);
                 if (len == 0)
-                    return std::make_tuple(T(), 0.f);
+                    return std::make_tuple(T(0.0f), 0.f);
                 else
                     return std::make_tuple(v * (1.f / len), len);
             };
-            vectorType["emul"] = [](const T& a, const T& b) {
-                T result;
-                for (int i = 0; i < T::num_components; ++i)
-                    result[i] = a[i] * b[i];
-                return result;
-            };
-            vectorType["ediv"] = [](const T& a, const T& b) {
-                T result;
-                for (int i = 0; i < T::num_components; ++i)
-                    result[i] = a[i] / b[i];
-                return result;
-            };
+            // glm's operator* / operator/ on two vectors is already component-wise.
+            vectorType["emul"] = [](const T& a, const T& b) { return a * b; };
+            vectorType["ediv"] = [](const T& a, const T& b) { return a / b; };
             vectorType[sol::meta_function::to_string] = [](const T& v) {
                 std::stringstream ss;
                 ss << std::setprecision(std::numeric_limits<typename T::value_type>::max_exponent10);
                 ss << "(" << v[0];
-                for (int i = 1; i < T::num_components; ++i)
+                for (int i = 1; i < kN; ++i)
                     ss << ", " << v[i];
                 ss << ")";
                 return ss.str();
@@ -191,14 +198,16 @@ namespace LuaUtil
         util["vector2"] = [](float x, float y) { return Vec2(x, y); };
         sol::usertype<Vec2> vec2Type = lua.new_usertype<Vec2>("Vec2");
         addVectorMethods<Vec2>(vec2Type);
-        vec2Type["rotate"] = &Misc::rotateVec2f;
+        vec2Type["rotate"] = [](const Vec2& v, float angle) {
+            return Misc::Convert::toGlm(Misc::rotateVec2f(Misc::Convert::toOsg(v), angle));
+        };
 
         // Lua bindings for Vec3
         util["vector3"] = [](float x, float y, float z) { return Vec3(x, y, z); };
         sol::usertype<Vec3> vec3Type = lua.new_usertype<Vec3>("Vec3");
         addVectorMethods<Vec3>(vec3Type);
-        vec3Type[sol::meta_function::involution] = [](const Vec3& a, const Vec3& b) { return a ^ b; };
-        vec3Type["cross"] = [](const Vec3& a, const Vec3& b) { return a ^ b; };
+        vec3Type[sol::meta_function::involution] = [](const Vec3& a, const Vec3& b) { return glm::cross(a, b); };
+        vec3Type["cross"] = [](const Vec3& a, const Vec3& b) { return glm::cross(a, b); };
 
         // Lua bindings for Vec4
         util["vector4"] = [](float x, float y, float z, float w) { return Vec4(x, y, z, w); };
@@ -224,8 +233,8 @@ namespace LuaUtil
         boxType[sol::meta_function::to_string] = [](const Box& b) {
             std::stringstream ss;
             ss << "Box{ ";
-            ss << "center(" << b.mCenter.x() << ", " << b.mCenter.y() << ", " << b.mCenter.z() << ") ";
-            ss << "halfSize(" << b.mHalfSize.x() << ", " << b.mHalfSize.y() << ", " << b.mHalfSize.z() << ")";
+            ss << "center(" << b.mCenter.x << ", " << b.mCenter.y << ", " << b.mCenter.z << ") ";
+            ss << "halfSize(" << b.mHalfSize.x << ", " << b.mHalfSize.y << ", " << b.mHalfSize.z << ")";
             ss << " }";
             return ss.str();
         };
@@ -276,57 +285,58 @@ namespace LuaUtil
         sol::table transforms(lua, sol::create);
         util["transform"] = LuaUtil::makeReadOnly(transforms);
 
-        transforms["identity"] = sol::make_object(lua, TransformQ{ osg::Quat() });
-        transforms["move"] = sol::overload([](const Vec3& v) { return TransformM{ osg::Matrixf::translate(v) }; },
-            [](float x, float y, float z) { return TransformM{ osg::Matrixf::translate(x, y, z) }; });
-        transforms["scale"] = sol::overload([](const Vec3& v) { return TransformM{ osg::Matrixf::scale(v) }; },
-            [](float x, float y, float z) { return TransformM{ osg::Matrixf::scale(x, y, z) }; });
-        transforms["rotate"] = [](float angle, const Vec3& axis) { return TransformQ{ osg::Quat(angle, axis) }; };
-        transforms["rotateX"] = [](float angle) { return TransformQ{ osg::Quat(angle, Vec3(-1, 0, 0)) }; };
-        transforms["rotateY"] = [](float angle) { return TransformQ{ osg::Quat(angle, Vec3(0, -1, 0)) }; };
-        transforms["rotateZ"] = [](float angle) { return TransformQ{ osg::Quat(angle, Vec3(0, 0, -1)) }; };
+        // Lua transform composition contract (pinned by the openmw.util math conventions test):
+        // (A * B) * v applies B first, then A. In glm's column-vector convention that means the
+        // stored matrix is A * B (natural order), whereas the old osg row-vector code stored
+        // B * A. Similarly osg::Quat::operator*(Quat) is Hamilton-reversed vs glm, so quaternion
+        // composition operand order is also swapped from the previous implementation.
+        transforms["identity"] = sol::make_object(lua, TransformQ{ glm::quat(1, 0, 0, 0) });
+        transforms["move"]
+            = sol::overload([](const Vec3& v) { return TransformM{ glm::translate(glm::mat4(1.0f), v) }; },
+                [](float x, float y, float z) { return TransformM{ glm::translate(glm::mat4(1.0f), Vec3(x, y, z)) }; });
+        transforms["scale"] = sol::overload([](const Vec3& v) { return TransformM{ glm::scale(glm::mat4(1.0f), v) }; },
+            [](float x, float y, float z) { return TransformM{ glm::scale(glm::mat4(1.0f), Vec3(x, y, z)) }; });
+        transforms["rotate"] = [](float angle, const Vec3& axis) {
+            // Match osg::Quat::makeRotate: a near-zero axis gives the identity, where glm::normalize would give NaN.
+            const float length = glm::length(axis);
+            if (length < 1e-7f)
+                return TransformQ{ glm::quat(1, 0, 0, 0) };
+            return TransformQ{ glm::angleAxis(angle, axis / length) };
+        };
+        transforms["rotateX"] = [](float angle) { return TransformQ{ glm::angleAxis(angle, Vec3(-1, 0, 0)) }; };
+        transforms["rotateY"] = [](float angle) { return TransformQ{ glm::angleAxis(angle, Vec3(0, -1, 0)) }; };
+        transforms["rotateZ"] = [](float angle) { return TransformQ{ glm::angleAxis(angle, Vec3(0, 0, -1)) }; };
 
         transMType[sol::meta_function::multiplication]
-            = sol::overload([](const TransformM& a, const Vec3& b) { return a.mM.preMult(b); },
-                [](const TransformM& a, const TransformM& b) { return TransformM{ b.mM * a.mM }; },
-                [](const TransformM& a, const TransformQ& b) {
-                    TransformM res{ a.mM };
-                    res.mM.preMultRotate(b.mQ);
-                    return res;
-                });
+            = sol::overload([](const TransformM& a, const Vec3& b) { return Vec3(a.mM * glm::vec4(b, 1.0f)); },
+                [](const TransformM& a, const TransformM& b) { return TransformM{ a.mM * b.mM }; },
+                [](const TransformM& a, const TransformQ& b) { return TransformM{ a.mM * glm::mat4_cast(b.mQ) }; });
         transMType[sol::meta_function::to_string] = [](const TransformM& m) {
-            osg::Vec3f trans;
-            osg::Vec3f scale;
-            osg::Quat rotation;
-            osg::Quat so;
-            m.mM.decompose(trans, rotation, scale, so);
-            osg::Quat::value_type rotationAngle;
-            osg::Quat::value_type soAngle;
-            osg::Vec3f rotationAxis;
-            osg::Vec3f soAxis;
-            rotation.getRotate(rotationAngle, rotationAxis);
-            so.getRotate(soAngle, soAxis);
+            glm::vec3 scale;
+            glm::quat rotation;
+            glm::vec3 trans;
+            glm::vec3 skew;
+            glm::vec4 perspective;
+            glm::decompose(m.mM, scale, rotation, trans, skew, perspective);
+            const float rotationAngle = glm::angle(rotation);
+            const glm::vec3 rotationAxis = glm::axis(rotation);
             std::stringstream ss;
             ss << "TransformM{ ";
-            if (trans.length2() > 0)
-                ss << "move(" << trans.x() << ", " << trans.y() << ", " << trans.z() << ") ";
+            if (glm::length2(trans) > 0)
+                ss << "move(" << trans.x << ", " << trans.y << ", " << trans.z << ") ";
             if (rotationAngle != 0)
-                ss << "rotation(angle=" << rotationAngle << ", axis=(" << rotationAxis.x() << ", " << rotationAxis.y()
-                   << ", " << rotationAxis.z() << ")) ";
-            if (scale.x() != 1 || scale.y() != 1 || scale.z() != 1)
-                ss << "scale(" << scale.x() << ", " << scale.y() << ", " << scale.z() << ") ";
-            if (soAngle != 0)
-                ss << "rotation(angle=" << soAngle << ", axis=(" << soAxis.x() << ", " << soAxis.y() << ", "
-                   << soAxis.z() << ")) ";
+                ss << "rotation(angle=" << rotationAngle << ", axis=(" << rotationAxis.x << ", " << rotationAxis.y
+                   << ", " << rotationAxis.z << ")) ";
+            if (scale.x != 1 || scale.y != 1 || scale.z != 1)
+                ss << "scale(" << scale.x << ", " << scale.y << ", " << scale.z << ") ";
             ss << "}";
             return ss.str();
         };
-        transMType["apply"] = [](const TransformM& a, const Vec3& b) { return a.mM.preMult(b); },
+        transMType["apply"] = [](const TransformM& a, const Vec3& b) { return Vec3(a.mM * glm::vec4(b, 1.0f)); };
         transMType["inverse"] = [](const TransformM& m) {
-            TransformM res;
-            if (!res.mM.invert_4x3(m.mM))
+            if (glm::determinant(m.mM) == 0.0f)
                 throw std::runtime_error("This Transform is not invertible");
-            return res;
+            return TransformM{ glm::inverse(m.mM) };
         };
         transMType["getYaw"] = [](const TransformM& m) {
             osg::Vec3f angles = Misc::toEulerAnglesXZ(m.mM);
@@ -347,23 +357,18 @@ namespace LuaUtil
 
         transQType[sol::meta_function::multiplication]
             = sol::overload([](const TransformQ& a, const Vec3& b) { return a.mQ * b; },
-                [](const TransformQ& a, const TransformQ& b) { return TransformQ{ b.mQ * a.mQ }; },
-                [](const TransformQ& a, const TransformM& b) {
-                    TransformM res{ b };
-                    res.mM.postMultRotate(a.mQ);
-                    return res;
-                });
+                [](const TransformQ& a, const TransformQ& b) { return TransformQ{ a.mQ * b.mQ }; },
+                [](const TransformQ& a, const TransformM& b) { return TransformM{ glm::mat4_cast(a.mQ) * b.mM }; });
         transQType[sol::meta_function::to_string] = [](const TransformQ& q) {
-            osg::Quat::value_type angle;
-            osg::Vec3f axis;
-            q.mQ.getRotate(angle, axis);
+            const float angle = glm::angle(q.mQ);
+            const glm::vec3 axis = glm::axis(q.mQ);
             std::stringstream ss;
-            ss << "TransformQ{ rotation(angle=" << angle << ", axis=(" << axis.x() << ", " << axis.y() << ", "
-               << axis.z() << ")) }";
+            ss << "TransformQ{ rotation(angle=" << angle << ", axis=(" << axis.x << ", " << axis.y << ", " << axis.z
+               << ")) }";
             return ss.str();
         };
-        transQType["apply"] = [](const TransformQ& a, const Vec3& b) { return a.mQ * b; },
-        transQType["inverse"] = [](const TransformQ& q) { return TransformQ{ q.mQ.inverse() }; };
+        transQType["apply"] = [](const TransformQ& a, const Vec3& b) { return a.mQ * b; };
+        transQType["inverse"] = [](const TransformQ& q) { return TransformQ{ glm::inverse(q.mQ) }; };
         transQType["getYaw"] = [](const TransformQ& q) {
             osg::Vec3f angles = Misc::toEulerAnglesXZ(q.mQ);
             return angles.z();
