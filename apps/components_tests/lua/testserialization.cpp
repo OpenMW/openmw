@@ -148,6 +148,15 @@ namespace
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, transM));
             EXPECT_EQ(serialized.size(), 130); // version, type, 16x double
+            // Pin wire bytes: payload is 16 doubles in the same column-major order
+            // pre-glm osg::Matrixf wrote them. Any layout drift breaks round-trip
+            // with saves written by earlier versions.
+            for (int i = 0; i < 16; ++i)
+            {
+                double value;
+                std::memcpy(&value, serialized.data() + 2 + i * sizeof(double), sizeof(double));
+                EXPECT_EQ(value, static_cast<double>(i + 1)) << "matrix payload byte " << i;
+            }
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<LuaUtil::TransformM>());
             EXPECT_EQ(value.as<LuaUtil::TransformM>().mM, transM.mM);
@@ -155,6 +164,14 @@ namespace
         {
             std::string serialized = LuaUtil::serialize(sol::make_object(lua, transQ));
             EXPECT_EQ(serialized.size(), 34); // version, type, 4x double
+            // Pin wire bytes: payload is x, y, z, w as doubles.
+            const double expected[4] = { 1.0, 2.0, 3.0, 4.0 };
+            for (int i = 0; i < 4; ++i)
+            {
+                double value;
+                std::memcpy(&value, serialized.data() + 2 + i * sizeof(double), sizeof(double));
+                EXPECT_EQ(value, expected[i]) << "quat payload byte " << i;
+            }
             sol::object value = LuaUtil::deserialize(lua, serialized);
             ASSERT_TRUE(value.is<LuaUtil::TransformQ>());
             EXPECT_EQ(value.as<LuaUtil::TransformQ>().mQ, transQ.mQ);
