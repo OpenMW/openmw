@@ -2,6 +2,7 @@
 
 #include <components/lua/luastate.hpp>
 #include <components/lua/utilpackage.hpp>
+#include <components/misc/convert.hpp>
 #include <components/misc/finitevalues.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -257,9 +258,10 @@ namespace MWLua
                 sol::object transformObject = options->get<sol::object>("transform");
                 std::optional<osg::Matrix> transform;
                 if (transformObject.is<LuaUtil::TransformM>())
-                    transform = LuaUtil::cast<LuaUtil::TransformM>(transformObject).mM;
+                    transform = Misc::Convert::toOsg(LuaUtil::cast<LuaUtil::TransformM>(transformObject).mM);
                 else if (transformObject.is<LuaUtil::TransformQ>())
-                    transform = osg::Matrix(LuaUtil::cast<LuaUtil::TransformQ>(transformObject).mQ);
+                    transform
+                        = osg::Matrix(Misc::Convert::toOsg(LuaUtil::cast<LuaUtil::TransformQ>(transformObject).mQ));
                 if (transform.has_value() && !transform->valid())
                     throw std::runtime_error("Transform provided for 'addVfx' is invalid");
 
