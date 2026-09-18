@@ -441,7 +441,7 @@ namespace MWRender
                 | osg::CopyOp::DEEP_COPY_PRIMITIVES));
 
             // Keep link to original mesh to keep it in cache
-            group->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(temp));
+            group->getOrCreateUserDataContainer()->addUserObject(const_cast<osg::Node*>(temp));
 
             InstancingVisitor visitor(entries, worldCenter);
             node->accept(visitor);

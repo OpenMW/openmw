@@ -6,7 +6,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
-#include <components/resource/scenemanager.hpp>
 
 #include "skeleton.hpp"
 #include "util.hpp"
@@ -46,7 +45,7 @@ namespace SceneUtil
             // - Arrays that we add or replace in the cloned geometry must be explicitely forbidden from reusing
             // BufferObjects of the original geometry. (ensured by vbo below)
             mGeometry[i] = new osg::Geometry(from, osg::CopyOp::SHALLOW_COPY);
-            mGeometry[i]->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(mSourceGeometry));
+            mGeometry[i]->getOrCreateUserDataContainer()->addUserObject(mSourceGeometry.get());
 
             osg::Geometry& to = *mGeometry[i];
             to.setSupportsDisplayList(false);

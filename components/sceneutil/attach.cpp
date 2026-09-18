@@ -123,7 +123,7 @@ namespace SceneUtil
             copyVisitor.doCopy(sceneManager);
             // add a ref to the original template to hint to the cache that it is still being used and should be kept in
             // cache.
-            handle->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(toAttach));
+            handle->getOrCreateUserDataContainer()->addUserObject(const_cast<osg::Node*>(toAttach.get()));
 
             if (handle->getNumChildren() == 1)
             {

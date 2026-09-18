@@ -3,7 +3,6 @@
 #include <osgUtil/CullVisitor>
 
 #include <cassert>
-#include <components/resource/scenemanager.hpp>
 
 namespace SceneUtil
 {
@@ -37,11 +36,11 @@ namespace SceneUtil
             // DO NOT COPY AND PASTE THIS CODE. Cloning osg::Geometry without also cloning its contained Arrays is
             // generally unsafe. In this specific case the operation is safe under the following two assumptions:
             // - When Arrays are removed or replaced in the cloned geometry, the original Arrays in their place must
-            // outlive the cloned geometry regardless. (ensured by TemplateRef)
+            // outlive the cloned geometry regardless. (ensured by the user-data ref below)
             // - Arrays that we add or replace in the cloned geometry must be explicitely forbidden from reusing
             // BufferObjects of the original geometry. (ensured by vbo below)
             mGeometry[i] = new osg::Geometry(*mSourceGeometry, osg::CopyOp::SHALLOW_COPY);
-            mGeometry[i]->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(mSourceGeometry));
+            mGeometry[i]->getOrCreateUserDataContainer()->addUserObject(mSourceGeometry.get());
 
             const osg::Geometry& from = *mSourceGeometry;
             osg::Geometry& to = *mGeometry[i];

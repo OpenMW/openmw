@@ -40,7 +40,7 @@ namespace Resource
         // Create an instance based on template and store template reference inside so the template will not be removed
         // from cache
         osg::ref_ptr<SceneUtil::AnimBlendRules> blendRules(new AnimBlendRules(*tmpl, osg::CopyOp::SHALLOW_COPY));
-        blendRules->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(tmpl));
+        blendRules->getOrCreateUserDataContainer()->addUserObject(const_cast<SceneUtil::AnimBlendRules*>(tmpl.get()));
 
         if (!overridePath.value().empty())
         {
@@ -49,7 +49,8 @@ namespace Resource
             {
                 blendRules->addOverrideRules(*blendRuleOverrides);
             }
-            blendRules->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(blendRuleOverrides));
+            blendRules->getOrCreateUserDataContainer()->addUserObject(
+                const_cast<SceneUtil::AnimBlendRules*>(blendRuleOverrides.get()));
         }
 
         return blendRules;
