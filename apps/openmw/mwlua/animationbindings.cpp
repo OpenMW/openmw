@@ -261,7 +261,7 @@ namespace MWLua
                     transform = Misc::Convert::toOsg(LuaUtil::cast<LuaUtil::TransformM>(transformObject).mM);
                 else if (transformObject.is<LuaUtil::TransformQ>())
                     transform
-                        = osg::Matrix(Misc::Convert::toOsg(LuaUtil::cast<LuaUtil::TransformQ>(transformObject).mQ));
+                        = Misc::Convert::toOsg(glm::mat4_cast(LuaUtil::cast<LuaUtil::TransformQ>(transformObject).mQ));
                 if (transform.has_value() && !transform->valid())
                     throw std::runtime_error("Transform provided for 'addVfx' is invalid");
 
