@@ -53,6 +53,19 @@ namespace MWMechanics
         mTargetActor = combat->mTargetActor;
     }
 
+    MWWorld::Ptr AiCombat::getTarget() const
+    {
+        const MWWorld::Ptr target = AiPackage::getTarget();
+        if (!target.isEmpty() && !target.getClass().isActor())
+            return {};
+        return target;
+    }
+
+    bool AiCombat::targetIs(const MWWorld::Ptr& ptr) const
+    {
+        return AiPackage::targetIs(ptr) && getTarget() == ptr;
+    }
+
     void AiCombat::init() {}
 
     /*
