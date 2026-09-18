@@ -2484,14 +2484,21 @@ namespace MWGui
 
             if (image.valid())
             {
-                // everything looks good, send it to the cursor manager
-                const Uint8 hotspotX = static_cast<Uint8>(imgSetPointer->getHotSpot().left);
-                const Uint8 hotspotY = static_cast<Uint8>(imgSetPointer->getHotSpot().top);
-                int rotation = imgSetPointer->getRotation();
-                MyGUI::IntSize pointerSize = imgSetPointer->getSize();
+                // scale the cursor to the interface scaling factor
+                const float guiUiScale = Settings::gui().mScalingFactor;
 
-                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, image, hotspotX, hotspotY,
-                    pointerSize.width, pointerSize.height);
+                // everything looks good, send it to the cursor manager
+                const Uint8 hotspotX = static_cast<Uint8>(guiUiScale * imgSetPointer->getHotSpot().left);
+                const Uint8 hotspotY = static_cast<Uint8>(guiUiScale * imgSetPointer->getHotSpot().top);
+
+                MyGUI::IntSize pointerSize = imgSetPointer->getSize();
+                const Uint8 width = static_cast<Uint8>(guiUiScale * pointerSize.width);
+                const Uint8 height = static_cast<Uint8>(guiUiScale * pointerSize.height);
+
+                int rotation = imgSetPointer->getRotation();
+
+                mCursorManager->createCursor(
+                    imgSetPointer->getResourceName(), rotation, image, hotspotX, hotspotY, width, height);
             }
         }
     }
