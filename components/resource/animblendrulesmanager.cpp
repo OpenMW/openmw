@@ -12,8 +12,8 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/pathhelpers.hpp>
 
+#include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/osgacontroller.hpp>
-#include <components/sceneutil/templateref.hpp>
 #include <components/vfs/pathutil.hpp>
 
 #include <components/resource/scenemanager.hpp>

@@ -14,9 +14,9 @@
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/misc/convert.hpp>
+#include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
-#include <components/sceneutil/templateref.hpp>
 #include <components/settings/values.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/terrain/quadtreenode.hpp>

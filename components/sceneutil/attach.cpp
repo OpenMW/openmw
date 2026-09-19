@@ -14,7 +14,7 @@
 #include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/skeleton.hpp>
 
-#include "templateref.hpp"
+#include "clone.hpp"
 #include "visitor.hpp"
 
 namespace SceneUtil
