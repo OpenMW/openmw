@@ -25,7 +25,7 @@ namespace SceneUtil
             return;
 
         // Move only objects to keep allocated storage in mObjects
-        workQueue.addWorkItem(new ClearVector(std::vector<osg::ref_ptr<osg::Referenced>>(
+        workQueue.addWorkItem(std::make_shared<ClearVector>(std::vector<osg::ref_ptr<osg::Referenced>>(
             std::move_iterator(mObjects.begin()), std::move_iterator(mObjects.end()))));
         mObjects.clear();
     }

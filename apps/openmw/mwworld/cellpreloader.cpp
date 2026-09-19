@@ -285,8 +285,8 @@ namespace MWWorld
                 return;
         }
 
-        osg::ref_ptr<PreloadItem> item(new PreloadItem(&cell, mResourceSystem->getSceneManager(), mBulletShapeManager,
-            mResourceSystem->getKeyframeManager(), mTerrain, mLandManager, mPreloadInstances));
+        auto item = std::make_shared<PreloadItem>(&cell, mResourceSystem->getSceneManager(), mBulletShapeManager,
+            mResourceSystem->getKeyframeManager(), mTerrain, mLandManager, mPreloadInstances);
         mWorkQueue->addWorkItem(item);
 
         mPreloadCells.emplace(&cell, PreloadEntry(timestamp, item));
@@ -345,7 +345,7 @@ namespace MWWorld
         {
             // the resource cache is cleared from the worker thread so that we're not holding up the main thread with
             // delete operations
-            mUpdateCacheItem = new UpdateCacheItem(mResourceSystem, timestamp);
+            mUpdateCacheItem = std::make_shared<UpdateCacheItem>(mResourceSystem, timestamp);
             mWorkQueue->addWorkItem(mUpdateCacheItem, true);
             mLastResourceCacheUpdate = timestamp;
         }
@@ -367,7 +367,7 @@ namespace MWWorld
         mPreloadInstances = preload;
     }
 
-    void CellPreloader::setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue)
+    void CellPreloader::setWorkQueue(std::shared_ptr<SceneUtil::WorkQueue> workQueue)
     {
         mWorkQueue = workQueue;
     }
@@ -424,7 +424,7 @@ namespace MWWorld
             mTerrainPreloadPositions.assign(positions.begin(), positions.end());
             if (!positions.empty())
             {
-                mTerrainPreloadItem = new TerrainPreloadItem(mTerrainViews, mTerrain, positions);
+                mTerrainPreloadItem = std::make_shared<TerrainPreloadItem>(mTerrainViews, mTerrain, positions);
                 mWorkQueue->addWorkItem(mTerrainPreloadItem);
             }
         }

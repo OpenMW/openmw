@@ -1,12 +1,10 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_WORKQUEUE_H
 #define OPENMW_COMPONENTS_SCENEUTIL_WORKQUEUE_H
 
-#include <osg/Referenced>
-#include <osg/ref_ptr>
-
 #include <atomic>
 #include <condition_variable>
 #include <deque>
+#include <memory>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -14,9 +12,11 @@
 namespace SceneUtil
 {
 
-    class WorkItem : public osg::Referenced
+    class WorkItem
     {
     public:
+        virtual ~WorkItem() = default;
+
         /// Override in a derived WorkItem to perform actual work.
         virtual void doWork() {}
 
@@ -42,7 +42,7 @@ namespace SceneUtil
     /// @brief A work queue that users can push work items onto, to be completed by one or more background threads.
     /// @note Work items will be processed in the order that they were given in, however
     /// if multiple work threads are involved then it is possible for a later item to complete before earlier items.
-    class WorkQueue : public osg::Referenced
+    class WorkQueue
     {
     public:
         WorkQueue(std::size_t workerThreads);
@@ -55,12 +55,12 @@ namespace SceneUtil
         /// Add a new work item to the back of the queue.
         /// @par The work item's waitTillDone() method may be used by the caller to wait until the work is complete.
         /// @param front If true, add item to the front of the queue. If false (default), add to the back.
-        void addWorkItem(osg::ref_ptr<WorkItem> item, bool front = false);
+        void addWorkItem(std::shared_ptr<WorkItem> item, bool front = false);
 
         /// Get the next work item from the front of the queue. If the queue is empty, waits until a new item is added.
         /// If the workqueue is in the process of being destroyed, may return nullptr.
         /// @par Used internally by the WorkThread.
-        osg::ref_ptr<WorkItem> removeWorkItem();
+        std::shared_ptr<WorkItem> removeWorkItem();
 
         size_t getNumItems() const;
 
@@ -68,7 +68,7 @@ namespace SceneUtil
 
     private:
         bool mIsReleased;
-        std::deque<osg::ref_ptr<WorkItem>> mQueue;
+        std::deque<std::shared_ptr<WorkItem>> mQueue;
 
         mutable std::mutex mMutex;
         std::condition_variable mCondition;

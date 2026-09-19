@@ -128,7 +128,7 @@ namespace MWGui
         typedef std::vector<Faction> FactionList;
 
         WindowManager(SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot,
-            Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
+            Resource::ResourceSystem* resourceSystem, const std::shared_ptr<SceneUtil::WorkQueue>& workQueue,
             const std::filesystem::path& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
             ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription,
             Files::ConfigurationManager& cfgMgr);
@@ -417,7 +417,7 @@ namespace MWGui
 
         const MWWorld::ESMStore* mStore;
         Resource::ResourceSystem* mResourceSystem;
-        osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+        std::shared_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
         std::unique_ptr<MyGUIPlatform::Platform> mGuiPlatform;
         osgViewer::Viewer* mViewer;

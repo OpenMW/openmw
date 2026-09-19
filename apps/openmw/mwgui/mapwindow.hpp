@@ -230,7 +230,7 @@ namespace MWGui
     {
     public:
         MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender,
-            SceneUtil::WorkQueue* workQueue);
+            const std::shared_ptr<SceneUtil::WorkQueue>& workQueue);
         virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);

@@ -604,8 +604,8 @@ namespace NavMeshTool
         mConsumer->expect(data.mWorldspace, tiles.size(), recastMeshProvider);
 
         for (const TilePosition& tilePosition : tiles)
-            mWorkQueue.addWorkItem(new GenerateNavMeshTile(data.mWorldspace, tilePosition, recastMeshProvider,
-                mAgentBounds, mSettings, mOptions.mCollectStats, mConsumer));
+            mWorkQueue.addWorkItem(std::make_shared<GenerateNavMeshTile>(data.mWorldspace, tilePosition,
+                recastMeshProvider, mAgentBounds, mSettings, mOptions.mCollectStats, mConsumer));
 
         return mConsumer->getStatus();
     }

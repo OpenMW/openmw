@@ -189,7 +189,7 @@ namespace MWRender
     };
 
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
-        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
+        Resource::ResourceSystem* resourceSystem, const std::shared_ptr<SceneUtil::WorkQueue>& workQueue,
         DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore,
         SceneUtil::UnrefQueue& unrefQueue)
         : mSkyBlending(Settings::fog().mSkyBlending)
@@ -450,9 +450,9 @@ namespace MWRender
         return mResourceSystem;
     }
 
-    SceneUtil::WorkQueue* RenderingManager::getWorkQueue()
+    const std::shared_ptr<SceneUtil::WorkQueue>& RenderingManager::getWorkQueue() const
     {
-        return mWorkQueue.get();
+        return mWorkQueue;
     }
 
     Terrain::World* RenderingManager::getTerrain()
@@ -462,7 +462,7 @@ namespace MWRender
 
     void RenderingManager::preloadCommonAssets()
     {
-        osg::ref_ptr<PreloadCommonAssetsWorkItem> workItem(new PreloadCommonAssetsWorkItem(mResourceSystem));
+        auto workItem = std::make_shared<PreloadCommonAssetsWorkItem>(mResourceSystem);
         mSky->listAssetsToPreload(workItem->mModels, workItem->mTextures);
         mWater->listAssetsToPreload(workItem->mTextures);
 
