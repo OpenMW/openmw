@@ -520,7 +520,8 @@ namespace MWLua
                     });
                 };
                 objectT["teleport"] = [removeFn, context](const GObject& object, const sol::object& cellOrName,
-                                          const osg::Vec3f& pos, const sol::object& options) {
+                                          const glm::vec3& posIn, const sol::object& options) {
+                    const osg::Vec3f pos = Misc::Convert::toOsg(posIn);
                     MWWorld::CellStore* cell = findCell(cellOrName, pos);
                     MWWorld::Ptr ptr = object.ptr();
                     int count = ptr.getCellRef().getCount();

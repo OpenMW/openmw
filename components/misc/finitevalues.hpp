@@ -1,9 +1,9 @@
 #ifndef OPENMW_COMPONENTS_MISC_FINITEVALUES_HPP
 #define OPENMW_COMPONENTS_MISC_FINITEVALUES_HPP
 
-#include <osg/Vec2f>
-#include <osg/Vec3f>
-#include <osg/Vec4f>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 #include <components/lua/luastate.hpp>
 
@@ -22,11 +22,11 @@ namespace Misc
         FiniteValue(T v)
         {
             constexpr bool isVecType
-                = std::is_same_v<osg::Vec2f, T> || std::is_same_v<osg::Vec3f, T> || std::is_same_v<osg::Vec4f, T>;
+                = std::is_same_v<glm::vec2, T> || std::is_same_v<glm::vec3, T> || std::is_same_v<glm::vec4, T>;
 
             if constexpr (isVecType)
             {
-                for (int i = 0; i < T::num_components; ++i)
+                for (glm::length_t i = 0; i < T::length(); ++i)
                     if (!std::isfinite(v[i]))
                         throw std::invalid_argument("Vector must contain finite numbers");
             }
@@ -45,11 +45,11 @@ namespace Misc
 
     using FiniteFloat = FiniteValue<float>;
 
-    using FiniteVec2f = FiniteValue<osg::Vec2f>;
+    using FiniteVec2f = FiniteValue<glm::vec2>;
 
-    using FiniteVec3f = FiniteValue<osg::Vec3f>;
+    using FiniteVec3f = FiniteValue<glm::vec3>;
 
-    using FiniteVec4f = FiniteValue<osg::Vec4f>;
+    using FiniteVec4f = FiniteValue<glm::vec4>;
 }
 
 namespace sol

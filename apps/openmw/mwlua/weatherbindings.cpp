@@ -8,6 +8,7 @@
 #include <components/esm3/loadregn.hpp>
 #include <components/lua/util.hpp>
 #include <components/misc/color.hpp>
+#include <components/misc/convert.hpp>
 #include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -99,7 +100,7 @@ namespace
     {
         auto value = rec[key].get<std::optional<Misc::FiniteVec3f>>();
         if (value)
-            property = *value;
+            property = Misc::Convert::toOsg(*value);
     }
 
     bool addPropertyFromTable(const sol::table& rec, std::string_view key, osg::Vec4f& property)
@@ -289,8 +290,11 @@ namespace MWLua
                     });
             record["isStorm"] = sol::property([](const T& w) { return RT::asRecord(w).mIsStorm; },
                 [](T& w, bool isStorm) { RT::asRecord(w).mIsStorm = isStorm; });
-            record["stormDirection"] = sol::property([](const T& w) { return RT::asRecord(w).mStormDirection; },
-                [](T& w, const FiniteVec3f& stormDirection) { RT::asRecord(w).mStormDirection = stormDirection; });
+            record["stormDirection"]
+                = sol::property([](const T& w) { return Misc::Convert::toGlm(RT::asRecord(w).mStormDirection); },
+                    [](T& w, const FiniteVec3f& stormDirection) {
+                        RT::asRecord(w).mStormDirection = Misc::Convert::toOsg(stormDirection);
+                    });
             record["glareView"] = sol::property([](const T& w) { return RT::asRecord(w).mGlareView; },
                 [](T& w, const FiniteFloat glareView) { RT::asRecord(w).mGlareView = glareView; });
             record["rainSpeed"] = sol::property([](const T& w) { return RT::asRecord(w).mRainSpeed; },
@@ -361,9 +365,9 @@ namespace MWLua
             record["flashDecrement"] = sol::property([](const T& w) { return RT::asRecord(w).mFlashDecrement; },
                 [](T& w, const FiniteFloat flashDecrement) { RT::asRecord(w).mFlashDecrement = flashDecrement; });
             record["stormParticleRotation"]
-                = sol::property([](const T& w) { return RT::asRecord(w).mStormParticleRotation; },
+                = sol::property([](const T& w) { return Misc::Convert::toGlm(RT::asRecord(w).mStormParticleRotation); },
                     [](T& w, const FiniteVec3f& stormParticleRotation) {
-                        RT::asRecord(w).mStormParticleRotation = stormParticleRotation;
+                        RT::asRecord(w).mStormParticleRotation = Misc::Convert::toOsg(stormParticleRotation);
                     });
             record["hasRipples"] = sol::property([](const T& w) { return RT::asRecord(w).mRipplesEnabled; },
                 [](T& w, bool ripplesEnabled) { RT::asRecord(w).mRipplesEnabled = ripplesEnabled; });
@@ -495,13 +499,13 @@ namespace MWLua
             []() -> const MWWorld::Weather* { return MWBase::Environment::get().getWorld()->getNextWeather(); });
         api["getTransition"] = overloadWeatherGetter(&MWBase::World::getWeatherTransition);
         api["getCurrentSunLightDirection"] = overloadForActiveCell(
-            []() -> std::optional<osg::Vec4f> {
+            []() -> std::optional<glm::vec4> {
                 osg::Vec4f sunPos = MWBase::Environment::get().getWorld()->getSunLightPosition();
                 // normalize to get the direction towards the sun
                 sunPos.normalize();
 
                 // and invert it to get the direction of the sun light
-                return -sunPos;
+                return Misc::Convert::toGlm(-sunPos);
             },
             false);
         api["getCurrentSunVisibility"] = overloadWeatherGetter(&MWBase::World::getSunVisibility);

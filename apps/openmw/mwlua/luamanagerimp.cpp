@@ -603,8 +603,8 @@ namespace MWLua
             sol::table hitResult = view.newTable();
             sol::table spellcast = view.newTable();
             hitResult["hit"] = true;
-            hitResult["hitPos"] = position;
-            hitResult["hitNormal"] = normal;
+            hitResult["hitPos"] = Misc::Convert::toGlm(position);
+            hitResult["hitNormal"] = Misc::Convert::toGlm(normal);
             if (!victim.isEmpty())
                 hitResult["hitObject"] = GObject(victim);
             spellcast["id"] = spellId.serializeText();
@@ -731,7 +731,7 @@ namespace MWLua
             data["strength"] = attackStrength;
             data["windUp"] = attackWindUp;
             data["damage"] = damageTable;
-            data["hitPos"] = hitPos;
+            data["hitPos"] = Misc::Convert::toGlm(hitPos);
             data["successful"] = successful;
             switch (sourceType)
             {

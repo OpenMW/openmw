@@ -322,7 +322,8 @@ namespace MWLua
         };
 
         api["spawn"]
-            = [context](std::string_view model, const osg::Vec3f& worldPos, sol::optional<sol::table> options) {
+            = [context](std::string_view model, const glm::vec3& worldPosIn, sol::optional<sol::table> options) {
+                  const osg::Vec3f worldPos = Misc::Convert::toOsg(worldPosIn);
                   if (options)
                   {
                       bool magicVfx = options->get_or("mwMagicVfx", true);

@@ -2,7 +2,10 @@
 
 #include "MyGUI_LanguageManager.h"
 
+#include <type_traits>
+
 #include <components/lua/util.hpp>
+#include <components/misc/convert.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -62,13 +65,45 @@ namespace MWLua
             = Action_None;
     };
 
+    // Lua vectors are glm; shader uniforms are still osg.
+    template <class T>
+    struct UniformType
+    {
+        using Type = T;
+    };
+    template <>
+    struct UniformType<glm::vec2>
+    {
+        using Type = osg::Vec2f;
+    };
+    template <>
+    struct UniformType<glm::vec3>
+    {
+        using Type = osg::Vec3f;
+    };
+    template <>
+    struct UniformType<glm::vec4>
+    {
+        using Type = osg::Vec4f;
+    };
+
+    template <class T>
+    typename UniformType<T>::Type toUniform(const T& value)
+    {
+        if constexpr (std::is_same_v<T, typename UniformType<T>::Type>)
+            return value;
+        else
+            return Misc::Convert::toOsg(value);
+    }
+
     template <class T>
     auto getSetter(const Context& context)
     {
         return [context](const Shader& shader, const std::string& name, const T& value) {
             context.mLuaManager->addAction(
                 [=] {
-                    MWBase::Environment::get().getWorld()->getPostProcessor()->setUniform(shader.mShader, name, value);
+                    MWBase::Environment::get().getWorld()->getPostProcessor()->setUniform(
+                        shader.mShader, name, toUniform(value));
                 },
                 "SetUniformShaderAction");
         };
@@ -88,7 +123,7 @@ namespace MWLua
                 throw std::runtime_error(
                     std::format("Mismatching uniform array size, got {} expected {}", table.size(), *targetSize));
 
-            std::vector<T> values;
+            std::vector<typename UniformType<T>::Type> values;
             values.reserve(*targetSize);
 
             for (size_t i = 0; i < *targetSize; ++i)
@@ -96,7 +131,7 @@ namespace MWLua
                 sol::object obj = table[LuaUtil::toLuaIndex(i)];
                 if (!obj.is<T>())
                     throw std::runtime_error("Invalid type for uniform array");
-                values.push_back(obj.as<T>());
+                values.push_back(toUniform(obj.as<T>()));
             }
 
             context.mLuaManager->addAction(
@@ -165,15 +200,15 @@ namespace MWLua
             shader["setBool"] = getSetter<bool>(context);
             shader["setFloat"] = getSetter<float>(context);
             shader["setInt"] = getSetter<int>(context);
-            shader["setVector2"] = getSetter<osg::Vec2f>(context);
-            shader["setVector3"] = getSetter<osg::Vec3f>(context);
-            shader["setVector4"] = getSetter<osg::Vec4f>(context);
+            shader["setVector2"] = getSetter<glm::vec2>(context);
+            shader["setVector3"] = getSetter<glm::vec3>(context);
+            shader["setVector4"] = getSetter<glm::vec4>(context);
 
             shader["setFloatArray"] = getArraySetter<float>(context);
             shader["setIntArray"] = getArraySetter<int>(context);
-            shader["setVector2Array"] = getArraySetter<osg::Vec2f>(context);
-            shader["setVector3Array"] = getArraySetter<osg::Vec3f>(context);
-            shader["setVector4Array"] = getArraySetter<osg::Vec4f>(context);
+            shader["setVector2Array"] = getArraySetter<glm::vec2>(context);
+            shader["setVector3Array"] = getArraySetter<glm::vec3>(context);
+            shader["setVector4Array"] = getArraySetter<glm::vec4>(context);
         }
 
         api["load"] = [](const std::string& name) {

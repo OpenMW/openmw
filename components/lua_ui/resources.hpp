@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <osg/Vec2f>
+#include <glm/vec2.hpp>
 
 #include <components/vfs/pathutil.hpp>
 
@@ -22,8 +22,8 @@ namespace LuaUi
     struct TextureData
     {
         VFS::Path::Normalized mPath;
-        osg::Vec2f mOffset;
-        osg::Vec2f mSize;
+        glm::vec2 mOffset;
+        glm::vec2 mSize;
     };
 
     // will have more/different data when automated atlasing is supported
@@ -32,8 +32,8 @@ namespace LuaUi
     struct CursorData
     {
         VFS::Path::Normalized mPath;
-        osg::Vec2f mSize;
-        osg::Vec2f mHotspot;
+        glm::vec2 mSize;
+        glm::vec2 mHotspot;
         double mRotation = 0;
         std::string mName;
         bool mPersistent = false;
@@ -53,10 +53,10 @@ namespace LuaUi
 
         explicit CursorKey(const CursorData& data)
             : mPath(data.mPath)
-            , mWidth(static_cast<int>(data.mSize.x()))
-            , mHeight(static_cast<int>(data.mSize.y()))
-            , mHotspotX(static_cast<int>(data.mHotspot.x()))
-            , mHotspotY(static_cast<int>(data.mHotspot.y()))
+            , mWidth(static_cast<int>(data.mSize.x))
+            , mHeight(static_cast<int>(data.mSize.y))
+            , mHotspotX(static_cast<int>(data.mHotspot.x))
+            , mHotspotY(static_cast<int>(data.mHotspot.y))
             , mRotation(data.mRotation)
             , mPersistent(data.mPersistent)
         {

@@ -6,7 +6,7 @@
 
 #include <MyGUI_LayerManager.h>
 #include <MyGUI_OverlappedLayer.h>
-#include <osg/Vec2f>
+#include <glm/vec2.hpp>
 
 namespace LuaUi
 {
@@ -22,11 +22,11 @@ namespace LuaUi
         }
 
         const std::string& name() const noexcept { return mName; }
-        const osg::Vec2f size()
+        glm::vec2 size()
         {
             MyGUI::ILayer* p = refresh();
             MyGUI::IntSize size = p->getSize();
-            return osg::Vec2f(static_cast<float>(size.width), static_cast<float>(size.height));
+            return glm::vec2(static_cast<float>(size.width), static_cast<float>(size.height));
         }
 
         struct Options

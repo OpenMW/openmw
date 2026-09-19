@@ -11,12 +11,14 @@
 #include <osg/Quat>
 #include <osg/Vec2f>
 #include <osg/Vec3f>
+#include <osg/Vec4f>
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 namespace Misc::Convert
 {
@@ -116,6 +118,16 @@ namespace Misc::Convert
     inline osg::Vec3f toOsg(const glm::vec3& v)
     {
         return osg::Vec3f(v.x, v.y, v.z);
+    }
+
+    inline glm::vec4 toGlm(const osg::Vec4f& v)
+    {
+        return glm::vec4(v.x(), v.y(), v.z(), v.w());
+    }
+
+    inline osg::Vec4f toOsg(const glm::vec4& v)
+    {
+        return osg::Vec4f(v.x, v.y, v.z, v.w);
     }
 
     inline glm::mat4 toGlm(const osg::Matrixf& m)
