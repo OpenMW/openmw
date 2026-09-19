@@ -144,6 +144,10 @@
 ---
 -- Returns currently rendered Lua UI root Elements in this Lua context.
 -- If `layer` is provided, only Elements attached to that layer are returned.
+-- Elements in distinct MyGUI layer nodes are returned from lower to higher render order. Elements sharing a layer
+-- node, such as those on a non-overlapped layer, retain an unspecified relative order.
+-- All Lua-created layers do not share a single layer node, and thus individual elements in a Lua-created
+-- layer are returned in their rendering order bottom-to-top.
 -- Note: this returns Elements created with `ui.create`. It does not return native engine UI widgets or child layouts
 -- that are not separate Elements.
 -- @function [parent=#ui] getElements
