@@ -133,17 +133,25 @@ namespace MWGui
 
     void DragAndDrop::update()
     {
+        updateDraggedCount(mDraggedCount);
+    }
+
+    void DragAndDrop::onItemConsumed()
+    {
+        if (!mIsOnDragAndDrop || mDraggedCount == 0)
+            return;
+
+        updateDraggedCount(mDraggedCount - 1);
+    }
+
+    void DragAndDrop::updateDraggedCount(std::size_t desiredCount)
+    {
         if (!mIsOnDragAndDrop)
             return;
 
-        // mItem.mCount is the last observed count of the physical stack, not the count on the cursor.
-        const unsigned count = mItem.mBase.getCellRef().getAbsCount();
-        const std::size_t removedCount = mItem.mCount > count ? mItem.mCount - count : 0;
-        mItem.mCount = count;
-
-        const std::size_t draggedCount
-            = std::min<std::size_t>(count, mDraggedCount - std::min(mDraggedCount, removedCount));
-        if (draggedCount == mDraggedCount && draggedCount != 0)
+        const std::size_t physicalCount = mItem.mBase.getCellRef().getAbsCount();
+        const std::size_t draggedCount = std::min(desiredCount, physicalCount);
+        if (draggedCount == mDraggedCount)
             return;
 
         mDraggedCount = draggedCount;

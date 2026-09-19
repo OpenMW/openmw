@@ -654,6 +654,17 @@ namespace MWGui
 
         std::unique_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
 
+        // An ingredient without effects cannot be consumed
+        // Don't finish draganddrop; the stack on cursor doesn't change
+        if (type == ESM::Ingredient::sRecordId && action->isNullAction())
+        {
+            if (isFromDragAndDrop)
+                mDragAndDrop->update();
+            return;
+        }
+
+        const bool isConsumable = type == ESM::Potion::sRecordId || type == ESM::Ingredient::sRecordId;
+
         MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
         auto [eqSlots, canStack] = ptr.getClass().getEquipmentSlots(ptr);
         int useCount = isFromDragAndDrop ? static_cast<int>(mDragAndDrop->mDraggedCount) : ptr.getCellRef().getCount();
@@ -675,8 +686,8 @@ namespace MWGui
         if (isFromDragAndDrop)
         {
             // Feature: Don't finish draganddrop if potion or ingredient was used
-            if (type == ESM::Potion::sRecordId || type == ESM::Ingredient::sRecordId)
-                mDragAndDrop->update();
+            if (isConsumable)
+                mDragAndDrop->onItemConsumed();
             else if (!willEquip)
                 mDragAndDrop->drop(mTradeModel, mItemView);
             else
