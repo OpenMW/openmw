@@ -11,7 +11,6 @@
 
 #include <glm/geometric.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/rotate_vector.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
@@ -30,7 +29,9 @@ namespace Misc
     /// Rotates given 2d vector counterclockwise. Angle is in radians.
     inline osg::Vec2f rotateVec2f(osg::Vec2f vec, float angle)
     {
-        return Misc::Convert::toOsg(glm::rotate(Misc::Convert::toGlm(vec), angle));
+        const float c = std::cos(angle);
+        const float s = std::sin(angle);
+        return osg::Vec2f(c * vec.x() - s * vec.y(), s * vec.x() + c * vec.y());
     }
 
     inline osg::Vec3f toEulerAnglesXZ(osg::Vec3f forward)

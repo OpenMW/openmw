@@ -1,6 +1,10 @@
 #include "box.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
+// matrix_decompose only exists as an experimental (gtx) extension whose API may change between glm
+// releases. Opting in per TU flags this file for review on a glm bump and keeps the define out of
+// every other TU's compile flags.
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace LuaUtil

@@ -16,8 +16,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
+// matrix_decompose only exists as an experimental (gtx) extension whose API may change between glm
+// releases. Opting in per TU flags this file for review on a glm bump and keeps the define out of
+// every other TU's compile flags.
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtx/norm.hpp>
 
 #include <MyGUI_StringUtility.h>
 
@@ -164,7 +167,7 @@ namespace LuaUtil
             vectorType[sol::meta_function::division] = [](const T& a, float c) { return a / c; };
             vectorType["dot"] = [](const T& a, const T& b) { return glm::dot(a, b); };
             vectorType["length"] = [](const T& v) { return glm::length(v); };
-            vectorType["length2"] = [](const T& v) { return glm::length2(v); };
+            vectorType["length2"] = [](const T& v) { return glm::dot(v, v); };
             vectorType["normalize"] = [](const T& v) {
                 float len = glm::length(v);
                 if (len == 0)
@@ -322,7 +325,7 @@ namespace LuaUtil
             const glm::vec3 rotationAxis = glm::axis(rotation);
             std::stringstream ss;
             ss << "TransformM{ ";
-            if (glm::length2(trans) > 0)
+            if (glm::dot(trans, trans) > 0)
                 ss << "move(" << trans.x << ", " << trans.y << ", " << trans.z << ") ";
             if (rotationAngle != 0)
                 ss << "rotation(angle=" << rotationAngle << ", axis=(" << rotationAxis.x << ", " << rotationAxis.y

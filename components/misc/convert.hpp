@@ -91,9 +91,12 @@ namespace Misc::Convert
     //
     // OSG stores osg::Matrix row-major with row-vector convention (v * M);
     // glm stores glm::mat4 column-major with column-vector convention (M * v).
-    // The two layouts share the same 16-float memory image, so make_mat4
-    // and Matrixf(ptr) round-trip a transformation exactly, provided the
-    // caller also flips multiplication order to match the new convention.
+    // Row-major-times-row-vector and column-major-times-column-vector cancel
+    // out: the two representations share the same 16-float memory image and
+    // encode the same transformation, so make_mat4 and Matrixf(ptr) round-trip
+    // exactly WITHOUT a transpose, provided the caller also flips the
+    // multiplication order to match the new convention. This is covered by
+    // MiscConvertGlm.MatrixMultiplicationOrder.
 
     inline glm::vec2 toGlm(const osg::Vec2f& v)
     {

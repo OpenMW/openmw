@@ -195,10 +195,6 @@ if(NOT OPENMW_USE_SYSTEM_GLM)
         SOURCE_DIR fetched/glm
     )
     FetchContent_MakeAvailable(glm)
-    # GLM_ENABLE_EXPERIMENTAL unlocks gtx/ headers (we use gtx/rotate_vector).
-    # Same flag is applied to the system-provided target in the top-level
-    # CMakeLists so both paths behave the same.
-    set_property(TARGET glm APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS GLM_ENABLE_EXPERIMENTAL)
 endif()
 
 if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
