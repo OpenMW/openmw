@@ -22,6 +22,9 @@ namespace MWSound
         // out of the way; files whose init reads more than this are not cached.
         constexpr std::streamoff sMaxHeadBytes = 256 * 1024;
 
+        // Covers vanilla's 658KB maximum.
+        constexpr std::streamoff sMaxWholeFileBytes = 1024 * 1024;
+
         // Reads in the lower half of the file extend the prefix; reads in the
         // upper half accumulate a suffix range, so both regions can be cached
         // and served next time.
@@ -235,7 +238,36 @@ namespace MWSound
     bool HeadCache::full() const
     {
         const std::lock_guard lock(mMutex);
-        return mMaxBytes - mBytes < static_cast<std::size_t>(2 * sMaxHeadBytes);
+        return mMaxBytes - mBytes < static_cast<std::size_t>(sMaxWholeFileBytes);
+    }
+
+    bool HeadCache::warmWholeFile(VFS::Path::NormalizedView name)
+    {
+        {
+            // Permit head-only entries to upgrade.
+            const std::lock_guard lock(mMutex);
+            const auto it = mEntries.find(name);
+            if (it != mEntries.end())
+            {
+                const HeadBuffer& buffer = **it->second;
+                if (static_cast<std::streamoff>(buffer.mHead.size()) == buffer.mFileSize)
+                    return true;
+                if (buffer.mFileSize > sMaxWholeFileBytes)
+                    return false;
+            }
+        }
+        Files::IStreamPtr stream = mVfs.get(name);
+        stream->seekg(0, std::ios_base::end);
+        const std::streamoff fileSize = stream->tellg();
+        if (fileSize <= 0 || fileSize > sMaxWholeFileBytes)
+            return false;
+        std::vector<char> head(static_cast<std::size_t>(fileSize));
+        stream->seekg(0);
+        stream->read(head.data(), head.size());
+        if (stream->gcount() != static_cast<std::streamsize>(head.size()))
+            return false;
+        insert(name, std::move(head), std::vector<char>(), fileSize, fileSize);
+        return true;
     }
 
     void HeadCache::insert(VFS::Path::NormalizedView name, std::vector<char>&& head, std::vector<char>&& suffix,
@@ -248,8 +280,18 @@ namespace MWSound
         if (bytes > mMaxBytes)
             return;
         const std::lock_guard lock(mMutex);
-        if (mEntries.contains(name))
-            return;
+        const auto existing = mEntries.find(name);
+        if (existing != mEntries.end())
+        {
+            // Preserve streams using the old entry.
+            const HeadBuffer& old = **existing->second;
+            const std::size_t oldBytes = old.mHead.size() + old.mSuffix.size();
+            if (bytes <= oldBytes)
+                return;
+            mBytes -= oldBytes;
+            mLru.erase(existing->second);
+            mEntries.erase(existing);
+        }
         while (!mLru.empty() && mBytes + bytes > mMaxBytes)
         {
             const HeadBuffer& evicted = *mLru.back();

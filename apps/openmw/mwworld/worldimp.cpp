@@ -1774,6 +1774,11 @@ namespace MWWorld
         return false;
     }
 
+    const std::set<CellStore*, std::less<>>& World::getActiveCells() const
+    {
+        return mWorldScene->getActiveCells();
+    }
+
     ESM::RefId World::getCurrentWorldspace() const
     {
         const CellStore* cellStore = mWorldScene->getCurrentCell();

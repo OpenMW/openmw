@@ -245,27 +245,64 @@ namespace MWSound
             EXPECT_THROW(cache.insert(sFile, *stream), std::invalid_argument);
         }
 
-        TEST(MWSoundHeadCacheTest, findsAnInsertedEntry)
+        TEST(MWSoundHeadCacheTest, warmsWholeFile)
         {
-            CountingFile file(makeContent(64));
+            const std::string content = makeContent(64);
+            CountingFile file(content);
             const auto vfs = TestingOpenMW::createTestVFS({ { sFile, &file } });
             HeadCache cache(*vfs, 1024);
 
-            EXPECT_FALSE(cache.contains(sFile));
+            EXPECT_TRUE(cache.warmWholeFile(sFile));
 
-            warm(cache, sFile, 16, *vfs);
             EXPECT_TRUE(cache.contains(sFile));
+            const int opens = file.mOpens;
+            std::shared_ptr<const HeadBuffer> buffer = cache.lookup(sFile);
+            ASSERT_NE(buffer, nullptr);
+            const Files::IStreamPtr stream = makeHeadStream(std::move(buffer), *vfs);
+            EXPECT_EQ(read(*stream, 64), content);
+            EXPECT_EQ(file.mOpens, opens);
+        }
+
+        TEST(MWSoundHeadCacheTest, upgradesCachedHead)
+        {
+            const std::string content = makeContent(64);
+            CountingFile file(content);
+            const auto vfs = TestingOpenMW::createTestVFS({ { sFile, &file } });
+            HeadCache cache(*vfs, 1024);
+            warm(cache, sFile, 16, *vfs);
+
+            EXPECT_TRUE(cache.warmWholeFile(sFile));
+
+            const int opens = file.mOpens;
+            std::shared_ptr<const HeadBuffer> buffer = cache.lookup(sFile);
+            ASSERT_NE(buffer, nullptr);
+            const Files::IStreamPtr stream = makeHeadStream(std::move(buffer), *vfs);
+            EXPECT_EQ(read(*stream, 64), content);
+            EXPECT_EQ(file.mOpens, opens);
+        }
+
+        TEST(MWSoundHeadCacheTest, rejectsOversizedEffect)
+        {
+            const std::string content = makeContent(2 * 1024 * 1024);
+            CountingFile file(content);
+            const auto vfs = TestingOpenMW::createTestVFS({ { sFile, &file } });
+            HeadCache cache(*vfs, 4 * 1024 * 1024);
+
+            EXPECT_FALSE(cache.warmWholeFile(sFile));
+
+            EXPECT_FALSE(cache.contains(sFile));
         }
 
         TEST(MWSoundHeadCacheTest, reportsFullNearCapacity)
         {
-            CountingFile file(makeContent(64));
+            const std::string content = makeContent(600 * 1024);
+            CountingFile file(content);
             const auto vfs = TestingOpenMW::createTestVFS({ { sFile, &file } });
-            HeadCache cache(*vfs, 512 * 1024 + 32);
+            HeadCache cache(*vfs, 1536 * 1024);
 
             EXPECT_FALSE(cache.full());
 
-            warm(cache, sFile, 64, *vfs);
+            EXPECT_TRUE(cache.warmWholeFile(sFile));
             EXPECT_TRUE(cache.full());
         }
 

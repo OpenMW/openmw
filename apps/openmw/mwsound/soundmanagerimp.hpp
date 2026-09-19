@@ -54,7 +54,7 @@ namespace MWSound
 
         std::unique_ptr<HeadCache> mHeadCache;
         std::unique_ptr<WarmQueue> mWarmQueue;
-        bool mWarmedSounds = false;
+        const MWWorld::Cell* mLastWarmedCell = nullptr;
 
         std::unique_ptr<SoundOutput> mOutput;
 
@@ -140,7 +140,8 @@ namespace MWSound
 
         void updateSounds(float duration);
         void updateRegionSound(float duration);
-        void warmSounds();
+        void warmCellSounds();
+        void enqueueWarmSound(const ESM::RefId& soundId);
         void updateWaterSound();
         void updateMusic(float duration);
 
@@ -169,6 +170,8 @@ namespace MWSound
     public:
         SoundManager(const VFS::Manager* vfs, bool useSound);
         ~SoundManager() override;
+
+        void warmStoreSounds();
 
         void processChangedSettings(const Settings::CategorySettingVector& settings) override;
 
