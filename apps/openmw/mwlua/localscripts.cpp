@@ -178,9 +178,13 @@ namespace MWLua
             });
         };
         selfAPI["_startAiCombat"] = [](SelfObject& self, const LObject& target, bool cancelOther) {
+            const MWWorld::Ptr& targetPtr = target.ptr();
+            if (!targetPtr.getClass().isActor())
+                throw std::runtime_error("Combat target must be an actor");
+
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            ai.stack(MWMechanics::AiCombat(target.ptr()), ptr, cancelOther);
+            ai.stack(MWMechanics::AiCombat(targetPtr), ptr, cancelOther);
         };
         selfAPI["_startAiPursue"] = [](SelfObject& self, const LObject& target, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();

@@ -118,7 +118,11 @@ namespace MWMechanics
         for (auto it = mPackages.begin(); it != mPackages.end(); ++it)
         {
             if ((*it)->getTypeId() == MWMechanics::AiPackageTypeId::Combat)
-                targetActors.push_back((*it)->getTarget());
+            {
+                const MWWorld::Ptr target = (*it)->getTarget();
+                if (!target.isEmpty())
+                    targetActors.push_back(target);
+            }
         }
 
         return !targetActors.empty();
