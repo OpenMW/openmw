@@ -1,5 +1,8 @@
 #include "uibindings.hpp"
 
+#include <unordered_map>
+#include <vector>
+
 #include <components/lua/util.hpp>
 #include <components/lua_ui/alignment.hpp>
 #include <components/lua_ui/content.hpp>
@@ -171,25 +174,62 @@ namespace MWLua
 
         api["getElements"] = [menu](sol::this_state thisState, sol::optional<std::string_view> layer) {
             sol::table res(thisState, sol::create);
-            size_t index = 1;
+            std::unordered_map<MyGUI::ILayerNode*, std::vector<std::shared_ptr<LuaUi::Element>>> elementsByLayerNode;
+            std::vector<std::shared_ptr<LuaUi::Element>> elementsWithoutLayerNode;
             LuaUi::Element::forEachShared(menu, [&](const std::shared_ptr<LuaUi::Element>& element) {
                 if ((element->mState != LuaUi::Element::Created && element->mState != LuaUi::Element::Update)
                     || element->mRoot == nullptr)
                     return;
 
-                MyGUI::ILayer* layerNode = nullptr;
-                for (LuaUi::WidgetExtension* ext = element->mRoot; ext != nullptr && layerNode == nullptr;
+                MyGUI::ILayer* elementLayer = nullptr;
+                MyGUI::ILayerNode* layerNode = nullptr;
+                for (LuaUi::WidgetExtension* ext = element->mRoot; ext != nullptr && elementLayer == nullptr;
                      ext = ext->getParent())
-                    layerNode = ext->widget()->getLayer();
+                {
+                    elementLayer = ext->widget()->getLayer();
+                    layerNode = ext->widget()->getLayerNode();
+                }
 
-                if (!layerNode)
+                if (!elementLayer)
                     return;
 
-                if (layer.has_value() && layerNode->getName() != *layer)
+                if (layer && elementLayer->getName() != *layer)
                     return;
 
-                res[index++] = element;
+                if (layerNode)
+                    elementsByLayerNode[layerNode].push_back(element);
+                else
+                    elementsWithoutLayerNode.push_back(element);
             });
+
+            size_t index = 1;
+            const auto appendLayer = [&](MyGUI::ILayer* currentLayer) {
+                for (size_t nodeIndex = 0; nodeIndex < currentLayer->getLayerNodeCount(); ++nodeIndex)
+                {
+                    const auto it = elementsByLayerNode.find(currentLayer->getLayerNodeAt(nodeIndex));
+                    if (it == elementsByLayerNode.end())
+                        continue;
+                    for (const std::shared_ptr<LuaUi::Element>& element : it->second)
+                        res[index++] = element;
+                    elementsByLayerNode.erase(it);
+                }
+            };
+
+            MyGUI::LayerManager& layerManager = MyGUI::LayerManager::getInstance();
+            for (size_t layerIndex = 0; layerIndex < layerManager.getLayerCount(); ++layerIndex)
+            {
+                MyGUI::ILayer* currentLayer = layerManager.getLayer(layerIndex);
+                if (!layer || currentLayer->getName() == *layer)
+                    appendLayer(currentLayer);
+            }
+
+            // A layer node may disappear between a UI update and this query. Preserve these Elements rather than
+            // omitting them, but their render order is no longer available.
+            for (const auto& [_, elements] : elementsByLayerNode)
+                for (const std::shared_ptr<LuaUi::Element>& element : elements)
+                    res[index++] = element;
+            for (const std::shared_ptr<LuaUi::Element>& element : elementsWithoutLayerNode)
+                res[index++] = element;
             return res;
         };
 
