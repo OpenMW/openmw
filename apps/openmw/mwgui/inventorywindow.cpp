@@ -665,10 +665,7 @@ namespace MWGui
                 useCount += it->getCellRef().getCount();
         }
 
-        const unsigned countBefore = ptr.getCellRef().getAbsCount();
         action->execute(player, !willEquip);
-        const unsigned countAfter = ptr.getCellRef().getAbsCount();
-        const unsigned consumedCount = countBefore > countAfter ? countBefore - countAfter : 0;
 
         // Partial equipping
         int excess = ptr.getCellRef().getCount() - useCount;
@@ -677,9 +674,9 @@ namespace MWGui
 
         if (isFromDragAndDrop)
         {
-            // Keep dragging any remaining potions or ingredients after use.
+            // Feature: Don't finish draganddrop if potion or ingredient was used
             if (type == ESM::Potion::sRecordId || type == ESM::Ingredient::sRecordId)
-                mDragAndDrop->update(consumedCount);
+                mDragAndDrop->update();
             else if (!willEquip)
                 mDragAndDrop->drop(mTradeModel, mItemView);
             else

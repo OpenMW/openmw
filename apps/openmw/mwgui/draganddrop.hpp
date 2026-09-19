@@ -33,8 +33,7 @@ namespace MWGui
         void startDrag(int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView,
             std::size_t count, bool playSound = true);
         void drop(ItemModel* targetModel, ItemView* targetView, bool playSound = true);
-        /// Synchronize the dragged count, subtracting consumedCount items used from the cursor.
-        void update(std::size_t consumedCount = 0);
+        void update();
         void onFrame();
 
         void finish();
