@@ -58,6 +58,7 @@
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/texmat.hpp>
 #include <components/sceneutil/texturetype.hpp>
+#include <components/sceneutil/userdata.hpp>
 #include <components/sceneutil/visitor.hpp>
 
 #include "autotransform.hpp"
@@ -443,14 +444,14 @@ namespace NifOsg
             if (roots.empty())
                 throw Nif::Exception("Found no root nodes", nif.getFilename());
 
-            osg::ref_ptr<SceneUtil::TextKeyMapHolder> textkeys(new SceneUtil::TextKeyMapHolder);
+            SceneUtil::TextKeyMap textkeys;
 
             osg::ref_ptr<osg::Group> created(new osg::Group);
             created->setDataVariance(osg::Object::STATIC);
             for (const Nif::NiAVObject* root : roots)
             {
-                auto node = handleNode(
-                    root, nullptr, nullptr, { .mNifVersion = nif.getVersion(), .mTextKeys = &textkeys->mTextKeys });
+                auto node
+                    = handleNode(root, nullptr, nullptr, { .mNifVersion = nif.getVersion(), .mTextKeys = &textkeys });
                 created->addChild(node);
             }
             if (mHasNightDayLabel)
@@ -479,8 +480,8 @@ namespace NifOsg
                 created = skel;
             }
 
-            if (!textkeys->mTextKeys.empty())
-                created->getOrCreateUserDataContainer()->addUserObject(textkeys);
+            if (!textkeys.empty())
+                SceneUtil::addUserData(*created, std::move(textkeys));
 
             created->setUserValue(Misc::OsgUserValues::sFileHash, nif.getHash());
 

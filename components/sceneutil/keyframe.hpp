@@ -39,22 +39,6 @@ namespace SceneUtil
         virtual osg::Callback* getAsCallback() = 0;
     };
 
-    /// Wrapper object containing an animation track as a ref-countable osg::Object.
-    struct TextKeyMapHolder : public osg::Object
-    {
-    public:
-        TextKeyMapHolder() {}
-        TextKeyMapHolder(const TextKeyMapHolder& copy, const osg::CopyOp& copyop)
-            : osg::Object(copy, copyop)
-            , mTextKeys(copy.mTextKeys)
-        {
-        }
-
-        TextKeyMap mTextKeys;
-
-        META_Object(SceneUtil, TextKeyMapHolder)
-    };
-
     /// Wrapper object containing the animation track and its KeyframeControllers.
     class KeyframeHolder : public osg::Object
     {

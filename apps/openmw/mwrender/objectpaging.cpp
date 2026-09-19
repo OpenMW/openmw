@@ -40,6 +40,7 @@
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/templateref.hpp>
+#include <components/sceneutil/userdata.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
@@ -320,18 +321,6 @@ namespace MWRender
             osg::Callback* operator()(const osg::Callback* callback) const override { return nullptr; }
         };
 
-        class RefnumSet : public osg::Object
-        {
-        public:
-            RefnumSet() {}
-            RefnumSet(const RefnumSet& copy, const osg::CopyOp&)
-                : mRefnums(copy.mRefnums)
-            {
-            }
-            META_Object(MWRender, RefnumSet)
-            std::vector<ESM::RefNum> mRefnums;
-        };
-
         class AnalyzeVisitor : public osg::NodeVisitor
         {
         public:
@@ -452,11 +441,11 @@ namespace MWRender
             ESM::RefNum mRefnum;
             void apply(osg::Geometry& node) override
             {
-                osg::ref_ptr<RefnumMarker> marker(new RefnumMarker);
-                marker->mRefnum = mRefnum;
+                RefnumMarker marker;
+                marker.mRefnum = mRefnum;
                 if (osg::Array* array = node.getVertexArray())
-                    marker->mNumVertices = array->getNumElements();
-                node.getOrCreateUserDataContainer()->addUserObject(marker);
+                    marker.mNumVertices = array->getNumElements();
+                SceneUtil::addUserData(node, marker);
             }
         };
     }
@@ -664,7 +653,7 @@ namespace MWRender
         };
         typedef std::map<osg::ref_ptr<const osg::Node>, InstanceList> NodeMap;
         NodeMap nodes;
-        const osg::ref_ptr<RefnumSet> refnumSet = activeGrid ? new RefnumSet : nullptr;
+        std::vector<ESM::RefNum> refnums;
 
         // Mask_UpdateVisitor is used in such cases in NIF loader:
         // 1. For collision nodes, which is not supposed to be rendered.
@@ -751,7 +740,7 @@ namespace MWRender
                         && dynamic_cast<const osgAnimation::BasicAnimationManager*>(cnode->getUpdateCallback())))
                     continue;
                 else
-                    refnumSet->mRefnums.push_back(refNum);
+                    refnums.push_back(refNum);
             }
 
             {
@@ -862,9 +851,9 @@ namespace MWRender
                     }
                     else
                     {
-                        osg::ref_ptr<RefnumMarker> marker = new RefnumMarker;
-                        marker->mRefnum = ref.mRefNum;
-                        trans->getOrCreateUserDataContainer()->addUserObject(marker);
+                        RefnumMarker marker;
+                        marker.mRefnum = ref.mRefNum;
+                        SceneUtil::addUserData(*trans, marker);
                     }
                 }
 
@@ -932,10 +921,9 @@ namespace MWRender
         osg::UserDataContainer* udc = group->getOrCreateUserDataContainer();
         if (activeGrid)
         {
-            std::sort(refnumSet->mRefnums.begin(), refnumSet->mRefnums.end());
-            refnumSet->mRefnums.erase(
-                std::unique(refnumSet->mRefnums.begin(), refnumSet->mRefnums.end()), refnumSet->mRefnums.end());
-            udc->addUserObject(refnumSet);
+            std::sort(refnums.begin(), refnums.end());
+            refnums.erase(std::unique(refnums.begin(), refnums.end()), refnums.end());
+            SceneUtil::addUserData(*group, std::move(refnums));
             group->addCullCallback(new SceneUtil::LightListCallback);
         }
         for (const auto& ref : templateRefs)
@@ -1081,14 +1069,8 @@ namespace MWRender
                 if (!activeGrid)
                     return;
 
-                osg::UserDataContainer* udc = obj->getUserDataContainer();
-                if (udc && udc->getNumUserObjects())
-                {
-                    RefnumSet* refnums = dynamic_cast<RefnumSet*>(udc->getUserObject(0));
-                    if (!refnums)
-                        return;
-                    mOutput.insert(mOutput.end(), refnums->mRefnums.begin(), refnums->mRefnums.end());
-                }
+                if (const auto* refnums = SceneUtil::findUserData<std::vector<ESM::RefNum>>(*obj))
+                    mOutput.insert(mOutput.end(), refnums->begin(), refnums->end());
             }
             osg::Vec4i mActiveGrid;
             std::vector<ESM::RefNum>& mOutput;

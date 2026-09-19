@@ -1,12 +1,12 @@
 #include "objects.hpp"
 
 #include <osg/Group>
-#include <osg/UserDataContainer>
 
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
+#include <components/sceneutil/userdata.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
@@ -57,7 +57,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> insert(new SceneUtil::PositionAttitudeTransform);
         cellnode->addChild(insert);
 
-        insert->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
+        SceneUtil::addUserData(*insert, ptr);
 
         const float* f = ptr.getRefData().getPosition().pos;
 
@@ -216,13 +216,8 @@ namespace MWRender
             cellnode = mCellSceneNodes[newCell];
         }
 
-        osg::UserDataContainer* userDataContainer = objectNode->getUserDataContainer();
-        if (userDataContainer)
-            for (unsigned int i = 0; i < userDataContainer->getNumUserObjects(); ++i)
-            {
-                if (dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
-                    userDataContainer->setUserObject(i, new PtrHolder(cur));
-            }
+        if (MWWorld::Ptr* ptr = SceneUtil::findUserData<MWWorld::Ptr>(*objectNode))
+            *ptr = cur;
 
         if (objectNode->getNumParents())
             objectNode->getParent(0)->removeChild(objectNode);

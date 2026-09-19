@@ -37,6 +37,7 @@
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/stateupdater.hpp>
 #include <components/sceneutil/texmat.hpp>
+#include <components/sceneutil/userdata.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/writescene.hpp>
@@ -886,8 +887,8 @@ namespace MWRender
             return result;
 
         auto test = [&](const osgUtil::LineSegmentIntersector::Intersection& intersection) {
-            PtrHolder* ptrHolder = nullptr;
-            std::vector<RefnumMarker*> refnumMarkers;
+            const MWWorld::Ptr* hitPtr = nullptr;
+            std::vector<const RefnumMarker*> refnumMarkers;
             bool hitNonObjectWorld = false;
             for (osg::Node* node : intersection.nodePath)
             {
@@ -895,27 +896,16 @@ namespace MWRender
                 if (!hitNonObjectWorld)
                     hitNonObjectWorld = nodeMask & nonObjectWorldMask;
 
-                osg::UserDataContainer* userDataContainer = node->getUserDataContainer();
-                if (!userDataContainer)
-                    continue;
-                for (unsigned int i = 0; i < userDataContainer->getNumUserObjects(); ++i)
-                {
-                    if (PtrHolder* p = dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
-                    {
-                        if (std::find(ignoreList.begin(), ignoreList.end(), p->mPtr) == ignoreList.end())
-                        {
-                            ptrHolder = p;
-                        }
-                    }
-                    if (RefnumMarker* r = dynamic_cast<RefnumMarker*>(userDataContainer->getUserObject(i)))
-                    {
-                        refnumMarkers.push_back(r);
-                    }
-                }
+                SceneUtil::forEachUserData<MWWorld::Ptr>(*node, [&](const MWWorld::Ptr& ptr) {
+                    if (std::find(ignoreList.begin(), ignoreList.end(), ptr) == ignoreList.end())
+                        hitPtr = &ptr;
+                });
+                SceneUtil::forEachUserData<RefnumMarker>(
+                    *node, [&](const RefnumMarker& marker) { refnumMarkers.push_back(&marker); });
             }
 
-            if (ptrHolder)
-                result.mHitObject = ptrHolder->mPtr;
+            if (hitPtr)
+                result.mHitObject = *hitPtr;
 
             unsigned int vertexCounter = 0;
             for (unsigned int i = 0; i < refnumMarkers.size(); ++i)
@@ -977,20 +967,8 @@ namespace MWRender
             if (mContainsPagedRefs)
                 return false;
 
-            osg::UserDataContainer* userDataContainer = transform.getUserDataContainer();
-            if (!userDataContainer)
-                return false;
-
-            for (unsigned int i = 0; i < userDataContainer->getNumUserObjects(); ++i)
-            {
-                if (PtrHolder* p = dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
-                {
-                    if (std::find(mIgnoreList.begin(), mIgnoreList.end(), p->mPtr) != mIgnoreList.end())
-                    {
-                        return true;
-                    }
-                }
-            }
+            if (const MWWorld::Ptr* p = SceneUtil::findUserData<MWWorld::Ptr>(transform))
+                return std::find(mIgnoreList.begin(), mIgnoreList.end(), *p) != mIgnoreList.end();
 
             return false;
         }
@@ -1155,7 +1133,7 @@ namespace MWRender
         }
 
         mPlayerNode->setUserDataContainer(new osg::DefaultUserDataContainer);
-        mPlayerNode->getUserDataContainer()->addUserObject(new PtrHolder(player));
+        SceneUtil::addUserData(*mPlayerNode, player);
 
         player.getRefData().setBaseNode(mPlayerNode);
 
