@@ -27,7 +27,6 @@ namespace SDLUtil
         // can bring a background window to the foreground on macOS; let window destruction handle it.
         const Uint32 fullscreenFlags = SDL_GetWindowFlags(mWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP;
         if (fullscreenFlags == SDL_WINDOW_FULLSCREEN)
-        SDL_SetWindowFullscreen(mWindow, 0);
             SDL_SetWindowFullscreen(mWindow, 0);
 
         // If user hasn't touched the defaults no need to restore
