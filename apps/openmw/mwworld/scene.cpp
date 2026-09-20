@@ -1193,15 +1193,9 @@ namespace MWWorld
 
             if (sqrDistToPlayer < mPreloadDistance * mPreloadDistance)
             {
-                try
-                {
-                    preloadCellWithSurroundings(mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()));
-                }
-                catch (const std::exception& e)
-                {
-                    Log(Debug::Warning) << "Failed to schedule preload for door " << door.toString() << ": "
-                                        << e.what();
-                }
+                CellStore* dest = mWorld.getWorldModel().findCell(door.getCellRef().getDestCell());
+                if (dest != nullptr)
+                    preloadCellWithSurroundings(*dest);
             }
         }
     }

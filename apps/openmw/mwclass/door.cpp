@@ -271,8 +271,12 @@ namespace MWClass
 
         if (ptr.getCellRef().getTeleport())
         {
-            text += "\n#{sTo}";
-            text += "\n" + getDestination(*ref);
+            std::string destination = getDestination(*ref);
+            if (!destination.empty())
+            {
+                text += "\n#{sTo}";
+                text += "\n" + destination;
+            }
         }
 
         int lockLevel = ptr.getCellRef().getLockLevel();
@@ -298,9 +302,10 @@ namespace MWClass
 
     std::string Door::getDestination(const MWWorld::LiveCellRef<ESM::Door>& door)
     {
-        std::string_view dest = MWBase::Environment::get().getWorld()->getCellName(
-            &MWBase::Environment::get().getWorldModel()->getCell(door.mRef.getDestCell()));
-
+        const MWWorld::CellStore* cell = MWBase::Environment::get().getWorldModel()->findCell(door.mRef.getDestCell());
+        if (cell == nullptr)
+            return {};
+        std::string_view dest = MWBase::Environment::get().getWorld()->getCellName(cell);
         return "#{sCell=" + std::string{ dest } + "}";
     }
 

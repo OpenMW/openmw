@@ -140,11 +140,13 @@ namespace MWLua
             const MWWorld::CellRef& cellRef = doorPtr(o).getCellRef();
             if (!cellRef.getTeleport())
                 return sol::nil;
-            MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
+            MWWorld::CellStore* cell = MWBase::Environment::get().getWorldModel()->findCell(cellRef.getDestCell());
+            if (cell == nullptr)
+                return sol::nil;
             if (o.isGObject())
-                return sol::make_object(thisState, GCell{ &cell });
+                return sol::make_object(thisState, GCell{ cell });
             else
-                return sol::make_object(thisState, LCell{ &cell });
+                return sol::make_object(thisState, LCell{ cell });
         };
 
         addRecordFunctionBinding<ESM::Door>(door, context);
@@ -164,11 +166,13 @@ namespace MWLua
             const MWWorld::CellRef& cellRef = door4Ptr(o).getCellRef();
             if (!cellRef.getTeleport())
                 return sol::nil;
-            MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
+            MWWorld::CellStore* cell = MWBase::Environment::get().getWorldModel()->findCell(cellRef.getDestCell());
+            if (cell == nullptr)
+                return sol::nil;
             if (o.isGObject())
-                return sol::make_object(lua, GCell{ &cell });
+                return sol::make_object(lua, GCell{ cell });
             else
-                return sol::make_object(lua, LCell{ &cell });
+                return sol::make_object(lua, LCell{ cell });
         };
 
         addRecordFunctionBinding<ESM4::Door>(door, context, "ESM4Door");
