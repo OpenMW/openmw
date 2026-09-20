@@ -286,6 +286,7 @@ namespace SceneUtil
                 "MWRender::BoneAnimBlendControllerWrapper",
                 "MWRender::PtrHolder",
                 "SceneUtil::CompositeStateSetUpdater",
+                "SceneUtil::TemplateRef",
                 "SceneUtil::UBOManager",
                 "SceneUtil::LightListCallback",
                 "SceneUtil::LightManagerUpdateCallback",

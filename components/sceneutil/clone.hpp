@@ -5,8 +5,6 @@
 #include <vector>
 
 #include <osg/CopyOp>
-#include <osg/Object>
-#include <osg/UserDataContainer>
 
 namespace osgParticle
 {
@@ -49,16 +47,6 @@ namespace SceneUtil
         mutable std::map<const osg::Node*, osg::Node*> mClonedNodes;
         mutable std::vector<Controller*> mControllersToRemap;
     };
-
-    /// Pin @a tmpl's lifetime to @a derived's by parking it in derived's user data container. Used after a shallow
-    /// copy so the template survives as long as anything copied from it, and so a cache holding the template sees it
-    /// as still in use. osg::UserDataContainer::addUserObject only takes a non-const pointer, hence the const_cast;
-    /// nothing ever reads the object back out, so it is never mutated through that pointer.
-    inline void addTemplateRef(osg::Object& derived, const osg::Object* tmpl)
-    {
-        if (tmpl != nullptr)
-            derived.getOrCreateUserDataContainer()->addUserObject(const_cast<osg::Object*>(tmpl));
-    }
 
 }
 

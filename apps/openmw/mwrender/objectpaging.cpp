@@ -32,7 +32,6 @@
 #include <components/misc/rng.hpp>
 #include <components/nifosg/autotransform.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/material.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
@@ -40,6 +39,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/templateref.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
