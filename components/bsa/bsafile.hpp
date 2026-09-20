@@ -67,7 +67,7 @@ namespace Bsa
             // beginning of the file, not the offset into the data buffer
             // (which is what is stored in the archive.)
             uint32_t mFileSize = 0;
-            uint32_t mOffset = 0;
+            uint64_t mOffset = 0;
             Hash mHash{};
             uint32_t mNameOffset = 0;
             uint32_t mNameSize = 0;

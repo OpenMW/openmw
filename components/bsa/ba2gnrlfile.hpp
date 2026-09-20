@@ -17,7 +17,7 @@ namespace Bsa
         {
             FileRecord();
             uint32_t mSize = 0;
-            uint32_t mOffset;
+            uint64_t mOffset;
             uint32_t mPackedSize = 0;
             bool isValid() const;
         };
