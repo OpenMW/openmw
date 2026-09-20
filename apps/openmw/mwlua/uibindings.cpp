@@ -1,6 +1,7 @@
 #include "uibindings.hpp"
 
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <components/lua/util.hpp>
@@ -175,7 +176,6 @@ namespace MWLua
         api["getElements"] = [menu](sol::this_state thisState, sol::optional<std::string_view> layer) {
             sol::table res(thisState, sol::create);
             std::unordered_map<MyGUI::ILayerNode*, std::vector<std::shared_ptr<LuaUi::Element>>> elementsByLayerNode;
-            std::vector<std::shared_ptr<LuaUi::Element>> elementsWithoutLayerNode;
             LuaUi::Element::forEachShared(menu, [&](const std::shared_ptr<LuaUi::Element>& element) {
                 if ((element->mState != LuaUi::Element::Created && element->mState != LuaUi::Element::Update)
                     || element->mRoot == nullptr)
@@ -196,10 +196,7 @@ namespace MWLua
                 if (layer && elementLayer->getName() != *layer)
                     return;
 
-                if (layerNode)
-                    elementsByLayerNode[layerNode].push_back(element);
-                else
-                    elementsWithoutLayerNode.push_back(element);
+                elementsByLayerNode[layerNode].push_back(element);
             });
 
             size_t index = 1;
@@ -209,8 +206,8 @@ namespace MWLua
                     const auto it = elementsByLayerNode.find(currentLayer->getLayerNodeAt(nodeIndex));
                     if (it == elementsByLayerNode.end())
                         continue;
-                    for (const std::shared_ptr<LuaUi::Element>& element : it->second)
-                        res[index++] = element;
+                    for (std::shared_ptr<LuaUi::Element>& element : it->second)
+                        res[index++] = std::move(element);
                     elementsByLayerNode.erase(it);
                 }
             };
@@ -223,13 +220,11 @@ namespace MWLua
                     appendLayer(currentLayer);
             }
 
-            // A layer node may disappear between a UI update and this query. Preserve these Elements rather than
-            // omitting them, but their render order is no longer available.
-            for (const auto& [_, elements] : elementsByLayerNode)
-                for (const std::shared_ptr<LuaUi::Element>& element : elements)
-                    res[index++] = element;
-            for (const std::shared_ptr<LuaUi::Element>& element : elementsWithoutLayerNode)
-                res[index++] = element;
+            // A layer node may be absent or disappear between a UI update and this query. Preserve these Elements
+            // rather than omitting them, but their render order is no longer available
+            for (auto& [_, elements] : elementsByLayerNode)
+                for (std::shared_ptr<LuaUi::Element>& element : elements)
+                    res[index++] = std::move(element);
             return res;
         };
 
