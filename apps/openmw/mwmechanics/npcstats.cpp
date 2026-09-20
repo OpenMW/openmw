@@ -8,8 +8,6 @@
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/npcstats.hpp>
 
-#include <components/misc/strings/format.hpp>
-
 #include <MyGUI_TextIterator.h>
 
 #include "../mwworld/esmstore.hpp"

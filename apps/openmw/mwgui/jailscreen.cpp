@@ -1,7 +1,6 @@
 #include <MyGUI_ScrollBar.h>
 
 #include <components/misc/rng.hpp>
-#include <components/misc/strings/format.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
