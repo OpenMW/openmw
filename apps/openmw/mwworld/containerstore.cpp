@@ -1114,8 +1114,8 @@ void MWWorld::ContainerStore::readState(const ESM::InventoryState& inventory)
                 readEquipmentState(getState(mLists.mLights, state), thisIndex, inventory);
                 break;
             case 0:
-                Log(Debug::Warning) << "Dropping inventory reference to '" << state.mRef.mRefID
-                                    << "' (object no longer exists)";
+                Log(Debug::Warning) << "Dropping inventory reference to " << state.mRef.mRefID
+                                    << " (object no longer exists)";
                 break;
             default:
                 Log(Debug::Warning) << "Warning: Invalid item type in inventory state, refid " << state.mRef.mRefID;
