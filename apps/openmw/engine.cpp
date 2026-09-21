@@ -16,7 +16,6 @@
 #include <components/debug/gldebug.hpp>
 
 #include <components/misc/rng.hpp>
-#include <components/misc/strings/format.hpp>
 
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>

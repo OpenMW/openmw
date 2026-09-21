@@ -37,7 +37,6 @@
 #include <components/files/conversion.hpp>
 #include <components/misc/helpviewer.hpp>
 #include <components/misc/scalableicon.hpp>
-#include <components/misc/strings/format.hpp>
 #include <components/misc/timeconvert.hpp>
 #include <components/version/version.hpp>
 

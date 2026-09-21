@@ -9,7 +9,6 @@
 #include <components/lua_ui/resources.hpp>
 #include <components/lua_ui/util.hpp>
 
-#include <components/misc/strings/format.hpp>
 #include <components/settings/values.hpp>
 
 #include "context.hpp"
@@ -17,6 +16,8 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+
+#include <format>
 
 namespace sol
 {
@@ -113,10 +114,9 @@ namespace MWLua
                 { "Success", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Success.substr(1)) },
                 { "Info", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Info.substr(1)) },
             }));
-        api["printToConsole"]
-            = [luaManager = context.mLuaManager](const std::string& message, const Misc::Color& color) {
-                  luaManager->addInGameConsoleMessage(message + "\n", color);
-              };
+        api["printToConsole"] = [luaManager = context.mLuaManager](std::string_view message, const Misc::Color& color) {
+            luaManager->addInGameConsoleMessage(std::format("{}\n", message), color);
+        };
         api["setConsoleMode"] = [luaManager = context.mLuaManager, windowManager](std::string_view mode) {
             luaManager->addAction([mode = std::string(mode), windowManager] { windowManager->setConsoleMode(mode); });
         };
@@ -190,8 +190,7 @@ namespace MWLua
                 [afterName = std::move(afterName), name = std::move(name), options]() {
                     size_t index = LuaUi::Layer::indexOf(afterName);
                     if (index == LuaUi::Layer::count())
-                        throw std::logic_error(
-                            Misc::StringUtils::format("Couldn't insert after non-existent layer %s", afterName));
+                        throw std::logic_error(std::format("Couldn't insert after non-existent layer {}", afterName));
                     LuaUi::Layer::insert(index + 1, name, options);
                 },
                 "Insert after UI layer");
@@ -203,8 +202,7 @@ namespace MWLua
                 [beforeName = std::move(beforeName), name = std::move(name), options]() {
                     size_t index = LuaUi::Layer::indexOf(beforeName);
                     if (index == LuaUi::Layer::count())
-                        throw std::logic_error(
-                            Misc::StringUtils::format("Couldn't insert before non-existent layer %s", beforeName));
+                        throw std::logic_error(std::format("Couldn't insert before non-existent layer {}", beforeName));
                     LuaUi::Layer::insert(index, name, options);
                 },
                 "Insert before UI layer");
@@ -337,7 +335,7 @@ namespace MWLua
         {
             auto textureResource = context.sol().new_usertype<LuaUi::TextureResource>("TextureResource");
             textureResource[sol::meta_function::to_string] = [](const LuaUi::TextureResource& resource) {
-                return "TextureResource[" + resource.mPath.value() + "]";
+                return std::format("TextureResource[{}]", resource.mPath.value());
             };
             textureResource["path"] = sol::readonly_property(
                 [](const LuaUi::TextureResource& resource) -> std::string_view { return resource.mPath; });
@@ -374,7 +372,7 @@ namespace MWLua
                 = sol::readonly_property([](LuaUi::Layer& self) -> std::string_view { return self.name(); });
             uiLayer["size"] = sol::readonly_property([](LuaUi::Layer& self) { return self.size(); });
             uiLayer[sol::meta_function::to_string]
-                = [](LuaUi::Layer& self) { return Misc::StringUtils::format("UiLayer(%s)", self.name()); };
+                = [](LuaUi::Layer& self) { return std::format("UiLayer({})", self.name()); };
         }
 
         sol::object cached = context.getTypePackage("openmw_ui");

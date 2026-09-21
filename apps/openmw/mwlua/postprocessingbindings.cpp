@@ -3,7 +3,6 @@
 #include "MyGUI_LanguageManager.h"
 
 #include <components/lua/util.hpp>
-#include <components/misc/strings/format.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -12,11 +11,13 @@
 #include "context.hpp"
 #include "luamanagerimp.hpp"
 
+#include <format>
+
 namespace
 {
     std::string getLocalizedMyGUIString(std::string_view unlocalized)
     {
-        return MyGUI::LanguageManager::getInstance().replaceTags(std::string(unlocalized)).asUTF8();
+        return MyGUI::LanguageManager::getInstance().replaceTags(MyGUI::UString(unlocalized)).asUTF8();
     }
 }
 
@@ -49,7 +50,7 @@ namespace MWLua
             if (!mShader)
                 return "Shader(nil)";
 
-            return Misc::StringUtils::format("Shader(%s, %s)", mShader->getName(), mShader->getFileName().value());
+            return std::format("Shader({}, {})", mShader->getName(), mShader->getFileName().value());
         }
 
         enum
@@ -81,11 +82,11 @@ namespace MWLua
                 = MWBase::Environment::get().getWorld()->getPostProcessor()->getUniformSize(shader.mShader, name);
 
             if (!targetSize.has_value())
-                throw std::runtime_error(Misc::StringUtils::format("Failed setting uniform array '%s'", name));
+                throw std::runtime_error(std::format("Failed setting uniform array '{}'", name));
 
             if (*targetSize != table.size())
-                throw std::runtime_error(Misc::StringUtils::format(
-                    "Mismatching uniform array size, got %zu expected %zu", table.size(), *targetSize));
+                throw std::runtime_error(
+                    std::format("Mismatching uniform array size, got {} expected {}", table.size(), *targetSize));
 
             std::vector<T> values;
             values.reserve(*targetSize);
@@ -128,7 +129,7 @@ namespace MWLua
 
                     if (MWBase::Environment::get().getWorld()->getPostProcessor()->enableTechnique(self.mShader, pos)
                         == MWRender::PostProcessor::Status_Error)
-                        throw std::runtime_error("Failed enabling shader '" + self.mShader->getName() + "'");
+                        throw std::runtime_error(std::format("Failed enabling shader '{}'", self.mShader->getName()));
                 });
             };
 
@@ -140,7 +141,7 @@ namespace MWLua
 
                     if (MWBase::Environment::get().getWorld()->getPostProcessor()->disableTechnique(self.mShader)
                         == MWRender::PostProcessor::Status_Error)
-                        throw std::runtime_error("Failed disabling shader '" + self.mShader->getName() + "'");
+                        throw std::runtime_error(std::format("Failed disabling shader '{}'", self.mShader->getName()));
                 });
             };
 
@@ -179,7 +180,7 @@ namespace MWLua
             Shader shader{ MWBase::Environment::get().getWorld()->getPostProcessor()->loadTechnique(name, false) };
 
             if (!shader.mShader || !shader.mShader->isValid())
-                throw std::runtime_error(Misc::StringUtils::format("Failed loading shader '%s'", name));
+                throw std::runtime_error(std::format("Failed loading shader '{}'", name));
 
             return shader;
         };
