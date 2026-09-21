@@ -32,8 +32,14 @@ namespace ESM
 
         if (mVersion <= MaxOldCountFormatVersion)
         {
-            if (mVersion <= MaxOldGoldValueFormatVersion)
-                mRef.mCount = std::max(1, mRef.mCount);
+            if (mRef.mRefID == "gold_001" || mRef.mRefID == "gold_005" || mRef.mRefID == "gold_010"
+                || mRef.mRefID == "gold_025" || mRef.mRefID == "gold_100")
+            {
+                if (mVersion <= MaxOldGoldValueFormatVersion)
+                    mRef.mCount = std::max(1, mRef.mCount);
+            }
+            else
+                mRef.mCount = 1;
             esm.getHNOT("COUN", mRef.mCount);
         }
 
