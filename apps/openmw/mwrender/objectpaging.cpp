@@ -918,7 +918,6 @@ namespace MWRender
 
         group->getBound();
         group->setNodeMask(Mask_Static);
-        osg::UserDataContainer* udc = group->getOrCreateUserDataContainer();
         if (activeGrid)
         {
             std::sort(refnums.begin(), refnums.end());
