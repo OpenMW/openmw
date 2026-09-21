@@ -1856,6 +1856,8 @@ namespace MWWorld
             {
                 World::DoorMarker newMarker;
                 newMarker.name = MWClass::Door::getDestination(ref);
+                if (newMarker.name.empty())
+                    return true;
                 newMarker.dest = ref.mRef.getDestCell();
 
                 ESM::Position pos = ref.mData.getPosition();
@@ -2609,13 +2611,15 @@ namespace MWWorld
         WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
         for (const MWWorld::CellRef* door : sortedDoors)
         {
-            const MWWorld::CellStore& source = worldModel->getCell(door->getDestCell());
+            const MWWorld::CellStore* source = worldModel->findCell(door->getDestCell());
+            if (source == nullptr)
+                continue;
 
             // Find door leading to our current teleport door
             // and use its destination to position inside cell.
             // \note Using _any_ door pointed to the cell,
             // not the one pointed to current door.
-            for (const MWWorld::LiveCellRef<ESM::Door>& destDoor : source.getReadOnlyDoors().mList)
+            for (const MWWorld::LiveCellRef<ESM::Door>& destDoor : source->getReadOnlyDoors().mList)
             {
                 if (cellId == destDoor.mRef.getDestCell())
                 {
@@ -2624,7 +2628,7 @@ namespace MWWorld
                     return doorDest;
                 }
             }
-            for (const MWWorld::LiveCellRef<ESM4::Door>& destDoor : source.getReadOnlyEsm4Doors().mList)
+            for (const MWWorld::LiveCellRef<ESM4::Door>& destDoor : source->getReadOnlyEsm4Doors().mList)
             {
                 if (cellId == destDoor.mRef.getDestCell())
                     return destDoor.mRef.getDoorDest();
@@ -3123,10 +3127,12 @@ namespace MWWorld
             nextCells.clear();
             for (const auto& currentCell : currentCells)
             {
-                MWWorld::CellStore& next = mWorldModel.getCell(currentCell);
+                MWWorld::CellStore* next = mWorldModel.findCell(currentCell);
+                if (next == nullptr)
+                    continue;
 
                 // Check if any door in the cell leads to an exterior directly
-                for (const MWWorld::LiveCellRef<ESM::Door>& ref : next.getReadOnlyDoors().mList)
+                for (const MWWorld::LiveCellRef<ESM::Door>& ref : next->getReadOnlyDoors().mList)
                 {
                     if (!ref.mRef.getTeleport())
                         continue;
@@ -3175,17 +3181,19 @@ namespace MWWorld
             std::swap(currentCells, nextCells);
             for (const auto& cell : currentCells)
             {
-                MWWorld::CellStore& next = mWorldModel.getCell(cell);
+                MWWorld::CellStore* next = mWorldModel.findCell(cell);
+                if (next == nullptr)
+                    continue;
                 checkedCells.insert(cell);
 
-                closestMarker = next.searchConst(id);
+                closestMarker = next->searchConst(id);
                 if (!closestMarker.isEmpty())
                 {
                     return closestMarker;
                 }
 
                 // Check if any door in the cell leads to an exterior directly
-                for (const MWWorld::LiveCellRef<ESM::Door>& ref : next.getReadOnlyDoors().mList)
+                for (const MWWorld::LiveCellRef<ESM::Door>& ref : next->getReadOnlyDoors().mList)
                 {
                     if (!ref.mRef.getTeleport())
                         continue;
