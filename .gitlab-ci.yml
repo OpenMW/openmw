@@ -852,13 +852,8 @@ macOS26_Xcode26_arm64:
           - "**/*.cmake"
           - "CI/*msvc*"
     - if: $CI_PIPELINE_SOURCE == "push"
-      #changes:
-      #  paths:
-      #    - CMakeLists.txt
-      #    - "**/CMakeLists.txt"
-      #    - "**/*.cmake"
-      #    - "CI/*msvc*"
-      #  compare_to: the last time this job worked for a parent commit
+      # triggered by TriggerNinja
+      when: manual
 
 Windows_Ninja_RelWithDebInfo_GroupOne:
   extends:
@@ -903,6 +898,17 @@ Windows_Ninja_RelWithDebInfo_GroupTwo:
           - CI/deps_versions.msvc.sh
       paths:
       - ccache
+
+TriggerNinja:
+  tags:
+    - saas-linux-small-amd64
+  stage: build
+  image: curlimages/curl-base
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+  script:
+    - apk add bash jq
+    - CI/trigger_ninja_if_necessary.sh
 
 .Windows_Compress_And_Upload_Symbols_Ninja_RelWithDebInfo:
   extends:
