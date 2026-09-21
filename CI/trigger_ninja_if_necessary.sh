@@ -3,6 +3,23 @@
 set -eou pipefail
 shopt -s globstar extglob
 
+project="$(printf '%s' "${CI_PROJECT_PATH:-OpenMW/openmw}" | jq -sRr '@uri')"
+
+if [[ -z ${GITLAB_ACCESS_TOKEN+xxxxxxx} ]]; then
+    echo "This script requires GitLab API access beyond that which CI_JOB_TOKEN grants."
+    echo "Please create a CI secret called GITLAB_ACCESS_TOKEN containing a Personal Access Token granting the right to call the following endpoints:"
+    echo "* /projects/${project}/repository/commits/:sha/statuses"
+    echo "* /projects/${project}/pipelines/:pipeline_id"
+    echo "* /projects/${project}/repository/commits/:sha"
+    echo "* /projects/${project}/pipelines/:pipeline_id/jobs"
+    echo "* /projects/${project}/jobs/:job_id/play"
+    echo
+    echo "At time of writing, this requires Commit Read, Pipeline Read and Job Run access."
+    echo
+    echo "Alternatively, if running this script locally, create such a token and export it as an environment variable."
+    exit 1
+fi
+
 base_commit="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
 comparison_commit="$("$(dirname -- "${BASH_SOURCE[0]}")/compute_comparison_commit.sh")"
 
@@ -23,7 +40,6 @@ fi
 
 access_token="${GITLAB_ACCESS_TOKEN:-${CI_JOB_TOKEN}}"
 api="${CI_API_V4_URL:-https://gitlab.com/api/v4}"
-project="$(printf '%s' "${CI_PROJECT_PATH:-OpenMW/openmw}" | jq -sRr '@uri')"
 project_url="$api/projects/$project"
 
 if [[ -n ${CI_PIPELINE_ID:-} ]]; then
