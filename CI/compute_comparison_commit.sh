@@ -12,12 +12,12 @@ project_url="$api/projects/$project"
 found_good_commit=""
 while :; do
     pipeline_ids="$(curl --no-progress-meter --header "PRIVATE-TOKEN: $access_token" --url "$project_url/repository/commits/${commit}/statuses?all=true" | jq '[.[].pipeline_id] | unique | .[]')"
-    for pipeline_id in "$pipeline_ids"; do
+    while IFS= read -r pipeline_id; do
         if curl --no-progress-meter --header "PRIVATE-TOKEN: $access_token" --url "$project_url/pipelines/$pipeline_id" | jq -e '.status == "success" and .source == "push"' > /dev/null; then
             found_good_commit="1"
             break
         fi
-    done
+    done <<< "$pipeline_ids"
     if [[ -n $found_good_commit ]]; then
         break
     else
