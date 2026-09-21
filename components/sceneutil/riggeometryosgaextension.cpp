@@ -8,7 +8,6 @@
 #include <osgUtil/CullVisitor>
 
 #include <components/debug/debuglog.hpp>
-#include <components/resource/scenemanager.hpp>
 
 namespace SceneUtil
 {
@@ -105,8 +104,7 @@ namespace SceneUtil
             // - Arrays that we add or replace in the cloned geometry must be explicitely forbidden from reusing
             // BufferObjects of the original geometry.
             mGeometry.at(i) = new OsgaRigGeometry(from, osg::CopyOp::SHALLOW_COPY);
-            mGeometry.at(i)->getOrCreateUserDataContainer()->addUserObject(
-                new Resource::TemplateRef(mSourceRigGeometry));
+            mGeometry.at(i)->getOrCreateUserDataContainer()->addUserObject(mSourceRigGeometry.get());
 
             OsgaRigGeometry& to = *mGeometry.at(i);
             to.setSupportsDisplayList(false);

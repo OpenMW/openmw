@@ -14,6 +14,7 @@
 #include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/skeleton.hpp>
 
+#include "templateref.hpp"
 #include "visitor.hpp"
 
 namespace SceneUtil
@@ -123,7 +124,7 @@ namespace SceneUtil
             copyVisitor.doCopy(sceneManager);
             // add a ref to the original template to hint to the cache that it is still being used and should be kept in
             // cache.
-            handle->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(toAttach));
+            SceneUtil::addTemplateRef(*handle, toAttach.get());
 
             if (handle->getNumChildren() == 1)
             {

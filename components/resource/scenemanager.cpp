@@ -47,6 +47,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/templateref.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/visitor.hpp>
 
@@ -185,11 +186,6 @@ namespace
 
 namespace Resource
 {
-    void TemplateMultiRef::addRef(const osg::Node* node)
-    {
-        mObjects.emplace_back(node);
-    }
-
     class SharedStateManager : public osgDB::SharedStateManager
     {
     public:
@@ -741,9 +737,9 @@ namespace Resource
                             osg::ref_ptr<osg::MatrixTransform> backToOriginTrans = new osg::MatrixTransform();
 
                             newRiggeometryHolder->getOrCreateUserDataContainer()->addUserObject(
-                                new TemplateRef(newRiggeometryHolder->getGeometry(0)));
+                                newRiggeometryHolder->getGeometry(0));
                             backToOriginTrans->getOrCreateUserDataContainer()->addUserObject(
-                                new TemplateRef(newRiggeometryHolder->getGeometry(0)));
+                                newRiggeometryHolder->getGeometry(0));
 
                             newRiggeometryHolder->setBodyPart(true);
 
@@ -756,8 +752,7 @@ namespace Resource
                             backToOriginTrans->addChild(newRiggeometryHolder);
                             group->addChild(backToOriginTrans);
 
-                            node->getOrCreateUserDataContainer()->addUserObject(
-                                new TemplateRef(newRiggeometryHolder->getGeometry(0)));
+                            node->getOrCreateUserDataContainer()->addUserObject(newRiggeometryHolder->getGeometry(0));
                         }
                     }
                 }
@@ -1079,7 +1074,7 @@ namespace Resource
         // add a ref to the original template to help verify the safety of shallow cloning operations
         // in addition, if this node is managed by a cache, we hint to the cache that it's still being used and should
         // be kept in cache
-        cloned->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(base));
+        SceneUtil::addTemplateRef(*cloned, base);
         return cloned;
     }
 
