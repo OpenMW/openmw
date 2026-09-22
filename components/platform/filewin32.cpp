@@ -1,11 +1,14 @@
 #include "file.hpp"
 
+#include <algorithm>
 #include <cassert>
-#include <components/misc/windows.hpp>
+#include <format>
+#include <limits>
 #include <stdexcept>
 #include <string>
 
 #include <components/files/conversion.hpp>
+#include <components/misc/windows.hpp>
 
 namespace Platform::File
 {
@@ -33,8 +36,8 @@ namespace Platform::File
         HANDLE handle = CreateFileW(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
         if (handle == INVALID_HANDLE_VALUE)
         {
-            throw std::runtime_error(std::string("Failed to open '") + Files::pathToUnicodeString(filename)
-                + "' for reading: " + std::to_string(GetLastError()));
+            throw std::runtime_error(std::format(
+                "Failed to open '{}' for reading: {}", Files::pathToUnicodeString(filename), GetLastError()));
         }
         return static_cast<Handle>(reinterpret_cast<intptr_t>(handle));
     }
@@ -53,49 +56,39 @@ namespace Platform::File
         LARGE_INTEGER li;
         li.QuadPart = static_cast<LONGLONG>(position);
         if (!SetFilePointerEx(nativeHandle, li, nullptr, nativeSeekType))
-        {
-            if (auto errCode = GetLastError(); errCode != ERROR_SUCCESS)
-            {
-                throw std::runtime_error(std::string("An fseek() call failed: ") + std::to_string(errCode));
-            }
-        }
+            throw std::runtime_error(std::format("Failed to seek in file: {}", GetLastError()));
     }
 
     size_t size(Handle handle)
     {
-        auto nativeHandle = getNativeHandle(handle);
+        const auto nativeHandle = getNativeHandle(handle);
+        LARGE_INTEGER li;
+        if (!GetFileSizeEx(nativeHandle, &li))
+            throw std::runtime_error(std::format("Failed to get file size: {}", GetLastError()));
 
-        BY_HANDLE_FILE_INFORMATION info;
-
-        if (!GetFileInformationByHandle(nativeHandle, &info))
-            throw std::runtime_error("A query operation on a file failed.");
-
-        if (info.nFileSizeHigh != 0)
-            throw std::runtime_error("Files greater that 4GB are not supported.");
-
-        return info.nFileSizeLow;
+        return static_cast<size_t>(li.QuadPart);
     }
 
     size_t tell(Handle handle)
     {
-        auto nativeHandle = getNativeHandle(handle);
+        const auto nativeHandle = getNativeHandle(handle);
+        LARGE_INTEGER distance;
+        distance.QuadPart = 0;
+        LARGE_INTEGER li;
+        if (!SetFilePointerEx(nativeHandle, distance, &li, FILE_CURRENT))
+            throw std::runtime_error(std::format("Failed to get file offset: {}", GetLastError()));
 
-        DWORD value = SetFilePointer(nativeHandle, 0, nullptr, SEEK_CUR);
-        if (value == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR)
-            throw std::runtime_error("A query operation on a file failed.");
-
-        return value;
+        return static_cast<size_t>(li.QuadPart);
     }
 
     size_t read(Handle handle, void* data, size_t size)
     {
-        auto nativeHandle = getNativeHandle(handle);
+        const auto nativeHandle = getNativeHandle(handle);
 
         DWORD bytesRead{};
-
+        size = std::min<size_t>(size, std::numeric_limits<DWORD>::max());
         if (!ReadFile(nativeHandle, data, static_cast<DWORD>(size), &bytesRead, nullptr))
-            throw std::runtime_error(
-                std::string("A read operation on a file failed: ") + std::to_string(GetLastError()));
+            throw std::runtime_error(std::format("A read operation on a file failed: {}", GetLastError()));
 
         return bytesRead;
     }
