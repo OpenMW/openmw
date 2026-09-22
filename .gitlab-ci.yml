@@ -907,7 +907,7 @@ TriggerNinja:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
   script:
-    - apk add bash jq
+    - apk add bash git jq
     - CI/trigger_ninja_if_necessary.sh
 
 .Windows_Compress_And_Upload_Symbols_Ninja_RelWithDebInfo:
