@@ -17,8 +17,11 @@
 
 namespace Bsa
 {
-    // special marker for invalid records,
-    const uint32_t sInvalidOffset = std::numeric_limits<uint32_t>::max();
+    namespace
+    {
+        // special marker for invalid records,
+        constexpr uint64_t sInvalidOffset = std::numeric_limits<uint64_t>::max();
+    }
 
     BA2GNRLFile::FileRecord::FileRecord()
         : mOffset(sInvalidOffset)
