@@ -226,7 +226,7 @@ void Bsa::BSAFile::writeHeader()
 
     uint32_t head[3];
     head[0] = 0x100;
-    auto fileDataOffset = mFiles.empty() ? 12 : mFiles.front().mOffset;
+    uint64_t fileDataOffset = mFiles.empty() ? 12 : mFiles.front().mOffset;
     head[1] = static_cast<uint32_t>(fileDataOffset - 12 - 8 * mFiles.size());
 
     output.seekp(0, std::ios_base::end);
