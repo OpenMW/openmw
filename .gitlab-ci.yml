@@ -843,16 +843,8 @@ macOS26_Xcode26_arm64:
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        paths:
-          - .gitlab-ci.yml
-          - CMakeLists.txt
-          - "**/CMakeLists.txt"
-          - "**/*.cmake"
-          - "CI/*msvc*"
-    - if: $CI_PIPELINE_SOURCE == "push"
-      # triggered by TriggerNinja
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+      # triggered by TriggerNinja - globbing expressions and job names live in its script
       when: manual
 
 Windows_Ninja_RelWithDebInfo_GroupOne:
@@ -905,7 +897,7 @@ TriggerNinja:
   stage: build
   image: curlimages/curl-base
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - apk add bash git jq
     - CI/trigger_ninja_if_necessary.sh

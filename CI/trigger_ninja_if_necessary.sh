@@ -7,7 +7,9 @@ project="$(printf '%s' "${CI_PROJECT_PATH:-OpenMW/openmw}" | jq -sRr '@uri')"
 
 if [[ -z ${GITLAB_ACCESS_TOKEN+xxxxxxx} ]]; then
     echo "This script requires GitLab API access beyond that which CI_JOB_TOKEN grants."
-    echo "Please create a CI secret called GITLAB_ACCESS_TOKEN containing a Personal Access Token granting the right to call the following endpoints:"
+    echo "It must be available via an environment variable called GITLAB_ACCESS_TOKEN."
+    echo
+    echo "Please create a CI secret with that name containing a Personal Access Token granting the right to call the following endpoints:"
     echo "* /projects/${project}/repository/commits/:sha/statuses"
     echo "* /projects/${project}/pipelines/:pipeline_id"
     echo "* /projects/${project}/repository/commits/:sha"
@@ -16,7 +18,7 @@ if [[ -z ${GITLAB_ACCESS_TOKEN+xxxxxxx} ]]; then
     echo
     echo "At time of writing, this requires Commit Read, Pipeline Read and Job Run access."
     echo
-    echo "Alternatively, if running this script locally, create such a token and export it as an environment variable."
+    echo "Alternatively, if running this script locally, create such a token and just export it in your shell."
     exit 1
 fi
 
@@ -25,9 +27,11 @@ comparison_commit="$("$(dirname -- "${BASH_SOURCE[0]}")/compute_comparison_commi
 
 echo "Commits: $base_commit $comparison_commit"
 
+FILES_THAT_AFFECT_NINJA_GLOB="@(.gitlab-ci.yml|CMakeLists.txt|**/CMakeLists.txt|**/*.cmake|CI/*msvc*)"
+
 should_trigger=""
 while IFS= read -r change; do
-    if [[ $change == @(.gitlab-ci.yml|CMakeLists.txt|**/CMakeLists.txt|**/*.cmake|CI/*msvc*) ]]; then
+    if [[ $change == $FILES_THAT_AFFECT_NINJA_GLOB ]]; then
         should_trigger=1
         break
     fi
