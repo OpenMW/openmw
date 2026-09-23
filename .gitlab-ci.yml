@@ -892,7 +892,7 @@ Windows_Ninja_RelWithDebInfo_GroupTwo:
       paths:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
-      key:
+    - key:
         prefix: ninja-2022-RelWithDebInfo-GroupTwo
         files:
           - CI/deps_versions.msvc.sh
