@@ -511,7 +511,7 @@ namespace Shader
     {
         std::unique_lock<std::mutex> lock(mMutex);
 
-        return getShaderInternal(templateName, defines, type);
+        return getShaderInternal(std::move(templateName), defines, type);
     }
 
     osg::ref_ptr<osg::Shader> ShaderManager::getShaderInternal(
