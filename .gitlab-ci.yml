@@ -7,19 +7,20 @@ stages:
   - checks
   - build
   - test
+  - repush
 
 workflow:
   auto_cancel:
     on_new_commit: interruptible
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
     - if: $CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == 'true'
       # continue running master and release branch pipelines when we do back-to-back merges in case one introduces a regression
       auto_cancel:
         on_new_commit: none
-    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "coverity"
 
 # https://blog.nimbleways.com/let-s-make-faster-gitlab-ci-cd-pipelines/
 variables:
@@ -101,6 +102,20 @@ Ubuntu_GCC_preprocess:
     paths:
       - build/install/
       - "**/CMakeCache.txt"
+
+PushToCoverityBranch:
+  tags:
+    - saas-linux-small-amd64
+  image:
+    name: alpine/git
+    entrypoint: [""]
+  stage: repush
+  rules:
+    - if: $CI_PROJECT_ID != "7107382"
+      when: never
+    - if: $CI_COMMIT_REF_NAME == "master"
+  script:
+    - git push $CI_REPOSITORY_URL HEAD:coverity
 
 Coverity:
   tags:
@@ -552,7 +567,7 @@ Ubuntu_GCC_integration_tests_asan:
       when: never
     # Merge request event rule is architecture-specific
     # Unlike ARM64, AMD64 job is manual non-blocking as it's seldom useful
-    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "push"
   image: macos-26-xcode-26
   tags:
     - saas-macos-medium-m1
@@ -1077,10 +1092,8 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
-  # temporarily enabled while we're linking these on the downloads page
   rules:
-    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
 
 Windows_MSBuild_RelWithDebInfo_GroupOne:
   extends:
@@ -1134,10 +1147,8 @@ Windows_Compress_And_Upload_Symbols_MSBuild_RelWithDebInfo:
       artifacts: true
     - job: "Windows_MSBuild_RelWithDebInfo_GroupTwo"
       artifacts: true
-  # temporarily enabled while we're linking the above on the downloads page
   rules:
-    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
 
 Windows_Merge_Artifacts_MSBuild_RelWithDebInfo:
   extends:
@@ -1147,10 +1158,8 @@ Windows_Merge_Artifacts_MSBuild_RelWithDebInfo:
       artifacts: true
     - job: "Windows_MSBuild_RelWithDebInfo_GroupTwo"
       artifacts: true
-  # temporarily enabled while we're linking the above on the downloads page
   rules:
-    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
 
 Windows_MSBuild_CacheInit_RelWithDebInfo:
   # build components only, so this can be shared with both groups
