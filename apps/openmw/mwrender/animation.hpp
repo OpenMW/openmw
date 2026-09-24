@@ -77,14 +77,17 @@ namespace MWRender
     class PartHolder
     {
     public:
-        PartHolder(osg::ref_ptr<osg::Node> node);
+        PartHolder(osg::ref_ptr<osg::Node> node, VFS::Path::NormalizedView model);
 
         ~PartHolder();
 
         const osg::ref_ptr<osg::Node>& getNode() const { return mNode; }
 
+        const VFS::Path::Normalized& getModel() const { return mModel; }
+
     private:
         osg::ref_ptr<osg::Node> mNode;
+        VFS::Path::Normalized mModel;
 
         void operator=(const PartHolder&);
         PartHolder(const PartHolder&);

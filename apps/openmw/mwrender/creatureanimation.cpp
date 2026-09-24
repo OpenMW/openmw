@@ -143,7 +143,7 @@ namespace MWRender
             osg::ref_ptr<osg::Node> attached
                 = attach(itemModel, bonename, bonename, item.getType() == ESM::Light::sRecordId);
 
-            scene = std::make_unique<PartHolder>(attached);
+            scene = std::make_unique<PartHolder>(attached, itemModel);
 
             if (!item.getClass().getEnchantment(item).empty())
                 mGlowUpdater

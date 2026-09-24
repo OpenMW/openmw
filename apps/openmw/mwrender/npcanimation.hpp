@@ -166,6 +166,8 @@ namespace MWRender
         /// Get the inventory slot that the given node path leads into, or -1 if not found.
         int getSlot(const osg::NodePath& path) const;
 
+        const PartHolder* getPart(ESM::PartReferenceType type) const { return mObjectParts[type].get(); }
+
         void setVampire(bool vampire) override;
 
         /// Set a translation offset (in object root space) to apply to meshes when in first person mode.
