@@ -136,7 +136,6 @@ namespace MWRender
         osg::ref_ptr<osg::Node> mAtmosphereDay;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mAtmosphereNightNode;
-        float mAtmosphereNightRoll;
         osg::ref_ptr<AtmosphereNightUpdater> mAtmosphereNightUpdater;
 
         osg::ref_ptr<AtmosphereUpdater> mAtmosphereUpdater;
