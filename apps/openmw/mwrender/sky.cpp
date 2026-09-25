@@ -238,7 +238,6 @@ namespace MWRender
         Resource::SceneManager* sceneManager, bool enableSkyRTT)
         : mSceneManager(sceneManager)
         , mCamera(camera)
-        , mAtmosphereNightRoll(0.f)
         , mCreated(false)
         , mIsStorm(false)
         , mTimescaleClouds(Fallback::Map::getBool("Weather_Timescale_Clouds"))
@@ -543,12 +542,12 @@ namespace MWRender
             mParticleNode->setAttitude(quat);
         }
 
-        const float timeScale = MWBase::Environment::get().getWorld()->getTimeManager()->getGameTimeScale();
+        const MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
 
         // UV Scroll the clouds
         float cloudDelta = duration * mCloudSpeed / 400.f;
         if (mTimescaleClouds)
-            cloudDelta *= timeScale / 60.f;
+            cloudDelta *= timeManager.getGameTimeScale() / 60.f;
 
         mCloudAnimationTimer += cloudDelta;
         if (mCloudAnimationTimer >= 4.f)
@@ -568,10 +567,12 @@ namespace MWRender
             mNextCloudMesh->setAttitude(rotation);
         }
 
-        // rotate the stars by 360 degrees every 4 days
-        mAtmosphereNightRoll += timeScale * duration * osg::DegreesToRadians(360.f) / (3600 * 96.f);
         if (mAtmosphereNightNode->getNodeMask() != 0)
-            mAtmosphereNightNode->setAttitude(osg::Quat(mAtmosphereNightRoll, osg::Vec3f(0, 0, 1)));
+        {
+            // morrowind rotates the stars counter-clockwise (from player pov) by 360 degrees every 4 days
+            const double rollAngle = timeManager.getGameTime() * osg::DegreesToRadians(-360.0) / (3600.0 * 96.0);
+            mAtmosphereNightNode->setAttitude(osg::Quat(rollAngle, osg::Vec3f(0, 0, 1)));
+        }
         mPrecipitationOccluder->update();
     }
 
