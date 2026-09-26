@@ -65,6 +65,7 @@ namespace LuaUi
         void clearForced();
 
         virtual void updateCoord();
+        static void refreshCursor();
 
         const sol::main_table& getLayout() { return mLayout; }
         void setLayout(const sol::table& layout) { mLayout = layout; }
@@ -192,7 +193,6 @@ namespace LuaUi
         void attachTemplate(WidgetExtension* ext);
         bool setCursor(const std::string& cursor);
         bool setInheritedCursor(const std::string& cursor);
-        void refreshCursorIfHovered();
 
         WidgetExtension* findDeep(std::string_view name);
         void findAll(std::string_view flagName, std::vector<WidgetExtension*>& result);

@@ -333,10 +333,10 @@ namespace LuaUi
         mWidget->setNeedMouseFocus(!propertyValue("ignorePointerEvents", false));
         CursorResource* cursor = propertyValue<CursorResource*>("cursor", nullptr);
         mHasCursor = cursor != nullptr;
-        const bool cursorChanged = mHasCursor ? setCursor(cursor->mName)
-                                              : setInheritedCursor(mParent ? mParent->mCursor : "arrow");
-        if (cursorChanged)
-            refreshCursorIfHovered();
+        if (mHasCursor)
+            setCursor(cursor->mName);
+        else
+            setInheritedCursor(mParent ? mParent->mCursor : "arrow");
         mWidget->setAlpha(propertyValue("alpha", 1.f));
         mWidget->setInheritsAlpha(propertyValue("inheritAlpha", true));
         parsePadding();
@@ -369,17 +369,11 @@ namespace LuaUi
         return setCursor(mHasCursor ? mCursor : cursor);
     }
 
-    void WidgetExtension::refreshCursorIfHovered()
+    void WidgetExtension::refreshCursor()
     {
         MyGUI::Widget* focused = MyGUI::InputManager::getInstance().getMouseFocusWidget();
-        for (MyGUI::Widget* widget = focused; widget != nullptr; widget = widget->getParent())
-        {
-            if (widget != mWidget)
-                continue;
-            if (WidgetExtension* extension = dynamic_cast<WidgetExtension*>(focused))
-                MyGUI::PointerManager::getInstance().setPointer(extension->mCursor);
-            return;
-        }
+        if (WidgetExtension* extension = dynamic_cast<WidgetExtension*>(focused))
+            MyGUI::PointerManager::getInstance().setPointer(extension->mCursor);
     }
 
     void WidgetExtension::updateChildrenCoord()
