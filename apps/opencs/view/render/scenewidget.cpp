@@ -243,7 +243,7 @@ namespace CSVRender
     SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget* parent,
         Qt::WindowFlags f, bool retrieveInput)
         : RenderWidget(resourceSystem, parent, f)
-        , mResourceSystem(resourceSystem)
+        , mResourceSystem(std::move(resourceSystem))
         , mHasDefaultAmbient(false)
         , mIsExterior(true)
         , mCamPositionSet(false)
