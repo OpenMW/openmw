@@ -333,10 +333,10 @@ namespace LuaUi
         mWidget->setNeedMouseFocus(!propertyValue("ignorePointerEvents", false));
         CursorResource* cursor = propertyValue<CursorResource*>("cursor", nullptr);
         mHasCursor = cursor != nullptr;
-        if (mHasCursor)
-            mCursor = cursor->mName;
-        setInheritedCursor(mParent ? mParent->mCursor : "arrow");
-        refreshCursorIfHovered();
+        const bool cursorChanged = mHasCursor ? setCursor(cursor->mName)
+                                              : setInheritedCursor(mParent ? mParent->mCursor : "arrow");
+        if (cursorChanged)
+            refreshCursorIfHovered();
         mWidget->setAlpha(propertyValue("alpha", 1.f));
         mWidget->setInheritsAlpha(propertyValue("inheritAlpha", true));
         parsePadding();
@@ -350,15 +350,23 @@ namespace LuaUi
             static_cast<int>(value.w()) };
     }
 
-    void WidgetExtension::setInheritedCursor(const std::string& cursor)
+    bool WidgetExtension::setCursor(const std::string& cursor)
     {
-        if (!mHasCursor)
-            mCursor = cursor;
+        if (mCursor == cursor)
+            return false;
+
+        mCursor = cursor;
         mWidget->setPointer(mCursor);
         for (WidgetExtension* child : mTemplateChildren)
             child->setInheritedCursor(mCursor);
         for (WidgetExtension* child : mChildren)
             child->setInheritedCursor(mCursor);
+        return true;
+    }
+
+    bool WidgetExtension::setInheritedCursor(const std::string& cursor)
+    {
+        return setCursor(mHasCursor ? mCursor : cursor);
     }
 
     void WidgetExtension::refreshCursorIfHovered()

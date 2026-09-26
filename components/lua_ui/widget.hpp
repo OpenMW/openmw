@@ -190,7 +190,8 @@ namespace LuaUi
 
         void attach(WidgetExtension* ext);
         void attachTemplate(WidgetExtension* ext);
-        void setInheritedCursor(const std::string& cursor);
+        bool setCursor(const std::string& cursor);
+        bool setInheritedCursor(const std::string& cursor);
         void refreshCursorIfHovered();
 
         WidgetExtension* findDeep(std::string_view name);
