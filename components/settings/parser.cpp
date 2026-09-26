@@ -237,13 +237,11 @@ void Settings::SettingsFileParser::saveSettingsFile(
         CategorySetting key = std::make_pair(currentCategory, setting);
         CategorySettingStatusMap::iterator finder = written.find(key);
 
-        // Settings not in the written map are definitely invalid.  Currently, this can only
-        // happen if the player edited the file while playing, because loadSettingsFile()
-        // will accept anything and pass it along in the map, but in the future, we might
-        // want to handle invalid settings more gracefully here.
+        // Ideally, we'd absorb setting file changes at runtime by subscribing to filesystem
+        // notifications, but alas, we do not do that yet.
         if (finder == written.end())
         {
-            ostream << "# invalid setting: " << line << std::endl;
+            ostream << "# ignoring setting modified while the program was running: " << line << std::endl;
             changed = true;
             continue;
         }
