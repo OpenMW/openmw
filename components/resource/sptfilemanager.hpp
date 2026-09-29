@@ -7,7 +7,7 @@
 
 namespace Resource
 {
-    class SptFileManager : public ResourceManager
+    class SptFileManager : public ResourceManager<Spt::SPTFilePtr>
     {
     public:
         SptFileManager(const VFS::Manager* vfs, double expiryDelay);
