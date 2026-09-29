@@ -17,17 +17,38 @@ namespace Spt
 {
     class SPTStream;
 
+    struct ControlPoint
+    {
+        float mPosX{};
+        float mPosY{};
+        float mTanX{};
+        float mTanY{};
+        float mTanLen{};
+    };
+
+    struct Curve
+    {
+        float mMin{};
+        float mMax{};
+        float mVariance{};
+        std::vector<ControlPoint> mPoints;
+
+        float evaluate(float t) const;
+    };
+
+    Curve parseCurve(SPTStream& stream);
+
     struct SPTLevelData
     {
-        std::string mDisturbance;
-        std::string mGravity;
-        std::string mFlexibility;
-        std::string mFlexibilityProfile;
-        std::string mLength;
-        std::string mRadius;
-        std::string mRadiusProfile;
-        std::string mStartAngle;
-        std::string mGravityProfile;
+        Curve mDisturbance;
+        Curve mGravity;
+        Curve mFlexibility;
+        Curve mFlexibilityProfile;
+        Curve mLength;
+        Curve mRadius;
+        Curve mRadiusProfile;
+        Curve mStartAngle;
+        Curve mGravityProfile;
 
         int32_t mSegmentsCrossSection{};
         int32_t mSegmentsLength{};
