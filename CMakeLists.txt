@@ -228,7 +228,7 @@ endif()
 include(GNUInstallDirs)
 # todo: force this suffix to match sApplicationName in configurationmanager.cpp
 set(CMAKE_INSTALL_SYSCONFDIR "${CMAKE_INSTALL_SYSCONFDIR}/openmw")
-set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATADIR}/games/openmw")
+set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATADIR}/openmw")
 
 # Set up common paths
 if (UNIX AND NOT APPLE)
@@ -249,11 +249,13 @@ if (APPLE)
 elseif(UNIX)
     # Paths
     SET(DATAROOTDIR "${CMAKE_INSTALL_DATAROOTDIR}" CACHE PATH "Sets the root of data directories to a non-default location")
-    SET(GLOBAL_DATA_PATH "${CMAKE_INSTALL_PREFIX}/share/games/" CACHE PATH "Set data path prefix")
+    # we can't use CMAKE_INSTALL_FULL_DATADIR to get this with our suffix as we add it after including GNUInstallDirs
+    SET(GLOBAL_DATA_PATH "${CMAKE_INSTALL_FULL_DATAROOTDIR}/openmw" CACHE PATH "Set absolute data path prefix for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
     SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
     SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
 
-    SET(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_SYSCONFDIR}/.." CACHE PATH "Set absolute config dir path for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
+    # we have to re-add our suffix here, too.
+    SET(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_FULL_SYSCONFDIR}/openmw" CACHE PATH "Set absolute config dir path for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
 
     set(OPENMW_RESOURCE_FILES "${CMAKE_INSTALL_DATADIR}/resources")
 endif(APPLE)
