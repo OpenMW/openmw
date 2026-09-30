@@ -1,3 +1,4 @@
+local core = require('openmw.core')
 local self = require('openmw.self')
 local types = require('openmw.types')
 local I = require('openmw.interfaces')
@@ -23,6 +24,9 @@ local function onPlayOnHitEffects(options)
     local aSpell = Actor.activeSpells(self):getByActiveSpellId(options.activeSpellId)
     if aSpell then
         common.playMagicEffects(self, 'hit', aSpell.effects, true)
+    elseif core.isWorldPaused() then
+        -- Lua events run while paused, but the spell may still be waiting for a mechanics update.
+        self:sendEvent('PlayOnHitEffects', options)
     end
 end
 
