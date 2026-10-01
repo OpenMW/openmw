@@ -294,6 +294,7 @@ namespace MWMechanics
 
         if (validVictim)
         {
+            applyElementalShields(attacker, victim);
             // Non-enchanted arrows shot at enemies have a chance to turn up in their inventory
             if (victim != getPlayer() && !appliedEnchantment)
             {
