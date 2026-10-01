@@ -22,11 +22,11 @@
 -- @function [parent=#ui] getCursorMode
 -- @return #CursorMode
 
---- Set the cursor position in UI pixels. The position is clamped to the OpenMW window.
+--- Set the cursor position in pixels. The position is clamped to the OpenMW window.
 -- @function [parent=#ui] setCursorPosition
 -- @param openmw.util#Vector2 position
 
---- Return the cursor position in UI pixels.
+--- Return the cursor position in pixels.
 -- @function [parent=#ui] getCursorPosition
 -- @return openmw.util#Vector2
 
@@ -38,11 +38,11 @@
 -- @function [parent=#ui] getCursorVisible
 -- @return #boolean
 
---- Override the cursor used by UI widgets. Pass `nil` to restore the cursor selected by the widget under the pointer.
+--- Override the engine cursor. Pass `nil` to restore the cursor back to engine-controlled.
 -- @function [parent=#ui] setCursor
 -- @param #CursorResource cursor
 
---- Return the currently displayed Lua cursor resource, or `nil` when a native MyGUI cursor is displayed.
+--- Return the currently displayed Lua cursor resource, or `nil` when a native engine-controlled cursor is displayed.
 -- @function [parent=#ui] getCursor
 -- @return #CursorResource cursor
 
@@ -383,7 +383,7 @@
 -- @field openmw.util#Vector2 size Size of the resource in the texture. (0, 0) by default. 0 means the whole texture size is used.
 
 ---
--- Register a hardware cursor backed by a texture in the virtual filesystem. Use the result as a widget's `props.cursor`, or pass it to @{openmw.ui#ui.setCursor} to override all widget cursors.
+-- Register a hardware cursor backed by a texture in the virtual filesystem. Use the result as a widget's `props.cursor`, or pass it to @{#(ui).setCursor} to override all widget cursors.
 -- Repeated calls with the same options will return the same CursorResource if it already has been registered.
 -- @function [parent=#ui] cursor
 -- @param #CursorResourceOptions options
