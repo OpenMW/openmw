@@ -11,7 +11,12 @@ project_url="$api/projects/$project"
 
 found_good_commit=""
 while :; do
-    pipeline_ids="$(curl --no-progress-meter --header "PRIVATE-TOKEN: $access_token" --url "$project_url/repository/commits/${commit}/statuses?all=true" | jq '[.[].pipeline_id] | unique | .[]')"
+    commit_status_json="$(curl --no-progress-meter --header "PRIVATE-TOKEN: $access_token" --url "$project_url/repository/commits/${commit}/statuses?all=true")"
+    if [[ $commit_status_json == '{"message":"404 Commit Not Found"}' ]]; then
+        commit="$(git rev-parse "${commit}~1")"
+        continue
+    fi
+    pipeline_ids="$(echo "$commit_status_json" | jq '[.[].pipeline_id] | unique | .[]')"
     while IFS= read -r pipeline_id; do
         if [[ -n $pipeline_id ]] && curl --no-progress-meter --header "PRIVATE-TOKEN: $access_token" --url "$project_url/pipelines/$pipeline_id" | jq -e '.status == "success" and .source == "push"' > /dev/null; then
             found_good_commit="1"
