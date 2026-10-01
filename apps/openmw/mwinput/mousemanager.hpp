@@ -3,6 +3,9 @@
 
 #include <components/sdlutil/events.hpp>
 #include <components/settings/settings.hpp>
+#include <osg/Vec2f>
+
+#include "../mwbase/inputmanager.hpp"
 
 namespace SDLUtil
 {
@@ -22,6 +25,11 @@ namespace MWInput
 
         void updateCursorMode();
         void update(float dt);
+
+        void setCursorMode(MWBase::CursorMode mode) { mCursorMode = mode; }
+        MWBase::CursorMode getCursorMode() const { return mCursorMode; }
+        void setCursorPosition(const osg::Vec2f& position);
+        osg::Vec2f getCursorPosition() const { return { mGuiCursorX, mGuiCursorY }; }
 
         void mouseMoved(const SDLUtil::MouseMotionEvent& arg) override;
         void mousePressed(const SDL_MouseButtonEvent& arg, Uint8 id) override;
@@ -49,6 +57,7 @@ namespace MWInput
         int mMouseWheel;
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
+        MWBase::CursorMode mCursorMode;
         float mLastWarpX;
         float mLastWarpY;
 

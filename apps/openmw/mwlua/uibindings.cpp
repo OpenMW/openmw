@@ -9,12 +9,19 @@
 #include <components/lua_ui/resources.hpp>
 #include <components/lua_ui/util.hpp>
 
+#include <components/misc/finitevalues.hpp>
+#include <components/misc/strings/format.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/settings/values.hpp>
+#include <components/vfs/manager.hpp>
+
+#include <cmath>
 
 #include "context.hpp"
 #include "luamanagerimp.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include <format>
@@ -31,6 +38,8 @@ namespace MWLua
 {
     namespace
     {
+        constexpr int sMaxCursorSize = 128;
+
         const std::unordered_map<MWGui::GuiMode, std::string_view> modeToName{
             { MWGui::GM_Inventory, "Interface" },
             { MWGui::GM_Container, "Container" },
@@ -82,6 +91,24 @@ namespace MWLua
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
 
         sol::table api(lua, sol::create);
+        api["CursorMode"]
+            = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, MWBase::CursorMode>(lua,
+                { { "CONFINED", MWBase::CursorMode::Confined }, { "FREE", MWBase::CursorMode::Free },
+                    { "LOCKED", MWBase::CursorMode::Locked } }));
+        api["setCursorMode"] = [luaManager = context.mLuaManager](MWBase::CursorMode mode) {
+            luaManager->addAction([mode] { MWBase::Environment::get().getInputManager()->setCursorMode(mode); });
+        };
+        api["getCursorMode"] = []() { return MWBase::Environment::get().getInputManager()->getCursorMode(); };
+        api["setCursorPosition"] = [luaManager = context.mLuaManager](const Misc::FiniteVec2f& position) {
+            luaManager->addAction(
+                [position] { MWBase::Environment::get().getInputManager()->setCursorPosition(position); });
+        };
+        api["getCursorPosition"] = []() { return MWBase::Environment::get().getInputManager()->getCursorPosition(); };
+        api["setCursorVisible"] = [luaManager = context.mLuaManager](bool visible) {
+            luaManager->addAction(
+                [visible] { MWBase::Environment::get().getWindowManager()->setCursorVisible(visible); });
+        };
+        api["getCursorVisible"] = [windowManager]() { return windowManager->getCursorVisible(); };
         api["_setHudVisibility"] = [luaManager = context.mLuaManager](bool state) {
             luaManager->addAction([state] { MWBase::Environment::get().getWindowManager()->setHudVisibility(state); });
         };
@@ -260,6 +287,52 @@ namespace MWLua
             return luaManager->uiResourceManager()->registerTexture(std::move(data));
         };
 
+        api["cursor"] = [luaManager = context.mLuaManager, menu](const sol::table& options) {
+            LuaUi::CursorData data;
+            sol::object path = LuaUtil::getFieldOrNil(options, "path");
+            if (path.is<std::string>())
+                data.mPath = VFS::Path::Normalized(path.as<std::string>());
+            if (data.mPath.empty())
+                throw std::logic_error("Invalid cursor path");
+            if (!MWBase::Environment::get().getResourceSystem()->getVFS()->exists(data.mPath))
+                throw std::logic_error("Cursor texture does not exist: " + std::string(data.mPath));
+
+            sol::object size = LuaUtil::getFieldOrNil(options, "size");
+            sol::object hotspot = LuaUtil::getFieldOrNil(options, "hotspot");
+            if (!size.is<osg::Vec2f>() || !hotspot.is<osg::Vec2f>())
+                throw std::logic_error("Cursor size and hotspot must be vectors");
+            data.mSize = size.as<osg::Vec2f>();
+            data.mHotspot = hotspot.as<osg::Vec2f>();
+            data.mPersistent = menu;
+
+            auto integral = [](float value) { return std::isfinite(value) && std::floor(value) == value; };
+            if (!integral(data.mSize.x()) || !integral(data.mSize.y()) || !integral(data.mHotspot.x())
+                || !integral(data.mHotspot.y()) || data.mSize.x() <= 0 || data.mSize.y() <= 0 || data.mHotspot.x() < 0
+                || data.mHotspot.y() < 0 || data.mHotspot.x() >= data.mSize.x() || data.mHotspot.y() >= data.mSize.y())
+                throw std::logic_error("Invalid cursor size or hotspot");
+            if (data.mSize.x() > sMaxCursorSize || data.mSize.y() > sMaxCursorSize)
+                throw std::logic_error("Cursor size cannot exceed 128 pixels");
+
+            auto cursor = luaManager->uiResourceManager()->registerCursor(std::move(data));
+            luaManager->addAction([cursor] {
+                MWBase::Environment::get().getWindowManager()->createLuaCursor(cursor->mName,
+                    std::string(cursor->mPath), static_cast<int>(cursor->mSize.x()),
+                    static_cast<int>(cursor->mSize.y()), static_cast<int>(cursor->mHotspot.x()),
+                    static_cast<int>(cursor->mHotspot.y()));
+            });
+            return cursor;
+        };
+
+        api["setCursor"] = [luaManager = context.mLuaManager](
+                               sol::optional<std::shared_ptr<LuaUi::CursorResource>> cursor) {
+            luaManager->addAction([cursor = std::move(cursor)] {
+                MWBase::Environment::get().getWindowManager()->setLuaCursorOverride(cursor ? (*cursor)->mName : "");
+            });
+        };
+        api["getCursor"] = [luaManager = context.mLuaManager, windowManager]() {
+            return luaManager->uiResourceManager()->findCursor(windowManager->getCurrentCursorName());
+        };
+
         api["screenSize"] = []() {
             return osg::Vec2f(
                 static_cast<float>(Settings::video().mResolutionX), static_cast<float>(Settings::video().mResolutionY));
@@ -343,6 +416,17 @@ namespace MWLua
                 = sol::readonly_property([](const LuaUi::TextureResource& resource) { return resource.mOffset; });
             textureResource["size"]
                 = sol::readonly_property([](const LuaUi::TextureResource& resource) { return resource.mSize; });
+
+            auto cursorResource = context.sol().new_usertype<LuaUi::CursorResource>("CursorResource");
+            cursorResource[sol::meta_function::to_string] = [](const LuaUi::CursorResource& resource) {
+                return "CursorResource[" + resource.mPath.value() + "]";
+            };
+            cursorResource["path"] = sol::readonly_property(
+                [](const LuaUi::CursorResource& resource) -> std::string_view { return resource.mPath; });
+            cursorResource["size"]
+                = sol::readonly_property([](const LuaUi::CursorResource& resource) { return resource.mSize; });
+            cursorResource["hotspot"]
+                = sol::readonly_property([](const LuaUi::CursorResource& resource) { return resource.mHotspot; });
 
             auto uiElement = context.sol().new_usertype<LuaUi::Element>("UiElement");
             uiElement[sol::meta_function::to_string] = [](const LuaUi::Element& element) {

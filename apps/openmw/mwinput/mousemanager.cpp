@@ -33,6 +33,7 @@ namespace MWInput
         , mMouseWheel(0)
         , mMouseLookEnabled(false)
         , mGuiCursorEnabled(true)
+        , mCursorMode(MWBase::CursorMode::Free)
         , mLastWarpX(-1)
         , mLastWarpY(-1)
         , mMouseMoveX(0)
@@ -126,7 +127,7 @@ namespace MWInput
         }
         else
         {
-            bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+            bool guiMode = mGuiCursorEnabled;
             guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX),
                           static_cast<int>(mGuiCursorY), SDLUtil::sdlMouseButtonToMyGui(id))
                 && guiMode;
@@ -134,8 +135,13 @@ namespace MWInput
             if (mBindingsManager->isDetectingBindingState())
                 return; // don't allow same mouseup to bind as initiated bind
 
-            mBindingsManager->setPlayerControlsEnabled(!guiMode);
-            mBindingsManager->mouseReleased(arg, id);
+            if (mGuiCursorEnabled)
+                mBindingsManager->setPlayerControlsEnabled(false);
+            else
+            {
+                mBindingsManager->setPlayerControlsEnabled(!guiMode);
+                mBindingsManager->mouseReleased(arg, id);
+            }
         }
 
         MWBase::Environment::get().getLuaManager()->inputEvent(
@@ -145,7 +151,7 @@ namespace MWInput
     void MouseManager::mouseWheelMoved(const SDL_MouseWheelEvent& arg)
     {
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
-        if (mBindingsManager->isDetectingBindingState() || !input->controlsDisabled())
+        if (mBindingsManager->isDetectingBindingState() || (!mGuiCursorEnabled && !input->controlsDisabled()))
         {
             mBindingsManager->mouseWheelMoved(arg);
         }
@@ -169,7 +175,7 @@ namespace MWInput
 
         if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
         {
-            guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+            guiMode = mGuiCursorEnabled;
             guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX),
                           static_cast<int>(mGuiCursorY), SDLUtil::sdlMouseButtonToMyGui(id))
                 && guiMode;
@@ -185,13 +191,18 @@ namespace MWInput
             MWBase::Environment::get().getWindowManager()->setCursorActive(true);
         }
 
-        mBindingsManager->setPlayerControlsEnabled(!guiMode);
-
-        // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
-        // Also do not trigger bindings when input controls are disabled, e.g. during save loading
-        if (!MWBase::Environment::get().getWindowManager()->isSettingsWindowVisible() && !input->controlsDisabled())
+        if (mGuiCursorEnabled)
         {
-            mBindingsManager->mousePressed(arg, id);
+            mBindingsManager->setPlayerControlsEnabled(false);
+        }
+        else
+        {
+            mBindingsManager->setPlayerControlsEnabled(!guiMode);
+
+            // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
+            // Also do not trigger bindings when input controls are disabled, e.g. during save loading
+            if (!MWBase::Environment::get().getWindowManager()->isSettingsWindowVisible() && !input->controlsDisabled())
+                mBindingsManager->mousePressed(arg, id);
         }
         MWBase::Environment::get().getLuaManager()->inputEvent(
             { MWBase::LuaManager::InputEvent::MouseButtonPressed, arg.button });
@@ -199,18 +210,16 @@ namespace MWInput
 
     void MouseManager::updateCursorMode()
     {
-        bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
-            && !MWBase::Environment::get().getWindowManager()->isConsoleMode();
-
         bool wasRelative = mInputWrapper->getMouseRelative();
-        bool isRelative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
+        bool isRelative = mCursorMode == MWBase::CursorMode::Locked;
 
-        // don't keep the pointer away from the window edge in gui mode
-        // stop using raw mouse motions and switch to system cursor movements
+        // Relative mode locks the cursor and disables mouse acceleration. The other
+        // modes use normal system cursor movement.
         mInputWrapper->setMouseRelative(isRelative);
 
-        // we let the mouse escape in the main menu
-        mInputWrapper->setGrabPointer(grab && (Settings::input().mGrabCursor || isRelative));
+        // Relative mode always confines the pointer. Confined mode does so without
+        // using relative input, while Free mode allows the pointer to leave the window.
+        mInputWrapper->setGrabPointer(mCursorMode != MWBase::CursorMode::Free);
 
         // we switched to non-relative mode, move our cursor to where the in-game
         // cursor is
@@ -278,6 +287,24 @@ namespace MWInput
 
         MyGUI::InputManager::getInstance().injectMouseMove(
             static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
+    }
+
+    void MouseManager::setCursorPosition(const osg::Vec2f& position)
+    {
+        const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        mGuiCursorX = std::clamp(position.x(), 0.f, static_cast<float>(viewSize.width - 1));
+        mGuiCursorY = std::clamp(position.y(), 0.f, static_cast<float>(viewSize.height - 1));
+        MyGUI::InputManager::getInstance().injectMouseMove(
+            static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
+
+        if (!mInputWrapper->getMouseRelative())
+        {
+            mLastWarpX = mGuiCursorX;
+            mLastWarpY = mGuiCursorY;
+            warpMouse();
+        }
+
+        MWBase::Environment::get().getWindowManager()->setCursorActive(true);
     }
 
     void MouseManager::warpMouse()

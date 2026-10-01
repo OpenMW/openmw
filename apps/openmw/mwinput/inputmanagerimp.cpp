@@ -106,17 +106,48 @@ namespace MWInput
 
     void InputManager::changeInputMode(bool guiMode)
     {
-        mControllerManager->setGuiCursorEnabled(guiMode);
-        mMouseManager->setGuiCursorEnabled(guiMode);
-        mGyroManager->setGuiCursorEnabled(guiMode);
-        mMouseManager->setMouseLookEnabled(!guiMode);
         if (guiMode)
             MWBase::Environment::get().getWindowManager()->showCrosshair(false);
 
         bool isCursorVisible
             = guiMode && (!mControllerManager->joystickLastUsed() || mControllerManager->gamepadGuiCursorEnabled());
         MWBase::Environment::get().getWindowManager()->setCursorVisible(isCursorVisible);
+
+        if (!guiMode)
+            setCursorMode(MWBase::CursorMode::Locked);
+        else if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
+            || MWBase::Environment::get().getWindowManager()->isConsoleMode())
+            setCursorMode(MWBase::CursorMode::Free);
+        else
+            setCursorMode(Settings::input().mGrabCursor ? MWBase::CursorMode::Confined : MWBase::CursorMode::Free);
         // if not in gui mode, the camera decides whether to show crosshair or not.
+    }
+
+    void InputManager::setCursorMode(MWBase::CursorMode mode)
+    {
+        const bool guiCursorEnabled = mode != MWBase::CursorMode::Locked;
+        mControllerManager->setGuiCursorEnabled(guiCursorEnabled);
+        mMouseManager->setGuiCursorEnabled(guiCursorEnabled);
+        mGyroManager->setGuiCursorEnabled(guiCursorEnabled);
+        mMouseManager->setMouseLookEnabled(!guiCursorEnabled);
+        MWBase::Environment::get().getWindowManager()->setCursorInteractionEnabled(guiCursorEnabled);
+        mBindingsManager->setPlayerControlsEnabled(!guiCursorEnabled);
+        mMouseManager->setCursorMode(mode);
+    }
+
+    MWBase::CursorMode InputManager::getCursorMode() const
+    {
+        return mMouseManager->getCursorMode();
+    }
+
+    void InputManager::setCursorPosition(const osg::Vec2f& position)
+    {
+        mMouseManager->setCursorPosition(position);
+    }
+
+    osg::Vec2f InputManager::getCursorPosition() const
+    {
+        return mMouseManager->getCursorPosition();
     }
 
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)

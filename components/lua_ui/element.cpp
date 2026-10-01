@@ -286,6 +286,7 @@ namespace LuaUi
             mRoot = createWidget(layout(), true, depth);
             mLayer = setLayer(mRoot, layout());
             updateRootCoord(mRoot);
+            WidgetExtension::refreshCursor();
             mState = Created;
             checkWarnings();
         }
@@ -346,6 +347,7 @@ namespace LuaUi
             }
             mLayer = setLayer(mRoot, layout());
             updateRootCoord(mRoot);
+            WidgetExtension::refreshCursor();
             mState = Created;
             checkWarnings();
         }
