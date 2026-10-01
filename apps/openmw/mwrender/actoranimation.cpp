@@ -83,7 +83,7 @@ namespace MWRender
         if (glowColor != nullptr)
             mGlowUpdater = SceneUtil::addEnchantedGlow(instance, mResourceSystem, *glowColor);
 
-        return std::make_unique<PartHolder>(instance);
+        return std::make_unique<PartHolder>(instance, model);
     }
 
     osg::ref_ptr<osg::Node> ActorAnimation::attach(

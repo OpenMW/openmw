@@ -700,7 +700,7 @@ namespace MWRender
         if (enchantedGlow)
             mGlowUpdater = SceneUtil::addEnchantedGlow(attached, mResourceSystem, *glowColor);
 
-        return std::make_unique<PartHolder>(std::move(attached));
+        return std::make_unique<PartHolder>(std::move(attached), model);
     }
 
     osg::Vec3f NpcAnimation::runAnimation(float timepassed)

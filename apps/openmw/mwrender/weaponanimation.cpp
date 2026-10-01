@@ -90,7 +90,7 @@ namespace MWRender
 
             osg::ref_ptr<osg::Node> arrow = getResourceSystem()->getSceneManager()->getInstance(model, parent);
 
-            mAmmunition = std::make_unique<PartHolder>(arrow);
+            mAmmunition = std::make_unique<PartHolder>(arrow, model);
         }
     }
 
