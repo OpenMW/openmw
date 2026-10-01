@@ -111,25 +111,10 @@ namespace MWGui
             return;
         }
 
+        // remember the last suitable key focus so keyboard navigation can resume from it (see switchFocus)
         MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-
-        if (focus == mCurrentFocus)
-        {
-            return;
-        }
-
-        // workaround incorrect key focus resets (fix in MyGUI TBD)
-        if (!shouldAcceptKeyFocus(focus) && shouldAcceptKeyFocus(mCurrentFocus)
-            && (!mModalWindow || isRootParent(mCurrentFocus, mModalWindow)))
-        {
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCurrentFocus);
-            focus = mCurrentFocus;
-        }
-
-        if (focus != mCurrentFocus)
-        {
+        if (shouldAcceptKeyFocus(focus))
             mCurrentFocus = focus;
-        }
     }
 
     void KeyboardNavigation::setDefaultFocus(MyGUI::Widget* window, MyGUI::Widget* defaultFocus)
@@ -205,6 +190,14 @@ namespace MWGui
             return false;
 
         MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+
+        // key focus was reset, e.g. by clicking empty space - return to the last focused widget first
+        if (!shouldAcceptKeyFocus(focus) && shouldAcceptKeyFocus(mCurrentFocus)
+            && (!mModalWindow || isRootParent(mCurrentFocus, mModalWindow)))
+        {
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCurrentFocus);
+            return true;
+        }
 
         bool isCycle = (direction == D_Prev || direction == D_Next);
 
