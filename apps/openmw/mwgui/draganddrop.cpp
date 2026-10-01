@@ -1,5 +1,7 @@
 #include "draganddrop.hpp"
 
+#include <algorithm>
+
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_Gui.h>
 
@@ -131,15 +133,34 @@ namespace MWGui
 
     void DragAndDrop::update()
     {
+        updateDraggedCount(mDraggedCount);
+    }
+
+    void DragAndDrop::onItemConsumed()
+    {
+        if (!mIsOnDragAndDrop || mDraggedCount == 0)
+            return;
+
+        updateDraggedCount(mDraggedCount - 1);
+    }
+
+    void DragAndDrop::updateDraggedCount(std::size_t desiredCount)
+    {
         if (!mIsOnDragAndDrop)
             return;
 
-        const unsigned count = mItem.mBase.getCellRef().getAbsCount();
-        if (count >= mDraggedCount)
+        const std::size_t physicalCount = mItem.mBase.getCellRef().getAbsCount();
+        const std::size_t draggedCount = std::min(desiredCount, physicalCount);
+        if (draggedCount == mDraggedCount)
             return;
 
-        mItem.mCount = count;
-        mDraggedCount = count;
+        mDraggedCount = draggedCount;
+        if (mDraggedCount == 0)
+        {
+            finish();
+            return;
+        }
+
         mDraggedWidget->setCount(static_cast<int>(mDraggedCount));
         mSourceSortModel->clearDragItems();
         mSourceSortModel->addDragItem(mItem.mBase, mDraggedCount);
