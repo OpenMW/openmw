@@ -71,8 +71,8 @@ jobs:
       fail-fast: true
       matrix:
         args:
-          - image: macos-15
-          - image: macos-15-intel
+          - image: macos-26
+          - image: macos-26-intel
     uses: ./.github/workflows/macos.yml
     with:
       image: ${{ matrix.args.image }}

@@ -20,12 +20,12 @@ jobs:
     - run: echo "CMAKE_BUILD_TYPE=${{ inputs.build-type }}" >> $GITHUB_ENV
 
     - run: echo "MACOS_AMD64=true" >> $GITHUB_ENV
-      if: ${{ inputs.image == 'macos-15-intel' }}
+      if: ${{ inputs.image == 'macos-26-intel' }}
 
     - run: echo "DMG_IDENTIFIER=x86_64" >> $GITHUB_ENV
-      if: ${{ inputs.image == 'macos-15-intel' }}
+      if: ${{ inputs.image == 'macos-26-intel' }}
     - run: echo "DMG_IDENTIFIER=arm64" >> $GITHUB_ENV
-      if: ${{ inputs.image != 'macos-15-intel' }}
+      if: ${{ inputs.image != 'macos-26-intel' }}
 
     - name: Install Building Dependencies
       run: CI/before_install.macos.sh
