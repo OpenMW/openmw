@@ -27,6 +27,8 @@ comparison_commit="$("$(dirname -- "${BASH_SOURCE[0]}")/compute_comparison_commi
 
 echo "Commits: $base_commit $comparison_commit"
 
+git fetch --depth 1 "${CI_REPOSITORY_URL:-https://gitlab.com/OpenMW/openmw.git}" +$comparison_commit 
+
 FILES_THAT_AFFECT_NINJA_GLOB="@(.gitlab-ci.yml|CMakeLists.txt|**/CMakeLists.txt|**/*.cmake|CI/*msvc*)"
 
 should_trigger=""
