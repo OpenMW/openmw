@@ -10,7 +10,7 @@ project="$(printf '%s' "${CI_PROJECT_PATH:-OpenMW/openmw}" | jq -sRr '@uri')"
 project_url="$api/projects/$project"
 
 found_good_commit=""
-while :; do
+for i in {1..100}; do
     commit_status_json="$(curl --no-progress-meter --header "PRIVATE-TOKEN: $access_token" --url "$project_url/repository/commits/${commit}/statuses?all=true")"
     if [[ $commit_status_json == '{"message":"404 Commit Not Found"}' ]]; then
         commit="$(git rev-parse "${commit}~1")"
