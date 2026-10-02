@@ -305,12 +305,13 @@ namespace MWLua
             data.mHotspot = hotspot.as<osg::Vec2f>();
             data.mPersistent = menu;
 
-            sol::optional<double> rotation = options.get<sol::optional<double>>("rotation");
+            sol::optional<Misc::FiniteDouble> rotation = options.get<sol::optional<Misc::FiniteDouble>>("rotation");
             if (rotation)
             {
-                if (!std::isfinite(*rotation) || std::floor(*rotation) != *rotation)
+                const double degrees = *rotation;
+                if (std::floor(degrees) != degrees)
                     throw std::logic_error("Cursor rotation must be a finite whole number of degrees");
-                data.mRotation = static_cast<int>(std::fmod(*rotation, 360.0));
+                data.mRotation = static_cast<int>(std::fmod(degrees, 360.0));
                 if (data.mRotation < 0)
                     data.mRotation += 360;
             }
