@@ -1863,9 +1863,8 @@ namespace MWGui
         onCursorChange(name);
     }
 
-    void WindowManager::createLuaCursor(
-        const std::string& name, const std::string& path, int width, int height, int hotspotX, int hotspotY,
-        double rotation)
+    void WindowManager::createLuaCursor(const std::string& name, const std::string& path, int width, int height,
+        int hotspotX, int hotspotY, double rotation)
     {
         osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(VFS::Path::Normalized(path));
         if (!image.valid())

@@ -29,8 +29,8 @@ namespace SDLUtil
         ///        name of the cursor we changed to ("arrow", "ibeam", etc)
         virtual void cursorChanged(std::string_view name);
 
-        virtual void createCursor(std::string_view name, double rotDegrees, osg::Image* image, int hotspotX, int hotspotY,
-            int cursorWidth, int cursorHeight);
+        virtual void createCursor(std::string_view name, double rotDegrees, osg::Image* image, int hotspotX,
+            int hotspotY, int cursorWidth, int cursorHeight);
         virtual void removeCursor(std::string_view name);
 
     private:
