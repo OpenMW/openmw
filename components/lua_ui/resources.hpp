@@ -34,7 +34,7 @@ namespace LuaUi
         VFS::Path::Normalized mPath;
         osg::Vec2f mSize;
         osg::Vec2f mHotspot;
-        int mRotation = 0;
+        double mRotation = 0;
         std::string mName;
         bool mPersistent = false;
     };
@@ -48,7 +48,7 @@ namespace LuaUi
         int mHeight;
         int mHotspotX;
         int mHotspotY;
-        int mRotation;
+        double mRotation;
         bool mPersistent;
 
         explicit CursorKey(const CursorData& data)

@@ -16,6 +16,7 @@
 #include <components/vfs/manager.hpp>
 
 #include <cmath>
+#include <numbers>
 
 #include "context.hpp"
 #include "luamanagerimp.hpp"
@@ -308,12 +309,10 @@ namespace MWLua
             sol::optional<Misc::FiniteDouble> rotation = options.get<sol::optional<Misc::FiniteDouble>>("rotation");
             if (rotation)
             {
-                const double degrees = *rotation;
-                if (std::floor(degrees) != degrees)
-                    throw std::logic_error("Cursor rotation must be a finite whole number of degrees");
-                data.mRotation = static_cast<int>(std::fmod(degrees, 360.0));
+                constexpr double fullTurn = 2 * std::numbers::pi;
+                data.mRotation = std::fmod(static_cast<double>(*rotation), fullTurn);
                 if (data.mRotation < 0)
-                    data.mRotation += 360;
+                    data.mRotation += fullTurn;
             }
 
             auto integral = [](float value) { return std::isfinite(value) && std::floor(value) == value; };
@@ -329,7 +328,7 @@ namespace MWLua
                 MWBase::Environment::get().getWindowManager()->createLuaCursor(cursor->mName,
                     std::string(cursor->mPath), static_cast<int>(cursor->mSize.x()),
                     static_cast<int>(cursor->mSize.y()), static_cast<int>(cursor->mHotspot.x()),
-                    static_cast<int>(cursor->mHotspot.y()), cursor->mRotation);
+                    static_cast<int>(cursor->mHotspot.y()), -cursor->mRotation * 180.0 / std::numbers::pi);
             });
             return cursor;
         };
