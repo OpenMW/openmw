@@ -317,7 +317,7 @@ namespace MWGui
 
         void changePointer(const std::string& name) override;
         void createLuaCursor(const std::string& name, const std::string& path, int width, int height, int hotspotX,
-            int hotspotY) override;
+            int hotspotY, int rotation) override;
         void removeLuaCursor(const std::string& name) override;
         void setLuaCursorOverride(const std::string& name) override;
         std::string getCurrentCursorName() const override;
