@@ -39,14 +39,25 @@ while IFS= read -r change; do
     fi
 done < <(git diff --name-only $base_commit $comparison_commit)
 
-if [[ -z $should_trigger ]]; then
-    echo "Running Ninja jobs is unnecessary."
-    exit 0
-fi
-
 access_token="${GITLAB_ACCESS_TOKEN:-${CI_JOB_TOKEN}}"
 api="${CI_API_V4_URL:-https://gitlab.com/api/v4}"
 project_url="$api/projects/$project"
+
+if [[ -z $should_trigger ]]; then
+    echo "Running Ninja jobs is unnecessary."
+
+    if [[ -n ${CI_PIPELINE_ID:-} ]]; then
+        echo "Running ReportStatus job..."
+        while IFS= read -r job_id; do
+            curl --no-progress-meter --request POST --header "PRIVATE-TOKEN: $access_token" --url "$project_url/jobs/$job_id/play" --header "Content-Type: application/json" --data '{ "job_variables_attributes": [ { "key": "DESIRED_EXIT_CODE", "value": "0" } ] }'
+        done < <(curl --no-progress-meter --header "PRIVATE-TOKEN: $access_token" --url "$project_url/pipelines/$CI_PIPELINE_ID/jobs?per_page=100" | jq '.[] | select(.name == "ReportStatus") | .id')
+        echo "Done."
+    else
+        echo "Dry run not in CI, but otherwise would have run ReportStatus job."
+    fi
+
+    exit 0
+fi
 
 if [[ -n ${CI_PIPELINE_ID:-} ]]; then
     echo "Running Ninja jobs..."

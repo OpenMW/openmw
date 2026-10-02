@@ -846,6 +846,7 @@ macOS26_Xcode26_arm64:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
       # triggered by TriggerNinja - globbing expressions and job names live in its script
       when: manual
+      allow_failure: true
 
 Windows_Ninja_RelWithDebInfo_GroupOne:
   extends:
@@ -901,6 +902,20 @@ TriggerNinja:
   script:
     - apk add bash git jq
     - CI/trigger_ninja_if_necessary.sh
+
+ReportStatus:
+  tags:
+    - saas-linux-small-amd64
+  stage: build
+  image: curlimages/curl-base
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - apk add bash git jq
+    - exit $DESIRED_EXIT_CODE
 
 .Windows_Compress_And_Upload_Symbols_Ninja_RelWithDebInfo:
   extends:
