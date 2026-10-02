@@ -858,22 +858,10 @@ macOS26_Xcode26_arm64:
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        paths:
-          - .gitlab-ci.yml
-          - CMakeLists.txt
-          - "**/CMakeLists.txt"
-          - "**/*.cmake"
-          - "CI/*msvc*"
-    - if: $CI_PIPELINE_SOURCE == "push"
-      #changes:
-      #  paths:
-      #    - CMakeLists.txt
-      #    - "**/CMakeLists.txt"
-      #    - "**/*.cmake"
-      #    - "CI/*msvc*"
-      #  compare_to: the last time this job worked for a parent commit
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+      # triggered by TriggerNinja - globbing expressions and job names live in its script
+      when: manual
+      allow_failure: true
 
 Windows_Ninja_RelWithDebInfo_GroupOne:
   extends:
@@ -912,12 +900,54 @@ Windows_Ninja_RelWithDebInfo_GroupTwo:
       paths:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
-      key:
+    - key:
         prefix: ninja-2022-RelWithDebInfo-GroupTwo
         files:
           - CI/deps_versions.msvc.sh
       paths:
       - ccache
+
+TriggerNinja:
+  tags:
+    - saas-linux-small-amd64
+  stage: build
+  image: curlimages/curl-base
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - apk add bash git jq
+    - CI/trigger_ninja_if_necessary.sh
+
+DetectStatus:
+  tags:
+    - saas-linux-small-amd64
+  stage: build
+  image: curlimages/curl-base
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+      allow_failure: true
+  needs:
+    - job: "Windows_Ninja_RelWithDebInfo_GroupOne"
+      artifacts: false
+    - job: "Windows_Ninja_RelWithDebInfo_GroupTwo"
+      artifacts: false
+  script:
+    - apk add bash git jq
+    - CI/detect_and_report_ninja_status.sh
+
+ReportStatus:
+  tags:
+    - saas-linux-small-amd64
+  stage: build
+  image: curlimages/curl-base
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - apk add bash git jq
+    - exit $DESIRED_EXIT_CODE
 
 .Windows_Compress_And_Upload_Symbols_Ninja_RelWithDebInfo:
   extends:
