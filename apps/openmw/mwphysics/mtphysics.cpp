@@ -275,7 +275,7 @@ namespace
                 if (mAdvanceSimulation)
                 {
                     MWWorld::Ptr standingOn;
-                    if (frameData.mStandingOn != nullptr && !frameData.mFlying)
+                    if (frameData.mStandingOn != nullptr)
                     {
                         auto* const ptrHolder
                             = static_cast<MWPhysics::PtrHolder*>(scheduler->getUserPointer(frameData.mStandingOn));
