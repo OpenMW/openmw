@@ -181,15 +181,15 @@ namespace MWRender
 
     struct NavMesh::DeallocateCreateNavMeshTileGroups final : SceneUtil::WorkItem
     {
-        osg::ref_ptr<NavMesh::CreateNavMeshTileGroups> mWorkItem;
+        std::shared_ptr<NavMesh::CreateNavMeshTileGroups> mWorkItem;
 
-        explicit DeallocateCreateNavMeshTileGroups(osg::ref_ptr<NavMesh::CreateNavMeshTileGroups>&& workItem)
+        explicit DeallocateCreateNavMeshTileGroups(std::shared_ptr<NavMesh::CreateNavMeshTileGroups>&& workItem)
             : mWorkItem(std::move(workItem))
         {
         }
     };
 
-    NavMesh::NavMesh(const osg::ref_ptr<osg::Group>& root, const osg::ref_ptr<SceneUtil::WorkQueue>& workQueue,
+    NavMesh::NavMesh(const osg::ref_ptr<osg::Group>& root, const std::shared_ptr<SceneUtil::WorkQueue>& workQueue,
         bool enabled, Settings::NavMeshRenderMode mode)
         : mRootNode(root)
         , mWorkQueue(workQueue)
@@ -230,7 +230,7 @@ namespace MWRender
 
         {
             std::pair<std::size_t, Version> lastest{ 0, Version{} };
-            osg::ref_ptr<CreateNavMeshTileGroups> latestCandidate;
+            std::shared_ptr<CreateNavMeshTileGroups> latestCandidate;
             for (auto it = mWorkItems.begin(); it != mWorkItems.end();)
             {
                 if (!(*it)->isDone())
@@ -245,7 +245,7 @@ namespace MWRender
                     std::swap(latestCandidate, *it);
                 }
                 if (*it != nullptr)
-                    mWorkQueue->addWorkItem(new DeallocateCreateNavMeshTileGroups(std::move(*it)));
+                    mWorkQueue->addWorkItem(std::make_shared<DeallocateCreateNavMeshTileGroups>(std::move(*it)));
                 it = mWorkItems.erase(it);
             }
 
@@ -275,7 +275,8 @@ namespace MWRender
                     }
                 }
 
-                mWorkQueue->addWorkItem(new DeallocateCreateNavMeshTileGroups(std::move(latestCandidate)));
+                mWorkQueue->addWorkItem(
+                    std::make_shared<DeallocateCreateNavMeshTileGroups>(std::move(latestCandidate)));
             }
         }
 
@@ -310,7 +311,7 @@ namespace MWRender
             return;
         }
 
-        osg::ref_ptr<CreateNavMeshTileGroups> workItem = new CreateNavMeshTileGroups(
+        auto workItem = std::make_shared<CreateNavMeshTileGroups>(
             id, version, navMesh, mGroupStateSet, mDebugDrawStateSet, settings, mTiles, mMode);
         mWorkQueue->addWorkItem(workItem);
         mWorkItems.push_back(std::move(workItem));

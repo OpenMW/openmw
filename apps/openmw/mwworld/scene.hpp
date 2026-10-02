@@ -110,7 +110,7 @@ namespace MWWorld
 
         std::vector<ESM::RefNum> mPagedRefs;
 
-        std::vector<osg::ref_ptr<SceneUtil::WorkItem>> mWorkItems;
+        std::vector<std::shared_ptr<SceneUtil::WorkItem>> mWorkItems;
 
         std::optional<ChangeCellGridRequest> mChangeCellGridRequest;
 
