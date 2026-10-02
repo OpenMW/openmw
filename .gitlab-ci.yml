@@ -903,6 +903,23 @@ TriggerNinja:
     - apk add bash git jq
     - CI/trigger_ninja_if_necessary.sh
 
+DetectStatus:
+  tags:
+    - saas-linux-small-amd64
+  stage: build
+  image: curlimages/curl-base
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+      allow_failure: true
+  needs:
+    - job: "Windows_Ninja_RelWithDebInfo_GroupOne"
+      artifacts: false
+    - job: "Windows_Ninja_RelWithDebInfo_GroupTwo"
+      artifacts: false
+  script:
+    - apk add bash git jq
+    - CI/detect_and_report_ninja_status.sh
+
 ReportStatus:
   tags:
     - saas-linux-small-amd64
