@@ -126,7 +126,7 @@ Coverity:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
-    key: Coverity.ubuntu_24.04.v2
+    key: Coverity.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
     paths:
     - apt-cache/
     - ccache/
@@ -182,7 +182,7 @@ Coverity_Upload:
 Ubuntu_GCC:
   extends: .Ubuntu
   cache:
-    key: Ubuntu_GCC.ubuntu_24.04.v2
+    key: Ubuntu_GCC.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
   before_script:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
   variables:
@@ -196,7 +196,7 @@ Ubuntu_GCC:
 Ubuntu_GCC_asan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_asan.ubuntu_24.04.v2
+    key: Ubuntu_GCC_asan.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
   variables:
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak
@@ -251,7 +251,7 @@ Teal:
 Ubuntu_GCC_Debug:
   extends: .Ubuntu
   cache:
-    key: Ubuntu_GCC_Debug.ubuntu_24.04.v3
+    key: Ubuntu_GCC_Debug.ubuntu_24.04.v3.$CI_COMMIT_REF_PROTECTED
   before_script:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
   variables:
@@ -267,7 +267,7 @@ Ubuntu_GCC_Debug:
 Ubuntu_GCC_tests:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests.ubuntu_24.04.v2
+    key: Ubuntu_GCC_tests.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -281,7 +281,7 @@ Ubuntu_GCC_tests:
 .Ubuntu_GCC_tests_Debug:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests_Debug.ubuntu_24.04.v2
+    key: Ubuntu_GCC_tests_Debug.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -297,7 +297,7 @@ Ubuntu_GCC_tests:
 Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests_asan.ubuntu_24.04.v2
+    key: Ubuntu_GCC_tests_asan.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -320,7 +320,7 @@ Ubuntu_GCC_tests_asan:
 Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests_ubsan.ubuntu_24.04.v2
+    key: Ubuntu_GCC_tests_ubsan.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -340,7 +340,7 @@ Ubuntu_GCC_tests_ubsan:
 .Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests_tsan.ubuntu_24.04.v2
+    key: Ubuntu_GCC_tests_tsan.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -391,7 +391,7 @@ Ubuntu_GCC_tests_coverage:
         - "CI/**/*"
         - ".gitlab-ci.yml"
   cache:
-    key: Ubuntu_GCC_FetchContent_Static_Deps.ubuntu_24.04.v2
+    key: Ubuntu_GCC_FetchContent_Static_Deps.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
     paths:
       - apt-cache/
       - ccache/
@@ -410,7 +410,7 @@ Ubuntu_Clang:
   before_script:
     - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
   cache:
-    key: Ubuntu_Clang.ubuntu_24.04.v3
+    key: Ubuntu_Clang.ubuntu_24.04.v3.$CI_COMMIT_REF_PROTECTED
   variables:
     CC: clang
     CXX: clang++
@@ -426,7 +426,7 @@ Ubuntu_Clang:
     - curl https://raw.githubusercontent.com/matus-chochlik/ctcache/e33c063ca6e52b48bcefbc45d46d8c150ffa81ca/src/ctcache/clang_tidy_cache.py -o /usr/local/bin/clang_tidy_cache.py
     - chmod 0775 /usr/local/bin/clang_tidy_cache.py
   cache:
-    key: Ubuntu_Clang_Tidy.ubuntu_24.04.v2
+    key: Ubuntu_Clang_Tidy.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
     paths:
       - apt-cache/
       - ctcache/
@@ -498,7 +498,7 @@ Ubuntu_Clang_Tidy_other:
 Ubuntu_Clang_tests_Debug:
   extends: Ubuntu_Clang
   cache:
-    key: Ubuntu_Clang_tests_Debug.ubuntu_24.04.v2
+    key: Ubuntu_Clang_tests_Debug.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -546,7 +546,7 @@ Ubuntu_Clang_integration_tests:
   needs:
     - Ubuntu_Clang
   cache:
-    key: Ubuntu_Clang_integration_tests.ubuntu_24.04.v4
+    key: Ubuntu_Clang_integration_tests.ubuntu_24.04.v4.$CI_COMMIT_REF_PROTECTED
   variables:
     OPENMW_DEPS: openmw-integration-tests
 
@@ -555,7 +555,7 @@ Ubuntu_GCC_integration_tests_asan:
   needs:
     - Ubuntu_GCC_asan
   cache:
-    key: Ubuntu_GCC_integration_tests_asan.ubuntu_24.04.v3
+    key: Ubuntu_GCC_integration_tests_asan.ubuntu_24.04.v3.$CI_COMMIT_REF_PROTECTED
   variables:
     OPENMW_DEPS: openmw-integration-tests libasan
     ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_leaks=0
@@ -612,7 +612,7 @@ macOS26_Xcode26_amd64:
       allow_failure: true
   cache:
     key:
-      prefix: macOS26_Xcode26_amd64.v1
+      prefix: macOS26_Xcode26_amd64.v1.$CI_COMMIT_REF_PROTECTED
       files:
         - CI/macos/deps_versions.sh
     paths:
@@ -631,7 +631,7 @@ macOS26_Xcode26_arm64:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   cache:
     key:
-      prefix: macOS26_Xcode26_arm64.v1
+      prefix: macOS26_Xcode26_arm64.v1.$CI_COMMIT_REF_PROTECTED
       files:
         - CI/macos/deps_versions.sh
     paths:
@@ -879,7 +879,7 @@ Windows_Ninja_RelWithDebInfo_GroupOne:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
     - key:
-        prefix: ninja-2022-RelWithDebInfo-GroupOne
+        prefix: ninja-2022-RelWithDebInfo-GroupOne-$CI_COMMIT_REF_PROTECTED
         files:
           - CI/deps_versions.msvc.sh
       paths:
@@ -901,7 +901,7 @@ Windows_Ninja_RelWithDebInfo_GroupTwo:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
     - key:
-        prefix: ninja-2022-RelWithDebInfo-GroupTwo
+        prefix: ninja-2022-RelWithDebInfo-GroupTwo-$CI_COMMIT_REF_PROTECTED
         files:
           - CI/deps_versions.msvc.sh
       paths:
@@ -985,14 +985,14 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
       - MSVC2022_64_Ninja/deps/Qt
       policy: push
     - key:
-        prefix: ninja-2022-RelWithDebInfo-GroupOne
+        prefix: ninja-2022-RelWithDebInfo-GroupOne-$CI_COMMIT_REF_PROTECTED
         files:
           - CI/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
     - key:
-        prefix: ninja-2022-RelWithDebInfo-GroupTwo
+        prefix: ninja-2022-RelWithDebInfo-GroupTwo-$CI_COMMIT_REF_PROTECTED
         files:
           - CI/deps_versions.msvc.sh
       paths:
@@ -1141,7 +1141,7 @@ Windows_MSBuild_RelWithDebInfo_GroupOne:
       - deps
       - MSVC2022_64/deps/Qt
     - key:
-        prefix: msbuild-2022-RelWithDebInfo-GroupOne
+        prefix: msbuild-2022-RelWithDebInfo-GroupOne-$CI_COMMIT_REF_PROTECTED
         files:
           - CI/deps_versions.msvc.sh
       paths:
@@ -1163,7 +1163,7 @@ Windows_MSBuild_RelWithDebInfo_GroupTwo:
       - deps
       - MSVC2022_64/deps/Qt
     - key:
-        prefix: msbuild-2022-RelWithDebInfo-GroupTwo
+        prefix: msbuild-2022-RelWithDebInfo-GroupTwo-$CI_COMMIT_REF_PROTECTED
         files:
           - CI/deps_versions.msvc.sh
       paths:
@@ -1209,14 +1209,14 @@ Windows_MSBuild_CacheInit_RelWithDebInfo:
       - MSVC2022_64/deps/Qt
       policy: push
     - key:
-        prefix: msbuild-2022-RelWithDebInfo-GroupOne
+        prefix: msbuild-2022-RelWithDebInfo-GroupOne-$CI_COMMIT_REF_PROTECTED
         files:
           - CI/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
     - key:
-        prefix: msbuild-2022-RelWithDebInfo-GroupTwo
+        prefix: msbuild-2022-RelWithDebInfo-GroupTwo-$CI_COMMIT_REF_PROTECTED
         files:
           - CI/deps_versions.msvc.sh
       paths:
