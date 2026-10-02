@@ -389,9 +389,10 @@ namespace MWPhysics
                 {
                     isOnGround = true;
                     isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
-                    actor.mStandingOn = tracer.mHitObject;
+                    if (!actor.mFlying)
+                        actor.mStandingOn = tracer.mHitObject;
 
-                    if (actor.mStandingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
+                    if (tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
                         actor.mWalkingOnWater = true;
                     if (!actor.mFlying && !isOnSlope)
                     {
