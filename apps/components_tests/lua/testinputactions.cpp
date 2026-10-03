@@ -54,7 +54,6 @@ namespace
         LuaUtil::Callback badA(
             { lua.load("return function() return 'not_a_bool' end")(), sol::table(lua, sol::create) });
         EXPECT_TRUE(registry.bind("a", badA, {}));
-        testing::internal::CaptureStderr();
         registry.update(1.0);
         sol::object aValue = registry.valueOfType("a", LuaUtil::InputAction::Type::Boolean);
         EXPECT_TRUE(aValue.is<bool>());
