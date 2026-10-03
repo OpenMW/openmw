@@ -123,7 +123,6 @@ namespace
         }
 
     private:
-        // Empty, so the first update sets the child whichever one the file opened on
         std::optional<unsigned int> mCurrentState;
     };
 
