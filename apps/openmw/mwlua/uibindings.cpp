@@ -16,6 +16,7 @@
 #include <components/vfs/manager.hpp>
 
 #include <cmath>
+#include <numbers>
 
 #include "context.hpp"
 #include "luamanagerimp.hpp"
@@ -305,6 +306,15 @@ namespace MWLua
             data.mHotspot = hotspot.as<osg::Vec2f>();
             data.mPersistent = menu;
 
+            sol::optional<Misc::FiniteDouble> rotation = options.get<sol::optional<Misc::FiniteDouble>>("rotation");
+            if (rotation)
+            {
+                constexpr double fullTurn = 2 * std::numbers::pi;
+                data.mRotation = std::fmod(static_cast<double>(*rotation), fullTurn);
+                if (data.mRotation < 0)
+                    data.mRotation += fullTurn;
+            }
+
             auto integral = [](float value) { return std::isfinite(value) && std::floor(value) == value; };
             if (!integral(data.mSize.x()) || !integral(data.mSize.y()) || !integral(data.mHotspot.x())
                 || !integral(data.mHotspot.y()) || data.mSize.x() <= 0 || data.mSize.y() <= 0 || data.mHotspot.x() < 0
@@ -318,7 +328,7 @@ namespace MWLua
                 MWBase::Environment::get().getWindowManager()->createLuaCursor(cursor->mName,
                     std::string(cursor->mPath), static_cast<int>(cursor->mSize.x()),
                     static_cast<int>(cursor->mSize.y()), static_cast<int>(cursor->mHotspot.x()),
-                    static_cast<int>(cursor->mHotspot.y()));
+                    static_cast<int>(cursor->mHotspot.y()), -cursor->mRotation * 180.0 / std::numbers::pi);
             });
             return cursor;
         };
@@ -427,6 +437,8 @@ namespace MWLua
                 = sol::readonly_property([](const LuaUi::CursorResource& resource) { return resource.mSize; });
             cursorResource["hotspot"]
                 = sol::readonly_property([](const LuaUi::CursorResource& resource) { return resource.mHotspot; });
+            cursorResource["rotation"]
+                = sol::readonly_property([](const LuaUi::CursorResource& resource) { return resource.mRotation; });
 
             auto uiElement = context.sol().new_usertype<LuaUi::Element>("UiElement");
             uiElement[sol::meta_function::to_string] = [](const LuaUi::Element& element) {

@@ -1863,8 +1863,8 @@ namespace MWGui
         onCursorChange(name);
     }
 
-    void WindowManager::createLuaCursor(
-        const std::string& name, const std::string& path, int width, int height, int hotspotX, int hotspotY)
+    void WindowManager::createLuaCursor(const std::string& name, const std::string& path, int width, int height,
+        int hotspotX, int hotspotY, double rotation)
     {
         osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(VFS::Path::Normalized(path));
         if (!image.valid())
@@ -1872,7 +1872,7 @@ namespace MWGui
             Log(Debug::Warning) << "Failed to load Lua cursor texture: " << path;
             return;
         }
-        mCursorManager->createCursor(name, 0, image, hotspotX, hotspotY, width, height);
+        mCursorManager->createCursor(name, rotation, image, hotspotX, hotspotY, width, height);
     }
 
     void WindowManager::removeLuaCursor(const std::string& name)

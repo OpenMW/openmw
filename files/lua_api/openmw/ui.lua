@@ -395,6 +395,7 @@
 --     path = 'textures/my_mod/hand.dds',
 --     size = vector2(32, 32),
 --     hotspot = vector2(2, 1),
+--     rotation = math.pi / 2,
 -- }
 -- local button = ui.create {
 --     type = ui.TYPE.Widget,
@@ -406,11 +407,13 @@
 -- @field #string path Path to the texture file
 -- @field openmw.util#Vector2 size Cursor size in pixels
 -- @field openmw.util#Vector2 hotspot Position in pixels within the cursor texture that tracks the mouse pointer
+-- @field #number rotation Clockwise rotation in radians, normalized to [0, 2π)
 
 --- Table with arguments passed to ui.cursor.
 -- @type CursorResourceOptions
 -- @field #string path Path to the cursor texture file. Required
 -- @field openmw.util#Vector2 size Size of the cursor in pixels, at most 128 by 128. Required
 -- @field openmw.util#Vector2 hotspot Position in pixels within the cursor texture that tracks the mouse pointer. Required
+-- @field #number rotation Optional clockwise rotation in radians (0 by default). The hotspot is specified in the final rotated cursor canvas - rotation does not enlarge that canvas.
 
 return nil

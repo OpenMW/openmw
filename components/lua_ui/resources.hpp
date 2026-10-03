@@ -34,6 +34,7 @@ namespace LuaUi
         VFS::Path::Normalized mPath;
         osg::Vec2f mSize;
         osg::Vec2f mHotspot;
+        double mRotation = 0;
         std::string mName;
         bool mPersistent = false;
     };
@@ -47,6 +48,7 @@ namespace LuaUi
         int mHeight;
         int mHotspotX;
         int mHotspotY;
+        double mRotation;
         bool mPersistent;
 
         explicit CursorKey(const CursorData& data)
@@ -55,6 +57,7 @@ namespace LuaUi
             , mHeight(static_cast<int>(data.mSize.y()))
             , mHotspotX(static_cast<int>(data.mHotspot.x()))
             , mHotspotY(static_cast<int>(data.mHotspot.y()))
+            , mRotation(data.mRotation)
             , mPersistent(data.mPersistent)
         {
         }
@@ -74,6 +77,7 @@ namespace LuaUi
             combine(key.mHeight);
             combine(key.mHotspotX);
             combine(key.mHotspotY);
+            combine(key.mRotation);
             combine(key.mPersistent);
             return result;
         }
