@@ -48,6 +48,9 @@ Properties
     - boolean (true)
     - | Modulate `alpha` with parents `alpha`.
       | If the parent has `inheritAlpha` set to `true`, the value after modulating is passed to the child.
+  * - cursor
+    - `CursorResource <../openmw_ui.html##(CursorResource)>`_
+    - Sets the cursor to be displayed when hovering over this widget.
   * - autoSize
     - boolean (true)
     - | Adjusts this widget's size to fit the text exactly.

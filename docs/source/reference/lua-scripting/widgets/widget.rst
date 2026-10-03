@@ -52,8 +52,9 @@ Properties
     - boolean (true)
     - | Modulate `alpha` with parents `alpha`.
       | If the parent has `inheritAlpha` set to `true`, the value after modulating is passed to the child.
-
-.. TODO: document the mouse pointer property, when API for reading / adding pointer types is available
+  * - cursor
+    - `CursorResource <../openmw_ui.html##(CursorResource)>`_
+    - Sets the cursor to be displayed when hovering over this widget.
 
 Events
 ------
