@@ -32,56 +32,46 @@ namespace MWRender
     {
         VFS::Path::NormalizedView mCloudTexture;
         VFS::Path::NormalizedView mNextCloudTexture;
-        float mCloudBlendFactor{};
+        VFS::Path::NormalizedView mParticleEffect;
+        VFS::Path::NormalizedView mRainEffect;
+
+        ESM::RefId mAmbientLoopSoundID;
+        ESM::RefId mRainLoopSoundID;
 
         osg::Vec4f mFogColor;
-
         osg::Vec4f mAmbientColor;
-
         osg::Vec4f mSkyColor;
-
         // sun light color
         osg::Vec4f mSunColor;
-
         // alpha is the sun transparency
         osg::Vec4f mSunDiscColor;
 
-        float mFogDepth{};
+        osg::Vec3f mStormDirection;
+        osg::Vec3f mNextStormDirection;
 
+        float mCloudBlendFactor{};
+        float mFogDepth{};
         float mDLFogFactor{};
         float mDLFogOffset{};
-
         float mWindSpeed{};
         float mBaseWindSpeed{};
         float mCurrentWindSpeed{};
         float mNextWindSpeed{};
-
         float mCloudSpeed{};
-
         float mGlareView{};
-
-        bool mNight{}; // use night skybox
         float mNightFade{}; // fading factor for night skybox
-
-        bool mIsStorm{};
-
-        ESM::RefId mAmbientLoopSoundID;
-        ESM::RefId mRainLoopSoundID;
         float mAmbientSoundVolume{};
-
-        VFS::Path::NormalizedView mParticleEffect;
-        VFS::Path::NormalizedView mRainEffect;
         float mPrecipitationAlpha{};
-
         float mRainDiameter{};
         float mRainMinHeight{};
         float mRainMaxHeight{};
         float mRainSpeed{};
         float mRainEntranceSpeed{};
+
         int mRainMaxRaindrops{};
 
-        osg::Vec3f mStormDirection;
-        osg::Vec3f mNextStormDirection;
+        bool mNight{}; // use night skybox
+        bool mIsStorm{};
     };
 
     struct MoonState
