@@ -94,7 +94,7 @@ endif()
 if (NOT APPLE)
     install(TARGETS openmw-wizard RUNTIME_DEPENDENCY_SET openmw-dependencies)
 
-generate_deploy_script_for_qt_app(openmw-wizard)
+    generate_deploy_script_for_qt_app(openmw-wizard)
 endif()
 
 if(USE_QT)

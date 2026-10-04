@@ -253,7 +253,7 @@ if (NOT APPLE AND BUILD_OPENCS)
     install(TARGETS openmw-cs RUNTIME_DEPENDENCY_SET openmw-dependencies)
     INSTALL(FILES "$<TARGET_FILE_DIR:openmw-cs>/defaults-cs.bin" DESTINATION "${CMAKE_INSTALL_SYSCONFDIR}")
 
-generate_deploy_script_for_qt_app(openmw-cs)
+    generate_deploy_script_for_qt_app(openmw-cs)
 endif()
 
 if (MSVC)
