@@ -253,30 +253,7 @@ if (NOT APPLE AND BUILD_OPENCS)
     install(TARGETS openmw-cs RUNTIME_DEPENDENCY_SET openmw-dependencies)
     INSTALL(FILES "$<TARGET_FILE_DIR:openmw-cs>/defaults-cs.bin" DESTINATION "${CMAKE_INSTALL_SYSCONFDIR}")
 
-    if (LINUX AND OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
-        if (Qt6Core_VERSION VERSION_LESS 6.10)
-            message(FATAL_ERROR "Deployment of Qt on Linux requires at least 6.10 (for the INCLUDE_PLUGINS argument)")
-        endif ()
-        # don't bother with this on Windows yet as windeployqt includes a bunch of DLLs we don't use
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
-            cmake_path(NORMAL_PATH QT_DIR OUTPUT_VARIABLE QT_BASE_DIR)
-        else ()
-            # just hope it's close enough
-        endif()
-        string(REGEX REPLACE "(.+)/lib/cmake/Qt[0-9]+" "\\1" QT_BASE_DIR "${QT_BASE_DIR}")
-        escape_regex_control_characters(QT_BASE_REGEX "${QT_BASE_DIR}")
-        qt_generate_deploy_app_script(TARGET openmw-cs
-            OUTPUT_SCRIPT deploy_script
-            NO_TRANSLATIONS
-            NO_COMPILER_RUNTIME
-            INCLUDE_PLUGINS wayland
-            POST_INCLUDE_REGEXES
-                "${QT_BASE_REGEX}"
-            POST_EXCLUDE_REGEXES
-                ".*"
-        )
-        install(SCRIPT ${deploy_script})
-    endif()
+generate_deploy_script_for_qt_app(openmw-cs)
 endif()
 
 if (MSVC)
