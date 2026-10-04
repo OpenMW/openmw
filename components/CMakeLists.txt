@@ -312,11 +312,6 @@ add_component_dir (stereo
 add_component_dir (debug
     debugging debuglog gldebug debugdraw writeflags
     )
-
-IF(NOT WIN32 AND NOT APPLE)
-    add_compile_definitions(GLOBAL_DATA_PATH="${GLOBAL_DATA_PATH}")
-    add_compile_definitions(GLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")
-ENDIF()
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
     constrainedfilestream memorystream hash configfileparser openfile constrainedfilestreambuf conversion
@@ -326,6 +321,10 @@ add_component_dir (files
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     set_source_files_properties(files/configfileparser.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
 endif()
+
+if (NOT WIN32 AND NOT APPLE)
+    set_source_files_properties(files/linuxpath.cpp PROPERTIES COMPILE_DEFINITIONS "GLOBAL_DATA_PATH=\"${GLOBAL_DATA_PATH}\";GLOBAL_CONFIG_PATH=\"${GLOBAL_CONFIG_PATH}\"")
+endif ()
 
 add_component_dir (compiler
     context controlparser errorhandler exception exprparser extensions fileparser generator
