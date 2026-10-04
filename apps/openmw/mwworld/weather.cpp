@@ -713,7 +713,6 @@ namespace MWWorld
         , mTransitionFactor(0)
         , mNightDayMode(Default)
         , mRegions()
-        , mResult()
     {
         mTimeSettings.mNightStart = mSunsetTime + mSunsetDuration;
         mTimeSettings.mNightEnd = mSunriseTime;
@@ -812,7 +811,7 @@ namespace MWWorld
         }
     }
 
-    float WeatherManager::calculateWindSpeed(const Weather& weather, float currentSpeed)
+    float WeatherManager::calculateWindSpeed(const Weather& weather, float currentSpeed) const
     {
         float targetSpeed = std::min(8.0f * weather.mWindSpeed, 70.f);
         if (currentSpeed == 0.f)
@@ -865,22 +864,22 @@ namespace MWWorld
             return;
         }
 
-        calculateWeatherResult(time.getHour(), duration, paused);
+        const MWRender::WeatherResult result = calculateWeatherResult(time.getHour(), duration, paused);
 
         if (!paused)
         {
-            mWindSpeed = mResult.mWindSpeed;
-            mCurrentWindSpeed = mResult.mCurrentWindSpeed;
-            mNextWindSpeed = mResult.mNextWindSpeed;
+            mWindSpeed = result.mWindSpeed;
+            mCurrentWindSpeed = result.mCurrentWindSpeed;
+            mNextWindSpeed = result.mNextWindSpeed;
         }
 
-        mIsStorm = mResult.mIsStorm;
+        mIsStorm = result.mIsStorm;
 
         // For some reason Ash Storm is not considered as a precipitation weather in game
-        mPrecipitation = !(mResult.mParticleEffect.empty() && mResult.mRainEffect.empty())
-            && mResult.mParticleEffect != Settings::models().mWeatherashcloud.get();
+        mPrecipitation = !(result.mParticleEffect.empty() && result.mRainEffect.empty())
+            && result.mParticleEffect != Settings::models().mWeatherashcloud.get();
 
-        mStormDirection = calculateStormDirection(mResult.mParticleEffect);
+        mStormDirection = calculateStormDirection(result.mParticleEffect);
         mRendering.getSkyManager()->setStormParticleDirection(mStormDirection);
 
         // disable sun during night
@@ -940,42 +939,42 @@ namespace MWWorld
         mRendering.getSkyManager()->setSecundaState(mSecunda.calculateState(time));
 
         mRendering.configureFog(
-            mResult.mFogDepth, underwaterFog, mResult.mDLFogFactor, mResult.mDLFogOffset / 100.0f, mResult.mFogColor);
-        mRendering.setAmbientColour(mResult.mAmbientColor);
-        mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor, mResult.mGlareView * glareFade);
+            result.mFogDepth, underwaterFog, result.mDLFogFactor, result.mDLFogOffset / 100.0f, result.mFogColor);
+        mRendering.setAmbientColour(result.mAmbientColor);
+        mRendering.setSunColour(result.mSunColor, result.mSunColor, result.mGlareView * glareFade);
 
-        mRendering.getSkyManager()->setWeather(mResult);
+        mRendering.getSkyManager()->setWeather(result);
 
         // Play sounds
-        if (mPlayingAmbientSoundID != mResult.mAmbientLoopSoundID)
+        if (mPlayingAmbientSoundID != result.mAmbientLoopSoundID)
         {
             if (mAmbientSound)
             {
                 MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
                 mAmbientSound = nullptr;
             }
-            if (!mResult.mAmbientLoopSoundID.empty())
-                mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(mResult.mAmbientLoopSoundID,
-                    mResult.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
-            mPlayingAmbientSoundID = mResult.mAmbientLoopSoundID;
+            if (!result.mAmbientLoopSoundID.empty())
+                mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(result.mAmbientLoopSoundID,
+                    result.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
+            mPlayingAmbientSoundID = result.mAmbientLoopSoundID;
         }
         else if (mAmbientSound)
-            mAmbientSound->setVolume(mResult.mAmbientSoundVolume);
+            mAmbientSound->setVolume(result.mAmbientSoundVolume);
 
-        if (mPlayingRainSoundID != mResult.mRainLoopSoundID)
+        if (mPlayingRainSoundID != result.mRainLoopSoundID)
         {
             if (mRainSound)
             {
                 MWBase::Environment::get().getSoundManager()->stopSound(mRainSound);
                 mRainSound = nullptr;
             }
-            if (!mResult.mRainLoopSoundID.empty())
-                mRainSound = MWBase::Environment::get().getSoundManager()->playSound(mResult.mRainLoopSoundID,
-                    mResult.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
-            mPlayingRainSoundID = mResult.mRainLoopSoundID;
+            if (!result.mRainLoopSoundID.empty())
+                mRainSound = MWBase::Environment::get().getSoundManager()->playSound(result.mRainLoopSoundID,
+                    result.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
+            mPlayingRainSoundID = result.mRainLoopSoundID;
         }
         else if (mRainSound)
-            mRainSound->setVolume(mResult.mAmbientSoundVolume);
+            mRainSound->setVolume(result.mAmbientSoundVolume);
     }
 
     void WeatherManager::stopSounds()
@@ -1070,7 +1069,7 @@ namespace MWWorld
         return currentWeather.mGlareView;
     }
 
-    void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
+    void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         ESM::WeatherState state;
         state.mCurrentRegion = mCurrentRegion;
@@ -1269,71 +1268,75 @@ namespace MWWorld
         }
     }
 
-    inline void WeatherManager::calculateWeatherResult(
-        const float gameHour, const float elapsedSeconds, const bool isPaused)
+    MWRender::WeatherResult WeatherManager::calculateWeatherResult(
+        const float gameHour, const float elapsedSeconds, const bool isPaused) const
     {
+        MWRender::WeatherResult result;
         float flash = 0.0f;
         if (!inTransition())
         {
             Weather& current = *mWeatherStore->find(mCurrentWeather);
-            calculateResult(current, gameHour);
+            result = calculateResult(current, gameHour);
             flash = current.calculateThunder(1.0f, elapsedSeconds, isPaused);
         }
         else
         {
-            calculateTransitionResult(1 - mTransitionFactor, gameHour);
             Weather& current = *mWeatherStore->find(mCurrentWeather);
-            float currentFlash = current.calculateThunder(mTransitionFactor, elapsedSeconds, isPaused);
             Weather& next = *mWeatherStore->find(mNextWeather);
+            result = calculateTransitionResult(current, next, 1 - mTransitionFactor, gameHour);
+            float currentFlash = current.calculateThunder(mTransitionFactor, elapsedSeconds, isPaused);
             float nextFlash = next.calculateThunder(1 - mTransitionFactor, elapsedSeconds, isPaused);
             flash = currentFlash + nextFlash;
         }
         osg::Vec4f flashColor(flash, flash, flash, 0.0f);
 
-        mResult.mFogColor += flashColor;
-        mResult.mAmbientColor += flashColor;
-        mResult.mSunColor += flashColor;
+        result.mFogColor += flashColor;
+        result.mAmbientColor += flashColor;
+        result.mSunColor += flashColor;
+        return result;
     }
 
-    inline void WeatherManager::calculateResult(const Weather& current, const float gameHour)
+    MWRender::WeatherResult WeatherManager::calculateResult(const Weather& current, const float gameHour) const
     {
-        mResult.mCloudTexture = current.mCloudTexture;
-        mResult.mCloudBlendFactor = 0;
-        mResult.mNextWindSpeed = 0;
-        mResult.mWindSpeed = mResult.mCurrentWindSpeed = calculateWindSpeed(current, mWindSpeed);
-        mResult.mBaseWindSpeed = current.mWindSpeed;
+        MWRender::WeatherResult result;
 
-        mResult.mCloudSpeed = current.mCloudSpeed;
-        mResult.mGlareView = current.mGlareView;
-        mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
-        mResult.mRainLoopSoundID = current.mRainLoopSoundID;
-        mResult.mAmbientSoundVolume = 1.f;
-        mResult.mPrecipitationAlpha = 1.f;
+        result.mCloudTexture = current.mCloudTexture;
+        result.mCloudBlendFactor = 0;
+        result.mNextWindSpeed = 0;
+        result.mWindSpeed = result.mCurrentWindSpeed = calculateWindSpeed(current, mWindSpeed);
+        result.mBaseWindSpeed = current.mWindSpeed;
 
-        mResult.mIsStorm = current.mIsStorm;
+        result.mCloudSpeed = current.mCloudSpeed;
+        result.mGlareView = current.mGlareView;
+        result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+        result.mRainLoopSoundID = current.mRainLoopSoundID;
+        result.mAmbientSoundVolume = 1.f;
+        result.mPrecipitationAlpha = 1.f;
 
-        mResult.mRainSpeed = current.mRainSpeed;
-        mResult.mRainEntranceSpeed = current.mRainEntranceSpeed;
-        mResult.mRainDiameter = current.mRainDiameter;
-        mResult.mRainMinHeight = current.mRainMinHeight;
-        mResult.mRainMaxHeight = current.mRainMaxHeight;
-        mResult.mRainMaxRaindrops = current.mRainMaxRaindrops;
+        result.mIsStorm = current.mIsStorm;
 
-        mResult.mParticleEffect = current.mParticleEffect;
-        mResult.mRainEffect = current.mRainEffect;
+        result.mRainSpeed = current.mRainSpeed;
+        result.mRainEntranceSpeed = current.mRainEntranceSpeed;
+        result.mRainDiameter = current.mRainDiameter;
+        result.mRainMinHeight = current.mRainMinHeight;
+        result.mRainMaxHeight = current.mRainMaxHeight;
+        result.mRainMaxRaindrops = current.mRainMaxRaindrops;
 
-        mResult.mNight = (gameHour < mSunriseTime
+        result.mParticleEffect = current.mParticleEffect;
+        result.mRainEffect = current.mRainEffect;
+
+        result.mNight = (gameHour < mSunriseTime
             || gameHour
                 > mTimeSettings.mNightStart + mTimeSettings.mStarsPostSunsetStart - mTimeSettings.mStarsFadingDuration);
 
-        mResult.mFogDepth = current.mLandFogDepth.getValue(gameHour, mTimeSettings, "Fog");
-        mResult.mFogColor = current.mFogColor.getValue(gameHour, mTimeSettings, "Fog");
-        mResult.mAmbientColor = current.mAmbientColor.getValue(gameHour, mTimeSettings, "Ambient");
-        mResult.mSunColor = current.mSunColor.getValue(gameHour, mTimeSettings, "Sun");
-        mResult.mSkyColor = current.mSkyColor.getValue(gameHour, mTimeSettings, "Sky");
-        mResult.mNightFade = mNightFade.getValue(gameHour, mTimeSettings, "Stars");
-        mResult.mDLFogFactor = current.mDL.FogFactor;
-        mResult.mDLFogOffset = current.mDL.FogOffset;
+        result.mFogDepth = current.mLandFogDepth.getValue(gameHour, mTimeSettings, "Fog");
+        result.mFogColor = current.mFogColor.getValue(gameHour, mTimeSettings, "Fog");
+        result.mAmbientColor = current.mAmbientColor.getValue(gameHour, mTimeSettings, "Ambient");
+        result.mSunColor = current.mSunColor.getValue(gameHour, mTimeSettings, "Sun");
+        result.mSkyColor = current.mSkyColor.getValue(gameHour, mTimeSettings, "Sky");
+        result.mNightFade = mNightFade.getValue(gameHour, mTimeSettings, "Stars");
+        result.mDLFogFactor = current.mDL.FogFactor;
+        result.mDLFogOffset = current.mDL.FogOffset;
 
         WeatherSetting setting = mTimeSettings.getSetting("Sun");
         float preSunsetTime = setting.mPreSunsetTime;
@@ -1344,19 +1347,19 @@ namespace MWWorld
             if (preSunsetTime > 0)
                 factor = (gameHour - (mTimeSettings.mDayEnd - preSunsetTime)) / preSunsetTime;
             factor = std::min(1.f, factor);
-            mResult.mSunDiscColor = lerp(osg::Vec4f(1, 1, 1, 1), current.mSunDiscSunsetColor, factor);
+            result.mSunDiscColor = lerp(osg::Vec4f(1, 1, 1, 1), current.mSunDiscSunsetColor, factor);
             // The SunDiscSunsetColor in the INI isn't exactly the resulting color on screen, most likely because
             // MW applied the color to the ambient term as well. After the ambient and emissive terms are added
             // together, the fixed pipeline would then clamp the total lighting to (1,1,1). A noticeable change in color
             // tone can be observed when only one of the color components gets clamped. Unfortunately that means we
             // can't use the INI color as is, have to replicate the above nonsense.
-            mResult.mSunDiscColor
-                = mResult.mSunDiscColor + osg::componentMultiply(mResult.mSunDiscColor, mResult.mAmbientColor);
+            result.mSunDiscColor
+                = result.mSunDiscColor + osg::componentMultiply(result.mSunDiscColor, result.mAmbientColor);
             for (int i = 0; i < 3; ++i)
-                mResult.mSunDiscColor[i] = std::min(1.f, mResult.mSunDiscColor[i]);
+                result.mSunDiscColor[i] = std::min(1.f, result.mSunDiscColor[i]);
         }
         else
-            mResult.mSunDiscColor = osg::Vec4f(1, 1, 1, 1);
+            result.mSunDiscColor = osg::Vec4f(1, 1, 1, 1);
 
         if (gameHour >= mTimeSettings.mDayEnd)
         {
@@ -1364,55 +1367,54 @@ namespace MWWorld
             float fade = std::min(
                 1.f, (gameHour - mTimeSettings.mDayEnd) / (mTimeSettings.mNightStart - mTimeSettings.mDayEnd));
             fade = fade * fade;
-            mResult.mSunDiscColor.a() = 1.f - fade;
+            result.mSunDiscColor.a() = 1.f - fade;
         }
         else if (gameHour >= mTimeSettings.mNightEnd && gameHour <= mTimeSettings.mNightEnd + mSunriseDuration / 2.f)
         {
             // sunrise
-            mResult.mSunDiscColor.a() = gameHour - mTimeSettings.mNightEnd;
+            result.mSunDiscColor.a() = gameHour - mTimeSettings.mNightEnd;
         }
         else
-            mResult.mSunDiscColor.a() = 1;
+            result.mSunDiscColor.a() = 1;
 
-        mResult.mStormDirection = calculateStormDirection(mResult.mParticleEffect);
+        result.mStormDirection = calculateStormDirection(result.mParticleEffect);
+        return result;
     }
 
-    inline void WeatherManager::calculateTransitionResult(const float factor, const float gameHour)
+    MWRender::WeatherResult WeatherManager::calculateTransitionResult(
+        const Weather& currentWeather, const Weather& nextWeather, const float factor, const float gameHour) const
     {
-        const Weather& currentWeather = *mWeatherStore->find(mCurrentWeather);
-        const Weather& nextWeather = *mWeatherStore->find(mNextWeather);
-        calculateResult(currentWeather, gameHour);
-        const MWRender::WeatherResult current = mResult;
-        calculateResult(nextWeather, gameHour);
-        const MWRender::WeatherResult other = mResult;
+        const MWRender::WeatherResult current = calculateResult(currentWeather, gameHour);
+        const MWRender::WeatherResult other = calculateResult(nextWeather, gameHour);
+        MWRender::WeatherResult result;
 
-        mResult.mStormDirection = current.mStormDirection;
-        mResult.mNextStormDirection = other.mStormDirection;
+        result.mStormDirection = current.mStormDirection;
+        result.mNextStormDirection = other.mStormDirection;
 
-        mResult.mCloudTexture = current.mCloudTexture;
-        mResult.mNextCloudTexture = other.mCloudTexture;
-        mResult.mCloudBlendFactor = nextWeather.cloudBlendFactor(factor);
+        result.mCloudTexture = current.mCloudTexture;
+        result.mNextCloudTexture = other.mCloudTexture;
+        result.mCloudBlendFactor = nextWeather.cloudBlendFactor(factor);
 
-        mResult.mFogColor = lerp(current.mFogColor, other.mFogColor, factor);
-        mResult.mSunColor = lerp(current.mSunColor, other.mSunColor, factor);
-        mResult.mSkyColor = lerp(current.mSkyColor, other.mSkyColor, factor);
+        result.mFogColor = lerp(current.mFogColor, other.mFogColor, factor);
+        result.mSunColor = lerp(current.mSunColor, other.mSunColor, factor);
+        result.mSkyColor = lerp(current.mSkyColor, other.mSkyColor, factor);
 
-        mResult.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor, factor);
-        mResult.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor, factor);
-        mResult.mFogDepth = lerp(current.mFogDepth, other.mFogDepth, factor);
-        mResult.mDLFogFactor = lerp(current.mDLFogFactor, other.mDLFogFactor, factor);
-        mResult.mDLFogOffset = lerp(current.mDLFogOffset, other.mDLFogOffset, factor);
+        result.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor, factor);
+        result.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor, factor);
+        result.mFogDepth = lerp(current.mFogDepth, other.mFogDepth, factor);
+        result.mDLFogFactor = lerp(current.mDLFogFactor, other.mDLFogFactor, factor);
+        result.mDLFogOffset = lerp(current.mDLFogOffset, other.mDLFogOffset, factor);
 
-        mResult.mCurrentWindSpeed = calculateWindSpeed(currentWeather, mCurrentWindSpeed);
-        mResult.mNextWindSpeed = calculateWindSpeed(nextWeather, mNextWindSpeed);
-        mResult.mBaseWindSpeed = lerp(current.mBaseWindSpeed, other.mBaseWindSpeed, factor);
+        result.mCurrentWindSpeed = calculateWindSpeed(currentWeather, mCurrentWindSpeed);
+        result.mNextWindSpeed = calculateWindSpeed(nextWeather, mNextWindSpeed);
+        result.mBaseWindSpeed = lerp(current.mBaseWindSpeed, other.mBaseWindSpeed, factor);
 
-        mResult.mWindSpeed = lerp(mResult.mCurrentWindSpeed, mResult.mNextWindSpeed, factor);
-        mResult.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
-        mResult.mGlareView = lerp(current.mGlareView, other.mGlareView, factor);
-        mResult.mNightFade = lerp(current.mNightFade, other.mNightFade, factor);
+        result.mWindSpeed = lerp(result.mCurrentWindSpeed, result.mNextWindSpeed, factor);
+        result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
+        result.mGlareView = lerp(current.mGlareView, other.mGlareView, factor);
+        result.mNightFade = lerp(current.mNightFade, other.mNightFade, factor);
 
-        mResult.mNight = current.mNight;
+        result.mNight = current.mNight;
 
         float threshold = nextWeather.mRainThreshold;
         if (threshold <= 0.f)
@@ -1420,36 +1422,37 @@ namespace MWWorld
 
         if (factor < threshold)
         {
-            mResult.mIsStorm = current.mIsStorm;
-            mResult.mParticleEffect = current.mParticleEffect;
-            mResult.mRainEffect = current.mRainEffect;
-            mResult.mRainSpeed = current.mRainSpeed;
-            mResult.mRainEntranceSpeed = current.mRainEntranceSpeed;
-            mResult.mAmbientSoundVolume = 1.f - factor / threshold;
-            mResult.mPrecipitationAlpha = mResult.mAmbientSoundVolume;
-            mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
-            mResult.mRainLoopSoundID = current.mRainLoopSoundID;
-            mResult.mRainDiameter = current.mRainDiameter;
-            mResult.mRainMinHeight = current.mRainMinHeight;
-            mResult.mRainMaxHeight = current.mRainMaxHeight;
-            mResult.mRainMaxRaindrops = current.mRainMaxRaindrops;
+            result.mIsStorm = current.mIsStorm;
+            result.mParticleEffect = current.mParticleEffect;
+            result.mRainEffect = current.mRainEffect;
+            result.mRainSpeed = current.mRainSpeed;
+            result.mRainEntranceSpeed = current.mRainEntranceSpeed;
+            result.mAmbientSoundVolume = 1.f - factor / threshold;
+            result.mPrecipitationAlpha = result.mAmbientSoundVolume;
+            result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+            result.mRainLoopSoundID = current.mRainLoopSoundID;
+            result.mRainDiameter = current.mRainDiameter;
+            result.mRainMinHeight = current.mRainMinHeight;
+            result.mRainMaxHeight = current.mRainMaxHeight;
+            result.mRainMaxRaindrops = current.mRainMaxRaindrops;
         }
         else
         {
-            mResult.mIsStorm = other.mIsStorm;
-            mResult.mParticleEffect = other.mParticleEffect;
-            mResult.mRainEffect = other.mRainEffect;
-            mResult.mRainSpeed = other.mRainSpeed;
-            mResult.mRainEntranceSpeed = other.mRainEntranceSpeed;
-            mResult.mAmbientSoundVolume = (factor - threshold) / (1 - threshold);
-            mResult.mPrecipitationAlpha = mResult.mAmbientSoundVolume;
-            mResult.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
-            mResult.mRainLoopSoundID = other.mRainLoopSoundID;
+            result.mIsStorm = other.mIsStorm;
+            result.mParticleEffect = other.mParticleEffect;
+            result.mRainEffect = other.mRainEffect;
+            result.mRainSpeed = other.mRainSpeed;
+            result.mRainEntranceSpeed = other.mRainEntranceSpeed;
+            result.mAmbientSoundVolume = (factor - threshold) / (1 - threshold);
+            result.mPrecipitationAlpha = result.mAmbientSoundVolume;
+            result.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
+            result.mRainLoopSoundID = other.mRainLoopSoundID;
 
-            mResult.mRainDiameter = other.mRainDiameter;
-            mResult.mRainMinHeight = other.mRainMinHeight;
-            mResult.mRainMaxHeight = other.mRainMaxHeight;
-            mResult.mRainMaxRaindrops = other.mRainMaxRaindrops;
+            result.mRainDiameter = other.mRainDiameter;
+            result.mRainMinHeight = other.mRainMinHeight;
+            result.mRainMaxHeight = other.mRainMaxHeight;
+            result.mRainMaxRaindrops = other.mRainMaxRaindrops;
         }
+        return result;
     }
 }

@@ -31,7 +31,7 @@ namespace MWRender
     {
         std::string mCloudTexture;
         std::string mNextCloudTexture;
-        float mCloudBlendFactor;
+        float mCloudBlendFactor{};
 
         osg::Vec4f mFogColor;
 
@@ -45,39 +45,39 @@ namespace MWRender
         // alpha is the sun transparency
         osg::Vec4f mSunDiscColor;
 
-        float mFogDepth;
+        float mFogDepth{};
 
-        float mDLFogFactor;
-        float mDLFogOffset;
+        float mDLFogFactor{};
+        float mDLFogOffset{};
 
-        float mWindSpeed;
-        float mBaseWindSpeed;
-        float mCurrentWindSpeed;
-        float mNextWindSpeed;
+        float mWindSpeed{};
+        float mBaseWindSpeed{};
+        float mCurrentWindSpeed{};
+        float mNextWindSpeed{};
 
-        float mCloudSpeed;
+        float mCloudSpeed{};
 
-        float mGlareView;
+        float mGlareView{};
 
-        bool mNight; // use night skybox
-        float mNightFade; // fading factor for night skybox
+        bool mNight{}; // use night skybox
+        float mNightFade{}; // fading factor for night skybox
 
-        bool mIsStorm;
+        bool mIsStorm{};
 
         ESM::RefId mAmbientLoopSoundID;
         ESM::RefId mRainLoopSoundID;
-        float mAmbientSoundVolume;
+        float mAmbientSoundVolume{};
 
         std::string mParticleEffect;
         std::string mRainEffect;
-        float mPrecipitationAlpha;
+        float mPrecipitationAlpha{};
 
-        float mRainDiameter;
-        float mRainMinHeight;
-        float mRainMaxHeight;
-        float mRainSpeed;
-        float mRainEntranceSpeed;
-        int mRainMaxRaindrops;
+        float mRainDiameter{};
+        float mRainMinHeight{};
+        float mRainMaxHeight{};
+        float mRainSpeed{};
+        float mRainEntranceSpeed{};
+        int mRainMaxRaindrops{};
 
         osg::Vec3f mStormDirection;
         osg::Vec3f mNextStormDirection;

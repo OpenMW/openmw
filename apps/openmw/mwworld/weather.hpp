@@ -385,7 +385,7 @@ namespace MWWorld
 
         std::vector<Moon> getCurrentMoons(const TimeStamp& time) const;
 
-        void write(ESM::ESMWriter& writer, Loading::Listener& progress);
+        void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
         bool readRecord(ESM::ESMReader& reader, uint32_t type);
 
@@ -431,7 +431,6 @@ namespace MWWorld
         ESM::RefId mNextWeather;
         ESM::RefId mQueuedWeather;
         std::map<ESM::RefId, RegionWeather> mRegions;
-        MWRender::WeatherResult mResult;
 
         MWBase::Sound* mAmbientSound{ nullptr };
         ESM::RefId mPlayingAmbientSoundID;
@@ -449,10 +448,12 @@ namespace MWWorld
         bool inTransition() const;
         void addWeatherTransition(ESM::RefId weatherID);
 
-        void calculateWeatherResult(const float gameHour, const float elapsedSeconds, const bool isPaused);
-        void calculateResult(const Weather& weather, const float gameHour);
-        void calculateTransitionResult(const float factor, const float gameHour);
-        float calculateWindSpeed(const Weather& weather, float currentSpeed);
+        MWRender::WeatherResult calculateWeatherResult(
+            const float gameHour, const float elapsedSeconds, const bool isPaused) const;
+        MWRender::WeatherResult calculateResult(const Weather& weather, const float gameHour) const;
+        MWRender::WeatherResult calculateTransitionResult(
+            const Weather& currentWeather, const Weather& nextWeather, const float factor, const float gameHour) const;
+        float calculateWindSpeed(const Weather& weather, float currentSpeed) const;
     };
 }
 
