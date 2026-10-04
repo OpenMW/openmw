@@ -247,6 +247,7 @@ namespace MWScript
                     /// \todo write to log
                 }
             }
+            ++index;
         }
     }
 }
