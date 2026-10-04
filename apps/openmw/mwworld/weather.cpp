@@ -1,6 +1,8 @@
 #include "weather.hpp"
 
 #include <components/esm/stringrefid.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/settings/values.hpp>
 
 #include <components/misc/rng.hpp>
@@ -43,7 +45,7 @@ namespace MWWorld
             return x * (1 - factor) + y * factor;
         }
 
-        osg::Vec3f calculateStormDirection(const std::string& particleEffect)
+        osg::Vec3f calculateStormDirection(VFS::Path::NormalizedView particleEffect)
         {
             osg::Vec3f stormDirection = MWWorld::Weather::defaultDirection();
             if (particleEffect == Settings::models().mWeatherashcloud.get()
@@ -141,11 +143,10 @@ namespace MWWorld
     }
 
     Weather::Weather(ESM::RefId id, int scriptId, const std::string& name, float stormWindSpeed, float dlFactor,
-        float dlOffset, std::string_view particleEffect)
+        float dlOffset, VFS::Path::NormalizedView particleEffect)
         : mId(id)
         , mScriptId(scriptId)
         , mName(name)
-        , mCloudTexture(Fallback::Map::getString("Weather_" + name + "_Cloud_Texture"))
         , mSkyColor(Fallback::Map::getColour("Weather_" + name + "_Sky_Sunrise_Color"),
               Fallback::Map::getColour("Weather_" + name + "_Sky_Day_Color"),
               Fallback::Map::getColour("Weather_" + name + "_Sky_Sunset_Color"),
@@ -179,7 +180,6 @@ namespace MWWorld
         , mRainMinHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Min"))
         , mRainMaxHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Max"))
         , mParticleEffect(particleEffect)
-        , mRainEffect(Fallback::Map::getBool("Weather_" + name + "_Using_Precip") ? "meshes\\raindrop.nif" : "")
         , mStormDirection(Weather::defaultDirection())
         , mCloudsMaximumPercent(Fallback::Map::getFloat("Weather_" + name + "_Clouds_Maximum_Percent"))
         , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
@@ -188,6 +188,11 @@ namespace MWWorld
         , mFlashDecrement(Fallback::Map::getFloat("Weather_" + name + "_Flash_Decrement"))
         , mFlashBrightness(0.0f)
     {
+        const auto* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+        mCloudTexture = Misc::ResourceHelpers::correctTexturePath(
+            VFS::Path::toNormalized(Fallback::Map::getString("Weather_" + name + "_Cloud_Texture")), *vfs);
+        if (Fallback::Map::getBool("Weather_" + name + "_Using_Precip"))
+            mRainEffect = VFS::Path::NormalizedView("meshes/raindrop.nif");
         mDL.FogFactor = dlFactor;
         mDL.FogOffset = dlOffset;
         mThunderSoundID[0]
@@ -605,14 +610,14 @@ namespace MWWorld
         mShared.clear();
         mStatic.clear();
         static const float fStromWindSpeed = store.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
-        const auto addWeather
-            = [&](const std::string& name, float dlFactor, float dlOffset, std::string_view particleEffect = {}) {
-                  const int index = static_cast<int>(getSize());
-                  Weather weather(ESM::Weather::indexToRefId(index), index, name, fStromWindSpeed, dlFactor, dlOffset,
-                      particleEffect);
+        const auto addWeather = [&](const std::string& name, float dlFactor, float dlOffset,
+                                    VFS::Path::NormalizedView particleEffect = {}) {
+            const int index = static_cast<int>(getSize());
+            Weather weather(
+                ESM::Weather::indexToRefId(index), index, name, fStromWindSpeed, dlFactor, dlOffset, particleEffect);
 
-                  insertStatic(std::move(weather));
-              };
+            insertStatic(std::move(weather));
+        };
         // These distant land fog factor and offset values are the defaults MGE XE provides. Should be
         // provided by settings somewhere?
         addWeather("Clear", 1.0f, 0.0f); // 0

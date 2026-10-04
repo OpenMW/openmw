@@ -13,6 +13,7 @@
 #include <components/sceneutil/material.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace Resource
 {
@@ -29,8 +30,8 @@ namespace MWRender
 
     struct WeatherResult
     {
-        std::string mCloudTexture;
-        std::string mNextCloudTexture;
+        VFS::Path::NormalizedView mCloudTexture;
+        VFS::Path::NormalizedView mNextCloudTexture;
         float mCloudBlendFactor{};
 
         osg::Vec4f mFogColor;
@@ -68,8 +69,8 @@ namespace MWRender
         ESM::RefId mRainLoopSoundID;
         float mAmbientSoundVolume{};
 
-        std::string mParticleEffect;
-        std::string mRainEffect;
+        VFS::Path::NormalizedView mParticleEffect;
+        VFS::Path::NormalizedView mRainEffect;
         float mPrecipitationAlpha{};
 
         float mRainDiameter{};

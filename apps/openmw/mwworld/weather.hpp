@@ -11,6 +11,7 @@
 
 #include <components/esm/refid.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwbase/soundmanager.hpp"
 
@@ -140,12 +141,12 @@ namespace MWWorld
         static osg::Vec3f defaultDirection();
 
         Weather(const ESM::RefId id, const int scriptId, const std::string& name, float stormWindSpeed, float dlFactor,
-            float dlOffset, std::string_view particleEffect);
+            float dlOffset, VFS::Path::NormalizedView particleEffect);
 
         ESM::RefId mId;
         int mScriptId;
         std::string mName;
-        std::string mCloudTexture;
+        VFS::Path::Normalized mCloudTexture;
 
         // Sky (atmosphere) color
         TimeOfDayInterpolator<osg::Vec4f> mSkyColor;
@@ -214,9 +215,9 @@ namespace MWWorld
         float mRainMinHeight;
         float mRainMaxHeight;
 
-        std::string mParticleEffect;
+        VFS::Path::Normalized mParticleEffect;
 
-        std::string mRainEffect;
+        VFS::Path::Normalized mRainEffect;
 
         osg::Vec3f mStormDirection;
 
