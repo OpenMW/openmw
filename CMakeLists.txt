@@ -26,7 +26,6 @@ else ()
 endif ()
 
 option(DEPLOY_QT_TRANSLATIONS "Deploy standard Qt translations to resources folder. Needed when OpenMW applications are deployed with Qt libraries" ${DEPLOY_QT_TRANSLATIONS_DEFAULT})
-# this has overlap with OPENMW_LOCAL_INSTALL, so needs some tidying
 option(OPENMW_DEPLOY_RUNTIME_DEPENDENCIES "Deploy runtime dependency libraries. Needed when not relying on a system-wide insallation of these libraries existing" ${deploy_runtime_dependencies_default})
 
 # Apps and tools
@@ -241,7 +240,7 @@ if (UNIX AND NOT APPLE)
 else()
     set(OPENMW_LOCAL_INSTALL_DEFAULT ON)
 endif()
-option(OPENMW_LOCAL_INSTALL "Local install of OpenMW instead of Global" ${OPENMW_LOCAL_INSTALL_DEFAULT})
+option(OPENMW_LOCAL_INSTALL "Local install of OpenMW instead of Global. Other files will be installed to the same location as the binaries, and accessed via relative paths." ${OPENMW_LOCAL_INSTALL_DEFAULT})
 if (OPENMW_LOCAL_INSTALL)
     set(CMAKE_INSTALL_BINDIR ".")
     set(CMAKE_INSTALL_LIBDIR "lib")
@@ -666,7 +665,7 @@ if (APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
 endif()
 
-if (OPENMW_DEPLOY_RUNTIME_DEPENDENCIES AND UNIX AND NOT APPLE)
+if (OPENMW_LOCAL_INSTALL AND UNIX AND NOT APPLE)
     if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
         # file(RELATIVE_PATH ...) can't handle pure lexical relativity, but cmake_path only came with 3.20.0
         cmake_path(RELATIVE_PATH CMAKE_INSTALL_LIBDIR BASE_DIRECTORY "${CMAKE_INSTALL_BINDIR}" OUTPUT_VARIABLE origin_relative_libdir)
