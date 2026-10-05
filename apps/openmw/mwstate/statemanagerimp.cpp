@@ -1,6 +1,8 @@
 #include "statemanagerimp.hpp"
 
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 
 #include <SDL_clipboard.h>
 
@@ -19,10 +21,6 @@
 #include <components/files/conversion.hpp>
 #include <components/misc/algorithm.hpp>
 #include <components/settings/values.hpp>
-
-#include <osg/Image>
-
-#include <osgDB/Registry>
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -856,25 +854,5 @@ void MWState::StateManager::writeScreenshot(std::vector<char>& imageData) const
 {
     int screenshotW = 259 * 2, screenshotH = 133 * 2; // *2 to get some nice antialiasing
 
-    osg::ref_ptr<osg::Image> screenshot(new osg::Image);
-
-    MWBase::Environment::get().getWorld()->screenshot(screenshot.get(), screenshotW, screenshotH);
-
-    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
-    if (!readerwriter)
-    {
-        Log(Debug::Error) << "Error: Unable to write screenshot, can't find a jpg ReaderWriter";
-        return;
-    }
-
-    std::ostringstream ostream;
-    osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*screenshot, ostream);
-    if (!result.success())
-    {
-        Log(Debug::Error) << "Error: Unable to write screenshot: " << result.message() << " code " << result.status();
-        return;
-    }
-
-    std::string data = ostream.str();
-    imageData = std::vector<char>(data.begin(), data.end());
+    imageData = MWBase::Environment::get().getWorld()->screenshot(screenshotW, screenshotH);
 }

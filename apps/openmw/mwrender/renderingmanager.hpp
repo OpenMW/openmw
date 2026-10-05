@@ -17,6 +17,7 @@
 #include <memory>
 #include <span>
 #include <unordered_map>
+#include <vector>
 
 namespace osg
 {
@@ -166,8 +167,8 @@ namespace MWRender
         void setWaterEnabled(bool enabled);
         void setWaterHeight(float level);
 
-        /// Take a screenshot of w*h onto the given image, not including the GUI.
-        void screenshot(osg::Image* image, int w, int h);
+        /// Take a screenshot of w*h, not including the GUI, encoded as JPEG. Empty on failure.
+        std::vector<char> screenshot(int w, int h);
 
         struct RayResult
         {

@@ -1,12 +1,16 @@
 #include "renderingmanager.hpp"
 
 #include <cstdlib>
+#include <sstream>
 
 #include <osg/ClipControl>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Group>
+#include <osg/Image>
 #include <osg/Matrix>
 #include <osg/UserDataContainer>
+
+#include <osgDB/Registry>
 
 #include <osgUtil/LineSegmentIntersector>
 
@@ -850,9 +854,29 @@ namespace MWRender
         mPostProcessor->getStateUpdater()->setWaterHeight(height);
     }
 
-    void RenderingManager::screenshot(osg::Image* image, int w, int h)
+    std::vector<char> RenderingManager::screenshot(int w, int h)
     {
-        mScreenshotManager->screenshot(image, w, h);
+        osg::ref_ptr<osg::Image> image(new osg::Image);
+        mScreenshotManager->screenshot(image.get(), w, h);
+
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
+        if (!readerwriter)
+        {
+            Log(Debug::Error) << "Error: Unable to write screenshot, can't find a jpg ReaderWriter";
+            return {};
+        }
+
+        std::ostringstream ostream;
+        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*image, ostream);
+        if (!result.success())
+        {
+            Log(Debug::Error) << "Error: Unable to write screenshot: " << result.message() << " code "
+                              << result.status();
+            return {};
+        }
+
+        const std::string data = ostream.str();
+        return std::vector<char>(data.begin(), data.end());
     }
 
     osg::Vec2f RenderingManager::getScreenCoords(const osg::BoundingBox& bb)
