@@ -29,6 +29,7 @@
 #include <osgParticle/BoxPlacer>
 #include <osgParticle/ConstantRateCounter>
 #include <osgParticle/ModularProgram>
+#include <osgParticle/Operator>
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
 
@@ -252,6 +253,15 @@ namespace
                 SceneUtil::setupDistortion(*node, config);
             }
         }
+    }
+
+    // A program skips its first cull traversal, having no previous time to take a dt from. Age-only affectors need no
+    // dt, so run them here. Their beginOperate must not need a node path, as there is no traversal yet.
+    void applyToSavedParticles(osgParticle::ModularProgram& program, osgParticle::Operator& affector)
+    {
+        affector.beginOperate(&program);
+        affector.operateParticles(program.getParticleSystem(), 0.0);
+        affector.endOperate();
     }
 }
 
@@ -1251,7 +1261,9 @@ namespace NifOsg
                 if (modifier->mRecordType == Nif::RC_NiParticleGrowFade)
                 {
                     const Nif::NiParticleGrowFade* gf = static_cast<const Nif::NiParticleGrowFade*>(modifier.getPtr());
-                    program->addOperator(new GrowFadeAffector(gf->mGrowTime, gf->mFadeTime));
+                    osg::ref_ptr<GrowFadeAffector> affector = new GrowFadeAffector(gf->mGrowTime, gf->mFadeTime);
+                    program->addOperator(affector);
+                    applyToSavedParticles(*program, *affector);
                 }
                 else if (modifier->mRecordType == Nif::RC_NiGravity)
                 {
@@ -1277,7 +1289,9 @@ namespace NifOsg
                     if (cl->mData.empty())
                         continue;
                     const Nif::NiColorData* clrdata = cl->mData.getPtr();
-                    program->addOperator(new ParticleColorAffector(clrdata));
+                    osg::ref_ptr<ParticleColorAffector> affector = new ParticleColorAffector(clrdata);
+                    program->addOperator(affector);
+                    applyToSavedParticles(*program, *affector);
                 }
                 else if (modifier->mRecordType == Nif::RC_NiParticleRotation)
                 {
@@ -1513,17 +1527,17 @@ namespace NifOsg
                 {
                     partsys->setFrozen(true);
                 }
-
-                // Due to odd code in the ParticleSystemUpdater, particle systems will not be updated in the first frame
-                // So do that update manually
-                osg::NodeVisitor nv;
-                partsys->update(0.0, nv);
             }
 
             // modifiers should be attached *after* the emitter in the scene graph for correct update order
             // attach to same node as the ParticleSystem, we need osgParticle Operators to get the correct
             // localToWorldMatrix for transforming to particle space
             handleParticlePrograms(partctrl->mModifier, partctrl->mCollider, parentNode, partsys.get(), rf);
+
+            // ParticleSystemUpdater skips its first cull traversal too, leaving saved particles at size and alpha 0.
+            // Runs after the programs, since it computes them from the ranges the affectors set.
+            osg::NodeVisitor nv;
+            partsys->update(0.0, nv);
 
             std::vector<const Nif::NiProperty*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);
