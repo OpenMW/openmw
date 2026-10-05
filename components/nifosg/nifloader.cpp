@@ -254,9 +254,9 @@ namespace
         }
     }
 
-    // Applies an age-only affector to the saved particles, which the program would first reach on the second frame.
-    // The affector's beginOperate must not need a node path.
-    void ageSavedParticles(osgParticle::ModularProgram& program, osgParticle::Operator& affector)
+    // A program skips its first cull traversal, having no previous time to take a dt from. Age-only affectors need no
+    // dt, so run them here. Their beginOperate must not need a node path, as there is no traversal yet.
+    void applyToSavedParticles(osgParticle::ModularProgram& program, osgParticle::Operator& affector)
     {
         affector.beginOperate(&program);
         affector.operateParticles(program.getParticleSystem(), 0.0);
@@ -1262,7 +1262,7 @@ namespace NifOsg
                     const Nif::NiParticleGrowFade* gf = static_cast<const Nif::NiParticleGrowFade*>(modifier.getPtr());
                     osg::ref_ptr<GrowFadeAffector> affector = new GrowFadeAffector(gf->mGrowTime, gf->mFadeTime);
                     program->addOperator(affector);
-                    ageSavedParticles(*program, *affector);
+                    applyToSavedParticles(*program, *affector);
                 }
                 else if (modifier->mRecordType == Nif::RC_NiGravity)
                 {
@@ -1290,7 +1290,7 @@ namespace NifOsg
                     const Nif::NiColorData* clrdata = cl->mData.getPtr();
                     osg::ref_ptr<ParticleColorAffector> affector = new ParticleColorAffector(clrdata);
                     program->addOperator(affector);
-                    ageSavedParticles(*program, *affector);
+                    applyToSavedParticles(*program, *affector);
                 }
                 else if (modifier->mRecordType == Nif::RC_NiParticleRotation)
                 {
@@ -1533,8 +1533,8 @@ namespace NifOsg
             // localToWorldMatrix for transforming to particle space
             handleParticlePrograms(partctrl->mModifier, partctrl->mCollider, parentNode, partsys.get(), rf);
 
-            // Due to odd code in the ParticleSystemUpdater, particle systems will not be updated in the first frame
-            // So do that update manually
+            // ParticleSystemUpdater skips its first cull traversal too, leaving saved particles at size and alpha 0.
+            // Runs after the programs, since it computes them from the ranges the affectors set.
             osg::NodeVisitor nv;
             partsys->update(0.0, nv);
 
