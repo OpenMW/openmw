@@ -23,7 +23,7 @@ if (WIN32)
 endif()
 
 if (NOT APPLE)
-    install(TARGETS openmw-iniimporter RUNTIME_DEPENDENCY_SET openmw-dependencies)
+    install(TARGETS openmw-iniimporter ${runtime_dependency_arguments})
 endif()
 
 if (MINGW)

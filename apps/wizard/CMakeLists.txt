@@ -92,7 +92,7 @@ if (BUILD_WITH_CODE_COVERAGE)
 endif()
 
 if (NOT APPLE)
-    install(TARGETS openmw-wizard RUNTIME_DEPENDENCY_SET openmw-dependencies)
+    install(TARGETS openmw-wizard ${runtime_dependency_arguments})
 
     generate_deploy_script_for_qt_app(openmw-wizard)
 endif()

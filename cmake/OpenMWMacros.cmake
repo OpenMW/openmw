@@ -162,16 +162,12 @@ macro (openmw_add_qt_executable target)
 endmacro (openmw_add_qt_executable)
 
 function (generate_deploy_script_for_qt_app target)
-    if (LINUX AND OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
+    if (UNIX AND NOT APPLE AND OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
         if (Qt6Core_VERSION VERSION_LESS 6.10)
             message(FATAL_ERROR "Deployment of Qt on Linux requires at least 6.10 (for the INCLUDE_PLUGINS argument)")
         endif ()
         # don't bother with this on Windows yet as windeployqt includes a bunch of DLLs we don't use
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
-            cmake_path(NORMAL_PATH QT_DIR OUTPUT_VARIABLE QT_BASE_DIR)
-        else ()
-            # just hope it's close enough
-        endif()
+        cmake_path(NORMAL_PATH QT_DIR OUTPUT_VARIABLE QT_BASE_DIR)
         string(REGEX REPLACE "(.+)/lib/cmake/Qt[0-9]+" "\\1" QT_BASE_DIR "${QT_BASE_DIR}")
         escape_regex_control_characters(QT_BASE_REGEX "${QT_BASE_DIR}")
         qt_generate_deploy_app_script(TARGET ${target}
