@@ -44,6 +44,9 @@ namespace Platform
         : QApplication(argc, argv)
     {
         qInstallMessageHandler(qtMessageHandler);
+#ifdef Q_OS_MACOS
+        setStyle("fusion");
+#endif
 #if defined(WIN32) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         init();
     }
