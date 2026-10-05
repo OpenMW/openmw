@@ -40,22 +40,12 @@ namespace SceneUtil
     };
 
     /// Wrapper object containing the animation track and its KeyframeControllers.
-    class KeyframeHolder : public osg::Object
+    struct KeyframeHolder
     {
-    public:
-        KeyframeHolder() {}
-        KeyframeHolder(const KeyframeHolder& copy, const osg::CopyOp& copyop)
-            : mTextKeys(copy.mTextKeys)
-            , mKeyframeControllers(copy.mKeyframeControllers)
-        {
-        }
-
         TextKeyMap mTextKeys;
 
-        META_Object(SceneUtil, KeyframeHolder)
-
         /// Controllers mapped to node name.
-        typedef std::map<std::string, osg::ref_ptr<const KeyframeController>> KeyframeControllerMap;
+        using KeyframeControllerMap = std::map<std::string, osg::ref_ptr<const KeyframeController>>;
         KeyframeControllerMap mKeyframeControllers;
     };
 

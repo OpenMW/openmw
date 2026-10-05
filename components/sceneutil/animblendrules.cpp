@@ -41,17 +41,13 @@ namespace SceneUtil
 
     using BlendRule = AnimBlendRules::BlendRule;
 
-    AnimBlendRules::AnimBlendRules(const AnimBlendRules& copy, const osg::CopyOp& copyop)
-        : mRules(copy.mRules)
+    AnimBlendRules::AnimBlendRules(std::vector<BlendRule> rules)
+        : mRules(std::move(rules))
     {
     }
 
-    AnimBlendRules::AnimBlendRules(const std::vector<BlendRule>& rules)
-        : mRules(rules)
-    {
-    }
-
-    osg::ref_ptr<AnimBlendRules> AnimBlendRules::fromFile(const VFS::Manager* vfs, VFS::Path::NormalizedView configPath)
+    std::shared_ptr<AnimBlendRules> AnimBlendRules::fromFile(
+        const VFS::Manager* vfs, VFS::Path::NormalizedView configPath)
     {
         Log(Debug::Debug) << "Attempting to load animation blending config '" << configPath << "'";
 
@@ -110,7 +106,7 @@ namespace SceneUtil
         if (rules.empty())
             return nullptr;
 
-        return new AnimBlendRules(rules);
+        return std::make_shared<AnimBlendRules>(std::move(rules));
     }
 
     void AnimBlendRules::addOverrideRules(const AnimBlendRules& overrideRules)

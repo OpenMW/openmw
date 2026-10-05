@@ -129,7 +129,7 @@ namespace MWWorld
                         constexpr VFS::Path::ExtensionView kf("kf");
                         kfname.changeExtension(kf);
                         if (vfs.exists(kfname))
-                            mPreloadedObjects.insert(mKeyframeManager->get(kfname));
+                            mPreloadedOwnedObjects.insert(mKeyframeManager->get(kfname));
                     }
 
                     mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
