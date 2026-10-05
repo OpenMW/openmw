@@ -53,7 +53,7 @@ if(NOT WIN32)
 endif(NOT WIN32)
 
 # Main executable
-openmw_add_executable(openmw-launcher
+openmw_add_qt_executable(openmw-launcher
     ${GUI_TYPE}
     ${LAUNCHER}
     ${LAUNCHER_HEADER}
@@ -63,16 +63,18 @@ openmw_add_executable(openmw-launcher
 add_dependencies(openmw-launcher qm-files)
 
 if (NOT APPLE)
-    INSTALL(TARGETS openmw-launcher)
+    install(TARGETS openmw-launcher ${runtime_dependency_arguments})
+
+    generate_deploy_script_for_qt_app(openmw-launcher)
 endif ()
 
-target_link_libraries(openmw-launcher
+target_link_libraries(openmw-launcher PUBLIC
     SDL2::SDL2
     ${OPENAL_LIBRARY}
     components_qt
 )
 
-target_link_libraries(openmw-launcher Qt::Widgets Qt::Core Qt::Svg)
+target_link_libraries(openmw-launcher PUBLIC Qt::Widgets Qt::Core Qt::Svg)
 
 if (WIN32)
     target_sources(openmw-launcher PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)

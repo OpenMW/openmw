@@ -22,7 +22,7 @@ if (BUILD_WITH_CODE_COVERAGE)
 endif()
 
 if (NOT APPLE)
-    install(TARGETS niftest)
+    install(TARGETS niftest ${runtime_dependency_arguments})
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)

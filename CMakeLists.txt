@@ -19,11 +19,23 @@ endif()
 
 if (APPLE OR WIN32)
     set(DEPLOY_QT_TRANSLATIONS_DEFAULT ON)
+    set(deploy_runtime_dependencies_default ON)
 else ()
     set(DEPLOY_QT_TRANSLATIONS_DEFAULT OFF)
+    set(deploy_runtime_dependencies_default OFF)
 endif ()
 
 option(DEPLOY_QT_TRANSLATIONS "Deploy standard Qt translations to resources folder. Needed when OpenMW applications are deployed with Qt libraries" ${DEPLOY_QT_TRANSLATIONS_DEFAULT})
+option(OPENMW_DEPLOY_RUNTIME_DEPENDENCIES "Deploy runtime dependency libraries. Needed when not relying on a system-wide insallation of these libraries existing" ${deploy_runtime_dependencies_default})
+
+set(runtime_dependency_arguments)
+if (OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
+    if (CMAKE_VERSION VERSION_LESS 3.21)
+        message(FATAL_ERROR "OPENMW_DEPLOY_RUNTIME_DEPENDENCIES requires at least CMake 3.21")
+    endif()
+    # when the version check is made obsolete, we can just pass this whether or not we're using it
+    set(runtime_dependency_arguments RUNTIME_DEPENDENCY_SET openmw-dependencies)
+endif ()
 
 # Apps and tools
 option(BUILD_OPENMW             "Build OpenMW" ON)
@@ -117,6 +129,7 @@ endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 # Macros
 include(OpenMWMacros)
 include(WholeArchive)
+include(escape_regex_control_characters)
 
 # doxygen main page
 
@@ -236,7 +249,7 @@ if (UNIX AND NOT APPLE)
 else()
     set(OPENMW_LOCAL_INSTALL_DEFAULT ON)
 endif()
-option(OPENMW_LOCAL_INSTALL "Local install of OpenMW instead of Global" ${OPENMW_LOCAL_INSTALL_DEFAULT})
+option(OPENMW_LOCAL_INSTALL "Local install of OpenMW instead of Global. Other files will be installed to the same location as the binaries, and accessed via relative paths." ${OPENMW_LOCAL_INSTALL_DEFAULT})
 if (OPENMW_LOCAL_INSTALL)
     set(CMAKE_INSTALL_BINDIR ".")
     set(CMAKE_INSTALL_LIBDIR "lib")
@@ -460,8 +473,49 @@ endif()
 if(OPENMW_USE_SYSTEM_OSG)
     find_package(OpenSceneGraph 3.6.5 REQUIRED ${USED_OSG_COMPONENTS})  # Bump to 3.6.6 when released
 
-    if(OSG_STATIC)
+    if(OSG_STATIC OR OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
+        if(WIN32 OR APPLE)
+            set(OSGPlugins_DONT_FIND_DEPENDENCIES 1)
+        endif()
         find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
+
+        if(OSG_STATIC)
+            set(module_or_static STATIC)
+        else()
+            set(module_or_static MODULE)
+        endif()
+
+        foreach(osgplugin ${USED_OSG_PLUGINS})
+            if(NOT TARGET ${osgplugin})
+                add_library(${osgplugin} ${module_or_static} IMPORTED)
+                string(TOUPPER ${osgplugin} pluginnameupper)
+                if (${pluginnameupper}_LIBRARY_RELEASE)
+                    set_property(TARGET ${osgplugin} APPEND PROPERTY
+                        IMPORTED_CONFIGURATIONS RELEASE
+                    )
+                    set_target_properties(${osgplugin} PROPERTIES
+                        IMPORTED_LOCATION_RELEASE "${${pluginnameupper}_LIBRARY_RELEASE}"
+                    )
+                endif()
+                if (${pluginnameupper}_LIBRARY_DEBUG)
+                    set_property(TARGET ${osgplugin} APPEND PROPERTY
+                        IMPORTED_CONFIGURATIONS DEBUG
+                    )
+                    set_target_properties(${osgplugin} PROPERTIES
+                        IMPORTED_LOCATION_DEBUG "${${pluginnameupper}_LIBRARY_DEBUG}"
+                    )
+                endif()
+            endif()
+        endforeach()
+        
+        if(NOT OSG_STATIC)
+            if(WIN32)
+                set(osg_plugin_destination "${CMAKE_INSTALL_BINDIR}")
+            else()
+                set(osg_plugin_destination "${CMAKE_INSTALL_LIBDIR}")
+            endif()
+            install(IMPORTED_RUNTIME_ARTIFACTS ${USED_OSG_PLUGINS} DESTINATION "${osg_plugin_destination}/osgPlugins-${OPENSCENEGRAPH_VERSION}" RUNTIME_DEPENDENCY_SET openmw-dependencies)
+        endif()
     endif()
 endif()
 
@@ -622,11 +676,13 @@ if (APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
 endif()
 
-if (UNIX AND NOT APPLE)
-    if (OPENMW_LOCAL_INSTALL AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+if (OPENMW_LOCAL_INSTALL AND UNIX AND NOT APPLE)
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
         # file(RELATIVE_PATH ...) can't handle pure lexical relativity, but cmake_path only came with 3.20.0
         cmake_path(RELATIVE_PATH CMAKE_INSTALL_LIBDIR BASE_DIRECTORY "${CMAKE_INSTALL_BINDIR}" OUTPUT_VARIABLE origin_relative_libdir)
         set(CMAKE_INSTALL_RPATH "$ORIGIN/${origin_relative_libdir}")
+    else()
+        message(WARNING "CMake is too old to work out how to adjust RPATH, please do so manually or update to something newer than 2017.")
     endif()
 endif()
 
@@ -804,6 +860,42 @@ endif()
 
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CUSTOM_CPACK_OS_NAME}-${CUSTOM_CPACK_ARCHITECTURE}")
 
+if (NOT APPLE AND OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
+    if (UNIX)
+        set(pre_exclude_regexes)
+        set(post_exclude_regexes
+            ^/lib64/
+            ^/usr/lib64/
+        )
+        set(directories)
+    elseif (WIN32)
+        # CMake thinks some dummy DLL names are real so explodes unless we manually pre-exclude every possible system DLL
+        # https://discourse.cmake.org/t/get-runtime-dependencies-has-difficulties-with-windows-api-sets/1768/23
+        set(pre_exclude_regexes
+            ^msvcp.*\\.dll$
+            ^vcruntime.*\\.dll$
+            ^api-ms-win-.*
+            ^ext-ms-.*
+            ^hvsifiletrust\\.dll$
+            ^pdmutilities\\.dll$
+        )
+        set(systemroot "$ENV{SystemRoot}")
+        # documentation says to use lower-case regex, but drive letter is upper-case and I can't be bothered preserving the case of just one character right now
+        #string(TOLOWER "${systemroot}" systemroot)
+        cmake_path(NORMAL_PATH systemroot)
+        escape_regex_control_characters(systemroot "${systemroot}")
+        set(post_exclude_regexes ^${systemroot}/)
+        # CMP0207 will avoid the need for this
+        string(REPLACE "/" "(/|\\\\)" post_exclude_regexes "${post_exclude_regexes}")
+        set(directories "${RUNTIME_OUTPUT_DIRECTORY}")
+    endif ()
+    install(RUNTIME_DEPENDENCY_SET openmw-dependencies
+        PRE_EXCLUDE_REGEXES ${pre_exclude_regexes}
+        POST_EXCLUDE_REGEXES ${post_exclude_regexes}
+        DIRECTORIES ${directories}
+    )
+endif ()
+
 # Apple bundling
 if (APPLE)
     if(CMAKE_VERSION VERSION_LESS 3.19)
@@ -863,9 +955,6 @@ if (APPLE)
     " COMPONENT Runtime)
 
     set(ABSOLUTE_PLUGINS "")
-
-    set(OSGPlugins_DONT_FIND_DEPENDENCIES 1)
-    find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
 
     foreach (PLUGIN_NAME ${USED_OSG_PLUGINS})
         string(TOUPPER ${PLUGIN_NAME} PLUGIN_NAME_UC)
@@ -933,28 +1022,15 @@ if (APPLE)
 
     set(CPACK_PRE_BUILD_SCRIPTS ${CMAKE_SOURCE_DIR}/cmake/SignMacApplications.cmake)
 
-    include(CPack)
 elseif(NOT APPLE)
     if(WIN32)
-        INSTALL(DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}/" DESTINATION "." FILES_MATCHING PATTERN "*.dll"
-                                                                                        PATTERN ".cmake" EXCLUDE
-                                                                                        PATTERN ".qt" EXCLUDE
-                                                                                        PATTERN "_CPack_Packages" EXCLUDE
-                                                                                        PATTERN "_deps" EXCLUDE
-                                                                                        PATTERN "apps" EXCLUDE
-                                                                                        PATTERN "bin" EXCLUDE
-                                                                                        PATTERN "CMakeFiles" EXCLUDE
-                                                                                        PATTERN "components" EXCLUDE
-                                                                                        PATTERN "deps" EXCLUDE
-                                                                                        PATTERN "docs" EXCLUDE
-                                                                                        PATTERN "extern" EXCLUDE
-                                                                                        PATTERN "files" EXCLUDE
-                                                                                        PATTERN "lib" EXCLUDE
-                                                                                        PATTERN "SymStore" EXCLUDE
-                                                                                        PATTERN "symstore-venv" EXCLUDE
-                                                                                        PATTERN "Testing" EXCLUDE
-                                                                                        PATTERN "tests_output" EXCLUDE
-                                                                                        PATTERN "try-compile" EXCLUDE)
+        # this just deals with Qt plugins now as if we get windeployqt.exe to do it, it adds things we don't need like ANGLE
+        INSTALL(DIRECTORY
+                "${RUNTIME_OUTPUT_DIRECTORY}/iconengines"
+                "${RUNTIME_OUTPUT_DIRECTORY}/imageformats"
+                "${RUNTIME_OUTPUT_DIRECTORY}/platforms"
+                "${RUNTIME_OUTPUT_DIRECTORY}/styles"
+            DESTINATION "." FILES_MATCHING PATTERN "*.dll")
         INSTALL(DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}/" DESTINATION "." CONFIGURATIONS Debug;RelWithDebInfo FILES_MATCHING PATTERN "*.pdb"
                                                                                                                             PATTERN ".cmake" EXCLUDE
                                                                                                                             PATTERN ".qt" EXCLUDE
@@ -974,10 +1050,6 @@ elseif(NOT APPLE)
                                                                                                                             PATTERN "Testing" EXCLUDE
                                                                                                                             PATTERN "tests_output" EXCLUDE
                                                                                                                             PATTERN "try-compile" EXCLUDE)
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" DESTINATION "." RENAME "AUTHORS.txt")
 
         SET(CPACK_GENERATOR "NSIS")
         SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW")
@@ -1021,7 +1093,6 @@ elseif(NOT APPLE)
             SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
         endif()
 
-        include(CPack)
     else(WIN32)
         # Linux installation
 
@@ -1035,6 +1106,13 @@ elseif(NOT APPLE)
         ENDIF(BUILD_OPENCS)
 
     endif(WIN32)
+    
+    install(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" TYPE DOC)
+    install(FILES "${OpenMW_SOURCE_DIR}/README.md" TYPE DOC)
+    install(FILES "${OpenMW_SOURCE_DIR}/LICENSE" TYPE DOC RENAME "LICENSE.txt")
+    install(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" TYPE DOC)
+
+    install(FILES "${RUNTIME_OUTPUT_DIRECTORY}/CI-ID.txt" TYPE DOC OPTIONAL)
 
     install(FILES "${RUNTIME_OUTPUT_DIRECTORY}/defaults.bin"
                   "${RUNTIME_OUTPUT_DIRECTORY}/gamecontrollerdb.txt"
@@ -1049,6 +1127,8 @@ elseif(NOT APPLE)
 
     install(DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}/resources" TYPE DATA)
 endif(APPLE)
+
+include(CPack)
 
 # what is necessary to build documentation
 if ( BUILD_DOCS )
