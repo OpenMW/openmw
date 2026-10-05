@@ -20,6 +20,8 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
+#include <type_traits>
+
 namespace Misc::Convert
 {
     inline osg::Vec3f makeOsgVec3f(const float* values)
@@ -98,7 +100,10 @@ namespace Misc::Convert
     // encode the same transformation, so make_mat4 and Matrixf(ptr) round-trip
     // exactly WITHOUT a transpose, provided the caller also flips the
     // multiplication order to match the new convention. This is covered by
-    // MiscConvertGlm.MatrixMultiplicationOrder.
+    // MiscConvertGlm.MatrixTranslationPreservesTransform and
+    // MiscConvertGlm.MatrixRotationPreservesTransform.
+    static_assert(sizeof(glm::mat4) == sizeof(osg::Matrixf));
+    static_assert(std::is_same_v<glm::mat4::value_type, osg::Matrixf::value_type>);
 
     inline glm::vec2 toGlm(const osg::Vec2f& v)
     {
