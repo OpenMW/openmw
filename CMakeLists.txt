@@ -513,7 +513,7 @@ if(OPENMW_USE_SYSTEM_OSG)
             endif()
         endforeach()
         
-        if(NOT OSG_STATIC)
+        if(NOT OSG_STATIC AND NOT APPLE)
             if(WIN32)
                 set(osg_plugin_destination "${CMAKE_INSTALL_BINDIR}")
             else()
