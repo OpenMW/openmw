@@ -258,6 +258,12 @@ if (OPENMW_LOCAL_INSTALL)
     set(CMAKE_INSTALL_SYSCONFDIR ".")
 endif()
 
+# absorb our changes into CMAKE_INSTALL_FULL_whatever variables
+foreach(dir BINDIR SYSCONFDIR LIBDIR DATADIR)
+    # when we cmake_minimum_required 3.20, dir becomes an argument
+    GNUInstallDirs_get_absolute_install_dir(CMAKE_INSTALL_FULL_${dir} CMAKE_INSTALL_${dir})
+endforeach()
+
 if (APPLE)
     set(OPENMW_RESOURCE_FILES "../Resources/resources")
 elseif(UNIX)
@@ -266,10 +272,9 @@ elseif(UNIX)
     SET(LICDIR "${CMAKE_INSTALL_DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
 
     if (NOT OPENMW_LOCAL_INSTALL)
-        # CMAKE_INSTALL_FULL_DATADIR/CMAKE_INSTALL_FULL_SYSCONFDIR are missing our suffices as we add them after including GNUInstallDirs
-        set(GLOBAL_DATA_PATH "${CMAKE_INSTALL_FULL_DATADIR}/${DATADIR_SUFFIX}" CACHE PATH "Set absolute data path prefix for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
-        set(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_FULL_SYSCONFDIR}/${SYSCONFDIR_SUFFIX}" CACHE PATH "Set absolute config dir path for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
-        set(OPENMW_RESOURCE_FILES "${CMAKE_INSTALL_FULL_DATADIR}/${DATADIR_SUFFIX}/resources" CACHE PATH "Set absolute resources dir path for Global installs. This is baked into openmw.cfg, so MUST be set to the final install path at build time.")
+        set(GLOBAL_DATA_PATH "${CMAKE_INSTALL_FULL_DATADIR}" CACHE PATH "Set absolute data path prefix for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
+        set(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_FULL_SYSCONFDIR}" CACHE PATH "Set absolute config dir path for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
+        set(OPENMW_RESOURCE_FILES "${CMAKE_INSTALL_FULL_DATADIR}/resources" CACHE PATH "Set absolute resources dir path for Global installs. This is baked into openmw.cfg, so MUST be set to the final install path at build time.")
     endif ()
 endif(APPLE)
 
