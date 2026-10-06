@@ -10,6 +10,7 @@ namespace ESM
     struct EffectList;
     struct ENAMstruct;
     struct Enchantment;
+    struct IndexedENAMstruct;
     struct Ingredient;
     struct MagicEffect;
     struct Potion;
@@ -40,8 +41,8 @@ namespace MWMechanics
     int getEnchantmentCharge(const ESM::Enchantment& enchantment);
 
     int getPotionValue(const ESM::Potion& potion);
-    std::optional<ESM::EffectList> rollIngredientEffect(
-        MWWorld::Ptr caster, const ESM::Ingredient* ingredient, uint32_t index = 0);
+    std::optional<ESM::IndexedENAMstruct> getIngredientEffect(const ESM::Ingredient* ingredient, uint32_t index);
+    std::optional<ESM::EffectList> rollIngredientEffect(MWWorld::Ptr caster, const ESM::Ingredient* ingredient);
 
     /**
      * @param spell spell to cast

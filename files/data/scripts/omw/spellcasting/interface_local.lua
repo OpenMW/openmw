@@ -53,7 +53,7 @@ return {
         end,
 
         --- (Local and Global) Inflicts a spell on the target following vanilla rules, such as filtering by range, and policing recastable effects. Note that this only
-        -- inflicts effects on the target, and does not explode the spell even if it has AOE effects.
+        -- inflicts effects on the target, and does not explode the spell even if it has AOE effects. Ingredients are not supported.
         -- @function [parent=#SpellCasting] inflict
         -- @param #SpellCastInfo spellCast
         -- @param openmw.core#GameObject target Must be either a @{openmw.types#Actor} or @{openmw.types#Lockable}

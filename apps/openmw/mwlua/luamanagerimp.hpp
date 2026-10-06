@@ -125,8 +125,8 @@ namespace MWLua
         void onDialogueResponse(
             const MWWorld::Ptr& actor, const ESM::DialInfo& info, const ESM::Dialogue& record) override;
         void applyMagicEffects(ESM::RefId id, const MWWorld::Ptr& caster, ESM::RefNum item, const MWWorld::Ptr& target,
-            const std::vector<int>& effects, bool ignoreReflect, bool ignoreSpellAbsorption, bool stackable,
-            bool isReflect) override;
+            const std::vector<ESM::IndexedENAMstruct>& effects, bool ignoreReflect, bool ignoreSpellAbsorption,
+            bool stackable, bool isReflect) override;
         void magicProjectileHit(ESM::RefId spellId, const MWWorld::Ptr& caster, ESM::RefNum item,
             const MWWorld::Ptr& victim, const osg::Vec3f& position, const osg::Vec3f& normal) override;
 

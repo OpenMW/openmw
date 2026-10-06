@@ -15,6 +15,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/luascripts.hpp>
+#include <components/esm3/effectlist.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 
@@ -564,15 +565,17 @@ namespace MWLua
     }
 
     void LuaManager::applyMagicEffects(ESM::RefId id, const MWWorld::Ptr& caster, ESM::RefNum item,
-        const MWWorld::Ptr& target, const std::vector<int>& effects, bool ignoreReflect, bool ignoreSpellAbsorption,
-        bool stackable, bool isReflect)
+        const MWWorld::Ptr& target, const std::vector<ESM::IndexedENAMstruct>& effects, bool ignoreReflect,
+        bool ignoreSpellAbsorption, bool stackable, bool isReflect)
     {
         if (!target.isEmpty() && !effects.empty())
         {
             mLua.protectedCall([&](LuaUtil::LuaView& view) {
+                // Preserve calculated magnitudes and durations, e.g. when consuming an ingredient.
                 sol::table luaEffects = view.newTable();
-                for (int i = 1; i <= static_cast<int>(effects.size()); i++)
-                    luaEffects[i] = effects[i - 1];
+                for (const ESM::IndexedENAMstruct& enam : effects)
+                    luaEffects.add(view.sol().create_table_with("index", enam.mIndex, "magnitudeMin",
+                        enam.mData.mMagnMin, "magnitudeMax", enam.mData.mMagnMax, "duration", enam.mData.mDuration));
                 sol::table data = view.newTable();
                 if (!caster.isEmpty())
                     data["caster"] = LObject(caster);
