@@ -239,9 +239,10 @@ if (MSVC)
 endif()
 
 include(GNUInstallDirs)
-# todo: force this suffix to match sApplicationName in configurationmanager.cpp
-set(CMAKE_INSTALL_SYSCONFDIR "${CMAKE_INSTALL_SYSCONFDIR}/openmw")
-set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATADIR}/openmw")
+set(SYSCONFDIR_SUFFIX "openmw" CACHE PATH "Suffix for CMAKE_INSTALL_SYSCONFDIR")
+set(DATADIR_SUFFIX "openmw" CACHE PATH "Suffix for CMAKE_INSTALL_DATADIR")
+set(CMAKE_INSTALL_SYSCONFDIR "${CMAKE_INSTALL_SYSCONFDIR}/${SYSCONFDIR_SUFFIX}")
+set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATADIR}/${DATADIR_SUFFIX}")
 
 # Set up common paths
 if (UNIX AND NOT APPLE)
@@ -261,15 +262,14 @@ if (APPLE)
     set(OPENMW_RESOURCE_FILES "../Resources/resources")
 elseif(UNIX)
     # Paths
-    SET(DATAROOTDIR "${CMAKE_INSTALL_DATAROOTDIR}" CACHE PATH "Sets the root of data directories to a non-default location")
-    SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
-    SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
+    SET(ICONDIR "${CMAKE_INSTALL_DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
+    SET(LICDIR "${CMAKE_INSTALL_DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
 
     if (NOT OPENMW_LOCAL_INSTALL)
-        # we can't use CMAKE_INSTALL_FULL_DATADIR to get this with our suffix as we add it after including GNUInstallDirs
-        set(GLOBAL_DATA_PATH "${CMAKE_INSTALL_FULL_DATAROOTDIR}/openmw" CACHE PATH "Set absolute data path prefix for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
-        set(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_FULL_SYSCONFDIR}/openmw" CACHE PATH "Set absolute config dir path for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
-        set(OPENMW_RESOURCE_FILES "${CMAKE_INSTALL_FULL_DATAROOTDIR}/openmw/resources" CACHE PATH "Set absolute resources dir path for Global installs. This is baked into openmw.cfg, so MUST be set to the final install path at build time.")
+        # CMAKE_INSTALL_FULL_DATADIR/CMAKE_INSTALL_FULL_SYSCONFDIR are missing our suffices as we add them after including GNUInstallDirs
+        set(GLOBAL_DATA_PATH "${CMAKE_INSTALL_FULL_DATADIR}/${DATADIR_SUFFIX}" CACHE PATH "Set absolute data path prefix for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
+        set(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_FULL_SYSCONFDIR}/${SYSCONFDIR_SUFFIX}" CACHE PATH "Set absolute config dir path for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
+        set(OPENMW_RESOURCE_FILES "${CMAKE_INSTALL_FULL_DATADIR}/${DATADIR_SUFFIX}/resources" CACHE PATH "Set absolute resources dir path for Global installs. This is baked into openmw.cfg, so MUST be set to the final install path at build time.")
     endif ()
 endif(APPLE)
 
@@ -1097,11 +1097,11 @@ elseif(NOT APPLE)
         # Linux installation
 
         # Install icon and desktop file
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/org.openmw.launcher.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "openmw")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/org.openmw.launcher.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications" COMPONENT "openmw")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}" COMPONENT "openmw")
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.appdata.xml" DESTINATION "${DATAROOTDIR}/metainfo" COMPONENT "openmw")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.appdata.xml" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/metainfo" COMPONENT "openmw")
         IF(BUILD_OPENCS)
-            INSTALL(FILES "${OpenMW_BINARY_DIR}/org.openmw.cs.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "opencs")
+            INSTALL(FILES "${OpenMW_BINARY_DIR}/org.openmw.cs.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications" COMPONENT "opencs")
             INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/openmw-cs.png" DESTINATION "${ICONDIR}" COMPONENT "opencs")
         ENDIF(BUILD_OPENCS)
 
