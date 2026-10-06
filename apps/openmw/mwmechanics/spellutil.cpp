@@ -159,21 +159,26 @@ namespace MWMechanics
         return potion.mData.mValue;
     }
 
-    std::optional<ESM::EffectList> rollIngredientEffect(
-        MWWorld::Ptr caster, const ESM::Ingredient* ingredient, uint32_t index)
+    std::optional<ESM::IndexedENAMstruct> getIngredientEffect(const ESM::Ingredient* ingredient, uint32_t index)
     {
-        if (index >= 4)
-            throw std::range_error("Index out of range");
-
-        ESM::ENAMstruct effect;
-        effect.mEffectID = ingredient->mData.mEffectID[index];
-        effect.mSkill = ingredient->mData.mSkills[index];
-        effect.mAttribute = ingredient->mData.mAttributes[index];
-        effect.mRange = ESM::RT_Self;
-        effect.mArea = 0;
-
-        if (effect.mEffectID.empty())
+        if (index >= 4 || ingredient->mData.mEffectID[index].empty())
             return std::nullopt;
+
+        ESM::IndexedENAMstruct effect{};
+        effect.mData.mEffectID = ingredient->mData.mEffectID[index];
+        effect.mData.mSkill = ingredient->mData.mSkills[index];
+        effect.mData.mAttribute = ingredient->mData.mAttributes[index];
+        effect.mData.mRange = ESM::RT_Self;
+        effect.mIndex = index;
+        return effect;
+    }
+
+    std::optional<ESM::EffectList> rollIngredientEffect(MWWorld::Ptr caster, const ESM::Ingredient* ingredient)
+    {
+        std::optional<ESM::IndexedENAMstruct> indexedEffect = getIngredientEffect(ingredient, 0);
+        if (!indexedEffect)
+            return std::nullopt;
+        ESM::ENAMstruct& effect = indexedEffect->mData;
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const auto magicEffect = store.get<ESM::MagicEffect>().find(effect.mEffectID);
@@ -213,7 +218,7 @@ namespace MWMechanics
         effect.mMagnMin = static_cast<int>(magnitude);
 
         ESM::EffectList effects;
-        effects.mList.push_back({ effect, index });
+        effects.mList.push_back(*indexedEffect);
         return effects;
     }
 

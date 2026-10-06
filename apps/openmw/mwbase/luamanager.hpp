@@ -37,6 +37,7 @@ namespace ESM
     struct LuaScripts;
     struct DialInfo;
     struct Dialogue;
+    struct IndexedENAMstruct;
 }
 
 namespace LuaUtil
@@ -110,8 +111,8 @@ namespace MWBase
         virtual void viewportResized(int width, int height) = 0;
         virtual void savePermanentStorage(const std::filesystem::path& userConfigPath) = 0;
         virtual void applyMagicEffects(ESM::RefId id, const MWWorld::Ptr& caster, ESM::RefNum item,
-            const MWWorld::Ptr& target, const std::vector<int>& effects, bool ignoreReflect, bool ignoreSpellAbsorption,
-            bool stackable, bool isReflect)
+            const MWWorld::Ptr& target, const std::vector<ESM::IndexedENAMstruct>& effects, bool ignoreReflect,
+            bool ignoreSpellAbsorption, bool stackable, bool isReflect)
             = 0;
         virtual void magicProjectileHit(ESM::RefId spellId, const MWWorld::Ptr& caster, ESM::RefNum item,
             const MWWorld::Ptr& victim, const osg::Vec3f& position, const osg::Vec3f& normal)

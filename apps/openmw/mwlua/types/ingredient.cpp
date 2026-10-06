@@ -8,6 +8,8 @@
 #include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
+#include "../../mwmechanics/spellutil.hpp"
+
 namespace
 {
     struct MutableIngredientEffectsList
@@ -167,21 +169,8 @@ namespace MWLua
                     = sol::readonly_property([lua = lua.lua_state()](const ESM::Ingredient& rec) -> sol::table {
                           sol::table res(lua, sol::create);
                           for (uint32_t i = 0; i < 4; ++i)
-                          {
-                              if (rec.mData.mEffectID[i].empty())
-                                  continue;
-                              ESM::IndexedENAMstruct effect;
-                              effect.mData.mEffectID = rec.mData.mEffectID[i];
-                              effect.mData.mSkill = rec.mData.mSkills[i];
-                              effect.mData.mAttribute = rec.mData.mAttributes[i];
-                              effect.mData.mRange = ESM::RT_Self;
-                              effect.mData.mArea = 0;
-                              effect.mData.mDuration = 0;
-                              effect.mData.mMagnMin = 0;
-                              effect.mData.mMagnMax = 0;
-                              effect.mIndex = i;
-                              res[LuaUtil::toLuaIndex(i)] = effect;
-                          }
+                              if (auto effect = MWMechanics::getIngredientEffect(&rec, i))
+                                  res[LuaUtil::toLuaIndex(i)] = *effect;
                           return res;
                       });
             }

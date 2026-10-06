@@ -16,7 +16,6 @@
 #include <components/lua/util.hpp>
 #include <components/misc/color.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/misc/strings/format.hpp>
 #include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -432,38 +431,44 @@ namespace MWLua
         return LuaUtil::makeReadOnly(magicApi);
     }
 
-    static std::pair<std::string_view, std::vector<ESM::IndexedENAMstruct>> getNameAndMagicEffects(
-        const MWWorld::Ptr& actor, ESM::RefId id, const sol::table& effects, bool quiet)
+    // Override the effect's magnitude range and duration, keeping unspecified values.
+    static void applyEffectParams(ESM::ENAMstruct& effect, const sol::table& params)
     {
-        std::vector<int32_t> effectIndexes;
+        effect.mMagnMin = params.get_or<int32_t>("magnitudeMin", effect.mMagnMin);
+        effect.mMagnMax = params.get_or<int32_t>("magnitudeMax", effect.mMagnMax);
+        effect.mDuration = std::max(params.get_or<int32_t>("duration", effect.mDuration), 0);
+    }
 
-        for (const auto& entry : effects)
-        {
-            if (entry.second.is<int32_t>())
-                effectIndexes.push_back(entry.second.as<int32_t>());
-            else if (entry.second.is<ESM::IndexedENAMstruct>())
-                throw std::runtime_error("Error: Adding effects as enam structs is not implemented, use indexes.");
-            else
-                throw std::runtime_error("Unexpected entry in 'effects' table while trying to add to active effects");
-        }
-
+    static std::pair<std::string_view, std::vector<ESM::IndexedENAMstruct>> getNameAndMagicEffects(
+        ESM::RefId id, const sol::table& effects)
+    {
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
-        auto getEffectsFromIndexes = [&](const ESM::EffectList& effectList) {
+        auto getEffects = [&](const ESM::EffectList& effectList) {
             std::vector<ESM::IndexedENAMstruct> enams;
-            for (auto index : effectIndexes)
-                enams.push_back(effectList.mList.at(index));
+            for (const auto& [_, entry] : effects)
+            {
+                if (!entry.is<sol::table>())
+                {
+                    enams.push_back(effectList.mList.at(LuaUtil::cast<int32_t>(entry)));
+                    continue;
+                }
+                sol::table params = entry.as<sol::table>();
+                ESM::IndexedENAMstruct& enam
+                    = enams.emplace_back(effectList.mList.at(LuaUtil::cast<int32_t>(params["index"])));
+                applyEffectParams(enam.mData, params);
+            }
             return enams;
         };
 
         auto getNameAndEffects = [&](auto* record) {
             return std::pair<std::string_view, std::vector<ESM::IndexedENAMstruct>>(
-                record->mName, getEffectsFromIndexes(record->mEffects));
+                record->mName, getEffects(record->mEffects));
         };
         auto getNameAndEffectsEnch = [&](auto* record) {
             auto* enchantment = esmStore.get<ESM::Enchantment>().find(record->mEnchant);
             return std::pair<std::string_view, std::vector<ESM::IndexedENAMstruct>>(
-                record->mName, getEffectsFromIndexes(enchantment->mEffects));
+                record->mName, getEffects(enchantment->mEffects));
         };
         switch (esmStore.find(id))
         {
@@ -471,21 +476,20 @@ namespace MWLua
                 return getNameAndEffects(esmStore.get<ESM::Potion>().find(id));
             case ESM::REC_INGR:
             {
-                // Ingredients are a special case as their effect list is calculated on consumption.
+                // Ingredient records do not specify magnitudes or durations.
                 const ESM::Ingredient* ingredient = esmStore.get<ESM::Ingredient>().find(id);
                 std::vector<ESM::IndexedENAMstruct> enams;
-                quiet = quiet || actor != MWMechanics::getPlayer();
-                for (uint32_t i = 0; i < effectIndexes.size(); i++)
+                for (const auto& [_, entry] : effects)
                 {
-                    if (auto effect = MWMechanics::rollIngredientEffect(actor, ingredient, effectIndexes[i]))
-                        enams.push_back(effect->mList[0]);
-                }
-                if (enams.empty() && !quiet)
-                {
-                    // "X has no effect on you"
-                    std::string message = esmStore.get<ESM::GameSetting>().find("sNotifyMessage50")->mValue.getString();
-                    message = Misc::StringUtils::format(message, ingredient->mName);
-                    MWBase::Environment::get().getWindowManager()->messageBox(message);
+                    if (!entry.is<sol::table>())
+                        throw std::runtime_error("Ingredient effects must be specified as tables");
+                    sol::table params = entry.as<sol::table>();
+                    int32_t index = LuaUtil::cast<int32_t>(params["index"]);
+                    auto effect = MWMechanics::getIngredientEffect(ingredient, index);
+                    if (!effect)
+                        throw std::runtime_error("Ingredient has no effect at index " + std::to_string(index));
+                    applyEffectParams(effect->mData, params);
+                    enams.push_back(*effect);
                 }
                 return { ingredient->mName, std::move(enams) };
             }
@@ -741,7 +745,7 @@ namespace MWLua
             });
         };
 
-        // types.Actor.activeSpells(o):add(id, spellid, effects, options)
+        // types.Actor.activeSpells(o):add(options)
         activeSpellsT["add"] = [context](const ActorActiveSpells& spells, const sol::table& options) {
             if (spells.isLObject())
                 throw std::runtime_error("Local scripts can modify effect only on the actor they are attached to.");
@@ -758,11 +762,10 @@ namespace MWLua
                 bool ignoreSpellAbsorption = options.get_or("ignoreSpellAbsorption", false);
                 bool ignoreResistances = options.get_or("ignoreResistances", false);
                 sol::table effects = options.get<sol::table>("effects");
-                bool quiet = options.get_or("quiet", false);
                 if (effects.empty())
                     throw std::runtime_error("Error:  Parameter 'effects': cannot be an empty list/table");
                 const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
-                auto [name, enams] = getNameAndMagicEffects(spells.mActor.ptr(), id, effects, quiet);
+                auto [name, enams] = getNameAndMagicEffects(id, effects);
                 name = options.get_or<std::string_view>("name", name);
 
                 MWWorld::Ptr casterPtr;

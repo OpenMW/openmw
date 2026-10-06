@@ -376,7 +376,7 @@ namespace MWMechanics
     {
         const auto caster = MWBase::Environment::get().getWorldModel()->getPtr(spellIt->mCaster);
         bool removedSpell = false;
-        std::vector<int> reflectedEffects;
+        std::vector<ESM::IndexedENAMstruct> reflectedEffects;
         for (auto it = spellIt->mEffects.begin(); it != spellIt->mEffects.end();)
         {
             if (it->mFlags & ESM::ActiveEffect::Flag_Remove && it->mTimeLeft <= 0.f
@@ -388,7 +388,11 @@ namespace MWMechanics
             auto result = applyMagicEffect(ptr, caster, *spellIt, *it, duration, context.mPlayNonLooping);
             if (result.mType == MagicApplicationResult::Type::REFLECTED)
             {
-                reflectedEffects.push_back(it->mEffectIndex);
+                ESM::IndexedENAMstruct& reflected = reflectedEffects.emplace_back();
+                reflected.mData.mDuration = static_cast<int32_t>(it->mDuration);
+                reflected.mData.mMagnMin = static_cast<int32_t>(it->mMinMagnitude);
+                reflected.mData.mMagnMax = static_cast<int32_t>(it->mMaxMagnitude);
+                reflected.mIndex = static_cast<uint32_t>(it->mEffectIndex);
                 it = spellIt->mEffects.erase(it);
             }
             else if (result.mType == MagicApplicationResult::Type::REMOVED)
