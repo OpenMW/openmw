@@ -762,7 +762,7 @@ namespace MWRender
             }
 
             // At this point blendRules will either be nullptr or an AnimBlendRules instance with > 0 rules inside.
-            animsrc->mAnimBlendRules = blendRules;
+            animsrc->mAnimBlendRules = std::move(blendRules);
         }
 
         return animsrc;
