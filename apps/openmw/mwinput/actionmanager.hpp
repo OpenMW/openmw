@@ -1,14 +1,7 @@
 #ifndef MWINPUT_ACTIONMANAGER_H
 #define MWINPUT_ACTIONMANAGER_H
 
-#include <osg/ref_ptr>
-#include <osgViewer/ViewerEventHandlers>
-
-namespace osgViewer
-{
-    class Viewer;
-    class ScreenCaptureHandler;
-}
+#include <functional>
 
 namespace MWInput
 {
@@ -17,8 +10,7 @@ namespace MWInput
     class ActionManager
     {
     public:
-        ActionManager(BindingsManager* bindingsManager, osg::ref_ptr<osgViewer::Viewer> viewer,
-            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler);
+        ActionManager(BindingsManager* bindingsManager, std::function<void()> takeScreenshot);
 
         void update(float dt);
 
@@ -45,8 +37,7 @@ namespace MWInput
         void handleGuiArrowKey(int action);
 
         BindingsManager* mBindingsManager;
-        osg::ref_ptr<osgViewer::Viewer> mViewer;
-        osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
+        std::function<void()> mTakeScreenshot;
 
         float mTimeIdle;
     };

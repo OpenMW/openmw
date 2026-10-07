@@ -26,7 +26,6 @@ namespace osg
     class Vec4f;
     class Matrixf;
     class Quat;
-    class Image;
     class Stats;
 }
 
@@ -439,7 +438,8 @@ namespace MWBase
         virtual void reattachPlayerCamera() = 0;
 
         /// \todo this does not belong here
-        virtual void screenshot(osg::Image* image, int w, int h) = 0;
+        /// Take a screenshot of w*h, not including the GUI, encoded as JPEG. Empty on failure.
+        virtual std::vector<char> screenshot(int w, int h) = 0;
 
         /// Find default position inside exterior cell specified by name
         /// \return empty RefId if exterior with given name not exists, the cell's RefId otherwise
