@@ -239,9 +239,10 @@ if (MSVC)
 endif()
 
 include(GNUInstallDirs)
-# todo: force this suffix to match sApplicationName in configurationmanager.cpp
-set(CMAKE_INSTALL_SYSCONFDIR "${CMAKE_INSTALL_SYSCONFDIR}/openmw")
-set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATADIR}/openmw")
+set(SYSCONFDIR_SUFFIX "openmw" CACHE PATH "Suffix for CMAKE_INSTALL_SYSCONFDIR")
+set(DATADIR_SUFFIX "openmw" CACHE PATH "Suffix for CMAKE_INSTALL_DATADIR")
+set(CMAKE_INSTALL_SYSCONFDIR "${CMAKE_INSTALL_SYSCONFDIR}/${SYSCONFDIR_SUFFIX}")
+set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATADIR}/${DATADIR_SUFFIX}")
 
 # Set up common paths
 if (UNIX AND NOT APPLE)
@@ -257,20 +258,24 @@ if (OPENMW_LOCAL_INSTALL)
     set(CMAKE_INSTALL_SYSCONFDIR ".")
 endif()
 
+# absorb our changes into CMAKE_INSTALL_FULL_whatever variables
+foreach(dir BINDIR SYSCONFDIR LIBDIR DATADIR)
+    # when we cmake_minimum_required 3.20, dir becomes an argument
+    GNUInstallDirs_get_absolute_install_dir(CMAKE_INSTALL_FULL_${dir} CMAKE_INSTALL_${dir})
+endforeach()
+
 if (APPLE)
     set(OPENMW_RESOURCE_FILES "../Resources/resources")
 elseif(UNIX)
     # Paths
-    SET(DATAROOTDIR "${CMAKE_INSTALL_DATAROOTDIR}" CACHE PATH "Sets the root of data directories to a non-default location")
-    # we can't use CMAKE_INSTALL_FULL_DATADIR to get this with our suffix as we add it after including GNUInstallDirs
-    SET(GLOBAL_DATA_PATH "${CMAKE_INSTALL_FULL_DATAROOTDIR}/openmw" CACHE PATH "Set absolute data path prefix for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
-    SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
-    SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
+    SET(ICONDIR "${CMAKE_INSTALL_DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
+    SET(LICDIR "${CMAKE_INSTALL_DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
 
-    # we have to re-add our suffix here, too.
-    SET(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_FULL_SYSCONFDIR}/openmw" CACHE PATH "Set absolute config dir path for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
-
-    set(OPENMW_RESOURCE_FILES "${CMAKE_INSTALL_DATADIR}/resources")
+    if (NOT OPENMW_LOCAL_INSTALL)
+        set(GLOBAL_DATA_PATH "${CMAKE_INSTALL_FULL_DATADIR}" CACHE PATH "Set absolute data path prefix for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
+        set(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_FULL_SYSCONFDIR}" CACHE PATH "Set absolute config dir path for Global installs. This is baked into the binaries, so MUST be set to the final install path at build time.")
+        set(OPENMW_RESOURCE_FILES "${CMAKE_INSTALL_FULL_DATADIR}/resources" CACHE PATH "Set absolute resources dir path for Global installs. This is baked into openmw.cfg, so MUST be set to the final install path at build time.")
+    endif ()
 endif(APPLE)
 
 if (WIN32)
@@ -508,7 +513,7 @@ if(OPENMW_USE_SYSTEM_OSG)
             endif()
         endforeach()
         
-        if(NOT OSG_STATIC)
+        if(NOT OSG_STATIC AND NOT APPLE)
             if(WIN32)
                 set(osg_plugin_destination "${CMAKE_INSTALL_BINDIR}")
             else()
@@ -1097,11 +1102,11 @@ elseif(NOT APPLE)
         # Linux installation
 
         # Install icon and desktop file
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/org.openmw.launcher.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "openmw")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/org.openmw.launcher.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications" COMPONENT "openmw")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}" COMPONENT "openmw")
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.appdata.xml" DESTINATION "${DATAROOTDIR}/metainfo" COMPONENT "openmw")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.appdata.xml" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/metainfo" COMPONENT "openmw")
         IF(BUILD_OPENCS)
-            INSTALL(FILES "${OpenMW_BINARY_DIR}/org.openmw.cs.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "opencs")
+            INSTALL(FILES "${OpenMW_BINARY_DIR}/org.openmw.cs.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications" COMPONENT "opencs")
             INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/openmw-cs.png" DESTINATION "${ICONDIR}" COMPONENT "opencs")
         ENDIF(BUILD_OPENCS)
 
@@ -1121,8 +1126,8 @@ elseif(NOT APPLE)
     if (OPENMW_LOCAL_INSTALL)
         install(FILES "${OpenMW_SOURCE_DIR}/files/openmw.cfg.local" TYPE SYSCONF RENAME "openmw.cfg")
     else ()
-        install(CODE "set(OPENMW_RESOURCE_FILES \"\${CMAKE_INSTALL_PREFIX}/${OPENMW_RESOURCE_FILES}\")")
-        install(CODE "configure_file(\"${OpenMW_SOURCE_DIR}/files/openmw.cfg\" \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_SYSCONFDIR}/openmw.cfg\")")
+        configure_file("${OpenMW_SOURCE_DIR}/files/openmw.cfg" "openmw.cfg.install")
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/openmw.cfg.install" TYPE SYSCONF RENAME "openmw.cfg")
     endif ()
 
     install(DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}/resources" TYPE DATA)
