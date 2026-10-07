@@ -1,7 +1,5 @@
 #include <algorithm>
 
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
-
 #include <osg/Geometry>
 #include <osg/Group>
 
@@ -26,11 +24,10 @@
 namespace MWRender
 {
 
-    DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld* world, int debugMode)
+    DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode)
         : mParentNode(std::move(parentNode))
-        , mWorld(world)
     {
-        DebugDrawer::setDebugMode(debugMode);
+        DebugDrawer::setDebugMode(0);
     }
 
     void DebugDrawer::createGeometry()
@@ -112,7 +109,7 @@ namespace MWRender
         destroyGeometry();
     }
 
-    void DebugDrawer::step()
+    void DebugDrawer::clearLines()
     {
         if (mDebugOn)
         {
@@ -120,7 +117,13 @@ namespace MWRender
             mTrisVertices->clear();
             mLinesColors->clear();
             mShapesRoot->removeChildren(0, mShapesRoot->getNumChildren());
-            mWorld->debugDrawWorld();
+        }
+    }
+
+    void DebugDrawer::flushLines()
+    {
+        if (mDebugOn)
+        {
             showCollisions();
             mLinesDrawArrays->setCount(static_cast<GLsizei>(mLinesVertices->size()));
             mTrisDrawArrays->setCount(static_cast<GLsizei>(mTrisVertices->size()));
@@ -170,11 +173,6 @@ namespace MWRender
         mTrisVertices->push_back(Misc::Convert::toOsg(v0));
         mTrisVertices->push_back(Misc::Convert::toOsg(v1));
         mTrisVertices->push_back(Misc::Convert::toOsg(v2));
-    }
-
-    void DebugDrawer::addCollision(const btVector3& orig, const btVector3& normal)
-    {
-        mCollisionViews.emplace_back(orig, normal);
     }
 
     void DebugDrawer::showCollisions()

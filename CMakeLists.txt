@@ -425,10 +425,7 @@ if (WIN32)
 endif()
 
 if(OPENMW_USE_SYSTEM_BULLET)
-    set(REQUIRED_BULLET_VERSION 286) # Bullet 286 required due to runtime bugfixes for btCapsuleShape
-    if (DEFINED ENV{TRAVIS_BRANCH} OR DEFINED ENV{APPVEYOR})
-        set(REQUIRED_BULLET_VERSION 283) # but for build testing, 283 is fine
-    endif()
+    set(REQUIRED_BULLET_VERSION 287) # 287 for btIDebugDraw::clearLines (286 already needed for btCapsuleShape fixes)
 
     # First, try BulletConfig-float64.cmake which comes with Debian derivatives.
     # This file does not define the Bullet version in a CMake-friendly way.
