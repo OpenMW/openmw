@@ -104,6 +104,7 @@ namespace Misc::Convert
     // MiscConvertGlm.MatrixRotationPreservesTransform.
     static_assert(sizeof(glm::mat4) == sizeof(osg::Matrixf));
     static_assert(std::is_same_v<glm::mat4::value_type, osg::Matrixf::value_type>);
+    static_assert(GLM_CONFIG_CTOR_INIT != GLM_CTOR_INIT_DISABLE, "build with GLM_FORCE_CTOR_INIT, see CMakeLists.txt");
 
     inline glm::vec2 toGlm(const osg::Vec2f& v)
     {

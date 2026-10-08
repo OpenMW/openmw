@@ -93,5 +93,12 @@ namespace Misc::Convert
                 for (int j = 0; j < 4; ++j)
                     EXPECT_NEAR(back(i, j), o(i, j), kEps) << "at (" << i << ", " << j << ")";
         }
+
+        TEST(MiscConvertGlm, DefaultsMatchOsg)
+        {
+            EXPECT_EQ(glm::vec3(), toGlm(osg::Vec3f()));
+            EXPECT_EQ(glm::quat(), toGlm(osg::Quat()));
+            EXPECT_EQ(glm::mat4(), toGlm(osg::Matrixf()));
+        }
     }
 }
