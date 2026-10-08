@@ -110,7 +110,7 @@ Almalinux_Generic:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   cache:
     - key:
-        prefix: almalinux-generic
+        prefix: almalinux-generic-$CI_COMMIT_REF_PROTECTED
         files:
           - CI/linux/deps_versions.sh
       paths:
@@ -186,7 +186,6 @@ Almalinux_Generic:
   artifacts:
     paths:
       - openmw-crash.log
-
 
 Almalinux_Generic_Integration_Tests:
   extends: .base_Generic_Integration_Tests
