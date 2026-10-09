@@ -11,6 +11,7 @@
 
 #include <cstddef>
 #include <format>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -152,6 +153,25 @@ namespace DetourNavigator
             if (const int ec = sqlite3_exec(&db, query.c_str(), nullptr, nullptr, nullptr); ec != SQLITE_OK)
                 throw std::runtime_error("Failed set max page count: " + std::string(sqlite3_errmsg(&db)));
         }
+
+        // Each tile is its own commit, and the rollback journal fsyncs a new journal file per commit: 3.3 MB of tiles
+        // cost 945 MB of writes. WAL appends to one log. Lost tiles are regenerated, so NORMAL sync is enough.
+        void setCacheDurability(sqlite3& db)
+        {
+            std::string mode;
+            const auto readMode = [](void* into, int, char** values, char**) {
+                *static_cast<std::string*>(into) = values[0] != nullptr ? values[0] : "";
+                return 0;
+            };
+            if (const int ec = sqlite3_exec(&db, "pragma journal_mode = WAL;", readMode, &mode, nullptr);
+                ec != SQLITE_OK)
+                Log(Debug::Warning) << "Failed to set navmeshdb journal mode to WAL: " << sqlite3_errmsg(&db);
+            else if (mode != "wal" && mode != "memory")
+                Log(Debug::Warning) << "Navmeshdb journal mode remains \"" << mode << "\"";
+            if (const int ec = sqlite3_exec(&db, "pragma synchronous = NORMAL;", nullptr, nullptr, nullptr);
+                ec != SQLITE_OK)
+                throw std::runtime_error("Failed set synchronous: " + std::string(sqlite3_errmsg(&db)));
+        }
     }
 
     std::ostream& operator<<(std::ostream& stream, ShapeType value)
@@ -185,6 +205,7 @@ namespace DetourNavigator
         if (dbPageSize == 0)
             throw std::runtime_error("NavMeshDb page size is zero");
         setMaxPageCount(*mDb, maxFileSize / dbPageSize + static_cast<std::uint64_t>((maxFileSize % dbPageSize) != 0));
+        setCacheDurability(*mDb);
     }
 
     Sqlite3::Transaction NavMeshDb::startTransaction(Sqlite3::TransactionMode mode)
