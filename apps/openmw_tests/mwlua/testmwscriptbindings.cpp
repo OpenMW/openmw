@@ -240,5 +240,24 @@ namespace MWLua
             EXPECT_TRUE(actor.mData.getLocals().getScriptId().empty());
         }
 
+        TEST_F(MWLuaMWScriptBindingsTest, shouldReadMWScriptVariablesRegardlessOfNameCase)
+        {
+            auto actor = makeActor();
+            const MWWorld::Ptr ptr(&actor);
+            mWorldModel.registerPtr(ptr);
+            actor.mData.setLocals(*mStore.get<ESM::Script>().find(mScriptId));
+            sol::state_view lua = mLua.unsafeState();
+            lua["actor"] = GObject(ptr);
+
+            const sol::protected_function_result result = lua.safe_script(
+                "local variables = mwscript.getLocalScript(actor).variables\n"
+                "variables.Runs = 7\n"
+                "assert(variables.runs == 7)\n"
+                "return variables.Runs");
+
+            ASSERT_TRUE(result.valid());
+            EXPECT_EQ(result.get<double>(), 7);
+            EXPECT_EQ(actor.mData.getLocals().mShorts[0], 7);
+        }
     }
 }

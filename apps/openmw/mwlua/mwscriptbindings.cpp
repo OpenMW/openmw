@@ -244,8 +244,9 @@ namespace MWLua
             = [](MWScriptVariables& s) { return s.mRef.getLocals().getSize(s.mRef.mId); };
         mwscriptVars[sol::meta_function::index] = sol::overload(
             [](MWScriptVariables& s, std::string_view var) -> sol::optional<double> {
-                if (s.mRef.getLocals().hasVar(s.mRef.mId, var))
-                    return s.mRef.getLocals().getVarAsDouble(s.mRef.mId, Misc::StringUtils::lowerCase(var));
+                const std::string name = Misc::StringUtils::lowerCase(var);
+                if (s.mRef.getLocals().hasVar(s.mRef.mId, name))
+                    return s.mRef.getLocals().getVarAsDouble(s.mRef.mId, name);
                 else
                     return sol::nullopt;
             },

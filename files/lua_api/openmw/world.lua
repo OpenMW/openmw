@@ -24,6 +24,7 @@
 -- @type MWScriptFunctions
 
 ---
+-- Variable names are case-insensitive.
 -- @type MWScriptVariables
 -- @map <#string, #number>
 
