@@ -90,6 +90,14 @@
 -- @return #boolean `false` if the script record does not exist; `true` if the stop was queued.
 
 ---
+-- Runs a dialogue response's result script with `actor` as its implicit reference, without selecting the response.
+-- Initializes the actor's attached MWScript variables, if any. Dialogue-dependent commands require the matching conversation and topic.
+-- @function [parent=#MWScriptFunctions] runResultScript
+-- @param openmw.core#DialogueRecordInfo info The response whose result script should run.
+-- @param openmw.core#GameObject actor
+-- @return #boolean `false` if the response has no result script; `true` if execution was queued.
+
+---
 -- @type MWScript
 -- @field #string recordId Id of the script
 -- @field openmw.core#GameObject object The script's implicit reference, or nil.

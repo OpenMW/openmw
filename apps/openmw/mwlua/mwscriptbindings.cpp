@@ -1,10 +1,12 @@
 #include "mwscriptbindings.hpp"
 
 #include <components/compiler/locals.hpp>
+#include <components/esm3/loaddial.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
 #include <components/misc/strings/lower.hpp>
 
+#include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -158,6 +160,24 @@ namespace MWLua
                     MWBase::Environment::get().getScriptManager()->getGlobalScripts().removeScript(scriptId);
                 },
                 "stopGlobalScript");
+            return true;
+        };
+        api["runResultScript"] = [context](const ESM::DialInfo& info, const GObject& actor) -> bool {
+            if (info.mResultScript.empty())
+                return false;
+            // Reject an unavailable actor before reporting that execution was queued.
+            actor.ptr();
+            context.mLuaManager->addAction(
+                [script = info.mResultScript, actor] {
+                    const MWWorld::Ptr ptr = actor.ptr();
+                    const ESM::RefId& scriptId = ptr.getClass().getScript(ptr);
+                    // The attached script may not have run yet, so its locals may be uninitialized.
+                    if (!scriptId.empty())
+                        ptr.getRefData().setLocals(
+                            *MWBase::Environment::get().getESMStore()->get<ESM::Script>().find(scriptId));
+                    MWBase::Environment::get().getDialogueManager()->executeScript(script, ptr);
+                },
+                "runResultScript");
             return true;
         };
         api["getLocalScript"] = [](const GObject& obj, sol::optional<GObject> player) -> sol::optional<MWScriptRef> {

@@ -72,8 +72,6 @@ namespace MWDialogue
 
         std::optional<Interpreter::Program> compile(const std::string& cmd, const MWWorld::Ptr& actor);
 
-        void executeScript(const std::string& script, const MWWorld::Ptr& actor);
-
         void executeTopic(const ESM::RefId& topic, ResponseCallback* callback);
 
         const ESM::Dialogue* searchDialogue(const ESM::RefId& id);
@@ -88,6 +86,8 @@ namespace MWDialogue
         bool isInChoice() const override;
 
         bool startDialogue(const MWWorld::Ptr& actor, ResponseCallback* callback) override;
+
+        void executeScript(const std::string& script, const MWWorld::Ptr& actor) override;
 
         std::list<std::string> getAvailableTopics() override;
         int getTopicFlag(const ESM::RefId& topicId) const override;
