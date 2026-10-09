@@ -13,6 +13,7 @@
 #include "../mwworld/worldimp.hpp"
 
 #include "context.hpp"
+#include "luamanagerimp.hpp"
 #include "object.hpp"
 
 #include <stdexcept>
@@ -108,6 +109,24 @@ namespace MWLua
                 return MWScriptRef{ scriptId, sol::nullopt };
             else
                 return sol::nullopt;
+        };
+        api["startGlobalScript"] = [context](std::string_view recordId, sol::optional<GObject> target,
+                                       sol::optional<GObject> player) -> bool {
+            if (player.has_value() && player->ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("Third argument must either be a player or be missing");
+            ESM::RefId scriptId = ESM::RefId::deserializeText(recordId);
+            if (!MWBase::Environment::get().getESMStore()->get<ESM::Script>().search(scriptId))
+                return false;
+            // Reject an unavailable target before reporting that the script was queued.
+            if (target.has_value())
+                target->ptr();
+            context.mLuaManager->addAction(
+                [scriptId, target] {
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addScript(
+                        scriptId, target ? target->ptr() : MWWorld::Ptr());
+                },
+                "startGlobalScript");
+            return true;
         };
         api["getLocalScript"] = [](const GObject& obj, sol::optional<GObject> player) -> sol::optional<MWScriptRef> {
             if (player.has_value() && player->ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())

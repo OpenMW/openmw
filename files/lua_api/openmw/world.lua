@@ -20,6 +20,7 @@
 
 ---
 -- Functions related to MWScript.
+-- Calls that change MWScript state take effect after the current Lua update.
 -- @type MWScriptFunctions
 
 ---
@@ -48,18 +49,25 @@
 -- @return #MWScript, #nil
 
 ---
+-- Starts a global MWScript with `target` as its implicit reference, if provided.
+-- An already running script is not restarted or retargeted.
+-- @function [parent=#MWScriptFunctions] startGlobalScript
+-- @param #string recordId
+-- @param openmw.core#GameObject target (optional) The script's implicit reference.
+-- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to select the player's instance of the script. Currently has no effect.
+-- @return #boolean `false` if the script record does not exist; `true` if the start was queued.
+
+---
 -- @type MWScript
 -- @field #string recordId Id of the script
--- @field openmw.core#GameObject object The object the script is attached to.
+-- @field openmw.core#GameObject object The script's implicit reference, or nil.
 -- @field openmw.core#GameObject player The player the script refers to.
 -- @field #boolean isRunning Whether the script is currently running
 -- @field #MWScriptVariables variables Local variables of the script (mutable)
 -- @usage
--- for _, script in ipairs(world.mwscript.getLocalScripts(object)) do
---   -- print the value of local variable 'something' (0 if there is no such variable)
---   print(script.variables.something)
---   -- set the variable 'something' (raises an error if there is no such variable)
---   script.variables.something = 5
+-- local script = world.mwscript.getLocalScript(object)
+-- if script then
+--   print(script.recordId, script.isRunning)
 -- end
 
 ---
