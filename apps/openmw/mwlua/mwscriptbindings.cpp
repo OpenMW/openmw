@@ -9,6 +9,7 @@
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwscript/globalscripts.hpp"
+#include "../mwscript/interpretercontext.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/worldimp.hpp"
@@ -166,6 +167,24 @@ namespace MWLua
             if (scriptId.empty())
                 return sol::nullopt;
             return MWScriptRef{ scriptId, obj };
+        };
+        api["runLocalScript"] = [context](const GObject& obj, sol::optional<GObject> player) -> bool {
+            if (player.has_value() && player->ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("Second argument must either be a player or be missing");
+            const MWWorld::Ptr& object = obj.ptr();
+            const ESM::RefId scriptId = object.getClass().getScript(object);
+            if (scriptId.empty() || !MWBase::Environment::get().getESMStore()->get<ESM::Script>().search(scriptId))
+                return false;
+            context.mLuaManager->addAction(
+                [scriptId, obj] {
+                    const MWWorld::Ptr ptr = obj.ptr();
+                    ptr.getRefData().setLocals(
+                        *MWBase::Environment::get().getESMStore()->get<ESM::Script>().find(scriptId));
+                    MWScript::InterpreterContext interpreterContext(&ptr.getRefData().getLocals(), ptr);
+                    MWBase::Environment::get().getScriptManager()->run(scriptId, interpreterContext);
+                },
+                "runLocalScript");
+            return true;
         };
         api["pauseLocalScript"] = [context](const GObject& obj, sol::optional<GObject> player) -> bool {
             return setLocalScriptEnabled(context, obj, player, false);

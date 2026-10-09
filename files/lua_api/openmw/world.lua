@@ -35,6 +35,14 @@
 -- @return #MWScript, #nil
 
 ---
+-- Runs the MWScript attached to `object` once, even if automatic execution is paused.
+-- Uses the object's local variables and implicit reference without changing its paused state.
+-- @function [parent=#MWScriptFunctions] runLocalScript
+-- @param openmw.core#GameObject object
+-- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to select the player's instance of the script. Currently has no effect.
+-- @return #boolean `false` if no attached script record exists; `true` if execution was queued.
+
+---
 -- Pauses automatic execution of the MWScript attached to `object` without clearing its variables.
 -- The paused state persists across saves. Existing activation interception is unaffected.
 -- @function [parent=#MWScriptFunctions] pauseLocalScript
