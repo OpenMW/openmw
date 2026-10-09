@@ -26,7 +26,7 @@ namespace MWWorld
         ///< Set the iterator to the begin of the script list.
 
         bool getNext(std::pair<ESM::RefId, Ptr>& script);
-        ///< Get next local script
+        ///< Get next local script whose automatic execution is enabled.
         /// @return Did we get a script?
 
         void add(const ESM::RefId& scriptName, const Ptr& ptr);
@@ -47,7 +47,7 @@ namespace MWWorld
         ///< Remove script for given reference (ignored if reference does not have a script listed).
 
         bool isRunning(const ESM::RefId&, const Ptr&) const;
-        ///< Is the local script running?.
+        ///< Is the local script registered for an active object and not paused?
     };
 }
 

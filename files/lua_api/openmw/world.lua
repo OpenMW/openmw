@@ -28,11 +28,27 @@
 -- @map <#string, #number>
 
 ---
--- Returns local mwscript on ``object``. Returns `nil` if the script doesn't exist or is not started.
+-- Returns the local MWScript on `object`, including when paused, or `nil` if it has not been initialized.
 -- @function [parent=#MWScriptFunctions] getLocalScript
 -- @param openmw.core#GameObject object
 -- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to get the script if there is a separate instance for each player. Currently has no effect.
 -- @return #MWScript, #nil
+
+---
+-- Pauses automatic execution of the MWScript attached to `object` without clearing its variables.
+-- The paused state persists across saves. Existing activation interception is unaffected.
+-- @function [parent=#MWScriptFunctions] pauseLocalScript
+-- @param openmw.core#GameObject object
+-- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to select the player's instance of the script. Currently has no effect.
+-- @return #boolean `false` if no attached script record exists; `true` if the change was queued.
+
+---
+-- Resumes automatic execution of the MWScript attached to `object` without resetting its variables.
+-- The script runs only when the engine processes the object.
+-- @function [parent=#MWScriptFunctions] resumeLocalScript
+-- @param openmw.core#GameObject object
+-- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to select the player's instance of the script. Currently has no effect.
+-- @return #boolean `false` if no attached script record exists; `true` if the change was queued.
 
 ---
 -- Returns mutable global variables. In multiplayer, these may be specific to the provided player.
@@ -70,7 +86,7 @@
 -- @field #string recordId Id of the script
 -- @field openmw.core#GameObject object The script's implicit reference, or nil.
 -- @field openmw.core#GameObject player The player the script refers to.
--- @field #boolean isRunning Whether the script is currently running
+-- @field #boolean isRunning For local scripts, whether the object is scheduled for automatic execution and is not paused. For global scripts, whether the script is running.
 -- @field #MWScriptVariables variables Local variables of the script (mutable)
 -- @usage
 -- local script = world.mwscript.getLocalScript(object)

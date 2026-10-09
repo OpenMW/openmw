@@ -9,6 +9,7 @@
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwscript/globalscripts.hpp"
+#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/worldimp.hpp"
 
@@ -20,6 +21,23 @@
 
 namespace MWLua
 {
+    namespace
+    {
+        bool setLocalScriptEnabled(
+            const Context& context, const GObject& obj, sol::optional<GObject> player, bool enabled)
+        {
+            if (player.has_value() && player->ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("Second argument must either be a player or be missing");
+            const MWWorld::Ptr& ptr = obj.ptr();
+            const ESM::RefId scriptId = ptr.getClass().getScript(ptr);
+            if (scriptId.empty() || !MWBase::Environment::get().getESMStore()->get<ESM::Script>().search(scriptId))
+                return false;
+            context.mLuaManager->addAction([obj, enabled] { obj.ptr().getRefData().setLocalScriptEnabled(enabled); },
+                enabled ? "resumeLocalScript" : "pauseLocalScript");
+            return true;
+        }
+    }
+
     struct MWScriptRef
     {
         ESM::RefId mId;
@@ -148,6 +166,12 @@ namespace MWLua
             if (scriptId.empty())
                 return sol::nullopt;
             return MWScriptRef{ scriptId, obj };
+        };
+        api["pauseLocalScript"] = [context](const GObject& obj, sol::optional<GObject> player) -> bool {
+            return setLocalScriptEnabled(context, obj, player, false);
+        };
+        api["resumeLocalScript"] = [context](const GObject& obj, sol::optional<GObject> player) -> bool {
+            return setLocalScriptEnabled(context, obj, player, true);
         };
 
         // In multiplayer it will be possible to have several instances (per player) of a single script,
