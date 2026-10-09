@@ -41,7 +41,7 @@
 -- @return #MWScriptVariables
 
 ---
--- Returns global mwscript with given recordId. Returns `nil` if the script doesn't exist or is not started.
+-- Returns the global MWScript with the given recordId, including when stopped, or `nil` if no instance exists.
 -- Currently there can be only one instance of each mwscript, but in multiplayer it will be possible to have a separate instance per player.
 -- @function [parent=#MWScriptFunctions] getGlobalScript
 -- @param #string recordId
@@ -56,6 +56,14 @@
 -- @param openmw.core#GameObject target (optional) The script's implicit reference.
 -- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to select the player's instance of the script. Currently has no effect.
 -- @return #boolean `false` if the script record does not exist; `true` if the start was queued.
+
+---
+-- Stops a global MWScript without clearing its variables.
+-- The stopped instance remains accessible through `getGlobalScript`.
+-- @function [parent=#MWScriptFunctions] stopGlobalScript
+-- @param #string recordId
+-- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to select the player's instance of the script. Currently has no effect.
+-- @return #boolean `false` if the script record does not exist; `true` if the stop was queued.
 
 ---
 -- @type MWScript

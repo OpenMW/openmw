@@ -128,6 +128,19 @@ namespace MWLua
                 "startGlobalScript");
             return true;
         };
+        api["stopGlobalScript"] = [context](std::string_view recordId, sol::optional<GObject> player) -> bool {
+            if (player.has_value() && player->ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("Second argument must either be a player or be missing");
+            ESM::RefId scriptId = ESM::RefId::deserializeText(recordId);
+            if (!MWBase::Environment::get().getESMStore()->get<ESM::Script>().search(scriptId))
+                return false;
+            context.mLuaManager->addAction(
+                [scriptId] {
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().removeScript(scriptId);
+                },
+                "stopGlobalScript");
+            return true;
+        };
         api["getLocalScript"] = [](const GObject& obj, sol::optional<GObject> player) -> sol::optional<MWScriptRef> {
             if (player.has_value() && player->ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
                 throw std::runtime_error("Second argument must either be a player or be missing");
