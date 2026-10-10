@@ -138,6 +138,7 @@ Programmers
     Julien Voisin (jvoisin/ap0)
     Karl-Felix Glatzer (k1ll)
     Kevin Poitra (PuppyKevin)
+    Kirill Blagodarov (blagish)
     Koncord
     Kurnevsky Evgeny (kurnevsky)
     Lars Söderberg (Lazaroth)
