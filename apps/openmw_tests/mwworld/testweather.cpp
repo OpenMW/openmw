@@ -40,12 +40,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 2 and 26, 11:57
+            // Days 2 and 9626, 11:57
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 2 + 11.0f + 56.0f / 60.0f);
             timeStampAfter += (24.0f * 2 + 11.0f + 58.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 26 + 11.0f + 56.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 26 + 11.0f + 58.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9626 + 11.0f + 56.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9626 + 11.0f + 58.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -77,12 +77,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 5 and 29, 0:00
+            // Days 5 and 9629, 0:00
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 4 + 23.0f + 59.0f / 60.0f);
             timeStampAfter += (24.0f * 5 + 0.0f + 1.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 28 + 23.0f + 59.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 29 + 0.0f + 1.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9628 + 23.0f + 59.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9629 + 0.0f + 1.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -114,12 +114,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 8 and 32, 0:00
+            // Days 8 and 9632, 0:00
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 7 + 23.0f + 59.0f / 60.0f);
             timeStampAfter += (24.0f * 8 + 0.0f + 1.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 31 + 23.0f + 59.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 32 + 0.0f + 1.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9631 + 23.0f + 59.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9632 + 0.0f + 1.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -151,12 +151,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 11 and 35, 0:00
+            // Days 11 and 9635, 0:00
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 10 + 23.0f + 59.0f / 60.0f);
             timeStampAfter += (24.0f * 11 + 0.0f + 1.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 34 + 23.0f + 59.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 35 + 0.0f + 1.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9634 + 23.0f + 59.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9635 + 0.0f + 1.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -188,12 +188,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 14 and 38, 0:00
+            // Days 14 and 9638, 0:00
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 13 + 23.0f + 59.0f / 60.0f);
             timeStampAfter += (24.0f * 14 + 0.0f + 1.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 37 + 23.0f + 59.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 38 + 0.0f + 1.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9637 + 23.0f + 59.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9638 + 0.0f + 1.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -225,12 +225,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 17 and 41, 2:57
+            // Days 17 and 9641, 2:57
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 17 + 2.0f + 56.0f / 60.0f);
             timeStampAfter += (24.0f * 17 + 2.0f + 58.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 41 + 2.0f + 56.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 41 + 2.0f + 58.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9641 + 2.0f + 56.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9641 + 2.0f + 58.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -262,12 +262,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 20 and 44, 5:57
+            // Days 20 and 9644, 5:57
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 20 + 5.0f + 56.0f / 60.0f);
             timeStampAfter += (24.0f * 20 + 5.0f + 58.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 44 + 5.0f + 56.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 44 + 5.0f + 58.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9644 + 5.0f + 56.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9644 + 5.0f + 58.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -299,12 +299,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 35.0f;
 
-            // Days 23 and 47, 8:57
+            // Days 23 and 9647, 8:57
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 23 + 8.0f + 56.0f / 60.0f);
             timeStampAfter += (24.0f * 23 + 8.0f + 58.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 47 + 8.0f + 56.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 47 + 8.0f + 58.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9647 + 8.0f + 56.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9647 + 8.0f + 58.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -338,12 +338,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 50.0f;
 
-            // Days 2 and 26, 14:19
+            // Days 2 and 9626, 14:19
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 2 + 14.0f + 18.0f / 60.0f);
             timeStampAfter += (24.0f * 2 + 14.0f + 20.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 26 + 14.0f + 18.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 26 + 14.0f + 20.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9626 + 14.0f + 18.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9626 + 14.0f + 20.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -375,12 +375,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 50.0f;
 
-            // Days 5 and 29, 0:00
+            // Days 5 and 9629, 0:00
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 4 + 23.0f + 59.0f / 60.0f);
             timeStampAfter += (24.0f * 5 + 0.0f + 1.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 28 + 23.0f + 59.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 29 + 0.0f + 1.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9628 + 23.0f + 59.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9629 + 0.0f + 1.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -412,12 +412,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 50.0f;
 
-            // Days 8 and 32, 0:00
+            // Days 8 and 9632, 0:00
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 7 + 23.0f + 59.0f / 60.0f);
             timeStampAfter += (24.0f * 8 + 0.0f + 1.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 31 + 23.0f + 59.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 32 + 0.0f + 1.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9631 + 23.0f + 59.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9632 + 0.0f + 1.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -449,12 +449,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 50.0f;
 
-            // Days 11 and 35, 0:00
+            // Days 11 and 9635, 0:00
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 10 + 23.0f + 59.0f / 60.0f);
             timeStampAfter += (24.0f * 11 + 0.0f + 1.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 34 + 23.0f + 59.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 35 + 0.0f + 1.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9634 + 23.0f + 59.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9635 + 0.0f + 1.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -486,12 +486,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 50.0f;
 
-            // Days 14 and 38, 0:00
+            // Days 14 and 9638, 0:00
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 13 + 23.0f + 59.0f / 60.0f);
             timeStampAfter += (24.0f * 14 + 0.0f + 1.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 37 + 23.0f + 59.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 38 + 0.0f + 1.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9637 + 23.0f + 59.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9638 + 0.0f + 1.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -523,12 +523,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 50.0f;
 
-            // Days 17 and 41, 3:31
+            // Days 17 and 9641, 3:31
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 17 + 3.0f + 30.0f / 60.0f);
             timeStampAfter += (24.0f * 17 + 3.0f + 32.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 41 + 3.0f + 30.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 41 + 3.0f + 32.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9641 + 3.0f + 30.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9641 + 3.0f + 32.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -560,12 +560,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 50.0f;
 
-            // Days 20 and 44, 7:07
+            // Days 20 and 9644, 7:07
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 20 + 7.0f + 6.0f / 60.0f);
             timeStampAfter += (24.0f * 20 + 7.0f + 8.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 44 + 7.0f + 6.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 44 + 7.0f + 8.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9644 + 7.0f + 6.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9644 + 7.0f + 8.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
@@ -597,12 +597,12 @@ namespace MWWorld
             float sunsetHour = 18.0f;
             float axisOffset = 50.0f;
 
-            // Days 23 and 47, 10:43
+            // Days 23 and 9647, 10:43
             TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
             timeStampBefore += (24.0f * 23 + 10.0f + 42.0f / 60.0f);
             timeStampAfter += (24.0f * 23 + 10.0f + 44.0f / 60.0f);
-            timeStampBeforePostLoop += (24.0f * 47 + 10.0f + 42.0f / 60.0f);
-            timeStampAfterPostLoop += (24.0f * 47 + 10.0f + 44.0f / 60.0f);
+            timeStampBeforePostLoop += (24.0f * 9647 + 10.0f + 42.0f / 60.0f);
+            timeStampAfterPostLoop += (24.0f * 9647 + 10.0f + 44.0f / 60.0f);
 
             MWWorld::MoonModel moon
                 = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
