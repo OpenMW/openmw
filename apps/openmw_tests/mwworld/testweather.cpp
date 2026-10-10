@@ -658,6 +658,50 @@ namespace MWWorld
             EXPECT_GT(afterStatePostLoop.mMoonAlpha, 0.0f);
         }
 
+        TEST(MWWorldWeatherTest, moonWithoutAHandoverShouldNotJumpAtTheEndOfTheLoop)
+        {
+            float dailyIncrement = 0.4f;
+            float speed = 0.15f;
+            float fadeEndAngle = 10.0f;
+            float fadeStartAngle = 50.0f;
+            float moonShadowEarlyFadeAngle = 5.0f;
+            float fadeInStart = 14.0f;
+            float fadeInFinish = 15.0f;
+            float fadeOutStart = 7.0f;
+            float fadeOutFinish = 10.0f;
+            float sunriseHour = 6.0f;
+            float sunsetHour = 18.0f;
+            float axisOffset = 35.0f;
+
+            // Days 24 and 48, 23:59. Visible at midnight on the last day of the cycle, so no handover.
+            TimeStamp timeStampBefore, timeStampAfter, timeStampBeforePostLoop, timeStampAfterPostLoop;
+            timeStampBefore += (24.0 * 24 + 23.0 + 59.0 / 60.0);
+            timeStampAfter += (24.0 * 25);
+            timeStampBeforePostLoop += (24.0 * 48 + 23.0 + 59.0 / 60.0);
+            timeStampAfterPostLoop += (24.0 * 49);
+
+            MWWorld::MoonModel moon
+                = MWWorld::MoonModel(fadeInStart, fadeInFinish, fadeOutStart, fadeOutFinish, axisOffset, speed,
+                    dailyIncrement, fadeStartAngle, fadeEndAngle, moonShadowEarlyFadeAngle, sunriseHour, sunsetHour);
+
+            MWRender::MoonState beforeState = moon.calculateState(timeStampBefore);
+            MWRender::MoonState afterState = moon.calculateState(timeStampAfter);
+            MWRender::MoonState beforeStatePostLoop = moon.calculateState(timeStampBeforePostLoop);
+            MWRender::MoonState afterStatePostLoop = moon.calculateState(timeStampAfterPostLoop);
+
+            // Under minimum speed, so 7.83 degrees an hour.
+            float oneMinuteOfRotation = 180.0f / 23.0f / 60.0f;
+
+            EXPECT_NEAR(afterState.mRotationFromHorizon, beforeState.mRotationFromHorizon, oneMinuteOfRotation);
+            EXPECT_NEAR(
+                afterStatePostLoop.mRotationFromHorizon, beforeStatePostLoop.mRotationFromHorizon, oneMinuteOfRotation);
+
+            EXPECT_GT(beforeState.mMoonAlpha, 0.0f);
+            EXPECT_GT(afterState.mMoonAlpha, 0.0f);
+            EXPECT_GT(beforeStatePostLoop.mMoonAlpha, 0.0f);
+            EXPECT_GT(afterStatePostLoop.mMoonAlpha, 0.0f);
+        }
+
         // FIXED RISE HOURS
 
         TEST(MWWorldWeatherTest, moonWithHalfDayIncrementShouldRiseAtTheSameHourEveryDay)

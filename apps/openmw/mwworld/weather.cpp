@@ -437,8 +437,8 @@ namespace MWWorld
     void MoonModel::buildCycle()
     {
         // The moon changes to the next day's rise hour when it's out of sight, so each day depends
-        // on the previous. We calculate an extra week to make the cached cycle accurate.
-        constexpr int firstDay = -7;
+        // on the previous. We calculate an extra cycle to make the cached cycle accurate.
+        constexpr int firstDay = 1 - sDaysPerCycle;
         float currentRiseHour = riseHour(firstDay);
 
         for (int day = firstDay + 1; day <= sDaysPerCycle; ++day)
