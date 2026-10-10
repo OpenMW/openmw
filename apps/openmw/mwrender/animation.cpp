@@ -1922,13 +1922,13 @@ namespace MWRender
                     mGlowLight = nullptr;
                 }
 
-                osg::ref_ptr<SceneUtil::Light> light(new SceneUtil::Light);
-                light->setDiffuse(osg::Vec4f(0, 0, 0, 0));
-                light->setSpecular(osg::Vec4f(0, 0, 0, 0));
-                light->setAmbient(osg::Vec4f(1.5f, 1.5f, 1.5f, 1.f));
+                SceneUtil::Light light;
+                light.setDiffuse(osg::Vec4f(0, 0, 0, 0));
+                light.setSpecular(osg::Vec4f(0, 0, 0, 0));
+                light.setAmbient(osg::Vec4f(1.5f, 1.5f, 1.5f, 1.f));
 
                 bool isExterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
-                SceneUtil::configureLight(light, radius, isExterior);
+                SceneUtil::configureLight(&light, radius, isExterior);
 
                 mGlowLight = new SceneUtil::LightSource;
                 mGlowLight->setNodeMask(Mask_Lighting);

@@ -152,7 +152,7 @@ namespace CSVRender
             = new SceneUtil::LightManager(SceneUtil::LightSettings{}, resourceSystem.get());
         lightMgr->setLightingMask(Mask_Lighting);
 
-        mSunLight = new SceneUtil::Light;
+        mSunLight = std::make_shared<SceneUtil::Light>();
         mSunLight->setDiffuse(osg::Vec4f(0, 0, 0, 1));
         mSunLight->setAmbient(osg::Vec4f(0, 0, 0, 1));
         mSunLight->setSpecular(osg::Vec4f(0, 0, 0, 0));

@@ -115,14 +115,14 @@ namespace SceneUtil
         const SceneUtil::LightCommon& esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
     {
         osg::ref_ptr<SceneUtil::LightSource> lightSource(new SceneUtil::LightSource);
-        osg::ref_ptr<SceneUtil::Light> light(new SceneUtil::Light);
+        SceneUtil::Light light;
         lightSource->setNodeMask(lightMask);
 
         // The minimum scene light radius is 16 in Morrowind
         const float radius = std::max(esmLight.mRadius, 16.f);
         lightSource->setRadius(radius);
 
-        configureLight(light, radius, isExterior);
+        configureLight(&light, radius, isExterior);
 
         osg::Vec4f diffuse = esmLight.mColor;
         osg::Vec4f specular = esmLight.mColor; // ESM format doesn't provide specular
@@ -133,15 +133,15 @@ namespace SceneUtil
             // Using specular lighting for negative lights is unreasonable
             specular = osg::Vec4f();
         }
-        light->setDiffuse(diffuse);
-        light->setAmbient(ambient);
-        light->setSpecular(specular);
+        light.setDiffuse(diffuse);
+        light.setAmbient(ambient);
+        light.setSpecular(specular);
 
         lightSource->setLight(light);
 
         osg::ref_ptr<SceneUtil::LightController> ctrl(new SceneUtil::LightController);
-        ctrl->setDiffuse(light->getDiffuse());
-        ctrl->setSpecular(light->getSpecular());
+        ctrl->setDiffuse(light.getDiffuse());
+        ctrl->setSpecular(light.getSpecular());
         if (esmLight.mFlicker)
             ctrl->setType(SceneUtil::LightController::LT_Flicker);
         if (esmLight.mFlickerSlow)

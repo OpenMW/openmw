@@ -320,7 +320,7 @@ namespace MWRender
 
         std::shared_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
-        osg::ref_ptr<SceneUtil::Light> mSunLight;
+        std::shared_ptr<SceneUtil::Light> mSunLight;
 
         DetourNavigator::Navigator& mNavigator;
         std::unique_ptr<NavMesh> mNavMesh;

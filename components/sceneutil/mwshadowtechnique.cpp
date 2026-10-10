@@ -486,10 +486,10 @@ MWShadowTechnique::LightData::LightData(MWShadowTechnique::ViewDependentData* vd
 {
 }
 
-void MWShadowTechnique::LightData::setLightData(osg::RefMatrix* lm, const Light* l, const osg::Matrixd& modelViewMatrix)
+void MWShadowTechnique::LightData::setLightData(osg::RefMatrix* lm, std::shared_ptr<const Light> l, const osg::Matrixd& modelViewMatrix)
 {
     lightMatrix = lm;
-    light = l;
+    light = std::move(l);
 
     lightPos = light->getPosition();
     directionalLight = (light->getPosition().w()== 0.0);
