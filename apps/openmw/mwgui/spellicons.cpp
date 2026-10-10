@@ -155,9 +155,8 @@ namespace MWGui
                     const ESM::Attribute& attribute = *store.get<ESM::Attribute>().find(arg);
                     desc += " (" + attribute.mName + ')';
                 }
-                // Show the range while a continuous effect still has its initial zero magnitude and no time has passed.
-                const bool showRange = !(effect.mData.mFlags & ESM::MagicEffect::AppliedOnce)
-                    && source.mMagnitude == 0.f && source.mTimeLeft == source.mDuration;
+                // Show the range for continuous effects.
+                const bool showRange = !(effect.mData.mFlags & ESM::MagicEffect::AppliedOnce);
                 const float minMagnitude = showRange ? source.mMinMagnitude : source.mMagnitude;
                 const float maxMagnitude = showRange ? source.mMaxMagnitude : source.mMagnitude;
                 desc += printEffectMagnitude(minMagnitude, maxMagnitude, effect.getMagnitudeDisplayType());
