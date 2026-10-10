@@ -274,6 +274,9 @@ namespace MWMechanics
             if (!actorRefData.getBaseNode())
                 return;
 
+            if (!targetActor.getClass().isActor())
+                return;
+
             if (targetActor.getClass().getCreatureStats(targetActor).isDead())
                 return;
 
