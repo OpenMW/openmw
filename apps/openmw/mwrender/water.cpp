@@ -546,7 +546,8 @@ namespace MWRender
             stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
             stateset->addUniform(new osg::Uniform("waterSurface", true));
             stateset->setRenderBinDetails(MWRender::RenderBin_DepthSorted, "DepthSortedBin");
-            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
+            // LESS keeps water clamped to the far plane from drawing over the sky.
+            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth(osg::Depth::LESS);
             depth->setWriteMask(false);
             stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
