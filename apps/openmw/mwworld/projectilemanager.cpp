@@ -35,7 +35,6 @@
 
 #include <components/settings/values.hpp>
 
-#include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -80,19 +79,14 @@ namespace
         return speed;
     }
 
-    // Morrowind overestimates the speed of a target it leads by this factor
-    constexpr float targetSpeedMultiplier = 1.25f;
-
-    // Like in Morrowind, only moving targets that are far enough away from the caster are led.
-    // Morrowind also requires the target to have moved more than 1 unit in the last frame,
-    // which depends on the frame rate, so only the speed is checked here.
+    // Only lead on targets that are far enough away ( > 512 units) that have moved
+    // more than 1 unit per frame. A high estimate of 30 fps is taken here
     bool shouldLeadTarget(const osg::Vec3f& casterPos, const MWMechanics::MovingTarget& target)
     {
         constexpr float minLeadDistance = 512.f;
-        constexpr float minLeadSpeed = 1.f;
+        constexpr float minLeadSpeed = 30.f;
 
-        return target.mVelocity.length() * targetSpeedMultiplier > minLeadSpeed
-            && (target.mPosition - casterPos).length() > minLeadDistance;
+        return target.mVelocity.length() > minLeadSpeed && (target.mPosition - casterPos).length() > minLeadDistance;
     }
 
     // Predict where a moving target will be when a projectile launched from launchPos reaches it.
@@ -101,6 +95,9 @@ namespace
     osg::Vec3f predictHitPosition(
         const osg::Vec3f& launchPos, const MWMechanics::MovingTarget& target, float projectileSpeed)
     {
+        // Morrowind overestimates the speed of a target it leads by this factor
+        constexpr float targetSpeedMultiplier = 1.25f;
+
         osg::Vec2f direction(target.mVelocity.x(), target.mVelocity.y());
         if (projectileSpeed <= 0.f || direction.normalize() <= 1e-6f)
             return target.mPosition;
@@ -391,18 +388,11 @@ namespace MWWorld
 
         if (movingTarget.has_value() && caster.getClass().isActor())
         {
-
             osg::Vec3f aimPosition = movingTarget->mPosition;
             if (shouldLeadTarget(caster.getRefData().getPosition().asVec3(), *movingTarget))
             {
                 const float speed = getMagicBoltSpeed(state.mSpeed, caster, Settings::game().mNormaliseRaceSpeed);
                 aimPosition = predictHitPosition(pos, *movingTarget, speed);
-
-                const MWWorld::CellStore* cell = caster.getCell();
-                if (cell->isExterior())
-                    aimPosition.z() = MWBase::Environment::get().getWorld()->getTerrainHeightAt(
-                                          aimPosition, cell->getCell()->getWorldSpace())
-                        + movingTarget->mHalfHeight;
             }
 
             const osg::Vec3f direction = aimPosition - pos;

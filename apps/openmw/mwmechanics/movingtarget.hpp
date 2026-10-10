@@ -10,7 +10,6 @@ namespace MWMechanics
     {
         osg::Vec3f mPosition; // Point to aim at
         osg::Vec3f mVelocity;
-        float mHalfHeight;
     };
 }
 

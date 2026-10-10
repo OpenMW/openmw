@@ -2982,13 +2982,19 @@ namespace MWWorld
         MWMechanics::CastSpell cast(actor, target, false, scriptedSpell);
         cast.mHitPosition = hitPosition;
 
-        // AI casters aim their magic bolts at their combat target, leading it if it's moving
-        if (!casterIsPlayer && !scriptedSpell)
+        // AI casters aim their magic bolts at their combat target, leading if it's moving
+        if (!casterIsPlayer)
         {
-            MWWorld::Ptr combatTarget;
-            if (stats.getAiSequence().getCombatTarget(combatTarget))
-                cast.mMovingTarget = MWMechanics::MovingTarget{ mPhysics->getCollisionObjectPosition(combatTarget),
-                    getActorVelocity(*mPhysics, combatTarget), mPhysics->getHalfExtents(combatTarget).z() };
+            MWWorld::Ptr boltTarget;
+            if (scriptedSpell)
+                boltTarget = target;
+            else
+                stats.getAiSequence().getCombatTarget(boltTarget);
+
+            // We need to check that we have a target, that it is an actor with physics to prevent aiming at (0, 0, 0)
+            if (!boltTarget.isEmpty() && boltTarget.getClass().isActor() && mPhysics->getActor(boltTarget) != nullptr)
+                cast.mMovingTarget = MWMechanics::MovingTarget{ mPhysics->getCollisionObjectPosition(boltTarget),
+                    getActorVelocity(*mPhysics, boltTarget) };
         }
 
         if (!selectedSpell.empty())
