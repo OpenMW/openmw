@@ -40,7 +40,7 @@ namespace Terrain
         /// @note Not thread safe.
         void unloadCell(int x, int y) override;
 
-        View* createView() override;
+        std::unique_ptr<View> createView() override;
 
     protected:
         bool isGridEmpty() const { return mGrid.empty(); }
