@@ -21,7 +21,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#SpellCasting] #number version
-        version = 0,
+        version = 1,
 
         --- (Local only) Apply new magic effects on this actor.
         -- Invokes handlers added via addApplyMagicEffectHandler. The default handler adds effects as a new active spell using Actor.activeSpells(self):add(options),
