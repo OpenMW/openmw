@@ -11,7 +11,7 @@ OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
 * IRC: [#openmw on irc.libera.chat](https://web.libera.chat/#openmw)
 * Discord: [official server](https://discord.com/servers/openmw-260439894298460160)
 * Matrix #openmw-space:openmw.org
-* _Note_: IRC/Discord/Matrix are bridged to each other.
+* _Note_: IRC, Discord, and Matrix are bridged to each other.
 
 Font Licenses:
 * DejaVuLGCSansMono.ttf: custom (see [files/data/fonts/DejaVuFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/DejaVuFontLicense.txt) for more information)
@@ -30,8 +30,8 @@ Platform Support
 
 The officially supported platforms at this time are:
 
-- Windows
-- macOS 14.8+
+- Windows 10 or later
+- macOS 14.8 or later
 - Linux
 
 We do not support 32-bit platforms.
