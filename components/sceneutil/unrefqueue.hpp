@@ -1,9 +1,7 @@
 #ifndef OPENMW_COMPONENTS_UNREFQUEUE_H
 #define OPENMW_COMPONENTS_UNREFQUEUE_H
 
-#include <osg/Referenced>
-#include <osg/ref_ptr>
-
+#include <memory>
 #include <vector>
 
 namespace SceneUtil
@@ -16,9 +14,7 @@ namespace SceneUtil
     {
     public:
         /// Adds an object to the list of objects to be unreferenced. Call from the main thread.
-        void push(osg::ref_ptr<osg::Referenced>&& obj) { mObjects.push_back(std::move(obj)); }
-
-        void push(const osg::ref_ptr<osg::Referenced>& obj) { mObjects.push_back(obj); }
+        void push(std::shared_ptr<void>&& obj) { mObjects.push_back(std::move(obj)); }
 
         /// Adds a WorkItem to the given WorkQueue that will clear the list of objects in a worker thread,
         /// thus unreferencing them. Call from the main thread.
@@ -27,7 +23,7 @@ namespace SceneUtil
         std::size_t getSize() const { return mObjects.size(); }
 
     private:
-        std::vector<osg::ref_ptr<osg::Referenced>> mObjects;
+        std::vector<std::shared_ptr<void>> mObjects;
     };
 }
 
