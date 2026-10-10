@@ -124,6 +124,23 @@ Dealing with regressions
 
 The master branch should always be in a working state that is not worse than the previous release in any way. If a regression is found, the first and foremost priority should be to get the regression fixed quickly, either by reverting the change that caused it or finding a better solution. Please avoid leaving the project in the 'broken' state for an extensive period of time while proper solutions are found. If the solution takes more than a day or so then it is usually better to revert the offending change first and reapply it later when fixed.
 
+Fork CI
+==========
+
+Some caveats with the CI jobs on a fork:
+
+macOS runners will not be available so you will not be able to verify macOS jobs run/build.
+
+For the Ninja jobs, you will need to [create a fine-grained personal access token (PAT)](https://docs.gitlab.com/auth/tokens/fine_grained_access_tokens/#create-a-fine-grained-personal-access-token) with following permissions:
+
+* /projects/${project}/repository/commits/:sha/statuses
+* /projects/${project}/pipelines/:pipeline_id
+* /projects/${project}/repository/commits/:sha
+* /projects/${project}/pipelines/:pipeline_id/jobs
+* /projects/${project}/jobs/:job_id/play
+
+And then set it as a [CI Secret for your fork](https://docs.gitlab.com/ci/variables/#for-a-project) called `GITLAB_ACCESS_TOKEN`.
+
 Other resources
 ===============
 
