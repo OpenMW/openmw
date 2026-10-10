@@ -30,7 +30,7 @@ namespace Terrain
         void operator()(ChunkKey, osg::Object* obj)
         {
             TerrainDrawable* drawable = static_cast<TerrainDrawable*>(obj);
-            CompositeMap* composite = drawable->getCompositeMap();
+            const CompositeMap* composite = drawable->getCompositeMap().get();
             if (composite && composite->mTexture)
                 mSceneManager->applyFilterSettings(composite->mTexture);
         }
@@ -278,12 +278,12 @@ namespace Terrain
         {
             if (useCompositeMap)
             {
-                osg::ref_ptr<CompositeMap> compositeMap = new CompositeMap;
+                auto compositeMap = std::make_shared<CompositeMap>();
                 compositeMap->mTexture = createCompositeMapRTT();
 
                 createCompositeMapGeometry(chunkSize, chunkCenter, osg::Vec4f(0, 0, 1, 1), *compositeMap);
 
-                mCompositeMapRenderer->addCompositeMap(compositeMap.get(), false);
+                mCompositeMapRenderer->addCompositeMap(compositeMap, false);
 
                 geometry->setCompositeMap(compositeMap);
                 geometry->setCompositeMapRenderer(mCompositeMapRenderer);
