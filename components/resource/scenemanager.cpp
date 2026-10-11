@@ -708,7 +708,7 @@ namespace Resource
                     osgAnimation::RigGeometry* foundRigGeometry = static_cast<osgAnimation::RigGeometry*>(foundRigNode);
 
                     osg::ref_ptr<SceneUtil::RigGeometryHolder> newRig
-                        = new SceneUtil::RigGeometryHolder(*foundRigGeometry, osg::CopyOp::DEEP_COPY_ALL);
+                        = new SceneUtil::RigGeometryHolder(*foundRigGeometry, osg::CopyOp::SHALLOW_COPY);
 
                     if (foundRigGeometry->getStateSet())
                         newRig->setStateSet(foundRigGeometry->getStateSet());
