@@ -674,7 +674,7 @@ namespace MWGui
         mGenerateClassResponses[2] = step.mResponses[2].mSpecialization;
 
         InfoBoxDialog::ButtonList buttons;
-        mGenerateClassQuestionDialog->setText(std::string(step.mQuestion));
+        mGenerateClassQuestionDialog->setText(step.mQuestion);
         buttons.emplace_back(step.mResponses[0].mAnswer);
         buttons.emplace_back(step.mResponses[1].mAnswer);
         buttons.emplace_back(step.mResponses[2].mAnswer);

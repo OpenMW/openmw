@@ -3,6 +3,7 @@
 
 #include <array>
 #include <memory>
+#include <string_view>
 
 #include <MyGUI_EditBox.h>
 
@@ -24,7 +25,7 @@ namespace MWGui
 
         typedef std::vector<std::string> ButtonList;
 
-        void setText(const std::string& str);
+        void setText(std::string_view str);
         std::string getText() const;
         void setButtons(ButtonList& buttons);
 

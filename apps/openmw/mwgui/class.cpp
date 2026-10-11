@@ -397,9 +397,9 @@ namespace MWGui
         mControllerButtons.mA = "#{Interface:Select}";
     }
 
-    void InfoBoxDialog::setText(const std::string& str)
+    void InfoBoxDialog::setText(std::string_view str)
     {
-        mText->setCaption(str);
+        mText->setCaption(MyGUI::UString(str));
         mTextBox->setVisible(!str.empty());
         fitToText(mText);
     }
