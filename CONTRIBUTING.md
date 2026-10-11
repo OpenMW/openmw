@@ -4,7 +4,7 @@ How to contribute to OpenMW
 Non-Coding
 ==============
 
-You can help by triaging the issues list. Check for unconfirmed bugs and try to reproduce them on your end, working out any details that may be necessary. Check for bugs that do not conform to [Bug Reporting Guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) and improve them to do so!
+You can help by triaging the issues list. Check for unconfirmed bugs and try to reproduce them on your end, working out any details that may be necessary. [See our Bug Reporting Guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) on how to improve bug reports.
 
 Other non-coding options include:
 
@@ -25,7 +25,7 @@ To contribute code to OpenMW:
 6. Read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference), especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards), and the rest of this document.
 7. Find an issue that interests you on the [issue tracker](https://gitlab.com/OpenMW/openmw/-/issues/). [The ones tagged "Beginner"](https://gitlab.com/OpenMW/openmw/-/issues/?scope=all&utf8=✓&state=opened&label_name=Beginner) may be good starting points.
 
-Ideally, before you start coding, reach out on [Discord](https://discord.com/servers/openmw-260439894298460160), [IRC](https://web.libera.chat/#openmw), or Matrix #openmw-space:openmw.org in the development channel (all three are bridged to each other) to discuss the issue and how you plan to tackle it. Alternatively, start the discussion in the GitLab issue itself.
+Ideally, before you start coding, reach out on [Discord](https://discord.com/servers/openmw-260439894298460160), [IRC](https://web.libera.chat/#openmw), or [Matrix #openmw-space:openmw.org](#openmw-space:openmw.org) in the development channel (all three are bridged to each other) to discuss the issue and how you plan to tackle it. Alternatively, start the discussion in the GitLab issue itself.
 
 Currently, we are focused on completing the Morrowind game experience and general polishing. Features outside this scope may be approved in some cases, but you should start a discussion first.
 
@@ -43,7 +43,7 @@ Merge request guidelines
 * Make sure each of your changes has a clear objective. Unnecessary changes may lead to merge conflicts, clutter the commit history and slow down review. Code formatting 'fixes' should be avoided, unless you were already changing that particular line anyway.
 * When pulling changes from master, prefer rebase over merge. Consider using a merge if there are conflicts or for long-running MRs.
 * Don't rebase without a good reason. Some good reasons include cleaning up the commit history, resolving merge conflicts, and pulling in related changes or build pipeline changes.
-* Review threads should be resolved by the thread author so that they can confirm that their concerns have been adequately dealt with. This rule does not apply to threads strictly using [suggested code changes](https://docs.gitlab.com/user/project/merge_requests/reviews/suggestions/)—if applied, they can be left as resolved.
+* Review threads should be resolved by the thread author so that they can confirm that their concerns have been adequately dealt with. This rule does not apply to threads consisting solely of [suggested code changes](https://docs.gitlab.com/user/project/merge_requests/reviews/suggestions/)—if applied, they can be left as resolved.
 
 Guidelines for original engine "fixes"
 =================================
@@ -127,7 +127,7 @@ The master branch should always be in a working state that is not worse than the
 Fork CI
 ==========
 
-Some caveats with the CI jobs on a fork:
+There are a few caveats to running CI jobs on a fork:
 
 macOS runners will not be available so you will not be able to verify macOS jobs run/build.
 

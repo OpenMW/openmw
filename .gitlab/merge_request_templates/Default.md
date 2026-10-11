@@ -19,7 +19,7 @@ Raise as a draft if incomplete.
 
 - [ ] I have read the [CONTRIBUTING guidelines](https://gitlab.com/OpenMW/openmw/-/blob/master/CONTRIBUTING.md)
 - [ ] My code runs locally
-- [ ] My code passes CI on my fork (*Note*: If Ninja jobs fail, check the error results for setup instructions.)
+- [ ] My code passes CI on my fork <!--(*Note*: If Ninja jobs fail, check the error results for setup instructions.)--->
 
 <!--
 List any remaining tasks or questions for the reviewers.
