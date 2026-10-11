@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <limits>
-#include <optional>
 
 #include <osg/BlendFunc>
 #include <osg/Matrix>
@@ -113,17 +112,12 @@ namespace
             unsigned int state = MWBase::Environment::get().getWorld()->getNightDayMode();
             const unsigned int newState = node->getNumChildren() > state ? state : 0;
 
-            if (newState != mCurrentState)
-            {
-                mCurrentState = newState;
+            const osg::Switch::ValueList& values = node->getValueList();
+            if (newState >= values.size() || !values[newState] || std::count(values.begin(), values.end(), true) != 1)
                 node->setSingleChildOn(newState);
-            }
 
             traverse(node, nv);
         }
-
-    private:
-        std::optional<unsigned int> mCurrentState;
     };
 
     class AddSwitchCallbacksVisitor : public osg::NodeVisitor
