@@ -244,7 +244,7 @@ namespace MWLua
                 { "FirstQuarter", Phase::FirstQuarter }, { "WaxingGibbous", Phase::WaxingGibbous } }));
 
         api["getCurrent"] = overloadForActiveCell(
-            []() -> const MWWorld::Weather* { return &MWBase::Environment::get().getWorld()->getCurrentWeather(); });
+            []() -> const MWWorld::Weather* { return MWBase::Environment::get().getWorld()->getCurrentWeather(); });
         api["getNext"] = overloadForActiveCell(
             []() -> const MWWorld::Weather* { return MWBase::Environment::get().getWorld()->getNextWeather(); });
         api["getTransition"] = overloadWeatherGetter(&MWBase::World::getWeatherTransition);

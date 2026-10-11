@@ -1796,10 +1796,13 @@ namespace MWWorld
 
     int World::getCurrentWeatherScriptId() const
     {
-        return mWeatherManager->getWeather().mScriptId;
+        const MWWorld::Weather* weather = getCurrentWeather();
+        if (weather != nullptr)
+            return weather->mScriptId;
+        return -1;
     }
 
-    const MWWorld::Weather& World::getCurrentWeather() const
+    const MWWorld::Weather* World::getCurrentWeather() const
     {
         return mWeatherManager->getWeather();
     }
