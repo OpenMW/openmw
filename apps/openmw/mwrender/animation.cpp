@@ -1928,7 +1928,7 @@ namespace MWRender
                 light.setAmbient(osg::Vec4f(1.5f, 1.5f, 1.5f, 1.f));
 
                 bool isExterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
-                SceneUtil::configureLight(&light, radius, isExterior);
+                SceneUtil::configureLight(light, radius, isExterior);
 
                 mGlowLight = new SceneUtil::LightSource;
                 mGlowLight->setNodeMask(Mask_Lighting);

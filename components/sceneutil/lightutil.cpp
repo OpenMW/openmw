@@ -42,7 +42,7 @@ namespace
 namespace SceneUtil
 {
 
-    void configureLight(SceneUtil::Light* light, float radius, bool isExterior)
+    void configureLight(SceneUtil::Light& light, float radius, bool isExterior)
     {
         float quadraticAttenuation = 0.f;
         float linearAttenuation = 0.f;
@@ -87,9 +87,9 @@ namespace SceneUtil
         if (constantAttenuation == 0.f && linearAttenuation == 0.f && quadraticAttenuation == 0.f)
             constantAttenuation = 1.f;
 
-        light->setConstantAttenuation(constantAttenuation);
-        light->setLinearAttenuation(linearAttenuation);
-        light->setQuadraticAttenuation(quadraticAttenuation);
+        light.setConstantAttenuation(constantAttenuation);
+        light.setLinearAttenuation(linearAttenuation);
+        light.setQuadraticAttenuation(quadraticAttenuation);
     }
 
     osg::ref_ptr<LightSource> addLight(
@@ -122,7 +122,7 @@ namespace SceneUtil
         const float radius = std::max(esmLight.mRadius, 16.f);
         lightSource->setRadius(radius);
 
-        configureLight(&light, radius, isExterior);
+        configureLight(light, radius, isExterior);
 
         osg::Vec4f diffuse = esmLight.mColor;
         osg::Vec4f specular = esmLight.mColor; // ESM format doesn't provide specular
