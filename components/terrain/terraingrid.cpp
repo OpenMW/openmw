@@ -131,9 +131,9 @@ namespace Terrain
         mHeightCullCallback->setLowZ(lowZ);
     }
 
-    View* TerrainGrid::createView()
+    std::unique_ptr<View> TerrainGrid::createView()
     {
-        return new MyView;
+        return std::make_unique<MyView>();
     }
 
 }

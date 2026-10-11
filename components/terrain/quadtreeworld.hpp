@@ -49,7 +49,7 @@ namespace Terrain
         /// @note Not thread safe.
         void unloadCell(int x, int y) override;
 
-        View* createView() override;
+        std::unique_ptr<View> createView() override;
         void preload(View* view, const osg::Vec3f& eyePoint, const osg::Vec4i& cellgrid, std::atomic<bool>& abort,
             Loading::Reporter& reporter) override;
         void rebuildViews() override;
@@ -94,7 +94,7 @@ namespace Terrain
 
         osg::ref_ptr<RootNode> mRootNode;
 
-        osg::ref_ptr<ViewDataMap> mViewDataMap;
+        std::unique_ptr<ViewDataMap> mViewDataMap;
 
         std::vector<ChunkManager*> mChunkManagers;
 

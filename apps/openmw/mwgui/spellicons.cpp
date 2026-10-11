@@ -47,26 +47,35 @@ namespace MWGui
             return widget;
         }
 
-        std::string printEffectMagnitude(float srcMagnitude, ESM::MagicEffect::MagnitudeDisplayType displayType)
+        std::string printEffectMagnitude(
+            float srcMinMagnitude, float srcMaxMagnitude, ESM::MagicEffect::MagnitudeDisplayType displayType)
         {
             std::string result;
             if (displayType == ESM::MagicEffect::MDT_None)
                 return result;
 
-            const int magnitude = static_cast<int>(srcMagnitude);
+            MWBase::WindowManager& windowManager = *MWBase::Environment::get().getWindowManager();
+            const int minMagnitude = static_cast<int>(srcMinMagnitude);
+            const int maxMagnitude = static_cast<int>(srcMaxMagnitude);
+            const std::string to = " " + std::string{ windowManager.getGameSettingString("sTo", {}) } + " ";
             if (displayType == ESM::MagicEffect::MDT_TimesInt)
             {
                 std::stringstream formatter;
-                formatter << std::fixed << std::setprecision(1) << " " << (magnitude / 10.0f);
+                formatter << std::fixed << std::setprecision(1) << " " << (minMagnitude / 10.0f);
+                if (minMagnitude != maxMagnitude)
+                    formatter << to << (maxMagnitude / 10.0f);
                 result += formatter.str();
             }
             else
             {
-                result += ": " + MyGUI::utility::toString(magnitude);
+                result += ": " + MyGUI::utility::toString(minMagnitude);
+                if (minMagnitude != maxMagnitude)
+                    result += to + MyGUI::utility::toString(maxMagnitude);
                 if (displayType != ESM::MagicEffect::MDT_Percentage)
                     result += ' ';
             }
 
+            const bool singular = minMagnitude == maxMagnitude && std::abs(minMagnitude) == 1;
             std::string_view unit;
             if (displayType == ESM::MagicEffect::MDT_TimesInt)
                 unit = "sXTimesINT";
@@ -75,11 +84,11 @@ namespace MWGui
             else if (displayType == ESM::MagicEffect::MDT_Feet)
                 unit = "sFeet";
             else if (displayType == ESM::MagicEffect::MDT_Level)
-                unit = magnitude > 1 ? "sLevels" : "sLevel";
+                unit = singular ? "sLevel" : "sLevels";
             else if (displayType == ESM::MagicEffect::MDT_Points)
-                unit = magnitude > 1 ? "sPoints" : "sPoint";
+                unit = singular ? "sPoint" : "sPoints";
 
-            result += MWBase::Environment::get().getWindowManager()->getGameSettingString(unit, {});
+            result += windowManager.getGameSettingString(unit, {});
 
             return result;
         }
@@ -146,7 +155,11 @@ namespace MWGui
                     const ESM::Attribute& attribute = *store.get<ESM::Attribute>().find(arg);
                     desc += " (" + attribute.mName + ')';
                 }
-                desc += printEffectMagnitude(source.mMagnitude, effect.getMagnitudeDisplayType());
+                // Show the range for continuous effects.
+                const bool showRange = !(effect.mData.mFlags & ESM::MagicEffect::AppliedOnce);
+                const float minMagnitude = showRange ? source.mMinMagnitude : source.mMagnitude;
+                const float maxMagnitude = showRange ? source.mMaxMagnitude : source.mMagnitude;
+                desc += printEffectMagnitude(minMagnitude, maxMagnitude, effect.getMagnitudeDisplayType());
                 if (source.mTimeLeft > -1 && Settings::game().mShowEffectDuration)
                     desc += MWGui::ToolTips::getDurationString(source.mTimeLeft, " #{sDuration}");
             }

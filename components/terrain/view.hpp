@@ -1,15 +1,13 @@
 #ifndef COMPONENTS_TERRAIN_VIEW_H
 #define COMPONENTS_TERRAIN_VIEW_H
 
-#include <osg/Referenced>
-
 namespace Terrain
 {
     /**
      * @brief A View is a collection of rendering objects that are visible from a given camera/intersection.
      * The base View class is part of the interface for usage in conjunction with preload feature.
      */
-    class View : public osg::Referenced
+    class View
     {
     public:
         virtual ~View() {}
