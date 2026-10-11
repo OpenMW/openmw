@@ -80,7 +80,8 @@ namespace SceneUtil
         stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
 
-        osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
+        // LESS keeps water clamped to the far plane from drawing over the sky.
+        osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth(osg::Depth::LESS);
         depth->setWriteMask(false);
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
