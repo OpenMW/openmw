@@ -154,23 +154,45 @@ namespace DetourNavigator
                 throw std::runtime_error("Failed set max page count: " + std::string(sqlite3_errmsg(&db)));
         }
 
-        // Each tile is its own commit, and the rollback journal fsyncs a new journal file per commit: 3.3 MB of tiles
-        // cost 945 MB of writes. WAL appends to one log. Lost tiles are regenerated, so NORMAL sync is enough.
-        void setCacheDurability(sqlite3& db)
+        struct SetJournalModeToWal
         {
-            std::string mode;
-            const auto readMode = [](void* into, int, char** values, char**) {
-                *static_cast<std::string*>(into) = values[0] != nullptr ? values[0] : "";
-                return 0;
-            };
-            if (const int ec = sqlite3_exec(&db, "pragma journal_mode = WAL;", readMode, &mode, nullptr);
-                ec != SQLITE_OK)
-                Log(Debug::Warning) << "Failed to set navmeshdb journal mode to WAL: " << sqlite3_errmsg(&db);
-            else if (mode != "wal" && mode != "memory")
-                Log(Debug::Warning) << "Navmeshdb journal mode remains \"" << mode << "\"";
-            if (const int ec = sqlite3_exec(&db, "pragma synchronous = NORMAL;", nullptr, nullptr, nullptr);
-                ec != SQLITE_OK)
-                throw std::runtime_error("Failed set synchronous: " + std::string(sqlite3_errmsg(&db)));
+            static std::string_view text() noexcept { return "pragma journal_mode = WAL;"; }
+            static void bind(sqlite3&, sqlite3_stmt&) {}
+        };
+
+        std::string setJournalModeToWal(sqlite3& db)
+        {
+            Sqlite3::Statement<SetJournalModeToWal> statement(db);
+            std::string value;
+            request(db, statement, &value, 1);
+            return value;
+        }
+
+        void useWriteAheadLog(sqlite3& db)
+        {
+            std::string journalMode;
+            try
+            {
+                journalMode = setJournalModeToWal(db);
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Warning) << "Failed to set navmeshdb journal mode to WAL: " << e.what();
+                return;
+            }
+            if (journalMode != "wal")
+            {
+                Log(Debug::Warning) << "Navmeshdb journal mode remains \"" << journalMode << "\"";
+                return;
+            }
+            Log(Debug::Info) << "Navmeshdb journal mode is set to WAL";
+            // NORMAL can corrupt the database on power loss in rollback journal modes, so it goes only with WAL.
+            if (sqlite3_exec(&db, "pragma synchronous = NORMAL;", nullptr, nullptr, nullptr) != SQLITE_OK)
+            {
+                Log(Debug::Warning) << "Failed to set navmeshdb synchronous to NORMAL: " << sqlite3_errmsg(&db);
+                return;
+            }
+            Log(Debug::Info) << "Navmeshdb synchronous is set to NORMAL";
         }
     }
 
@@ -205,7 +227,7 @@ namespace DetourNavigator
         if (dbPageSize == 0)
             throw std::runtime_error("NavMeshDb page size is zero");
         setMaxPageCount(*mDb, maxFileSize / dbPageSize + static_cast<std::uint64_t>((maxFileSize % dbPageSize) != 0));
-        setCacheDurability(*mDb);
+        useWriteAheadLog(*mDb);
     }
 
     Sqlite3::Transaction NavMeshDb::startTransaction(Sqlite3::TransactionMode mode)

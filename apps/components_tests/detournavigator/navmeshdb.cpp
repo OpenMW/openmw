@@ -199,7 +199,8 @@ namespace
     {
         std::string mode;
         const auto read = [](void* into, int, char** values, char**) {
-            *static_cast<std::string*>(into) = values[0];
+            if (values[0] != nullptr)
+                *static_cast<std::string*>(into) = values[0];
             return 0;
         };
         EXPECT_EQ(sqlite3_exec(&db, "pragma journal_mode;", read, &mode, nullptr), SQLITE_OK) << sqlite3_errmsg(&db);
