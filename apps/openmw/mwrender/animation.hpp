@@ -38,7 +38,7 @@ namespace Resource
 
 namespace SceneUtil
 {
-    class KeyframeHolder;
+    struct KeyframeHolder;
     class KeyframeController;
     class LightSource;
     class LightListCallback;
@@ -319,7 +319,7 @@ namespace MWRender
         inline osg::Callback* handleBlendTransform(const osg::ref_ptr<osg::Node>& node,
             osg::ref_ptr<SceneUtil::KeyframeController> keyframeController,
             std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<ControllerType>>& blendControllers,
-            const AnimBlendStateData& stateData, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules,
+            const AnimBlendStateData& stateData, const std::shared_ptr<const SceneUtil::AnimBlendRules>& blendRules,
             const AnimState& active);
 
         void animationEnded(AnimState& state) const;

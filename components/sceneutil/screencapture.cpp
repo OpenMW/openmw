@@ -131,7 +131,7 @@ namespace SceneUtil
     }
 
     AsyncScreenCaptureOperation::AsyncScreenCaptureOperation(
-        osg::ref_ptr<WorkQueue> queue, osg::ref_ptr<CaptureOperation> impl)
+        std::shared_ptr<WorkQueue> queue, osg::ref_ptr<CaptureOperation> impl)
         : mQueue(std::move(queue))
         , mImpl(std::move(impl))
     {
@@ -146,18 +146,18 @@ namespace SceneUtil
 
     void AsyncScreenCaptureOperation::stop()
     {
-        for (const osg::ref_ptr<SceneUtil::WorkItem>& item : *mWorkItems.lockConst())
+        for (const std::shared_ptr<SceneUtil::WorkItem>& item : *mWorkItems.lockConst())
             item->abort();
 
-        for (const osg::ref_ptr<SceneUtil::WorkItem>& item : *mWorkItems.lockConst())
+        for (const std::shared_ptr<SceneUtil::WorkItem>& item : *mWorkItems.lockConst())
             item->waitTillDone();
     }
 
     void AsyncScreenCaptureOperation::operator()(const osg::Image& image, const unsigned int contextId)
     {
-        osg::ref_ptr<SceneUtil::WorkItem> item(new ScreenCaptureWorkItem(mImpl, image, contextId));
+        std::shared_ptr<SceneUtil::WorkItem> item = std::make_shared<ScreenCaptureWorkItem>(mImpl, image, contextId);
         mQueue->addWorkItem(item);
-        const auto isDone = [](const osg::ref_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
+        const auto isDone = [](const std::shared_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
         const auto workItems = mWorkItems.lock();
         workItems->erase(std::remove_if(workItems->begin(), workItems->end(), isDone), workItems->end());
         workItems->emplace_back(std::move(item));

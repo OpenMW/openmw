@@ -2,7 +2,6 @@
 
 #include <osg/Depth>
 #include <osg/MatrixTransform>
-#include <osg/UserDataContainer>
 
 #include <osgUtil/CullVisitor>
 #include <osgUtil/RenderBin>
@@ -21,6 +20,8 @@
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/lightcommon.hpp>
+#include <components/sceneutil/textkeymap.hpp>
+#include <components/sceneutil/userdata.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/settings/values.hpp>
 
@@ -830,27 +831,18 @@ namespace MWRender
             {
                 src = mHeadAnimationTime;
 
-                if (node->getUserDataContainer())
+                if (const SceneUtil::TextKeyMap* keys = SceneUtil::findUserData<SceneUtil::TextKeyMap>(*node))
                 {
-                    for (unsigned int i = 0; i < node->getUserDataContainer()->getNumUserObjects(); ++i)
+                    for (const auto& key : *keys)
                     {
-                        osg::Object* obj = node->getUserDataContainer()->getUserObject(i);
-                        if (SceneUtil::TextKeyMapHolder* keys = dynamic_cast<SceneUtil::TextKeyMapHolder*>(obj))
-                        {
-                            for (const auto& key : keys->mTextKeys)
-                            {
-                                if (Misc::StringUtils::ciEqual(key.second, "talk: start"))
-                                    mHeadAnimationTime->setTalkStart(key.first);
-                                if (Misc::StringUtils::ciEqual(key.second, "talk: stop"))
-                                    mHeadAnimationTime->setTalkStop(key.first);
-                                if (Misc::StringUtils::ciEqual(key.second, "blink: start"))
-                                    mHeadAnimationTime->setBlinkStart(key.first);
-                                if (Misc::StringUtils::ciEqual(key.second, "blink: stop"))
-                                    mHeadAnimationTime->setBlinkStop(key.first);
-                            }
-
-                            break;
-                        }
+                        if (Misc::StringUtils::ciEqual(key.second, "talk: start"))
+                            mHeadAnimationTime->setTalkStart(key.first);
+                        if (Misc::StringUtils::ciEqual(key.second, "talk: stop"))
+                            mHeadAnimationTime->setTalkStop(key.first);
+                        if (Misc::StringUtils::ciEqual(key.second, "blink: start"))
+                            mHeadAnimationTime->setBlinkStart(key.first);
+                        if (Misc::StringUtils::ciEqual(key.second, "blink: stop"))
+                            mHeadAnimationTime->setBlinkStop(key.first);
                     }
                 }
                 SceneUtil::ForceControllerSourcesVisitor assignVisitor(std::move(src));

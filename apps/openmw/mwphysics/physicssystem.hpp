@@ -14,7 +14,6 @@
 #include <osg/BoundingBox>
 #include <osg/Quat>
 #include <osg/Timer>
-#include <osg/ref_ptr>
 
 #include <components/vfs/pathutil.hpp>
 
@@ -25,14 +24,8 @@
 
 namespace osg
 {
-    class Group;
     class Object;
     class Stats;
-}
-
-namespace MWRender
-{
-    class DebugDrawer;
 }
 
 namespace Resource
@@ -42,6 +35,7 @@ namespace Resource
 }
 
 class btCollisionWorld;
+class btIDebugDraw;
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
@@ -157,7 +151,7 @@ namespace MWPhysics
     class PhysicsSystem : public RayCastingInterface
     {
     public:
-        PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode);
+        PhysicsSystem(Resource::ResourceSystem* resourceSystem, std::unique_ptr<btIDebugDraw> debugDrawer);
         virtual ~PhysicsSystem();
 
         Resource::BulletShapeManager* getShapeManager();
@@ -333,9 +327,7 @@ namespace MWPhysics
         std::unique_ptr<btCollisionObject> mWaterCollisionObject;
         std::unique_ptr<btCollisionShape> mWaterCollisionShape;
 
-        std::unique_ptr<MWRender::DebugDrawer> mDebugDrawer;
-
-        osg::ref_ptr<osg::Group> mParentNode;
+        std::unique_ptr<btIDebugDraw> mDebugDrawer;
 
         std::size_t mSimulationsCounter = 0;
         std::array<std::vector<Simulation>, 2> mSimulations;

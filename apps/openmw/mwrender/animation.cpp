@@ -455,7 +455,7 @@ namespace MWRender
 
     struct Animation::AnimSource
     {
-        osg::ref_ptr<const SceneUtil::KeyframeHolder> mKeyframes;
+        std::shared_ptr<const SceneUtil::KeyframeHolder> mKeyframes;
 
         typedef std::map<std::string, osg::ref_ptr<SceneUtil::KeyframeController>> ControllerMap;
 
@@ -463,7 +463,7 @@ namespace MWRender
 
         const SceneUtil::TextKeyMap& getTextKeys() const;
 
-        osg::ref_ptr<const SceneUtil::AnimBlendRules> mAnimBlendRules;
+        std::shared_ptr<const SceneUtil::AnimBlendRules> mAnimBlendRules;
     };
 
     void UpdateVfxCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
@@ -655,7 +655,7 @@ namespace MWRender
         if (!mResourceSystem->getVFS()->exists(kfname))
             return nullptr;
 
-        osg::ref_ptr<const SceneUtil::KeyframeHolder> keyframes = mResourceSystem->getKeyframeManager()->get(kfname);
+        std::shared_ptr<const SceneUtil::KeyframeHolder> keyframes = mResourceSystem->getKeyframeManager()->get(kfname);
 
         if (keyframes == nullptr || keyframes->mTextKeys.empty() || keyframes->mKeyframeControllers.empty())
             return nullptr;
@@ -737,7 +737,7 @@ namespace MWRender
             // globalBlendConfigPath is only used with actors! Objects have no default blending.
             constexpr VFS::Path::NormalizedView globalBlendConfigPath("animations/animation-config.yaml");
 
-            osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules;
+            std::shared_ptr<const SceneUtil::AnimBlendRules> blendRules;
             if (mPtr.getClass().isActor())
             {
                 blendRules
@@ -752,7 +752,7 @@ namespace MWRender
             }
 
             // At this point blendRules will either be nullptr or an AnimBlendRules instance with > 0 rules inside.
-            animsrc->mAnimBlendRules = blendRules;
+            animsrc->mAnimBlendRules = std::move(blendRules);
         }
 
         return animsrc;
@@ -1065,7 +1065,7 @@ namespace MWRender
     inline osg::Callback* Animation::handleBlendTransform(const osg::ref_ptr<osg::Node>& node,
         osg::ref_ptr<SceneUtil::KeyframeController> keyframeController,
         std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<ControllerType>>& blendControllers,
-        const AnimBlendStateData& stateData, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules,
+        const AnimBlendStateData& stateData, const std::shared_ptr<const SceneUtil::AnimBlendRules>& blendRules,
         const AnimState& active)
     {
         osg::ref_ptr<ControllerType> animController;

@@ -196,9 +196,9 @@ namespace Terrain
         return vd;
     }
 
-    ViewData* ViewDataMap::createIndependentView() const
+    std::unique_ptr<ViewData> ViewDataMap::createIndependentView() const
     {
-        ViewData* vd = new ViewData;
+        auto vd = std::make_unique<ViewData>();
         vd->setWorldUpdateRevision(mWorldUpdateRevision);
         return vd;
     }

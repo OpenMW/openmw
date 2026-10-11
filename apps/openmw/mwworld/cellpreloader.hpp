@@ -5,9 +5,8 @@
 
 #include <components/sceneutil/workqueue.hpp>
 
-#include <osg/ref_ptr>
-
 #include <map>
+#include <memory>
 #include <span>
 
 namespace osg
@@ -76,7 +75,7 @@ namespace MWWorld
 
         std::size_t getCacheSize() const { return mPreloadCells.size(); }
 
-        void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
+        void setWorkQueue(std::shared_ptr<SceneUtil::WorkQueue> workQueue);
 
         void setTerrainPreloadPositions(std::span<const PositionCellGrid> positions);
 
@@ -94,7 +93,7 @@ namespace MWWorld
         Resource::BulletShapeManager* mBulletShapeManager;
         Terrain::World* mTerrain;
         MWRender::LandManager* mLandManager;
-        osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+        std::shared_ptr<SceneUtil::WorkQueue> mWorkQueue;
         double mExpiryDelay;
         std::size_t mMinCacheSize = 0;
         std::size_t mMaxCacheSize = 0;
@@ -104,7 +103,7 @@ namespace MWWorld
 
         struct PreloadEntry
         {
-            PreloadEntry(double timestamp, osg::ref_ptr<SceneUtil::WorkItem> workItem)
+            PreloadEntry(double timestamp, std::shared_ptr<SceneUtil::WorkItem> workItem)
                 : mTimeStamp(timestamp)
                 , mWorkItem(std::move(workItem))
             {
@@ -115,17 +114,17 @@ namespace MWWorld
             }
 
             double mTimeStamp;
-            osg::ref_ptr<SceneUtil::WorkItem> mWorkItem;
+            std::shared_ptr<SceneUtil::WorkItem> mWorkItem;
         };
         typedef std::map<const MWWorld::CellStore*, PreloadEntry> PreloadMap;
 
         // Cells that are currently being preloaded, or have already finished preloading
         PreloadMap mPreloadCells;
 
-        std::vector<osg::ref_ptr<Terrain::View>> mTerrainViews;
+        std::vector<std::shared_ptr<Terrain::View>> mTerrainViews;
         std::vector<PositionCellGrid> mTerrainPreloadPositions;
-        osg::ref_ptr<TerrainPreloadItem> mTerrainPreloadItem;
-        osg::ref_ptr<SceneUtil::WorkItem> mUpdateCacheItem;
+        std::shared_ptr<TerrainPreloadItem> mTerrainPreloadItem;
+        std::shared_ptr<SceneUtil::WorkItem> mUpdateCacheItem;
 
         std::vector<PositionCellGrid> mLoadedTerrainPositions;
         double mLoadedTerrainTimestamp;

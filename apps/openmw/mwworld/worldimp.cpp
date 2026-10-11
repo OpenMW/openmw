@@ -76,6 +76,7 @@
 #include "../mwmechanics/summoning.hpp"
 
 #include "../mwrender/animation.hpp"
+#include "../mwrender/bulletdebugdraw.hpp"
 #include "../mwrender/camera.hpp"
 #include "../mwrender/npcanimation.hpp"
 #include "../mwrender/postprocessor.hpp"
@@ -230,9 +231,10 @@ namespace MWWorld
     }
 
     void World::init(Debug::Level maxRecastLogLevel, osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
-        SceneUtil::WorkQueue* workQueue, SceneUtil::UnrefQueue& unrefQueue)
+        const std::shared_ptr<SceneUtil::WorkQueue>& workQueue, SceneUtil::UnrefQueue& unrefQueue)
     {
-        mPhysics = std::make_unique<MWPhysics::PhysicsSystem>(mResourceSystem, rootNode);
+        mPhysics = std::make_unique<MWPhysics::PhysicsSystem>(
+            mResourceSystem, std::make_unique<MWRender::DebugDrawer>(rootNode));
 
         if (Settings::navigator().mEnable)
         {
@@ -2328,9 +2330,9 @@ namespace MWWorld
         return mRendering->getAnimation(ptr);
     }
 
-    void World::screenshot(osg::Image* image, int w, int h)
+    std::vector<char> World::screenshot(int w, int h)
     {
-        mRendering->screenshot(image, w, h);
+        return mRendering->screenshot(w, h);
     }
 
     void World::activateDoor(const MWWorld::Ptr& door)

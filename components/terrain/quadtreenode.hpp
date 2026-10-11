@@ -18,7 +18,7 @@ namespace Terrain
     };
 
     class QuadTreeNode;
-    class LodCallback : public osg::Referenced
+    class LodCallback
     {
     public:
         virtual ~LodCallback() {}

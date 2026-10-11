@@ -1870,17 +1870,7 @@ namespace MWMechanics
         {
             mAnimation->setPitchFactor(1.f);
 
-            // A smooth transition can be provided if a pre-wind-up section is defined. Random attack animations never
-            // have one.
-            if (mUpperBodyState == UpperBodyState::AttackWindUp && !isRandomAttackAnimation(mCurrentWeapon))
-            {
-                float currentTime = mAnimation->getCurrentTime(mCurrentWeapon);
-                float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " min attack");
-                float startTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " start");
-                if (startTime <= currentTime && currentTime < minAttackTime)
-                    mAnimation->setPitchFactor((currentTime - startTime) / (minAttackTime - startTime));
-            }
-            else if (mUpperBodyState == UpperBodyState::AttackEnd)
+            if (mUpperBodyState == UpperBodyState::AttackEnd)
             {
                 // technically we do not need a pitch for crossbow reload animation,
                 // but we should avoid abrupt repositioning
@@ -1888,6 +1878,15 @@ namespace MWMechanics
                     mAnimation->setPitchFactor(std::max(0.f, 1.f - complete * 10.f));
                 else
                     mAnimation->setPitchFactor(1.f - complete);
+            }
+            // Smooth transition for the pre-wind-up section. Random attack animations don't have one.
+            else if (!isRandomAttackAnimation(mCurrentWeapon))
+            {
+                float currentTime = mAnimation->getCurrentTime(mCurrentWeapon);
+                float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " min attack");
+                float startTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " start");
+                if (startTime <= currentTime && currentTime < minAttackTime)
+                    mAnimation->setPitchFactor((currentTime - startTime) / (minAttackTime - startTime));
             }
         }
 

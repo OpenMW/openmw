@@ -1,5 +1,9 @@
 #include "uibindings.hpp"
 
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include <components/lua/util.hpp>
 #include <components/lua_ui/alignment.hpp>
 #include <components/lua_ui/content.hpp>
@@ -16,6 +20,7 @@
 #include <components/vfs/manager.hpp>
 
 #include <cmath>
+#include <numbers>
 
 #include "context.hpp"
 #include "luamanagerimp.hpp"
@@ -170,25 +175,56 @@ namespace MWLua
 
         api["getElements"] = [menu](sol::this_state thisState, sol::optional<std::string_view> layer) {
             sol::table res(thisState, sol::create);
-            size_t index = 1;
+            std::unordered_map<MyGUI::ILayerNode*, std::vector<std::shared_ptr<LuaUi::Element>>> elementsByLayerNode;
             LuaUi::Element::forEachShared(menu, [&](const std::shared_ptr<LuaUi::Element>& element) {
                 if ((element->mState != LuaUi::Element::Created && element->mState != LuaUi::Element::Update)
                     || element->mRoot == nullptr)
                     return;
 
-                MyGUI::ILayer* layerNode = nullptr;
-                for (LuaUi::WidgetExtension* ext = element->mRoot; ext != nullptr && layerNode == nullptr;
+                MyGUI::ILayer* elementLayer = nullptr;
+                MyGUI::ILayerNode* layerNode = nullptr;
+                for (LuaUi::WidgetExtension* ext = element->mRoot; ext != nullptr && elementLayer == nullptr;
                      ext = ext->getParent())
-                    layerNode = ext->widget()->getLayer();
+                {
+                    elementLayer = ext->widget()->getLayer();
+                    layerNode = ext->widget()->getLayerNode();
+                }
 
-                if (!layerNode)
+                if (!elementLayer)
                     return;
 
-                if (layer.has_value() && layerNode->getName() != *layer)
+                if (layer && elementLayer->getName() != *layer)
                     return;
 
-                res[index++] = element;
+                elementsByLayerNode[layerNode].push_back(element);
             });
+
+            size_t index = 1;
+            const auto appendLayer = [&](MyGUI::ILayer* currentLayer) {
+                for (size_t nodeIndex = 0; nodeIndex < currentLayer->getLayerNodeCount(); ++nodeIndex)
+                {
+                    const auto it = elementsByLayerNode.find(currentLayer->getLayerNodeAt(nodeIndex));
+                    if (it == elementsByLayerNode.end())
+                        continue;
+                    for (std::shared_ptr<LuaUi::Element>& element : it->second)
+                        res[index++] = std::move(element);
+                    elementsByLayerNode.erase(it);
+                }
+            };
+
+            MyGUI::LayerManager& layerManager = MyGUI::LayerManager::getInstance();
+            for (size_t layerIndex = 0; layerIndex < layerManager.getLayerCount(); ++layerIndex)
+            {
+                MyGUI::ILayer* currentLayer = layerManager.getLayer(layerIndex);
+                if (!layer || currentLayer->getName() == *layer)
+                    appendLayer(currentLayer);
+            }
+
+            // A layer node may be absent or disappear between a UI update and this query. Preserve these Elements
+            // rather than omitting them, but their render order is no longer available
+            for (auto& [_, elements] : elementsByLayerNode)
+                for (std::shared_ptr<LuaUi::Element>& element : elements)
+                    res[index++] = std::move(element);
             return res;
         };
 
@@ -305,6 +341,15 @@ namespace MWLua
             data.mHotspot = hotspot.as<osg::Vec2f>();
             data.mPersistent = menu;
 
+            sol::optional<Misc::FiniteDouble> rotation = options.get<sol::optional<Misc::FiniteDouble>>("rotation");
+            if (rotation)
+            {
+                constexpr double fullTurn = 2 * std::numbers::pi;
+                data.mRotation = std::fmod(static_cast<double>(*rotation), fullTurn);
+                if (data.mRotation < 0)
+                    data.mRotation += fullTurn;
+            }
+
             auto integral = [](float value) { return std::isfinite(value) && std::floor(value) == value; };
             if (!integral(data.mSize.x()) || !integral(data.mSize.y()) || !integral(data.mHotspot.x())
                 || !integral(data.mHotspot.y()) || data.mSize.x() <= 0 || data.mSize.y() <= 0 || data.mHotspot.x() < 0
@@ -318,7 +363,7 @@ namespace MWLua
                 MWBase::Environment::get().getWindowManager()->createLuaCursor(cursor->mName,
                     std::string(cursor->mPath), static_cast<int>(cursor->mSize.x()),
                     static_cast<int>(cursor->mSize.y()), static_cast<int>(cursor->mHotspot.x()),
-                    static_cast<int>(cursor->mHotspot.y()));
+                    static_cast<int>(cursor->mHotspot.y()), -cursor->mRotation * 180.0 / std::numbers::pi);
             });
             return cursor;
         };
@@ -427,6 +472,8 @@ namespace MWLua
                 = sol::readonly_property([](const LuaUi::CursorResource& resource) { return resource.mSize; });
             cursorResource["hotspot"]
                 = sol::readonly_property([](const LuaUi::CursorResource& resource) { return resource.mHotspot; });
+            cursorResource["rotation"]
+                = sol::readonly_property([](const LuaUi::CursorResource& resource) { return resource.mRotation; });
 
             auto uiElement = context.sol().new_usertype<LuaUi::Element>("UiElement");
             uiElement[sol::meta_function::to_string] = [](const LuaUi::Element& element) {

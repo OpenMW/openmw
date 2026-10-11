@@ -10,6 +10,7 @@
 
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <LinearMath/btIDebugDraw.h>
 #include <LinearMath/btThreads.h>
 
 #include <osg/Stats>
@@ -21,8 +22,6 @@
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
-
-#include "../mwrender/bulletdebugdraw.hpp"
 
 #include "../mwworld/class.hpp"
 
@@ -399,13 +398,11 @@ namespace MWPhysics
         std::mutex mHasJobMutex;
     };
 
-    PhysicsTaskScheduler::PhysicsTaskScheduler(
-        float physicsDt, btCollisionWorld* collisionWorld, MWRender::DebugDrawer* debugDrawer)
+    PhysicsTaskScheduler::PhysicsTaskScheduler(float physicsDt, btCollisionWorld* collisionWorld)
         : mDefaultPhysicsDt(physicsDt)
         , mPhysicsDt(physicsDt)
         , mTimeAccum(0.f)
         , mCollisionWorld(collisionWorld)
-        , mDebugDrawer(debugDrawer)
         , mLockingPolicy(detectLockingPolicy())
         , mNumThreads(getNumThreads(mLockingPolicy))
         , mNumJobs(0)
@@ -817,7 +814,10 @@ namespace MWPhysics
     void PhysicsTaskScheduler::debugDraw()
     {
         MaybeSharedLock lock(mCollisionWorldMutex, mLockingPolicy);
-        mDebugDrawer->step();
+        btIDebugDraw* debugDrawer = mCollisionWorld->getDebugDrawer();
+        debugDrawer->clearLines();
+        mCollisionWorld->debugDrawWorld();
+        debugDrawer->flushLines();
     }
 
     void* PhysicsTaskScheduler::getUserPointer(const btCollisionObject* object) const

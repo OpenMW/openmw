@@ -31,11 +31,10 @@ if(NOT OPENMW_USE_SYSTEM_BULLET)
         set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE BOOL "" FORCE)
     endif()
 
-    # May 7, 2021
     include(FetchContent)
     FetchContent_Declare(bullet
-        URL https://github.com/bulletphysics/bullet3/archive/refs/tags/3.17.tar.gz
-        URL_HASH SHA512=a5105bf5f1dd365a64a350755c7d2c97942f74897a18dcdb3651e6732fd55cc1030a096f5808cf50575281f05e3ac09aa50a48d271a47b94cd61f5167a72b7cc
+        URL https://github.com/bulletphysics/bullet3/archive/refs/tags/3.25.tar.gz
+        URL_HASH SHA512=7086e5fcf69635801bb311261173cb8d173b712ca1bd78be03df48fad884674e85512861190e45a1a62d5627aaad65cde08c175c44a3be9afa410d3dfd5358d4
         SOURCE_DIR fetched/bullet
     )
     FetchContent_MakeAvailable(bullet)
@@ -130,8 +129,8 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
     # OSGoS branch 3.6
     include(FetchContent)
     FetchContent_Declare(osg
-        URL https://github.com/OpenMW/osg/archive/01cc2b585c8456a4ff843066b7e1a8715558289f.zip
-        URL_HASH SHA512=9b0a94c1c1d99c767f1857629d43c7a53bfcb74ef760993a121567831e168a1ebbfc10b0c67d7f2241c7b6c6dab2d0e6b876d9f17aca0fabe1a8c86b2279f956
+        URL https://github.com/OpenMW/osg/archive/9b384d5439977784e5cd250ff8ff7966928ddd27.zip
+        URL_HASH SHA512=ec9c0975e1d70a30fe68695c7a87cdbe86f69592488c77ece8222c6f089c7ac45b118616c8b6c045e74baf9ee8338243fc46c35d458a5ea4d98f1cea64fb44d6
         SOURCE_DIR fetched/osg
     )
     FetchContent_MakeAvailable(osg)

@@ -141,7 +141,7 @@ add_component_dir (sceneutil
     lightmanager lightutil positionattitudetransform workqueue pathgridutil waterutil writescene serialize optimizer
     detourdebugdraw navmesh agentpath animblendrules shadow mwshadowtechnique recastmesh shadowsbin osgacontroller rtt
     screencapture depth color riggeometryosgaextension extradata unrefqueue lightcommon clearcolor
-    cullsafeboundsvisitor keyframe nodecallback templateref textkeymap glextensions fog texmat material
+    cullsafeboundsvisitor keyframe nodecallback templateref textkeymap userdata glextensions fog texmat material
     )
 
 add_component_dir (nif
@@ -312,11 +312,6 @@ add_component_dir (stereo
 add_component_dir (debug
     debugging debuglog gldebug debugdraw writeflags
     )
-
-IF(NOT WIN32 AND NOT APPLE)
-    add_compile_definitions(GLOBAL_DATA_PATH="${GLOBAL_DATA_PATH}")
-    add_compile_definitions(GLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")
-ENDIF()
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
     constrainedfilestream memorystream hash configfileparser openfile constrainedfilestreambuf conversion
@@ -326,6 +321,10 @@ add_component_dir (files
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     set_source_files_properties(files/configfileparser.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
 endif()
+
+if (NOT WIN32 AND NOT APPLE)
+    set_source_files_properties(files/linuxpath.cpp PROPERTIES COMPILE_DEFINITIONS "GLOBAL_DATA_PATH=\"${GLOBAL_DATA_PATH}\";GLOBAL_CONFIG_PATH=\"${GLOBAL_CONFIG_PATH}\"")
+endif ()
 
 add_component_dir (compiler
     context controlparser errorhandler exception exprparser extensions fileparser generator
@@ -685,22 +684,28 @@ target_compile_definitions(components PUBLIC
 )
 
 if(OSG_STATIC)
-    unset(_osg_plugins_static_files)
-    add_library(components_osg_plugins INTERFACE)
-    foreach(_plugin ${USED_OSG_PLUGINS})
-        string(TOUPPER ${_plugin} _plugin_uc)
-        if(OPENMW_USE_SYSTEM_OSG)
-            list(APPEND _osg_plugins_static_files ${${_plugin_uc}_LIBRARY})
-        else()
-            list(APPEND _osg_plugins_static_files $<TARGET_FILE:${${_plugin_uc}_LIBRARY}>)
-            target_link_libraries(components_osg_plugins INTERFACE $<TARGET_PROPERTY:${${_plugin_uc}_LIBRARY},LINK_LIBRARIES>)
-            add_dependencies(components_osg_plugins ${${_plugin_uc}_LIBRARY})
-        endif()
-    endforeach()
-    # We use --whole-archive because OSG plugins use registration.
-    get_whole_archive_options(_opts ${_osg_plugins_static_files})
-    target_link_options(components_osg_plugins INTERFACE ${_opts})
-    target_link_libraries(components components_osg_plugins ${COLLADA_DOM_LIBRARIES})
+    if(CMAKE_VERSION VERSION_LESS 3.24)
+        unset(_osg_plugins_static_files)
+        add_library(components_osg_plugins INTERFACE)
+        foreach(_plugin ${USED_OSG_PLUGINS})
+            string(TOUPPER ${_plugin} _plugin_uc)
+            if(OPENMW_USE_SYSTEM_OSG)
+                list(APPEND _osg_plugins_static_files ${${_plugin_uc}_LIBRARY})
+            else()
+                list(APPEND _osg_plugins_static_files $<TARGET_FILE:${${_plugin_uc}_LIBRARY}>)
+                target_link_libraries(components_osg_plugins INTERFACE $<TARGET_PROPERTY:${${_plugin_uc}_LIBRARY},LINK_LIBRARIES>)
+                add_dependencies(components_osg_plugins ${${_plugin_uc}_LIBRARY})
+            endif()
+        endforeach()
+        # We use --whole-archive because OSG plugins use registration.
+        get_whole_archive_options(_opts ${_osg_plugins_static_files})
+        target_link_options(components_osg_plugins INTERFACE ${_opts})
+        target_link_libraries(components components_osg_plugins)
+    else()
+        target_link_libraries(components "$<LINK_LIBRARY:WHOLE_ARCHIVE,${USED_OSG_PLUGINS}>")
+    endif()
+
+    target_link_libraries(components ${COLLADA_DOM_LIBRARIES})
 
     if(OPENMW_USE_SYSTEM_OSG)
         # OSG plugin pkgconfig files are missing these dependencies.

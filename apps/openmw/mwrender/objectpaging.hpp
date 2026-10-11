@@ -83,22 +83,10 @@ namespace MWRender
         LODNameCache mLODNameCache;
     };
 
-    class RefnumMarker : public osg::Object
+    struct RefnumMarker
     {
-    public:
-        RefnumMarker()
-            : mNumVertices(0)
-        {
-        }
-        RefnumMarker(const RefnumMarker& copy, osg::CopyOp co)
-            : mRefnum(copy.mRefnum)
-            , mNumVertices(copy.mNumVertices)
-        {
-        }
-        META_Object(MWRender, RefnumMarker)
-
         ESM::RefNum mRefnum;
-        unsigned int mNumVertices;
+        unsigned int mNumVertices = 0;
     };
 }
 

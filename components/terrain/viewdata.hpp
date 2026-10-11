@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_TERRAIN_VIEWDATA_H
 
 #include <deque>
+#include <memory>
 #include <vector>
 
 #include <osg/Node>
@@ -90,7 +91,7 @@ namespace Terrain
         unsigned int mWorldUpdateRevision;
     };
 
-    class ViewDataMap : public osg::Referenced
+    class ViewDataMap
     {
     public:
         ViewDataMap()
@@ -108,7 +109,7 @@ namespace Terrain
             osg::Object* viewer, const osg::Vec3f& viewPoint, const osg::Vec4i& activeGrid, bool& needsUpdate);
 
         ViewData* createOrReuseView();
-        ViewData* createIndependentView() const;
+        std::unique_ptr<ViewData> createIndependentView() const;
 
         void clearUnusedViews(double referenceTime);
         void rebuildViews();

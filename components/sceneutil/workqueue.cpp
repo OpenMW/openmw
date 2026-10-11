@@ -67,7 +67,7 @@ namespace SceneUtil
         mThreads.clear();
     }
 
-    void WorkQueue::addWorkItem(osg::ref_ptr<WorkItem> item, bool front)
+    void WorkQueue::addWorkItem(std::shared_ptr<WorkItem> item, bool front)
     {
         if (item->isDone())
         {
@@ -83,7 +83,7 @@ namespace SceneUtil
         mCondition.notify_one();
     }
 
-    osg::ref_ptr<WorkItem> WorkQueue::removeWorkItem()
+    std::shared_ptr<WorkItem> WorkQueue::removeWorkItem()
     {
         std::unique_lock<std::mutex> lock(mMutex);
         while (mQueue.empty() && !mIsReleased)
@@ -92,7 +92,7 @@ namespace SceneUtil
         }
         if (!mQueue.empty())
         {
-            osg::ref_ptr<WorkItem> item = std::move(mQueue.front());
+            std::shared_ptr<WorkItem> item = std::move(mQueue.front());
             mQueue.pop_front();
             return item;
         }
@@ -127,7 +127,7 @@ namespace SceneUtil
     {
         while (true)
         {
-            osg::ref_ptr<WorkItem> item = mWorkQueue->removeWorkItem();
+            std::shared_ptr<WorkItem> item = mWorkQueue->removeWorkItem();
             if (!item)
                 return;
             mActive = true;

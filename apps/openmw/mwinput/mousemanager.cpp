@@ -135,13 +135,9 @@ namespace MWInput
             if (mBindingsManager->isDetectingBindingState())
                 return; // don't allow same mouseup to bind as initiated bind
 
-            if (mGuiCursorEnabled)
-                mBindingsManager->setPlayerControlsEnabled(false);
-            else
-            {
-                mBindingsManager->setPlayerControlsEnabled(!guiMode);
-                mBindingsManager->mouseReleased(arg, id);
-            }
+            mBindingsManager->setPlayerControlsEnabled(mGuiCursorEnabled ? false : !guiMode);
+            // A press may have opened the GUI, so the release still needs to clear its binding.
+            mBindingsManager->mouseReleased(arg, id);
         }
 
         MWBase::Environment::get().getLuaManager()->inputEvent(
@@ -191,19 +187,13 @@ namespace MWInput
             MWBase::Environment::get().getWindowManager()->setCursorActive(true);
         }
 
-        if (mGuiCursorEnabled)
-        {
-            mBindingsManager->setPlayerControlsEnabled(false);
-        }
-        else
-        {
-            mBindingsManager->setPlayerControlsEnabled(!guiMode);
+        mBindingsManager->setPlayerControlsEnabled(mGuiCursorEnabled ? false : !guiMode);
 
-            // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
-            // Also do not trigger bindings when input controls are disabled, e.g. during save loading
-            if (!MWBase::Environment::get().getWindowManager()->isSettingsWindowVisible() && !input->controlsDisabled())
-                mBindingsManager->mousePressed(arg, id);
-        }
+        // Keep menu bindings such as Inventory active, but don't send gameplay bindings when Lua frees the cursor.
+        // Don't trigger any mouse bindings while in settings menu or while input controls are disabled.
+        if ((!mGuiCursorEnabled || MWBase::Environment::get().getWindowManager()->isGuiMode())
+            && !MWBase::Environment::get().getWindowManager()->isSettingsWindowVisible() && !input->controlsDisabled())
+            mBindingsManager->mousePressed(arg, id);
         MWBase::Environment::get().getLuaManager()->inputEvent(
             { MWBase::LuaManager::InputEvent::MouseButtonPressed, arg.button });
     }

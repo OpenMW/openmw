@@ -17,6 +17,7 @@
 #include <memory>
 #include <span>
 #include <unordered_map>
+#include <vector>
 
 namespace osg
 {
@@ -112,7 +113,7 @@ namespace MWRender
     {
     public:
         RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
-            Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
+            Resource::ResourceSystem* resourceSystem, const std::shared_ptr<SceneUtil::WorkQueue>& workQueue,
             DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore,
             SceneUtil::UnrefQueue& unrefQueue);
         ~RenderingManager();
@@ -123,7 +124,7 @@ namespace MWRender
 
         Resource::ResourceSystem* getResourceSystem();
 
-        SceneUtil::WorkQueue* getWorkQueue();
+        const std::shared_ptr<SceneUtil::WorkQueue>& getWorkQueue() const;
         Terrain::World* getTerrain();
 
         void preloadCommonAssets();
@@ -166,8 +167,8 @@ namespace MWRender
         void setWaterEnabled(bool enabled);
         void setWaterHeight(float level);
 
-        /// Take a screenshot of w*h onto the given image, not including the GUI.
-        void screenshot(osg::Image* image, int w, int h);
+        /// Take a screenshot of w*h, not including the GUI, encoded as JPEG. Empty on failure.
+        std::vector<char> screenshot(int w, int h);
 
         struct RayResult
         {
@@ -317,7 +318,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::LightManager> mSceneRoot;
         Resource::ResourceSystem* mResourceSystem;
 
-        osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+        std::shared_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
         osg::ref_ptr<SceneUtil::Light> mSunLight;
 

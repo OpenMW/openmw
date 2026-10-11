@@ -136,6 +136,54 @@ macro (openmw_add_executable target)
     endif (MSVC)
 endmacro (openmw_add_executable)
 
+macro (openmw_add_qt_executable target)
+    set(OMW_ADD_EXE_OPTIONS WIN32 MACOSX_BUNDLE EXCLUDE_FROM_ALL)
+    set(OMW_ADD_EXE_VALUES)
+    set(OMW_ADD_EXE_MULTI_VALUES)
+    cmake_parse_arguments(OMW_ADD_EXE "${OMW_ADD_EXE_OPTIONS}" "${OMW_ADD_EXE_VALUES}" "${OMW_ADD_EXE_MULTI_VALUES}" ${ARGN})
+
+    if (OMW_ADD_EXE_WIN32)
+        set(OMW_ADD_EXE_WIN32_VALUE WIN32)
+    endif (OMW_ADD_EXE_WIN32)
+
+    if (OMW_ADD_EXE_MACOSX_BUNDLE)
+        set(OMW_ADD_EXE_MACOSX_BUNDLE_VALUE MACOSX_BUNDLE)
+    endif (OMW_ADD_EXE_MACOSX_BUNDLE)
+
+    if (OMW_ADD_EXE_EXCLUDE_FROM_ALL)
+        set(OMW_ADD_EXE_EXCLUDE_FROM_ALL_VALUE EXCLUDE_FROM_ALL)
+    endif (OMW_ADD_EXE_EXCLUDE_FROM_ALL)
+
+    qt_add_executable(${target} ${OMW_ADD_EXE_WIN32_VALUE} ${OMW_ADD_EXE_MACOSX_BUNDLE_VALUE} ${OMW_ADD_EXE_EXCLUDE_FROM_ALL_VALUE} ${OMW_ADD_EXE_UNPARSED_ARGUMENTS})
+
+    if (MSVC)
+        set_target_properties(${target} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${target}>")
+    endif (MSVC)
+endmacro (openmw_add_qt_executable)
+
+function (generate_deploy_script_for_qt_app target)
+    if (UNIX AND NOT APPLE AND OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
+        if (Qt6Core_VERSION VERSION_LESS 6.10)
+            message(FATAL_ERROR "Deployment of Qt on Linux requires at least 6.10 (for the INCLUDE_PLUGINS argument)")
+        endif ()
+        # don't bother with this on Windows yet as windeployqt includes a bunch of DLLs we don't use
+        cmake_path(NORMAL_PATH QT_DIR OUTPUT_VARIABLE QT_BASE_DIR)
+        string(REGEX REPLACE "(.+)/lib/cmake/Qt[0-9]+" "\\1" QT_BASE_DIR "${QT_BASE_DIR}")
+        escape_regex_control_characters(QT_BASE_REGEX "${QT_BASE_DIR}")
+        qt_generate_deploy_app_script(TARGET ${target}
+            OUTPUT_SCRIPT deploy_script
+            NO_TRANSLATIONS
+            NO_COMPILER_RUNTIME
+            INCLUDE_PLUGINS wayland
+            POST_INCLUDE_REGEXES
+                "${QT_BASE_REGEX}"
+            POST_EXCLUDE_REGEXES
+                ".*"
+        )
+        install(SCRIPT ${deploy_script})
+    endif()
+endfunction()
+
 macro (get_generator_is_multi_config VALUE)
     # TODO: make git version getter less dumb so everywhere that calls this macro can just call the function this calls instead
     if (DEFINED generator_is_multi_config_var)

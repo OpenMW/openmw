@@ -13,6 +13,7 @@
 #include <components/sceneutil/material.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace Resource
 {
@@ -29,58 +30,48 @@ namespace MWRender
 
     struct WeatherResult
     {
-        std::string mCloudTexture;
-        std::string mNextCloudTexture;
-        float mCloudBlendFactor;
-
-        osg::Vec4f mFogColor;
-
-        osg::Vec4f mAmbientColor;
-
-        osg::Vec4f mSkyColor;
-
-        // sun light color
-        osg::Vec4f mSunColor;
-
-        // alpha is the sun transparency
-        osg::Vec4f mSunDiscColor;
-
-        float mFogDepth;
-
-        float mDLFogFactor;
-        float mDLFogOffset;
-
-        float mWindSpeed;
-        float mBaseWindSpeed;
-        float mCurrentWindSpeed;
-        float mNextWindSpeed;
-
-        float mCloudSpeed;
-
-        float mGlareView;
-
-        bool mNight; // use night skybox
-        float mNightFade; // fading factor for night skybox
-
-        bool mIsStorm;
+        VFS::Path::NormalizedView mCloudTexture;
+        VFS::Path::NormalizedView mNextCloudTexture;
+        VFS::Path::NormalizedView mParticleEffect;
+        VFS::Path::NormalizedView mRainEffect;
 
         ESM::RefId mAmbientLoopSoundID;
         ESM::RefId mRainLoopSoundID;
-        float mAmbientSoundVolume;
 
-        std::string mParticleEffect;
-        std::string mRainEffect;
-        float mPrecipitationAlpha;
-
-        float mRainDiameter;
-        float mRainMinHeight;
-        float mRainMaxHeight;
-        float mRainSpeed;
-        float mRainEntranceSpeed;
-        int mRainMaxRaindrops;
+        osg::Vec4f mFogColor;
+        osg::Vec4f mAmbientColor;
+        osg::Vec4f mSkyColor;
+        // sun light color
+        osg::Vec4f mSunColor;
+        // alpha is the sun transparency
+        osg::Vec4f mSunDiscColor;
 
         osg::Vec3f mStormDirection;
         osg::Vec3f mNextStormDirection;
+
+        float mCloudBlendFactor{};
+        float mFogDepth{};
+        float mDLFogFactor{};
+        float mDLFogOffset{};
+        float mWindSpeed{};
+        float mBaseWindSpeed{};
+        float mCurrentWindSpeed{};
+        float mNextWindSpeed{};
+        float mCloudSpeed{};
+        float mGlareView{};
+        float mNightFade{}; // fading factor for night skybox
+        float mAmbientSoundVolume{};
+        float mPrecipitationAlpha{};
+        float mRainDiameter{};
+        float mRainMinHeight{};
+        float mRainMaxHeight{};
+        float mRainSpeed{};
+        float mRainEntranceSpeed{};
+
+        int mRainMaxRaindrops{};
+
+        bool mNight{}; // use night skybox
+        bool mIsStorm{};
     };
 
     struct MoonState

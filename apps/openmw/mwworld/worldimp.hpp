@@ -1,6 +1,8 @@
 #ifndef GAME_MWWORLD_WORLDIMP_H
 #define GAME_MWWORLD_WORLDIMP_H
 
+#include <memory>
+
 #include <osg/Timer>
 #include <osg/ref_ptr>
 
@@ -205,7 +207,7 @@ namespace MWWorld
 
         // Must be called after `loadData`.
         void init(Debug::Level maxRecastLogLevel, osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
-            SceneUtil::WorkQueue* workQueue, SceneUtil::UnrefQueue& unrefQueue);
+            const std::shared_ptr<SceneUtil::WorkQueue>& workQueue, SceneUtil::UnrefQueue& unrefQueue);
 
         virtual ~World();
 
@@ -527,7 +529,7 @@ namespace MWWorld
         void reattachPlayerCamera() override;
 
         /// \todo this does not belong here
-        void screenshot(osg::Image* image, int w, int h) override;
+        std::vector<char> screenshot(int w, int h) override;
 
         /// Find center of exterior cell above land surface
         /// \return false if exterior with given name not exists, true otherwise

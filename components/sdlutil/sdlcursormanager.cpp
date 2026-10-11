@@ -83,7 +83,7 @@ namespace SDLUtil
             SDL_SetCursor(it->second);
     }
 
-    void SDLCursorManager::createCursor(std::string_view name, int rotDegrees, osg::Image* image, int hotspotX,
+    void SDLCursorManager::createCursor(std::string_view name, double rotDegrees, osg::Image* image, int hotspotX,
         int hotspotY, int cursorWidth, int cursorHeight)
     {
 #ifndef ANDROID
@@ -101,7 +101,7 @@ namespace SDLUtil
     }
 
     SDLUtil::SurfaceUniquePtr decompress(
-        osg::ref_ptr<osg::Image> source, float rotDegrees, int cursorWidth, int cursorHeight)
+        osg::ref_ptr<osg::Image> source, double rotDegrees, int cursorWidth, int cursorHeight)
     {
         int width = source->s();
         int height = source->t();
@@ -152,7 +152,7 @@ namespace SDLUtil
         return targetSurface;
     }
 
-    void SDLCursorManager::_createCursorFromResource(std::string_view name, int rotDegrees, osg::Image* image,
+    void SDLCursorManager::_createCursorFromResource(std::string_view name, double rotDegrees, osg::Image* image,
         int hotspotX, int hotspotY, int cursorWidth, int cursorHeight)
     {
         if (mCursorMap.find(name) != mCursorMap.end())
@@ -160,7 +160,7 @@ namespace SDLUtil
 
         try
         {
-            auto surface = decompress(image, static_cast<float>(rotDegrees), cursorWidth, cursorHeight);
+            auto surface = decompress(image, rotDegrees, cursorWidth, cursorHeight);
 
             // set the cursor and store it for later
             SDL_Cursor* curs = SDL_CreateColorCursor(surface.get(), hotspotX, hotspotY);

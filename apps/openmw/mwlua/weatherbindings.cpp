@@ -145,11 +145,12 @@ namespace MWLua
             [](MWWorld::Weather& w, const FiniteFloat windSpeed) { w.mWindSpeed = windSpeed; });
         weatherT["cloudSpeed"] = sol::property([](const MWWorld::Weather& w) { return w.mCloudSpeed; },
             [](MWWorld::Weather& w, const FiniteFloat cloudSpeed) { w.mCloudSpeed = cloudSpeed; });
-        weatherT["cloudTexture"] = sol::property(
-            [vfs](const MWWorld::Weather& w) -> std::string {
-                return Misc::ResourceHelpers::correctTexturePath(VFS::Path::toNormalized(w.mCloudTexture), *vfs);
-            },
-            [](MWWorld::Weather& w, std::string_view cloudTexture) { w.mCloudTexture = cloudTexture; });
+        weatherT["cloudTexture"]
+            = sol::property([](const MWWorld::Weather& w) -> std::string_view { return w.mCloudTexture; },
+                [vfs](MWWorld::Weather& w, std::string_view cloudTexture) {
+                    w.mCloudTexture
+                        = Misc::ResourceHelpers::correctTexturePath(VFS::Path::toNormalized(cloudTexture), *vfs);
+                });
         weatherT["cloudsMaximumPercent"]
             = sol::property([](const MWWorld::Weather& w) { return w.mCloudsMaximumPercent; },
                 [](MWWorld::Weather& w, const FiniteFloat cloudsMaximumPercent) {
@@ -172,13 +173,13 @@ namespace MWLua
                 w.mRainEntranceSpeed = rainEntranceSpeed;
             });
         weatherT["rainEffect"] = sol::property(
-            [](const MWWorld::Weather& w) -> sol::optional<std::string> {
+            [](const MWWorld::Weather& w) -> std::optional<std::string_view> {
                 if (w.mRainEffect.empty())
-                    return sol::nullopt;
-                return w.mRainEffect;
+                    return {};
+                return w.mRainEffect.view();
             },
-            [](MWWorld::Weather& w, sol::optional<std::string_view> rainEffect) {
-                w.mRainEffect = rainEffect.value_or("");
+            [](MWWorld::Weather& w, std::optional<std::string_view> rainEffect) {
+                w.mRainEffect = VFS::Path::Normalized(rainEffect.value_or(std::string_view{}));
             });
         weatherT["rainMaxRaindrops"] = sol::property([](const MWWorld::Weather& w) { return w.mRainMaxRaindrops; },
             [](MWWorld::Weather& w, int rainMaxRaindrops) { w.mRainMaxRaindrops = rainMaxRaindrops; });
@@ -211,13 +212,13 @@ namespace MWLua
         weatherT["sunColor"] = sol::readonly_property([](const MWWorld::Weather& w) { return &w.mSunColor; });
         weatherT["landFogDepth"] = sol::readonly_property([](const MWWorld::Weather& w) { return &w.mLandFogDepth; });
         weatherT["particleEffect"] = sol::property(
-            [](const MWWorld::Weather& w) -> sol::optional<std::string> {
+            [](const MWWorld::Weather& w) -> std::optional<std::string_view> {
                 if (w.mParticleEffect.empty())
-                    return sol::nullopt;
-                return w.mParticleEffect;
+                    return {};
+                return w.mParticleEffect.view();
             },
-            [](MWWorld::Weather& w, sol::optional<std::string_view> particleEffect) {
-                w.mParticleEffect = particleEffect.value_or("");
+            [](MWWorld::Weather& w, std::optional<std::string_view> particleEffect) {
+                w.mParticleEffect = VFS::Path::Normalized(particleEffect.value_or(std::string_view{}));
             });
         weatherT["distantLandFogFactor"] = sol::property([](const MWWorld::Weather& w) { return w.mDL.FogFactor; },
             [](MWWorld::Weather& w, const FiniteFloat fogFactor) { w.mDL.FogFactor = fogFactor; });

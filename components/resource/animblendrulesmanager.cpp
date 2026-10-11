@@ -13,7 +13,6 @@
 #include <components/misc/pathhelpers.hpp>
 
 #include <components/sceneutil/osgacontroller.hpp>
-#include <components/sceneutil/templateref.hpp>
 #include <components/vfs/pathutil.hpp>
 
 #include <components/resource/scenemanager.hpp>
@@ -30,7 +29,7 @@ namespace Resource
     {
     }
 
-    osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::getRules(
+    std::shared_ptr<const AnimBlendRules> AnimBlendRulesManager::getRules(
         const VFS::Path::NormalizedView path, const VFS::Path::NormalizedView overridePath)
     {
         // Note: Providing a non-existing path but an existing overridePath is not supported!
@@ -38,30 +37,34 @@ namespace Resource
         if (!tmpl)
             return nullptr;
 
-        // Create an instance based on template and store template reference inside so the template will not be removed
-        // from cache
-        osg::ref_ptr<SceneUtil::AnimBlendRules> blendRules(new AnimBlendRules(*tmpl, osg::CopyOp::SHALLOW_COPY));
-        SceneUtil::addTemplateRef(*blendRules, tmpl.get());
+        // Cached rules are immutable, so callers without overrides can share them. Only a ruleset with overrides
+        // applied needs its own copy.
+        if (overridePath.value().empty())
+            return tmpl;
 
-        if (!overridePath.value().empty())
+        auto blendRuleOverrides = loadRules(overridePath);
+        if (!blendRuleOverrides)
+            return tmpl;
+
+        // Keep the cached sources referenced for as long as the merged rules live, so the cache doesn't expire and
+        // reparse them while actors still use the result.
+        struct MergedRules
         {
-            auto blendRuleOverrides = loadRules(overridePath);
-            if (blendRuleOverrides)
-            {
-                blendRules->addOverrideRules(*blendRuleOverrides);
-            }
-            SceneUtil::addTemplateRef(*blendRules, blendRuleOverrides.get());
-        }
-
-        return blendRules;
+            std::shared_ptr<const AnimBlendRules> mBase;
+            std::shared_ptr<const AnimBlendRules> mOverrides;
+            AnimBlendRules mRules;
+        };
+        auto merged = std::make_shared<MergedRules>(MergedRules{ tmpl, blendRuleOverrides, *tmpl });
+        merged->mRules.addOverrideRules(*blendRuleOverrides);
+        return std::shared_ptr<const AnimBlendRules>(merged, &merged->mRules);
     }
 
-    osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::loadRules(VFS::Path::NormalizedView path)
+    std::shared_ptr<const AnimBlendRules> AnimBlendRulesManager::loadRules(VFS::Path::NormalizedView path)
     {
-        if (std::optional<osg::ref_ptr<const AnimBlendRules>> cached = mCache->getRefFromObjectCacheOrNone(path))
+        if (std::optional<std::shared_ptr<const AnimBlendRules>> cached = mCache->getRefFromObjectCacheOrNone(path))
             return *cached;
 
-        osg::ref_ptr<AnimBlendRules> blendRules = AnimBlendRules::fromFile(mVFS, path);
+        std::shared_ptr<AnimBlendRules> blendRules = AnimBlendRules::fromFile(mVFS, path);
         mCache->addEntryToObjectCache(path.value(), blendRules);
         return blendRules;
     }

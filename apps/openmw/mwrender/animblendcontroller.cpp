@@ -137,7 +137,7 @@ namespace MWRender
     }
 
     AnimBlendController::AnimBlendController(const osg::ref_ptr<SceneUtil::KeyframeController>& keyframeTrack,
-        const AnimBlendStateData& newState, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules)
+        const AnimBlendStateData& newState, const std::shared_ptr<const SceneUtil::AnimBlendRules>& blendRules)
         : mEasingFn(&Easings::sineOut)
     {
         setKeyframeTrack(keyframeTrack, newState, blendRules);
@@ -149,19 +149,19 @@ namespace MWRender
     }
 
     NifAnimBlendController::NifAnimBlendController(const osg::ref_ptr<SceneUtil::KeyframeController>& keyframeTrack,
-        const AnimBlendStateData& newState, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules)
+        const AnimBlendStateData& newState, const std::shared_ptr<const SceneUtil::AnimBlendRules>& blendRules)
         : AnimBlendController(keyframeTrack, newState, blendRules)
     {
     }
 
     BoneAnimBlendController::BoneAnimBlendController(const osg::ref_ptr<SceneUtil::KeyframeController>& keyframeTrack,
-        const AnimBlendStateData& newState, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules)
+        const AnimBlendStateData& newState, const std::shared_ptr<const SceneUtil::AnimBlendRules>& blendRules)
         : AnimBlendController(keyframeTrack, newState, blendRules)
     {
     }
 
     void AnimBlendController::setKeyframeTrack(const osg::ref_ptr<SceneUtil::KeyframeController>& kft,
-        const AnimBlendStateData& newState, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules)
+        const AnimBlendStateData& newState, const std::shared_ptr<const SceneUtil::AnimBlendRules>& blendRules)
     {
         // If animation has changed then start blending
         if (newState.mGroupname != mAnimState.mGroupname || newState.mStartKey != mAnimState.mStartKey

@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_KEYFRAMEMANAGER_H
 #define OPENMW_COMPONENTS_KEYFRAMEMANAGER_H
 
+#include <memory>
 #include <string>
 
 #include <osg/ref_ptr>
@@ -47,7 +48,7 @@ namespace Resource
 
     /// @brief Managing of keyframe resources
     /// @note May be used from any thread.
-    class KeyframeManager : public ResourceManager<osg::ref_ptr<const SceneUtil::KeyframeHolder>>
+    class KeyframeManager : public ResourceManager<std::shared_ptr<const SceneUtil::KeyframeHolder>>
     {
     public:
         explicit KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay,
@@ -56,7 +57,7 @@ namespace Resource
 
         /// Retrieve a read-only keyframe resource by name (case-insensitive).
         /// @note Throws an exception if the resource is not found.
-        osg::ref_ptr<const SceneUtil::KeyframeHolder> get(VFS::Path::NormalizedView name);
+        std::shared_ptr<const SceneUtil::KeyframeHolder> get(VFS::Path::NormalizedView name);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 

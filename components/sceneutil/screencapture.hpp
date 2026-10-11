@@ -7,6 +7,7 @@
 #include <osgViewer/ViewerEventHandlers>
 
 #include <filesystem>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -40,7 +41,7 @@ namespace SceneUtil
     class AsyncScreenCaptureOperation : public osgViewer::ScreenCaptureHandler::CaptureOperation
     {
     public:
-        AsyncScreenCaptureOperation(osg::ref_ptr<SceneUtil::WorkQueue> queue,
+        AsyncScreenCaptureOperation(std::shared_ptr<SceneUtil::WorkQueue> queue,
             osg::ref_ptr<osgViewer::ScreenCaptureHandler::CaptureOperation> impl);
 
         ~AsyncScreenCaptureOperation();
@@ -50,9 +51,9 @@ namespace SceneUtil
         void operator()(const osg::Image& image, unsigned int contextId) override;
 
     private:
-        const osg::ref_ptr<SceneUtil::WorkQueue> mQueue;
+        const std::shared_ptr<SceneUtil::WorkQueue> mQueue;
         const osg::ref_ptr<osgViewer::ScreenCaptureHandler::CaptureOperation> mImpl;
-        Misc::ScopeGuarded<std::vector<osg::ref_ptr<SceneUtil::WorkItem>>> mWorkItems;
+        Misc::ScopeGuarded<std::vector<std::shared_ptr<SceneUtil::WorkItem>>> mWorkItems;
     };
 }
 

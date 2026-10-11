@@ -786,7 +786,7 @@ namespace MWGui
 
     // ------------------------------------------------------------------------------------------
     MapWindow::MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender,
-        SceneUtil::WorkQueue* workQueue)
+        const std::shared_ptr<SceneUtil::WorkQueue>& workQueue)
 #ifdef USE_OPENXR
         : WindowPinnableBase("openmw_map_window_vr.layout")
 #else

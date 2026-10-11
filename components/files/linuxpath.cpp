@@ -71,8 +71,7 @@ namespace Files
 
     std::filesystem::path LinuxPath::getGlobalConfigPath() const
     {
-        std::filesystem::path globalPath(GLOBAL_CONFIG_PATH);
-        return globalPath / mName;
+        return GLOBAL_CONFIG_PATH;
     }
 
     std::filesystem::path LinuxPath::getLocalPath() const
@@ -98,8 +97,7 @@ namespace Files
 
     std::filesystem::path LinuxPath::getGlobalDataPath() const
     {
-        std::filesystem::path globalDataPath(GLOBAL_DATA_PATH);
-        return globalDataPath / mName;
+        return GLOBAL_DATA_PATH;
     }
 
     std::vector<std::filesystem::path> LinuxPath::getInstallPaths() const

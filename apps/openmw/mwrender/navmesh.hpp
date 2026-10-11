@@ -38,7 +38,7 @@ namespace MWRender
     class NavMesh
     {
     public:
-        explicit NavMesh(const osg::ref_ptr<osg::Group>& root, const osg::ref_ptr<SceneUtil::WorkQueue>& workQueue,
+        explicit NavMesh(const osg::ref_ptr<osg::Group>& root, const std::shared_ptr<SceneUtil::WorkQueue>& workQueue,
             bool enabled, Settings::NavMeshRenderMode mode);
         ~NavMesh();
 
@@ -69,7 +69,7 @@ namespace MWRender
         struct DeallocateCreateNavMeshTileGroups;
 
         osg::ref_ptr<osg::Group> mRootNode;
-        osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+        std::shared_ptr<SceneUtil::WorkQueue> mWorkQueue;
         osg::ref_ptr<osg::StateSet> mGroupStateSet;
         osg::ref_ptr<osg::StateSet> mDebugDrawStateSet;
         bool mEnabled;
@@ -77,7 +77,7 @@ namespace MWRender
         std::size_t mId;
         DetourNavigator::Version mVersion;
         std::map<DetourNavigator::TilePosition, Tile> mTiles;
-        std::vector<osg::ref_ptr<CreateNavMeshTileGroups>> mWorkItems;
+        std::vector<std::shared_ptr<CreateNavMeshTileGroups>> mWorkItems;
     };
 }
 

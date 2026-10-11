@@ -752,11 +752,8 @@ namespace MWRender
         {
             mClouds = weather.mCloudTexture;
 
-            const VFS::Path::Normalized texture
-                = Misc::ResourceHelpers::correctTexturePath(VFS::Path::toNormalized(mClouds), *mSceneManager->getVFS());
-
             osg::ref_ptr<osg::Texture2D> cloudTex
-                = new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture));
+                = new osg::Texture2D(mSceneManager->getImageManager()->getImage(mClouds));
             cloudTex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
             cloudTex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 
@@ -775,11 +772,8 @@ namespace MWRender
 
             if (!mNextClouds.empty())
             {
-                const VFS::Path::Normalized texture = Misc::ResourceHelpers::correctTexturePath(
-                    VFS::Path::toNormalized(mNextClouds), *mSceneManager->getVFS());
-
                 osg::ref_ptr<osg::Texture2D> cloudTex
-                    = new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture));
+                    = new osg::Texture2D(mSceneManager->getImageManager()->getImage(mNextClouds));
                 cloudTex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
                 cloudTex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 

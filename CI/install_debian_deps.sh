@@ -82,8 +82,8 @@ declare -rA GROUPED_DEPS=(
     libmyguiengine3debian1v5
     libmyguiengine3debian1v5-dbgsym
     libopenal1
-    libopenscenegraph161
-    libopenscenegraph161-dbgsym
+    libopenscenegraph162
+    libopenscenegraph162-dbgsym
     libopenthreads21-dbgsym
     libpng16-16
     libqt6opengl6
