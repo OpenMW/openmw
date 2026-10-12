@@ -1241,11 +1241,11 @@ namespace MWWorld
         }
         else
         {
-            if (!mQueuedWeather.empty())
+            if (!mQueuedWeather.empty() && mWeatherStore->search(mQueuedWeather))
             {
                 mCurrentWeather = mQueuedWeather;
             }
-            else if (!mNextWeather.empty())
+            else if (next != nullptr)
             {
                 mCurrentWeather = mNextWeather;
             }
