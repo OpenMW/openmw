@@ -1,5 +1,9 @@
 #include "charactercreation.hpp"
 
+#include <array>
+#include <format>
+#include <string_view>
+
 #include <MyGUI_ITexture.h>
 
 #include <components/debug/debuglog.hpp>
@@ -31,50 +35,58 @@ namespace
 {
     struct Response
     {
-        const std::string mText;
+        const std::string_view mAnswer;
         const ESM::Class::Specialization mSpecialization;
     };
 
     struct Step
     {
-        const std::string mText;
-        const Response mResponses[3];
+        const std::string_view mQuestion;
+        const std::array<Response, 3> mResponses;
         const VFS::Path::Normalized mSound;
     };
 
-    Step sGenerateClassSteps(int number)
+    constexpr std::array<std::size_t, 3> getIndices(int order)
     {
-        number++;
-
-        std::string question{ Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_Question") };
-        std::string answer0{ Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerOne") };
-        std::string answer1{ Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerTwo") };
-        std::string answer2{ Fallback::Map::getString(
-            "Question_" + MyGUI::utility::toString(number) + "_AnswerThree") };
-        std::string sound = "vo\\misc\\chargen qa" + MyGUI::utility::toString(number) + ".wav";
-
-        Response r0 = { std::move(answer0), ESM::Class::Combat };
-        Response r1 = { std::move(answer1), ESM::Class::Magic };
-        Response r2 = { std::move(answer2), ESM::Class::Stealth };
-
-        // randomize order in which responses are displayed
-        int order = Misc::Rng::rollDice(6);
-
         switch (order)
         {
             case 0:
-                return { std::move(question), { std::move(r0), std::move(r1), std::move(r2) }, std::move(sound) };
+                return { 0, 1, 2 };
             case 1:
-                return { std::move(question), { std::move(r0), std::move(r2), std::move(r1) }, std::move(sound) };
+                return { 0, 2, 1 };
             case 2:
-                return { std::move(question), { std::move(r1), std::move(r0), std::move(r2) }, std::move(sound) };
+                return { 1, 0, 2 };
             case 3:
-                return { std::move(question), { std::move(r1), std::move(r2), std::move(r0) }, std::move(sound) };
+                return { 1, 2, 0 };
             case 4:
-                return { std::move(question), { std::move(r2), std::move(r0), std::move(r1) }, std::move(sound) };
+                return { 2, 0, 1 };
             default:
-                return { std::move(question), { std::move(r2), std::move(r1), std::move(r0) }, std::move(sound) };
+                return { 2, 1, 0 };
         }
+    }
+
+    Step generateClassSteps(int number)
+    {
+        number++;
+
+        const std::array<Response, 3> responses = {
+            Response{ Fallback::Map::getString(std::format("Question_{}_AnswerOne", number)),
+                ESM::Class::Specialization::Combat },
+            Response{ Fallback::Map::getString(std::format("Question_{}_AnswerTwo", number)),
+                ESM::Class::Specialization::Magic },
+            Response{ Fallback::Map::getString(std::format("Question_{}_AnswerThree", number)),
+                ESM::Class::Specialization::Stealth },
+        };
+
+        // randomize order in which responses are displayed
+        const int order = Misc::Rng::rollDice(6);
+        const std::array<std::size_t, 3> indices = getIndices(order);
+
+        return Step{
+            .mQuestion = Fallback::Map::getString(std::format("Question_{}_Question", number)),
+            .mResponses = { responses[indices[0]], responses[indices[1]], responses[indices[2]] },
+            .mSound = VFS::Path::Normalized(std::format("vo/misc/chargen qa{}.wav", number)),
+        };
     }
 }
 
@@ -656,16 +668,16 @@ namespace MWGui
 
         mGenerateClassQuestionDialog = std::make_unique<InfoBoxDialog>();
 
-        Step step = sGenerateClassSteps(mGenerateClassStep);
+        const Step step = generateClassSteps(mGenerateClassStep);
         mGenerateClassResponses[0] = step.mResponses[0].mSpecialization;
         mGenerateClassResponses[1] = step.mResponses[1].mSpecialization;
         mGenerateClassResponses[2] = step.mResponses[2].mSpecialization;
 
         InfoBoxDialog::ButtonList buttons;
-        mGenerateClassQuestionDialog->setText(step.mText);
-        buttons.push_back(step.mResponses[0].mText);
-        buttons.push_back(step.mResponses[1].mText);
-        buttons.push_back(step.mResponses[2].mText);
+        mGenerateClassQuestionDialog->setText(step.mQuestion);
+        buttons.emplace_back(step.mResponses[0].mAnswer);
+        buttons.emplace_back(step.mResponses[1].mAnswer);
+        buttons.emplace_back(step.mResponses[2].mAnswer);
         mGenerateClassQuestionDialog->setButtons(buttons);
         mGenerateClassQuestionDialog->eventButtonSelected
             += MyGUI::newDelegate(this, &CharacterCreation::onClassQuestionChosen);
