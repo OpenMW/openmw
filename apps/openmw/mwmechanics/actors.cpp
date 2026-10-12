@@ -1947,22 +1947,24 @@ namespace MWMechanics
 
     void Actors::updateSneaking(CharacterController* ctrl, float duration, SidingCache& cachedAllies)
     {
+        const auto windowManager = MWBase::Environment::get().getWindowManager();
         if (!ctrl)
         {
-            MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
+            windowManager->setSneakVisibility(false);
             return;
         }
 
         const MWWorld::Ptr player = getPlayer();
+        const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
 
-        if (!MWBase::Environment::get().getMechanicsManager()->isSneaking(player))
+        if (!mechanicsManager->isSneaking(player))
         {
             mSneakSkillTimer = 0.f;
-            MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
+            windowManager->setSneakVisibility(false);
             return;
         }
 
-        MWBase::World* const world = MWBase::Environment::get().getWorld();
+        const auto world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
         static const float fSneakUseDist = gmst.find("fSneakUseDist")->mValue.getFloat();
         static const float fSneakUseDelay = gmst.find("fSneakUseDelay")->mValue.getFloat();
@@ -1989,22 +1991,20 @@ namespace MWMechanics
             if (sidingActors.find(observer) != sidingActors.cend())
                 continue;
 
-            if (world->getLOS(player, observer))
+            if (!world->getLOS(player, observer))
+                continue;
+
+            if (mechanicsManager->awarenessCheck(player, observer))
             {
-                if (MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, observer))
-                {
-                    detected = true;
-                    avoidedNotice = false;
-                    break;
-                }
-                else
-                {
-                    avoidedNotice = true;
-                }
+                detected = true;
+                avoidedNotice = false;
+                break;
             }
+
+            avoidedNotice = true;
         }
 
-        // Sneaking time accumulates even with no observer in range; at most one interval is spent per frame.
+        // Sneaking time accumulates even with no observer in range.
         mSneakSkillTimer = detected ? 0.f : mSneakSkillTimer + duration;
         if (avoidedNotice && mSneakSkillTimer > fSneakUseDelay)
         {
@@ -2013,7 +2013,7 @@ namespace MWMechanics
         }
 
         if (mSneakTimer == 0.f)
-            MWBase::Environment::get().getWindowManager()->setSneakVisibility(!detected);
+            windowManager->setSneakVisibility(!detected);
 
         mSneakTimer += duration;
     }
