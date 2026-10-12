@@ -84,9 +84,9 @@ namespace
     bool shouldLeadTarget(const osg::Vec3f& casterPos, const MWMechanics::MovingTarget& target)
     {
         constexpr float minLeadDistance = 512.f;
-        constexpr float minLeadSpeed = 30.f;
+        constexpr float minLeadSpeed = 30.f * 30.f;
 
-        return target.mVelocity.length() > minLeadSpeed && (target.mPosition - casterPos).length() > minLeadDistance;
+        return target.mVelocity.length2() > minLeadSpeed && (target.mPosition - casterPos).length() > minLeadDistance;
     }
 
     // Predict where a moving target will be when a projectile launched from launchPos reaches it.
