@@ -131,7 +131,7 @@ There are a few caveats to running CI jobs on a fork:
 
 macOS runners will not be available so you will not be able to verify macOS jobs run/build.
 
-For the Ninja jobs, you will need to [create a fine-grained personal access token (PAT)](https://docs.gitlab.com/auth/tokens/fine_grained_access_tokens/#create-a-fine-grained-personal-access-token) with following permissions: Commit Read, Pipeline Read and Job Run access. And then set it as a [CI Secret for your fork](https://docs.gitlab.com/ci/variables/#for-a-project) called `GITLAB_ACCESS_TOKEN`.
+For the Ninja jobs, you will need to [create a fine-grained personal access token (PAT)](https://docs.gitlab.com/auth/tokens/fine_grained_access_tokens/#create-a-fine-grained-personal-access-token) with the following permissions: Commit Read, Pipeline Read and Job Run access. Then, set it as a [CI Secret for your fork](https://docs.gitlab.com/ci/variables/#for-a-project) called `GITLAB_ACCESS_TOKEN`.
 
 Other resources
 ===============
