@@ -24,7 +24,7 @@ targetsjson="$(jq -r '.configurations[].targets[].jsonFile' "$codemodel")"
 
 artifacts=""
 for targetjson in $targetsjson; do
-    if jq -e '.type == "EXECUTABLE" or .type == "SHARED_LIBRARY" or .type =="MODULE"' ".cmake/api/v1/reply/$targetjson" > /dev/null; then
+    if jq -e '.type == "EXECUTABLE" or .type == "SHARED_LIBRARY" or .type =="MODULE_LIBRARY"' ".cmake/api/v1/reply/$targetjson" > /dev/null; then
         artifacts+="$(jq -r '.artifacts[].path' ".cmake/api/v1/reply/$targetjson")"
         artifacts+=$'\n'
     fi
