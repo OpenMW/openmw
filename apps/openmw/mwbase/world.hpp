@@ -223,7 +223,7 @@ namespace MWBase
 
         virtual int getCurrentWeatherScriptId() const = 0;
 
-        virtual const MWWorld::Weather& getCurrentWeather() const = 0;
+        virtual const MWWorld::Weather* getCurrentWeather() const = 0;
 
         virtual int getNextWeatherScriptId() const = 0;
 

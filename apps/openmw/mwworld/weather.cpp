@@ -363,7 +363,10 @@ namespace MWWorld
         }
 
         // if we hit this path then the chances don't add to 100, choose a default weather instead
-        mWeather = ESM::Weather::indexToRefId(0);
+        if (store.getSize() > 0)
+            mWeather = store.at(0)->mId;
+        else
+            mWeather = {};
     }
 
     MoonModel::MoonModel(float fadeInStart, float fadeInFinish, float fadeOutStart, float fadeOutFinish,
@@ -647,10 +650,10 @@ namespace MWWorld
         throw std::runtime_error("Weather " + id.toDebugString() + " not found");
     }
 
-    Weather* WeatherStore::find(ESM::RefId id)
+    Weather* WeatherStore::search(ESM::RefId id)
     {
         const auto* self = this;
-        return const_cast<Weather*>(self->find(id));
+        return const_cast<Weather*>(self->search(id));
     }
 
     Weather* WeatherStore::insertStatic(Weather&& item)
@@ -854,8 +857,14 @@ namespace MWWorld
         bool isDay = time.getHour() >= mSunriseTime && time.getHour() <= mTimeSettings.mNightStart;
         if (isExterior && !isDay)
             mNightDayMode = ExteriorNight;
-        else if (!isExterior && isDay && mWeatherStore->find(mCurrentWeather)->mGlareView >= 0.5f)
-            mNightDayMode = InteriorDay;
+        else if (!isExterior && isDay)
+        {
+            const Weather* current = mWeatherStore->search(mCurrentWeather);
+            if (current != nullptr && current->mGlareView >= 0.5f)
+                mNightDayMode = InteriorDay;
+            else
+                mNightDayMode = Default;
+        }
         else
             mNightDayMode = Default;
 
@@ -1061,17 +1070,18 @@ namespace MWWorld
 
     float WeatherManager::getSunVisibility() const
     {
-        const Weather& currentWeather = *mWeatherStore->find(mCurrentWeather);
-        if (inTransition())
+        const Weather* currentWeather = mWeatherStore->search(mCurrentWeather);
+        if (currentWeather == nullptr)
+            return 0;
+        if (const Weather* nextWeather = mWeatherStore->search(mNextWeather))
         {
-            const Weather& nextWeather = *mWeatherStore->find(mNextWeather);
-            if (mTransitionFactor < nextWeather.mCloudsMaximumPercent)
+            if (mTransitionFactor < nextWeather->mCloudsMaximumPercent)
             {
-                float t = mTransitionFactor / nextWeather.mCloudsMaximumPercent;
-                return (1.f - t) * currentWeather.mGlareView + t * nextWeather.mGlareView;
+                float t = mTransitionFactor / nextWeather->mCloudsMaximumPercent;
+                return (1.f - t) * currentWeather->mGlareView + t * nextWeather->mGlareView;
             }
         }
-        return currentWeather.mGlareView;
+        return currentWeather->mGlareView;
     }
 
     void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -1124,6 +1134,8 @@ namespace MWWorld
                     found->second = RegionWeather(it->second);
                 }
             }
+            if (!mWeatherStore->search(mCurrentWeather))
+                mWeatherUpdateTime = 0.0f;
 
             return true;
         }
@@ -1201,9 +1213,10 @@ namespace MWWorld
     {
         // When a player chooses to train, wait, or serves jail time, any transitions will be fast forwarded to the last
         // weather type set, regardless of the remaining transition time.
-        if (!mFastForward && inTransition())
+        const Weather* next = mWeatherStore->search(mNextWeather);
+        if (!mFastForward && next != nullptr)
         {
-            const float delta = mWeatherStore->find(mNextWeather)->transitionDelta();
+            const float delta = next->transitionDelta();
             mTransitionFactor -= elapsedRealSeconds * delta;
             if (mTransitionFactor <= 0.0f)
             {
@@ -1213,9 +1226,10 @@ namespace MWWorld
 
                 // We may have begun processing the queued transition, so we need to apply the remaining time towards
                 // it.
-                if (inTransition())
+                next = mWeatherStore->search(mNextWeather);
+                if (next != nullptr)
                 {
-                    const float newDelta = mWeatherStore->find(mNextWeather)->transitionDelta();
+                    const float newDelta = next->transitionDelta();
                     const float remainingSeconds = -(mTransitionFactor / delta);
                     mTransitionFactor = 1.0f - (remainingSeconds * newDelta);
                 }
@@ -1227,11 +1241,11 @@ namespace MWWorld
         }
         else
         {
-            if (!mQueuedWeather.empty())
+            if (!mQueuedWeather.empty() && mWeatherStore->search(mQueuedWeather))
             {
                 mCurrentWeather = mQueuedWeather;
             }
-            else if (!mNextWeather.empty())
+            else if (next != nullptr)
             {
                 mCurrentWeather = mNextWeather;
             }
@@ -1260,8 +1274,6 @@ namespace MWWorld
         // In order to work like ChangeWeather expects, this method begins transitioning to the new weather immediately
         // if no transition is in progress, otherwise it queues it to be transitioned.
 
-        assert(!weatherID.empty());
-
         if (!inTransition() && (weatherID != mCurrentWeather))
         {
             mNextWeather = weatherID;
@@ -1271,6 +1283,8 @@ namespace MWWorld
         {
             mQueuedWeather = weatherID;
         }
+        if (mTransitionFactor > 0.f && !mWeatherStore->search(mCurrentWeather))
+            mTransitionFactor = 0.f;
     }
 
     MWRender::WeatherResult WeatherManager::calculateWeatherResult(
@@ -1278,20 +1292,20 @@ namespace MWWorld
     {
         MWRender::WeatherResult result;
         float flash = 0.0f;
-        if (!inTransition())
+        Weather* current = mWeatherStore->search(mCurrentWeather);
+        if (current == nullptr)
+            return result;
+        if (Weather* next = mWeatherStore->search(mNextWeather))
         {
-            Weather& current = *mWeatherStore->find(mCurrentWeather);
-            result = calculateResult(current, gameHour);
-            flash = current.calculateThunder(1.0f, elapsedSeconds, isPaused);
+            result = calculateTransitionResult(*current, *next, 1 - mTransitionFactor, gameHour);
+            float currentFlash = current->calculateThunder(mTransitionFactor, elapsedSeconds, isPaused);
+            float nextFlash = next->calculateThunder(1 - mTransitionFactor, elapsedSeconds, isPaused);
+            flash = currentFlash + nextFlash;
         }
         else
         {
-            Weather& current = *mWeatherStore->find(mCurrentWeather);
-            Weather& next = *mWeatherStore->find(mNextWeather);
-            result = calculateTransitionResult(current, next, 1 - mTransitionFactor, gameHour);
-            float currentFlash = current.calculateThunder(mTransitionFactor, elapsedSeconds, isPaused);
-            float nextFlash = next.calculateThunder(1 - mTransitionFactor, elapsedSeconds, isPaused);
-            flash = currentFlash + nextFlash;
+            result = calculateResult(*current, gameHour);
+            flash = current->calculateThunder(1.0f, elapsedSeconds, isPaused);
         }
         osg::Vec4f flashColor(flash, flash, flash, 0.0f);
 

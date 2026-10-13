@@ -325,7 +325,7 @@ namespace MWWorld
 
         const Weather* search(ESM::RefId id) const;
         const Weather* find(ESM::RefId id) const;
-        Weather* find(ESM::RefId id);
+        Weather* search(ESM::RefId id);
 
         Weather* insertStatic(Weather&& item);
         void eraseStatic(ESM::RefId id);
@@ -372,7 +372,7 @@ namespace MWWorld
 
         void advanceTime(double hours, bool incremental);
 
-        const Weather& getWeather() { return *mWeatherStore->find(mCurrentWeather); }
+        const Weather* getWeather() { return mWeatherStore->search(mCurrentWeather); }
 
         const Weather* getNextWeather() { return mWeatherStore->search(mNextWeather); }
 
