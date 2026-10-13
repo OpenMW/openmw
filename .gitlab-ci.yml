@@ -123,7 +123,7 @@ Almalinux_Generic:
     CXX: g++
     OPENMW_LOCAL_INSTALL: 1
     CI_OPENMW_USE_VCPKG: true
-    CUSTOM_CPACK_LABEL: $CI_COMMIT_REF_NAME
+    CUSTOM_CPACK_LABEL: $CI_COMMIT_REF_SLUG
     CCACHE_SIZE: 1G
   before_script:
     - dnf install -y epel-release
@@ -149,7 +149,7 @@ Almalinux_Generic:
     - cpack -G TXZ -D CPACK_STRIP_FILES=ON -D CPACK_THREADS=0 -D CPACK_INCLUDE_TOPLEVEL_DIRECTORY=0
     - |
       if [[ -v AWS_ACCESS_KEY_ID ]]; then
-          artifactDirectory="$CI_PROJECT_NAMESPACE/$CI_COMMIT_REF_NAME/$CI_COMMIT_SHORT_SHA-$CI_JOB_ID/"
+          artifactDirectory="${CI_PROJECT_NAMESPACE//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_REF_NAME//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_SHORT_SHA//[\"<>|$'\t'\/\\?*]/_}-${CI_JOB_ID//[\"<>|$'\t'\/\\?*]/_}/"
           aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp OpenMW*.tar.xz s3://openmw-artifacts/$artifactDirectory
       fi
   artifacts:
