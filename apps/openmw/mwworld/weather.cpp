@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace MWWorld
 {
@@ -43,6 +44,16 @@ namespace MWWorld
         osg::Vec4f lerp(const osg::Vec4f& x, const osg::Vec4f& y, float factor)
         {
             return x * (1 - factor) + y * factor;
+        }
+
+        // Sign-safe and finite-safe division.
+        float safeDivide(float numerator, float divisor)
+        {
+            if (divisor != 0.0f)
+                return numerator / divisor;
+
+            float magnitude = numerator != 0.0f ? std::numeric_limits<float>::max() : 0.0f;
+            return std::signbit(numerator) != std::signbit(divisor) ? -magnitude : magnitude;
         }
 
         osg::Vec3f calculateStormDirection(VFS::Path::NormalizedView particleEffect)
@@ -371,26 +382,22 @@ namespace MWWorld
 
     MoonModel::MoonModel(float fadeInStart, float fadeInFinish, float fadeOutStart, float fadeOutFinish,
         float axisOffset, float speed, float dailyIncrement, float fadeStartAngle, float fadeEndAngle,
-        float moonShadowEarlyFadeAngle)
+        float moonShadowEarlyFadeAngle, float sunriseHour, float sunsetHour)
+        : mFadeInStart(fadeInStart)
+        , mFadeInFinish(fadeInFinish)
+        , mFadeOutStart(fadeOutStart)
+        , mFadeOutFinish(fadeOutFinish)
+        , mAxisOffset(axisOffset)
+        , mSpeed(speed)
+        , mDailyIncrement(dailyIncrement)
+        , mFadeStartAngle(fadeStartAngle)
+        , mFadeEndAngle(fadeEndAngle)
+        , mMoonShadowEarlyFadeAngle(moonShadowEarlyFadeAngle)
+        , mSunriseHour(sunriseHour)
+        , mSunsetHour(sunsetHour)
     {
-        mFadeInStart = fadeInStart;
-        mFadeInFinish = fadeInFinish;
-        mFadeOutStart = fadeOutStart;
-        mFadeOutFinish = fadeOutFinish;
-        mAxisOffset = axisOffset;
-        mDailyIncrement = dailyIncrement;
-        mFadeStartAngle = fadeStartAngle;
-        mFadeEndAngle = fadeEndAngle;
-        mMoonShadowEarlyFadeAngle = moonShadowEarlyFadeAngle;
-
-        // Morrowind appears to have a minimum speed to avoid situations where the moon can't
-        // complete a full rotation in a single 24-hour period. The reverse-engineered formula is
-        // 180 degrees (full hemisphere) / 23 hours / 15 degrees (1 hour travel at speed 1.0).
-        mSpeed = std::max(speed, (180.0f / 23.0f / 15.0f));
-
-        // Morrowind appears to reduce mDailyIncrement with modulo 24.0f to avoid situations where
-        // the moon would increment more than an entire rotation in a single day.
-        mDailyIncrement = std::fmod(mDailyIncrement, 24.0f);
+        calculateSettings();
+        buildCycle();
     }
 
     MoonModel::MoonModel(const std::string& name)
@@ -404,141 +411,181 @@ namespace MWWorld
         , mFadeStartAngle(Fallback::Map::getFloat("Moons_" + name + "_Fade_Start_Angle"))
         , mFadeEndAngle(Fallback::Map::getFloat("Moons_" + name + "_Fade_End_Angle"))
         , mMoonShadowEarlyFadeAngle(Fallback::Map::getFloat("Moons_" + name + "_Moon_Shadow_Early_Fade_Angle"))
+        , mSunriseHour(Fallback::Map::getFloat("Weather_Sunrise_Time"))
+        , mSunsetHour(Fallback::Map::getFloat("Weather_Sunset_Time"))
     {
-        // Morrowind appears to have a minimum speed to avoid situations where the moon can't
-        // complete a full rotation in a single 24-hour period. The reverse-engineered formula is
-        // 180 degrees (full hemisphere) / 23 hours / 15 degrees (1 hour travel at speed 1.0).
-        mSpeed = std::max(mSpeed, (180.0f / 23.0f / 15.0f));
+        calculateSettings();
+        buildCycle();
+    }
 
-        // Morrowind appears to reduce mDailyIncrement with modulo 24.0f to avoid situations where
+    void MoonModel::calculateSettings()
+    {
+        // Morrowind's moon speed is tied to day length. A shorter day means a faster sun and
+        // (weirdly) a faster moon too. The reverse-engineered formula is
+        // mSpeed * 180 degrees (a full hemisphere) / day length (vanilla is 12 hours).
+        float dayLength = mSunsetHour - mSunriseHour;
+        mDegreesPerHour = safeDivide(mSpeed * 180.0f, dayLength);
+
+        // Morrowind appears to have a minimum speed to avoid situations where the moon can't
+        // complete a full rotation in a single 24-hour period. The minimum is 1 rotation in 23 hours.
+        // Also weirdly, the minimum only applies to moon speeds that aren't literally signed negative.
+        if (!std::signbit(mDegreesPerHour))
+            mDegreesPerHour = std::max(mDegreesPerHour, 180.0f / 23.0f);
+
+        // Morrowind appears to reduce mDailyIncrement with mod 24.0f to avoid situations where
         // the moon would increment more than an entire rotation in a single day.
         mDailyIncrement = std::fmod(mDailyIncrement, 24.0f);
     }
 
-    MWRender::MoonState MoonModel::calculateState(const TimeStamp& gameTime) const
+    void MoonModel::buildCycle()
     {
-        float rotationFromHorizon = angle(gameTime.getDay(), gameTime.getHour());
-        MWRender::MoonState state = { rotationFromHorizon,
-            mAxisOffset, // Reverse engineered from Morrowind's scene graph rotation matrices.
-            phase(gameTime), shadowBlend(rotationFromHorizon),
-            earlyMoonShadowAlpha(rotationFromHorizon) * hourlyAlpha(gameTime.getHour()) };
+        // The moon changes to the next day's rise hour when it's out of sight, so each day depends
+        // on the previous. We calculate an extra cycle to make the cached cycle accurate.
+        constexpr int firstDay = 1 - sDaysPerCycle;
+        float currentRiseHour = riseHour(firstDay);
 
-        return state;
+        for (int day = firstDay + 1; day <= sDaysPerCycle; ++day)
+        {
+            float nextRiseHour = riseHour(day);
+            float handover = handoverHour(currentRiseHour, nextRiseHour);
+
+            if (day >= 1)
+                mCycle[dayOfCycle(day)] = { currentRiseHour, handover };
+
+            if (handover < 24.0f)
+                currentRiseHour = nextRiseHour;
+        }
     }
 
-    inline float MoonModel::angle(int gameDay, float gameHour) const
+    MWRender::MoonState MoonModel::calculateState(const TimeStamp& gameTime) const
+    {
+        const CycleDay& today = mCycle[dayOfCycle(gameTime.getDay())];
+        bool postHandover = gameTime.getHour() >= today.mHandoverHour;
+        float currentRiseHour = postHandover ? mCycle[dayOfCycle(gameTime.getDay() + 1)].mRiseHour : today.mRiseHour;
+        float rotationFromHorizon = angle(gameTime.getHour(), currentRiseHour);
+
+        return { rotationFromHorizon,
+            mAxisOffset, // Reverse engineered from Morrowind's scene graph rotation matrices.
+            phase(gameTime.getDay(), postHandover), shadowBlend(rotationFromHorizon),
+            earlyMoonShadowAlpha(rotationFromHorizon) * hourlyAlpha(gameTime.getHour()) };
+    }
+
+    inline float MoonModel::hoursUntilVisible() const
+    {
+        return safeDivide(mFadeEndAngle - mMoonShadowEarlyFadeAngle, rotation(1.0f));
+    }
+
+    inline float MoonModel::hoursUntilInvisible() const
+    {
+        return safeDivide(180.0f - mFadeEndAngle + mMoonShadowEarlyFadeAngle, rotation(1.0f));
+    }
+
+    inline float MoonModel::hourOfDay(float hours)
+    {
+        float hour = std::fmod(hours, 24.0f);
+        return hour < 0.0f ? hour + 24.0f : hour;
+    }
+
+    inline int MoonModel::dayOfCycle(int gameDay)
+    {
+        // Get the current day's placement in the cycle.
+        int day = (gameDay - 1) % sDaysPerCycle;
+        return day < 0 ? day + sDaysPerCycle : day;
+    }
+
+    float MoonModel::riseHour(int gameDay) const
+    {
+        if (mDailyIncrement == 0.0f)
+            return 0.0f;
+
+        // Skip enough increments that the rise hour maintains a 24-day cycle.
+        float skippedIncrements = (sDaysPerCycle - std::abs(sDaysPerCycle / mDailyIncrement))
+            * std::floor(static_cast<float>(gameDay + sStartIncrements - 1) / sDaysPerCycle);
+        float riseHour = mDailyIncrement * (gameDay + sStartIncrements - 1 - skippedIncrements);
+
+        // We need to wrap the moon's rise hour between about 0,24 or -24,0 depending on daily increment.
+        riseHour = std::fmod(riseHour, 24.0f);
+        if (mDailyIncrement < 0.0f && riseHour > sRiseHourEpsilon)
+            riseHour -= 24.0f;
+
+        if (mDailyIncrement >= 0.0f && riseHour <= sRiseHourEpsilon)
+            riseHour += 24.0f;
+
+        return riseHour;
+    }
+
+    float MoonModel::handoverHour(float prevRiseHour, float nextRiseHour) const
+    {
+        // The handover hour is the point where the moon's rise hour switches to the next day's.
+        // This makes the moon "jump" from one position to another, so Morrowind waits
+        // until the moon is invisible to make the transition.
+
+        // Whether the time elapsed since the rise hour places the moon in an invisible hour range.
+        auto isInvisibleHour = [&](float gameHour, float riseHour) {
+            float travelled = hourOfDay(gameHour - riseHour);
+            return travelled < hoursUntilVisible() || travelled >= hoursUntilInvisible() - sRiseHourEpsilon;
+        };
+
+        // Whether the moon is invisible by alpha or by fade angle at both the old and new positions.
+        auto isInvisible = [&](float gameHour) {
+            bool transparent = hourlyAlpha(gameHour) <= 0.0f;
+            return (transparent || isInvisibleHour(gameHour, prevRiseHour))
+                && (isInvisibleHour(gameHour, nextRiseHour) || (transparent && gameHour < mSunriseHour));
+        };
+
+        // Midnight is the earliest possible invisible time.
+        if (isInvisible(0.0f))
+            return 0.0f;
+
+        // Get the moon fadeout point and both days' invisible times, then find the earliest.
+        // Moon settings can lead to no invisible times, which means no handover.
+        float daytimeFade = mFadeOutFinish - sOneMinute;
+        float prevRiseInvisibleHour = hourOfDay(prevRiseHour + hoursUntilInvisible());
+        float nextRiseInvisibleHour = hourOfDay(nextRiseHour + hoursUntilInvisible());
+
+        float handover = 999.0f; // No handover
+        if (daytimeFade >= 0.0f && isInvisible(daytimeFade))
+            handover = daytimeFade;
+
+        if (isInvisible(prevRiseInvisibleHour))
+            handover = std::min(handover, prevRiseInvisibleHour);
+
+        if (isInvisible(nextRiseInvisibleHour))
+            handover = std::min(handover, nextRiseInvisibleHour);
+
+        return handover;
+    }
+
+    inline float MoonModel::rotation(float hours) const
+    {
+        return mDegreesPerHour * hours;
+    }
+
+    inline float MoonModel::angle(float gameHour, float riseHour) const
     {
         // Morrowind's moons start travel on one side of the horizon (let's call it H-rise) and travel 180 degrees to
         // the opposite horizon (let's call it H-set). Upon reaching H-set, they reset to H-rise until the next moon
         // rise.
 
-        // When calculating the angle of the moon, several cases have to be taken into account:
-        // 1. Moon rises and then sets in one day.
-        // 2. Moon sets and doesn't rise in one day (occurs when the moon rise hour is >= 24).
-        // 3. Moon sets and then rises in one day.
-        float moonRiseHourToday = moonRiseHour(gameDay);
-        float moonRiseAngleToday = 0.0f;
+        // A rise hour past this game hour means the moon rose the day before.
+        float travelled = gameHour - riseHour;
+        if (travelled < 0.0f)
+            travelled += 24.0f;
 
-        if (gameHour < moonRiseHourToday)
-        {
-            // Rise hour increases by mDailyIncrement each day, so yesterday's is easy to calculate
-            float moonRiseHourYesterday = moonRiseHourToday - mDailyIncrement;
-            if (moonRiseHourYesterday < 24.0f)
-            {
-                // Morrowind offsets the increment by -1 when the previous day's visible point crosses into the next
-                // day. The offset lasts from this point until the next 24-day loop starts. To find this point we add
-                // mDailyIncrement to the previous visible point and check the result.
-                float moonShadowEarlyFadeAngle1 = mFadeEndAngle - mMoonShadowEarlyFadeAngle;
-                float timeToVisible = moonShadowEarlyFadeAngle1 / rotation(1.0f);
-                float cycleOffset = moonRiseHourYesterday + timeToVisible > 24.0f ? mDailyIncrement : 0.0f;
-
-                float moonRiseAngleYesterday = rotation(24.0f - (moonRiseHourYesterday + cycleOffset));
-                if (moonRiseAngleYesterday < 180.0f)
-                {
-                    // The moon rose but did not set yesterday, so accumulate yesterday's angle with how much we've
-                    // travelled today.
-                    moonRiseAngleToday = rotation(gameHour) + moonRiseAngleYesterday;
-                }
-            }
-        }
-        else
-        {
-            moonRiseAngleToday = rotation(gameHour - moonRiseHourToday);
-        }
-
-        if (moonRiseAngleToday >= 180.0f)
-        {
-            // The moon set today, reset the angle to the horizon.
-            moonRiseAngleToday = 0.0f;
-        }
-
-        return moonRiseAngleToday;
+        // Absolute value to account for negative non-zero speed moons
+        float rotationFromHorizon = rotation(travelled);
+        return std::abs(rotationFromHorizon) < 180.0f ? rotationFromHorizon : 0.0f;
     }
 
-    inline float MoonModel::moonPhaseHour(int gameDay) const
+    inline MWRender::MoonState::Phase MoonModel::phase(int gameDay, bool postHandover)
     {
-        // Morrowind delays moon phase changes until one of these is true:
-        //   * The moon is invisible at midnight.
-        //   * The moon reached moonShadowEarlyFadeAngle2 one daily increment ago (therefore invisible).
-        if (!isVisible(gameDay, 0.0f))
-            return 0.0f;
-        else
-        {
-            // Calculate the angle at which the moon becomes transparent and the starting angle.
-            float moonShadowEarlyFadeAngle2 = (180.0f - mFadeEndAngle) + mMoonShadowEarlyFadeAngle;
-            float midnightAngle = angle(gameDay, 0.0f);
-
-            // We can assume that moonShadowEarlyFadeAngle2 > midnightAngle, because the opposite
-            // case would make the moon invisible at midnight, which is checked above.
-            return ((moonShadowEarlyFadeAngle2 - midnightAngle) / rotation(1.0f)) + std::max(mDailyIncrement, 0.0f);
-        }
-    }
-
-    inline float MoonModel::moonRiseHour(int gameDay) const
-    {
-        if (mDailyIncrement == 0.0f)
-            return 0.0f;
-
-        // This arises from the start date of 16 Last Seed, 427
-        // TODO: Find an alternate formula that doesn't rely on this day being fixed.
-        constexpr int startDay = 16;
-
-        // This formula finds the number of missed increments necessary to make the rise hour a 24-day loop.
-        // The offset increases on the first day of the loop and is multiplied by the number of completed loops.
-        float incrementOffset = (24.0f - std::abs(24.0f / mDailyIncrement)) * std::floor((gameDay + startDay) / 24.0f);
-
-        // This odd formula arises from the fact that on 16 Last Seed, 17 increments have occurred, meaning
-        // that upon starting a new game, it must only calculate the moon phase as far back as 1 Last Seed.
-        // Note that we don't modulo after adding the latest daily increment because other calculations need to
-        // know if doing so would cause the moon rise to be postponed until the next day (which happens when
-        // the moon rise hour is >= 24 in Morrowind).
-        return mDailyIncrement + std::fmod((gameDay - 1 + startDay - incrementOffset) * mDailyIncrement, 24.0f);
-    }
-
-    inline float MoonModel::rotation(float hours) const
-    {
-        // 15 degrees per hour was reverse engineered from the rotation matrices of the Morrowind scene graph.
-        // Note that this correlates to 360 / 24, which is a full rotation every 24 hours, so speed is a measure
-        // of whole rotations that could be completed in a day.
-        return 15.0f * mSpeed * hours;
-    }
-
-    MWRender::MoonState::Phase MoonModel::phase(const TimeStamp& gameTime) const
-    {
-        // Morrowind starts with a full moon on 16 Last Seed and then begins to wane 17 Last Seed, working on 3 day
+        // Morrowind starts with a full moon on 16 Last Seed and then begins to wane 17 Last Seed, working on a 3 day
         // phase cycle.
 
-        // If the moon didn't rise yet today, use yesterday's moon phase.
-        if (gameTime.getHour() < moonPhaseHour(gameTime.getDay()))
-            return static_cast<MWRender::MoonState::Phase>((gameTime.getDay() / 3) % 8);
-        else
-            return static_cast<MWRender::MoonState::Phase>(((gameTime.getDay() + 1) / 3) % 8);
-    }
+        // The phase changes when the active rise hour changes.
+        int phaseDay = postHandover ? gameDay + 1 : gameDay;
 
-    inline bool MoonModel::isVisible(int gameDay, float gameHour) const
-    {
-        // Moons are "visible" when their alpha value is non-zero.
-        return hourlyAlpha(gameHour) > 0.f && earlyMoonShadowAlpha(angle(gameDay, gameHour)) > 0.f;
+        return static_cast<MWRender::MoonState::Phase>((phaseDay / sDaysPerPhase) % sPhasesPerCycle);
     }
 
     inline float MoonModel::shadowBlend(float angle) const
@@ -566,9 +613,9 @@ namespace MWWorld
 
     inline float MoonModel::hourlyAlpha(float gameHour) const
     {
-        // Morrowind culls the moon one minute before mFadeOutFinish
-        constexpr float oneMinute = 0.0167f;
-        float adjustedFadeOutFinish = mFadeOutFinish - oneMinute;
+        // Morrowind culls the moon one minute before mFadeOutFinish, but only when the moon has
+        // a transparent hour range. If #2 below is <= 0, the early minute is skipped.
+        float adjustedFadeOutFinish = mFadeInStart > mFadeOutFinish ? mFadeOutFinish - sOneMinute : mFadeOutFinish;
 
         // The Fade Out Start / Finish and Fade In Start / Finish describe the hours at which the moon
         // appears and disappears.
@@ -589,6 +636,11 @@ namespace MWWorld
 
     inline float MoonModel::earlyMoonShadowAlpha(float angle) const
     {
+        // A moon at the horizon has either not yet risen or has finished its arc.
+        // A negative moonShadowEarlyFadeAngle1 keeps the horizon permanently lit.
+        if (angle <= 0.0f && mFadeEndAngle >= mMoonShadowEarlyFadeAngle)
+            return 0.0f;
+
         // The Moon Shadow Early Fade Angle describes an arc relative to Fade End Angle.
         // Depending on the current angle, the following values describe how transparent the moon is.
         // 1. From Moon Shadow Early Fade Angle 1 to Fade End Angle 1 (during moon rise): 0..1
