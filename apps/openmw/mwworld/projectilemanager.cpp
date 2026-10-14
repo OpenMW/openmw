@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include <osg/PositionAttitudeTransform>
+#include <osg/Vec2f>
 
 #include <components/debug/debuglog.hpp>
 
@@ -63,6 +64,57 @@
 
 namespace
 {
+    float getMagicBoltSpeed(float effectSpeed, const MWWorld::Ptr& caster, bool normaliseRaceSpeed)
+    {
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+        static const float fTargetSpellMaxSpeed
+            = store.get<ESM::GameSetting>().find("fTargetSpellMaxSpeed")->mValue.getFloat();
+        float speed = fTargetSpellMaxSpeed * effectSpeed;
+        if (!normaliseRaceSpeed && !caster.isEmpty() && caster.getClass().isNpc())
+        {
+            const auto npc = caster.get<ESM::NPC>()->mBase;
+            const auto race = store.get<ESM::Race>().find(npc->mRace);
+            speed *= npc->isMale() ? race->mData.mMaleWeight : race->mData.mFemaleWeight;
+        }
+        return speed;
+    }
+
+    // Only lead on targets that are far enough away ( > 512 units) that have moved
+    // more than 1 unit per frame. A high estimate of 30 fps is taken here
+    bool shouldLeadTarget(const osg::Vec3f& casterPos, const MWMechanics::MovingTarget& target)
+    {
+        constexpr float minLeadDistance = 512.f;
+        constexpr float minLeadSpeed = 30.f * 30.f;
+
+        return target.mVelocity.length2() > minLeadSpeed && (target.mPosition - casterPos).length() > minLeadDistance;
+    }
+
+    // Predict where a moving target will be when a projectile launched from launchPos reaches it.
+    // Like in Morrowind, the target is only led horizontally, but by its full speed,
+    // so moving vertically (e.g. jumping) makes the lead longer.
+    osg::Vec3f predictHitPosition(
+        const osg::Vec3f& launchPos, const MWMechanics::MovingTarget& target, float projectileSpeed)
+    {
+        // Morrowind overestimates the speed of a target it leads by this factor
+        constexpr float targetSpeedMultiplier = 1.25f;
+
+        osg::Vec2f direction(target.mVelocity.x(), target.mVelocity.y());
+        if (projectileSpeed <= 0.f || direction.normalize() <= 1e-6f)
+            return target.mPosition;
+
+        const osg::Vec3f leadVelocity = osg::Vec3f(direction, 0.f) * target.mVelocity.length() * targetSpeedMultiplier;
+
+        // Estimate the flight time to the current position, then refine it once using the predicted position
+        osg::Vec3f predicted = target.mPosition;
+        for (int i = 0; i < 2; ++i)
+        {
+            const osg::Vec2f offset(predicted.x() - launchPos.x(), predicted.y() - launchPos.y());
+            const float flightTime = offset.length() / projectileSpeed;
+            predicted = target.mPosition + leadVelocity * flightTime;
+        }
+        return predicted;
+    }
+
     ESM::EffectList getMagicBoltData(std::vector<ESM::RefId>& projectileIDs, std::set<ESM::RefId>& sounds, float& speed,
         VFS::Path::NormalizedView& texture, std::string& sourceName, const ESM::RefId& id)
     {
@@ -289,8 +341,9 @@ namespace MWWorld
         state.mEffectAnimationTime->addTime(duration);
     }
 
-    void ProjectileManager::launchMagicBolt(
-        const ESM::RefId& spellId, const Ptr& caster, const osg::Vec3f& fallbackDirection, ESM::RefNum item)
+    void ProjectileManager::launchMagicBolt(const ESM::RefId& spellId, const Ptr& caster,
+        const osg::Vec3f& fallbackDirection, ESM::RefNum item,
+        const std::optional<MWMechanics::MovingTarget>& movingTarget)
     {
         osg::Vec3f pos = caster.getRefData().getPosition().asVec3();
         if (caster.getClass().isActor())
@@ -331,6 +384,20 @@ namespace MWWorld
         {
             Log(Debug::Warning) << "Unable to launch magic bolt (direction to target is empty)";
             return;
+        }
+
+        if (movingTarget.has_value() && caster.getClass().isActor())
+        {
+            osg::Vec3f aimPosition = movingTarget->mPosition;
+            if (shouldLeadTarget(caster.getRefData().getPosition().asVec3(), *movingTarget))
+            {
+                const float speed = getMagicBoltSpeed(state.mSpeed, caster, Settings::game().mNormaliseRaceSpeed);
+                aimPosition = predictHitPosition(pos, *movingTarget, speed);
+            }
+
+            const osg::Vec3f direction = aimPosition - pos;
+            if (direction.length2() > 0)
+                orient.makeRotate(osg::Vec3f(0, 1, 0), direction);
         }
 
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
@@ -468,17 +535,8 @@ namespace MWWorld
                 }
             }
 
-            const auto& store = *MWBase::Environment::get().getESMStore();
             osg::Quat orient = magicBoltState.mNode->getAttitude();
-            static float fTargetSpellMaxSpeed
-                = store.get<ESM::GameSetting>().find("fTargetSpellMaxSpeed")->mValue.getFloat();
-            float speed = fTargetSpellMaxSpeed * magicBoltState.mSpeed;
-            if (!normaliseRaceSpeed && !caster.isEmpty() && caster.getClass().isNpc())
-            {
-                const auto npc = caster.get<ESM::NPC>()->mBase;
-                const auto race = store.get<ESM::Race>().find(npc->mRace);
-                speed *= npc->isMale() ? race->mData.mMaleWeight : race->mData.mFemaleWeight;
-            }
+            const float speed = getMagicBoltSpeed(magicBoltState.mSpeed, caster, normaliseRaceSpeed);
             osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
             direction.normalize();
             projectile->setVelocity(direction * speed);

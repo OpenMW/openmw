@@ -1,10 +1,16 @@
 #ifndef MWMECHANICS_SPELLCASTING_H
 #define MWMECHANICS_SPELLCASTING_H
 
+#include <optional>
+
+#include <osg/Vec3f>
+
 #include <components/esm3/activespells.hpp>
 #include <components/esm3/effectlist.hpp>
 
 #include "../mwworld/ptr.hpp"
+
+#include "movingtarget.hpp"
 
 namespace ESM
 {
@@ -37,6 +43,7 @@ namespace MWMechanics
         ESM::RefId mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc
         osg::Vec3f mHitPosition{ 0, 0, 0 }; // Used for spawning area orb
+        std::optional<MovingTarget> mMovingTarget; // If set, magic bolts are aimed ahead of this target
         bool mAlwaysSucceed{
             false
         }; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)

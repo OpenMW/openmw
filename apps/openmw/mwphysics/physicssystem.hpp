@@ -240,6 +240,9 @@ namespace MWPhysics
         /// the actor collision box in world space.
         osg::Vec3f getCollisionObjectPosition(const MWWorld::ConstPtr& actor) const;
 
+        /// Get the configured duration of a single physics step in seconds.
+        float getPhysicsDt() const { return mPhysicsDt; }
+
         /// Get bounding box in world space of the given object.
         osg::BoundingBox getBoundingBox(const MWWorld::ConstPtr& object) const;
 

@@ -572,7 +572,7 @@ namespace MWWorld
         void castSpell(const MWWorld::Ptr& actor, bool manualSpell = false) override;
 
         void launchMagicBolt(const ESM::RefId& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection,
-            ESM::RefNum item) override;
+            ESM::RefNum item, const std::optional<MWMechanics::MovingTarget>& movingTarget) override;
         void launchProjectile(MWWorld::Ptr& actor, MWWorld::Ptr& projectile, const osg::Vec3f& worldPos,
             const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength, float attackWindUp) override;
         void updateProjectilesCasters() override;

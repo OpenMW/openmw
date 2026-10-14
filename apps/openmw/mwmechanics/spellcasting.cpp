@@ -137,7 +137,7 @@ namespace MWMechanics
             fallbackDirection = (mTarget.getRefData().getPosition().asVec3() + offset)
                 - (mCaster.getRefData().getPosition().asVec3());
 
-        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, mCaster, fallbackDirection, mItem);
+        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, mCaster, fallbackDirection, mItem, mMovingTarget);
     }
 
     void CastSpell::inflict(
