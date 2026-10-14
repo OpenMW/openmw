@@ -1,3 +1,5 @@
+local async = require('openmw.async')
+local core = require('openmw.core')
 local self = require('openmw.self')
 local types = require('openmw.types')
 local I = require('openmw.interfaces')
@@ -19,12 +21,38 @@ I.SpellCasting.addApplyMagicEffectsHandler(function(options)
     end
 end)
 
+-- These effects wait for non-zero dt in MWMechanics::applyMagicEffect.
+local deferredEffects = {
+    [core.magic.EFFECT_TYPE.Invisibility] = true,
+    [core.magic.EFFECT_TYPE.Recall] = true,
+    [core.magic.EFFECT_TYPE.DivineIntervention] = true,
+    [core.magic.EFFECT_TYPE.AlmsiviIntervention] = true,
+}
+local playOnHitEffectsLater
+
 local function onPlayOnHitEffects(options)
+    local paused = core.isWorldPaused()
     local aSpell = Actor.activeSpells(self):getByActiveSpellId(options.activeSpellId)
+
     if aSpell then
-        common.playMagicEffects(self, 'hit', aSpell.effects, true)
+        local effects = auxUtil.mapFilter(aSpell.effects, function(effect)
+            if deferredEffects[effect.id] then return not paused end
+            return not options.deferredOnly
+        end)
+        common.playMagicEffects(self, 'hit', effects, true)
+    end
+
+    if paused then
+        -- Some effects may still be waiting for a mechanics update.
+        -- Simulation timers only fire once the world is unpaused.
+        async:newSimulationTimer(0, playOnHitEffectsLater, {
+            activeSpellId = options.activeSpellId,
+            deferredOnly = aSpell ~= nil,
+        })
     end
 end
+
+playOnHitEffectsLater = async:registerTimerCallback('PlayOnHitEffects', onPlayOnHitEffects)
 
 return {
     interfaceName = 'SpellCasting',
