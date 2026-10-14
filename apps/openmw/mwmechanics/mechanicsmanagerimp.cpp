@@ -39,6 +39,7 @@
 #include "autocalcspell.hpp"
 #include "combat.hpp"
 #include "npcstats.hpp"
+#include "spelleffects.hpp"
 #include "spellutil.hpp"
 
 namespace
@@ -845,6 +846,8 @@ namespace MWMechanics
         mUpdatePlayer = true;
         mClassSelected = true;
         mRaceSelected = true;
+
+        restoreMagicSound(getPlayer());
     }
 
     namespace
