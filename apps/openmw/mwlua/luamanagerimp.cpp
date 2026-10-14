@@ -279,16 +279,16 @@ namespace MWLua
         MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
         const double realTime = LuaUtil::getRealTime();
 
-        const bool isPaused = timeManager.isPaused();
+        const bool timersPaused = timeManager.isPaused();
         const double simulationTime = timeManager.getSimulationTime();
         const double gameTime = timeManager.getGameTime();
 
         // Always process real-time timers (runs even when paused), but only process game/simulation timers when not
         // paused
-        mMenuScripts.processTimers(simulationTime, gameTime, realTime, isPaused);
-        mGlobalScripts.processTimers(simulationTime, gameTime, realTime, isPaused);
+        mMenuScripts.processTimers(simulationTime, gameTime, realTime, timersPaused);
+        mGlobalScripts.processTimers(simulationTime, gameTime, realTime, timersPaused);
         forEachActive(mActiveLocalScripts,
-            [&](LocalScripts* scripts) { scripts->processTimers(simulationTime, gameTime, realTime, isPaused); });
+            [&](LocalScripts* scripts) { scripts->processTimers(simulationTime, gameTime, realTime, timersPaused); });
 
         // Run event handlers for events that were sent before `finalizeEventBatch`.
         mLuaEvents.callEventHandlers();
