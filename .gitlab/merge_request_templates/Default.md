@@ -13,6 +13,8 @@ If applicable, provide steps and files required to reproduce the issue or test t
 PLEASE: No LLM/AI generated descriptions. Write this yourself.
 
 If your contribution contains visual changes, provide screenshots, before/after comparisons, or videos.
+
+Raise as a draft if incomplete.
 -->
 
 - [ ] I have read the [CONTRIBUTING guidelines](https://gitlab.com/OpenMW/openmw/-/blob/master/CONTRIBUTING.md)
