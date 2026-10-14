@@ -1167,7 +1167,7 @@ namespace MWRender
 
     void RenderingManager::renderPlayer(const MWWorld::Ptr& player)
     {
-        mPlayerAnimation = new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0,
+        mPlayerAnimation = std::make_unique<NpcAnimation>(player, player.getRefData().getBaseNode(), mResourceSystem, 0,
             NpcAnimation::VM_Normal, mFirstPersonFieldOfView);
 
         mCamera->setAnimation(mPlayerAnimation.get());
@@ -1582,12 +1582,12 @@ namespace MWRender
                     * osg::Quat(rotation[1], osg::Vec3(0, -1, 0)) * osg::Quat(rotation[2], osg::Vec3(0, 0, -1)));
             rootNode->setPosition(ptr.getCellRef().getPosition().asVec3());
 
-            osg::ref_ptr<Animation> animation = nullptr;
+            std::unique_ptr<Animation> animation;
 
             if (ptr.getClass().isNpc())
             {
                 rootNode->setNodeMask(Mask_Actor);
-                animation = new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(rootNode), mResourceSystem);
+                animation = std::make_unique<NpcAnimation>(ptr, osg::ref_ptr<osg::Group>(rootNode), mResourceSystem);
             }
         }
 

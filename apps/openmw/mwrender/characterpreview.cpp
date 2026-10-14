@@ -335,7 +335,7 @@ namespace MWRender
     {
         mAnimation = nullptr;
 
-        mAnimation = new NpcAnimation(mCharacter, mNode, mResourceSystem, true,
+        mAnimation = std::make_unique<NpcAnimation>(mCharacter, mNode, mResourceSystem, true,
             (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
         onSetup();

@@ -8,9 +8,9 @@ namespace SceneUtil
     {
         struct ClearVector final : SceneUtil::WorkItem
         {
-            std::vector<osg::ref_ptr<osg::Referenced>> mObjects;
+            std::vector<std::shared_ptr<void>> mObjects;
 
-            explicit ClearVector(std::vector<osg::ref_ptr<osg::Referenced>>&& objects)
+            explicit ClearVector(std::vector<std::shared_ptr<void>>&& objects)
                 : mObjects(std::move(objects))
             {
             }
@@ -25,7 +25,7 @@ namespace SceneUtil
             return;
 
         // Move only objects to keep allocated storage in mObjects
-        workQueue.addWorkItem(std::make_shared<ClearVector>(std::vector<osg::ref_ptr<osg::Referenced>>(
+        workQueue.addWorkItem(std::make_shared<ClearVector>(std::vector<std::shared_ptr<void>>(
             std::move_iterator(mObjects.begin()), std::move_iterator(mObjects.end()))));
         mObjects.clear();
     }
