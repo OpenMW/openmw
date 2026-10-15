@@ -307,14 +307,14 @@ namespace MWWorld
 
         if (createLight)
         {
-            osg::ref_ptr<SceneUtil::Light> projectileLight(new SceneUtil::Light);
-            projectileLight->setAmbient(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
-            projectileLight->setDiffuse(lightDiffuseColor);
-            projectileLight->setSpecular(osg::Vec4(0.0f, 0.0f, 0.0f, 0.0f));
-            projectileLight->setConstantAttenuation(0.f);
-            projectileLight->setLinearAttenuation(0.1f);
-            projectileLight->setQuadraticAttenuation(0.f);
-            projectileLight->setPosition(osg::Vec4(pos, 1.0));
+            SceneUtil::Light projectileLight;
+            projectileLight.setAmbient(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            projectileLight.setDiffuse(lightDiffuseColor);
+            projectileLight.setSpecular(osg::Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+            projectileLight.setConstantAttenuation(0.f);
+            projectileLight.setLinearAttenuation(0.1f);
+            projectileLight.setQuadraticAttenuation(0.f);
+            projectileLight.setPosition(osg::Vec4(pos, 1.0));
 
             SceneUtil::LightSource* projectileLightSource = new SceneUtil::LightSource;
             projectileLightSource->setNodeMask(MWRender::Mask_Lighting);

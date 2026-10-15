@@ -3,6 +3,7 @@
 
 #include <osg/Drawable>
 
+#include <memory>
 #include <mutex>
 #include <set>
 
@@ -16,14 +17,12 @@ namespace osg
 namespace Terrain
 {
 
-    class CompositeMap : public osg::Referenced
+    class CompositeMap
     {
     public:
-        CompositeMap();
-        ~CompositeMap();
         std::vector<osg::ref_ptr<osg::Drawable>> mDrawables;
         osg::ref_ptr<osg::Texture2D> mTexture;
-        size_t mCompiled;
+        size_t mCompiled = 0;
     };
 
     /**
@@ -47,10 +46,10 @@ namespace Terrain
         void setTargetFrameRate(float framerate);
 
         /// Add a composite map to be rendered
-        void addCompositeMap(CompositeMap* map, bool immediate = false);
+        void addCompositeMap(const std::shared_ptr<CompositeMap>& map, bool immediate = false);
 
         /// Mark this composite map to be required for the current frame
-        void setImmediate(CompositeMap* map);
+        void setImmediate(const std::shared_ptr<CompositeMap>& map);
 
         size_t getCompileSetSize() const;
 
@@ -59,7 +58,7 @@ namespace Terrain
         double mMinimumTimeAvailable;
         mutable osg::Timer mTimer;
 
-        typedef std::set<osg::ref_ptr<CompositeMap>> CompileSet;
+        typedef std::set<std::shared_ptr<CompositeMap>> CompileSet;
 
         mutable CompileSet mCompileSet;
         mutable CompileSet mImmediateCompileSet;

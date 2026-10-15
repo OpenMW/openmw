@@ -21,6 +21,7 @@
 #define COMPONENTS_SCENEUTIL_MWSHADOWTECHNIQUE_H 1
 
 #include <array>
+#include <memory>
 #include <mutex>
 #include <string>
 
@@ -170,12 +171,12 @@ namespace SceneUtil {
         {
             LightData(ViewDependentData* vdd);
 
-            virtual void setLightData(osg::RefMatrix* lm, const Light* l, const osg::Matrixd& modelViewMatrix);
+            virtual void setLightData(osg::RefMatrix* lm, std::shared_ptr<const Light> l, const osg::Matrixd& modelViewMatrix);
 
             ViewDependentData*                  _viewDependentData;
 
             osg::ref_ptr<osg::RefMatrix>        lightMatrix;
-            osg::ref_ptr<const Light>           light;
+            std::shared_ptr<const Light>        light;
 
             osg::Vec4d                          lightPos;
             osg::Vec3d                          lightPos3;

@@ -3,6 +3,8 @@
 
 #include <osg/Geometry>
 
+#include <memory>
+
 namespace osg
 {
     class ClusterCullingCallback;
@@ -59,8 +61,8 @@ namespace Terrain
         void setupWaterBoundingBox(float waterheight, float margin);
         const osg::BoundingBox& getWaterBoundingBox() const { return mWaterBoundingBox; }
 
-        void setCompositeMap(CompositeMap* map) { mCompositeMap = map; }
-        CompositeMap* getCompositeMap() const { return mCompositeMap; }
+        void setCompositeMap(const std::shared_ptr<CompositeMap>& map) { mCompositeMap = map; }
+        const std::shared_ptr<CompositeMap>& getCompositeMap() const { return mCompositeMap; }
         void setCompositeMapRenderer(CompositeMapRenderer* renderer) { mCompositeMapRenderer = renderer; }
 
     private:
@@ -70,7 +72,7 @@ namespace Terrain
         osg::ref_ptr<osg::ClusterCullingCallback> mClusterCullingCallback;
 
         osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
-        osg::ref_ptr<CompositeMap> mCompositeMap;
+        std::shared_ptr<CompositeMap> mCompositeMap;
         osg::ref_ptr<CompositeMapRenderer> mCompositeMapRenderer;
     };
 

@@ -24,7 +24,7 @@ namespace SceneUtil
     /// @brief Set up global attenuation settings for a Light.
     /// @param radius The radius of the light source.
     /// @param isExterior Is the light outside? May be used for deciding which attenuation settings to use.
-    void configureLight(Light* light, float radius, bool isExterior);
+    void configureLight(Light& light, float radius, bool isExterior);
 
     /// @brief Convert an ESM::Light to a SceneUtil::LightSource, and add it to a sub graph.
     /// @note If the sub graph contains a node named "AttachLight" (case insensitive), then the light is added to that.

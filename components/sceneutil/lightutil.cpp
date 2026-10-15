@@ -42,7 +42,7 @@ namespace
 namespace SceneUtil
 {
 
-    void configureLight(SceneUtil::Light* light, float radius, bool isExterior)
+    void configureLight(SceneUtil::Light& light, float radius, bool isExterior)
     {
         float quadraticAttenuation = 0.f;
         float linearAttenuation = 0.f;
@@ -87,9 +87,9 @@ namespace SceneUtil
         if (constantAttenuation == 0.f && linearAttenuation == 0.f && quadraticAttenuation == 0.f)
             constantAttenuation = 1.f;
 
-        light->setConstantAttenuation(constantAttenuation);
-        light->setLinearAttenuation(linearAttenuation);
-        light->setQuadraticAttenuation(quadraticAttenuation);
+        light.setConstantAttenuation(constantAttenuation);
+        light.setLinearAttenuation(linearAttenuation);
+        light.setQuadraticAttenuation(quadraticAttenuation);
     }
 
     osg::ref_ptr<LightSource> addLight(
@@ -115,7 +115,7 @@ namespace SceneUtil
         const SceneUtil::LightCommon& esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
     {
         osg::ref_ptr<SceneUtil::LightSource> lightSource(new SceneUtil::LightSource);
-        osg::ref_ptr<SceneUtil::Light> light(new SceneUtil::Light);
+        SceneUtil::Light light;
         lightSource->setNodeMask(lightMask);
 
         // The minimum scene light radius is 16 in Morrowind
@@ -133,15 +133,15 @@ namespace SceneUtil
             // Using specular lighting for negative lights is unreasonable
             specular = osg::Vec4f();
         }
-        light->setDiffuse(diffuse);
-        light->setAmbient(ambient);
-        light->setSpecular(specular);
+        light.setDiffuse(diffuse);
+        light.setAmbient(ambient);
+        light.setSpecular(specular);
 
         lightSource->setLight(light);
 
         osg::ref_ptr<SceneUtil::LightController> ctrl(new SceneUtil::LightController);
-        ctrl->setDiffuse(light->getDiffuse());
-        ctrl->setSpecular(light->getSpecular());
+        ctrl->setDiffuse(light.getDiffuse());
+        ctrl->setSpecular(light.getSpecular());
         if (esmLight.mFlicker)
             ctrl->setType(SceneUtil::LightController::LT_Flicker);
         if (esmLight.mFlickerSlow)

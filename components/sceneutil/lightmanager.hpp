@@ -23,22 +23,9 @@ namespace SceneUtil
     template <class T>
     using DoubleBuffer = std::array<T, 2>;
 
-    class Light : public osg::Referenced
+    class Light
     {
     public:
-        Light() = default;
-
-        Light(const Light& copy, const osg::CopyOp& copyop)
-            : mSpecular(copy.mSpecular)
-            , mDiffuse(copy.mDiffuse)
-            , mAmbient(copy.mAmbient)
-            , mPosition(copy.mPosition)
-            , mConstantAttenuation(copy.mConstantAttenuation)
-            , mLinearAttenuation(copy.mLinearAttenuation)
-            , mQuadraticAttenuation(copy.mQuadraticAttenuation)
-        {
-        }
-
         const osg::Vec4f& getSpecular() const { return mSpecular; }
         const osg::Vec4f& getDiffuse() const { return mDiffuse; }
         const osg::Vec4f& getAmbient() const { return mAmbient; }
@@ -142,7 +129,7 @@ namespace SceneUtil
     class LightSource : public osg::Node
     {
         // double buffered, since one of them may be in use by the draw thread at any given time
-        DoubleBuffer<osg::ref_ptr<Light>> mLight;
+        DoubleBuffer<Light> mLight;
 
         // LightSource will affect objects within this radius
         float mRadius;
@@ -178,17 +165,11 @@ namespace SceneUtil
         /// Get the Light safe for modification in the given frame.
         /// @par May be used externally to animate the light's color/attenuation properties,
         /// and is used internally to synchronize the light's position with the position of the LightSource.
-        Light* getLight(size_t frame) { return mLight[frame % 2]; }
+        Light* getLight(size_t frame) { return &mLight[frame % 2]; }
 
-        /// @warning It is recommended not to replace an existing Light, because there might still be
-        /// references to it in the light StateSet cache that are associated with this LightSource's ID.
-        /// These references will stay valid due to ref_ptr but will point to the old object.
-        /// @warning Do not modify the \a light after you've called this function.
-        void setLight(Light* light)
-        {
-            mLight[0] = light;
-            mLight[1] = new Light(*light);
-        }
+        /// @warning It is recommended not to replace an existing Light, because the light StateSet cache may still
+        /// hold state built from the old one under this LightSource's ID.
+        void setLight(const Light& light) { mLight.fill(light); }
 
         /// Get the unique ID for this light source.
         int getId() const { return mId; }
@@ -258,8 +239,8 @@ namespace SceneUtil
         osg::ref_ptr<osg::StateSet> getLightListStateSet(
             const LightList& lightList, size_t frameNum, const osg::RefMatrix* viewMatrix);
 
-        void setSunlight(osg::ref_ptr<Light> sun);
-        osg::ref_ptr<Light> getSunlight();
+        void setSunlight(std::shared_ptr<Light> sun);
+        const std::shared_ptr<Light>& getSunlight() const;
 
         bool getClusteredLighting() const;
 
@@ -308,7 +289,7 @@ namespace SceneUtil
 
         size_t mLightingMask;
 
-        osg::ref_ptr<Light> mSun;
+        std::shared_ptr<Light> mSun;
 
         bool mClusteredLighting;
 

@@ -86,7 +86,7 @@ namespace CSVRender
         CompositeOsgRenderer* mRenderer;
         osg::ref_ptr<osgViewer::View> mView;
         osg::ref_ptr<osg::Group> mRootNode;
-        osg::ref_ptr<SceneUtil::Light> mSunLight;
+        std::shared_ptr<SceneUtil::Light> mSunLight;
 
         std::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 

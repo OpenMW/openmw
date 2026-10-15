@@ -37,7 +37,7 @@ namespace Terrain
 
         while (!mImmediateCompileSet.empty())
         {
-            osg::ref_ptr<CompositeMap> node = *mImmediateCompileSet.begin();
+            std::shared_ptr<CompositeMap> node = *mImmediateCompileSet.begin();
             mImmediateCompileSet.erase(node);
 
             mMutex.unlock();
@@ -48,7 +48,7 @@ namespace Terrain
         const auto deadline = std::chrono::steady_clock::now() + std::chrono::duration<double>(availableTime);
         while (!mCompileSet.empty() && std::chrono::steady_clock::now() < deadline)
         {
-            osg::ref_ptr<CompositeMap> node = *mCompileSet.begin();
+            std::shared_ptr<CompositeMap> node = *mCompileSet.begin();
             mCompileSet.erase(node);
 
             mMutex.unlock();
@@ -141,7 +141,7 @@ namespace Terrain
         mTargetFrameRate = framerate;
     }
 
-    void CompositeMapRenderer::addCompositeMap(CompositeMap* compositeMap, bool immediate)
+    void CompositeMapRenderer::addCompositeMap(const std::shared_ptr<CompositeMap>& compositeMap, bool immediate)
     {
         std::lock_guard<std::mutex> lock(mMutex);
         if (immediate)
@@ -150,7 +150,7 @@ namespace Terrain
             mCompileSet.insert(compositeMap);
     }
 
-    void CompositeMapRenderer::setImmediate(CompositeMap* compositeMap)
+    void CompositeMapRenderer::setImmediate(const std::shared_ptr<CompositeMap>& compositeMap)
     {
         std::lock_guard<std::mutex> lock(mMutex);
         CompileSet::iterator found = mCompileSet.find(compositeMap);
@@ -168,12 +168,5 @@ namespace Terrain
         std::lock_guard<std::mutex> lock(mMutex);
         return mCompileSet.size();
     }
-
-    CompositeMap::CompositeMap()
-        : mCompiled(0)
-    {
-    }
-
-    CompositeMap::~CompositeMap() {}
 
 }
