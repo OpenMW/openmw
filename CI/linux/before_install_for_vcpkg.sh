@@ -8,7 +8,7 @@ mkdir -p deps
 cd deps
 
 if [[ ! -d ./Qt/$QT_VER ]]; then
-    pipx run aqt install-qt linux desktop $QT_VER gcc_64 -m all -O ./Qt
+    ~/.local/bin/aqt install-qt linux desktop $QT_VER gcc_64 -m all -O ./Qt
 fi
 
 VCPKG_TRIPLET='x64-linux-dynamic'
