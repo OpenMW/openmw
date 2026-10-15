@@ -46,17 +46,17 @@ foreach(_library ${OSGPlugins_FIND_COMPONENTS})
     # On some systems, notably Debian and Ubuntu, the OSG plugins do not have
     # the usual "lib" prefix. We temporarily add the empty string to the list
     # of prefixes CMake searches for (via osg_find_library) to support these systems.
-    set(_saved_lib_prefix ${CMAKE_FIND_LIBRARY_PREFIXES}) # save CMAKE_FIND_LIBRARY_PREFIXES
+    set(_saved_lib_prefix "${CMAKE_FIND_LIBRARY_PREFIXES}") # save CMAKE_FIND_LIBRARY_PREFIXES
     list(APPEND CMAKE_FIND_LIBRARY_PREFIXES "") # search libraries with no prefix
-    set(_saved_lib_suffix ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    set(_saved_lib_suffix "${CMAKE_FIND_LIBRARY_SUFFIXES}")
     if(WIN32)
         # find_library isn't supposed to find DLLs, it's supposed to find their import libraries, but these are modules, so don't have import libraries
         list(APPEND CMAKE_FIND_LIBRARY_SUFFIXES ".dll")
     endif()
     set(${_library_uc}_DIR ${OSGPlugins_LIB_DIR}) # to help function osg_find_library
     osg_find_library(${_library_uc} ${_library}) # find it into ${_library_uc}_LIBRARIES
-    set(CMAKE_FIND_LIBRARY_PREFIXES ${_saved_lib_prefix}) # restore prefix
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ${_saved_lib_suffix})
+    set(CMAKE_FIND_LIBRARY_PREFIXES "${_saved_lib_prefix}") # restore prefix
+    set(CMAKE_FIND_LIBRARY_SUFFIXES "${_saved_lib_suffix}")
 
     if (${_library_uc}_LIBRARIES)
         set(${_component}_LIBRARY ${${_library_uc}_LIBRARIES}) # fake as if we call find_library

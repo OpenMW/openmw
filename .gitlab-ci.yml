@@ -72,7 +72,7 @@ Ubuntu_GCC_preprocess:
     - export CCACHE_BASEDIR="`pwd`"
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
     - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_script.linux.sh
+    - CI/before_script.linux.sh -C
     - cd build
     - cmake --build . -- -j $(nproc)
     - df -h
@@ -96,12 +96,115 @@ Ubuntu_GCC_preprocess:
     - df -h
     - du -sh build/
     - du -sh build/install/
-    - du -sh apt-cache/
     - du -sh ccache/
   artifacts:
     paths:
       - build/install/
       - "**/CMakeCache.txt"
+
+Almalinux_Generic:
+  tags:
+    - saas-linux-medium-amd64
+  image: almalinux:9
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+  cache:
+    - key:
+        prefix: almalinux-generic-$CI_COMMIT_REF_PROTECTED
+        files:
+          - CI/linux/deps_versions.sh
+      paths:
+        - deps
+        - ccache
+  stage: build
+  variables:
+    OPENMW_CXX_FLAGS: "-Werror -Werror=implicit-fallthrough"
+    CC: gcc
+    CXX: g++
+    OPENMW_LOCAL_INSTALL: 1
+    CI_OPENMW_USE_VCPKG: true
+    CUSTOM_CPACK_LABEL: $CI_COMMIT_REF_SLUG
+    CCACHE_SIZE: 1G
+  before_script:
+    - dnf install -y epel-release
+    - dnf install -y git binutils gcc-toolset-13 ccache cmake unzip pkg-config p7zip p7zip-plugins pipx mesa-libGL-devel libxkbcommon-devel mesa-libEGL-devel fontconfig
+    - source /opt/rh/gcc-toolset-13/enable
+    - ./CI/linux/before_install_for_vcpkg.sh
+  script:
+    - df -h
+    - export CCACHE_BASEDIR="`pwd`"
+    - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
+    - ccache -z -M "${CCACHE_SIZE}"
+    - CI/before_script.linux.sh -C
+    - cd build
+    - cmake --build . -- -j $(nproc)
+    - ccache -svv
+    - |
+      if [[ -v AWS_ACCESS_KEY_ID ]]; then
+          dnf install -y awscli2 jq
+          ../CI/store-symbols.sh
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 sync --size-only SymStore s3://openmw-sym
+      fi
+    - printf "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}\nCI_JOB_ID ${CI_JOB_ID}\nCI_COMMIT_SHA ${CI_COMMIT_SHA}\n" > CI-ID.txt
+    - cpack -G TXZ -D CPACK_STRIP_FILES=ON -D CPACK_THREADS=0 -D CPACK_INCLUDE_TOPLEVEL_DIRECTORY=0
+    - |
+      if [[ -v AWS_ACCESS_KEY_ID ]]; then
+          artifactDirectory="${CI_PROJECT_NAMESPACE//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_REF_NAME//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_SHORT_SHA//[\"<>|$'\t'\/\\?*]/_}-${CI_JOB_ID//[\"<>|$'\t'\/\\?*]/_}/"
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp OpenMW*.tar.xz s3://openmw-artifacts/$artifactDirectory
+      fi
+  artifacts:
+    paths:
+      - "**/CMakeCache.txt"
+      - build/OpenMW*.tar.xz
+
+.base_Generic_Integration_Tests:
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+  needs:
+    - job: "Almalinux_Generic"
+      artifacts: true
+  script:
+    - mkdir -p install
+    - |
+      for package in build/OpenMW*.tar.xz; do
+          echo "Extracting '$package'..."
+          tar -xf "$package" -C install
+      done
+    - echo "set debuginfod enabled on" >> ~/.gdbinit
+    - export DEBUGINFOD_URLS="https://openmw-sym.rgw.ctrl-c.liu.se $DEBUGINFOD_URLS https://debuginfod.elfutils.org"
+    - CI/run_integration_tests.sh
+  after_script:
+    - |
+      if [[ -f /tmp/openmw-crash.log ]]; then
+        cat /tmp/openmw-crash.log
+        cp /tmp/openmw-crash.log openmw-crash.log
+      fi
+  variables:
+    EXAMPLE_SUITE_REVISION: a1ba6fc9d7315c2158ef4c60349fc4e71b7ca343
+    OPENMW_BINARY: install/openmw
+  artifacts:
+    paths:
+      - openmw-crash.log
+
+Almalinux_Generic_Integration_Tests:
+  extends: .base_Generic_Integration_Tests
+  image: almalinux:9
+  before_script:
+    - dnf install -y python3-pip xorg-x11-server-Xvfb alsa-utils git-lfs openal-soft
+    - pip3 install --user numpy matplotlib termtables click
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+Arch_Linux_Generic_Integration_Tests:
+  extends: .base_Generic_Integration_Tests
+  image: archlinux
+  before_script:
+    - pacman --noconfirm -Sy python python-pip python-numpy python-matplotlib python-click xorg-server-xvfb alsa-utils git-lfs openal
+    - python -m venv --system-site-packages testvenv
+    - export PATH="$(pwd)/testvenv/bin:$PATH"
+    - hash -r
+    - pip install termtables
 
 PushToCoverityBranch:
   tags:
@@ -147,7 +250,7 @@ Coverity:
     - export COVERITY_NO_LOG_ENVIRONMENT_VARIABLES=1
     - mkdir -pv "${CCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_script.linux.sh
+    - CI/before_script.linux.sh -C
     - cov-analysis-linux64-*/bin/cov-configure --template --comptype prefix --compiler ccache
     - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc)
     - ccache -svv
@@ -446,7 +549,7 @@ Ubuntu_Clang:
     - mkdir -pv "${CCACHE_DIR}"
     - mkdir -pv "${CTCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_script.linux.sh
+    - CI/before_script.linux.sh -C
     - mkdir -p build/extern build/apps/launcher build/apps/opencs build/apps/wizard
     - cp extern/.clang-tidy build/extern/
     - cp extern/.clang-tidy build/apps/launcher/

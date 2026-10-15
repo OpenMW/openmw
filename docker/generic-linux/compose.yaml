@@ -1,0 +1,23 @@
+services:
+  generic-linux-build-container:
+    build:
+      dockerfile_inline: |
+        FROM almalinux:9
+        RUN dnf install -y epel-release
+        RUN dnf install -y git binutils gcc-toolset-13 ccache cmake unzip pkg-config pipx mesa-libGL-devel libxkbcommon-devel mesa-libEGL-devel fontconfig
+        RUN echo "source /opt/rh/gcc-toolset-13/enable" > /etc/profile.d/activate-gcc.sh
+        RUN git config --global --add safe.directory /build/openmw
+    pull_policy: build
+    environment:
+      OPENMW_CXX_FLAGS: "-Werror -Werror=implicit-fallthrough"
+      CC: gcc
+      CXX: g++
+      CI_OPENMW_USE_VCPKG: 1
+      OPENMW_LOCAL_INSTALL: 1
+      CCACHE_DIR: /build/openmw/ccache
+    volumes:
+      - ../..:/build/openmw
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    working_dir: /build/openmw
