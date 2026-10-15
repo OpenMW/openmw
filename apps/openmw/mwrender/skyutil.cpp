@@ -334,9 +334,11 @@ namespace MWRender
             mPhaseTex = new osg::Texture2D(mImageManager.getImage(phaseTex));
             mPhaseTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
             mPhaseTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+            mPhaseTex->setLODBias(-1.f); // Vanilla doesn't appear to use mipmaps at all
             mCircleTex = new osg::Texture2D(mImageManager.getImage(circleTex));
             mCircleTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
             mCircleTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+            mCircleTex->setLODBias(-1.f);
 
             reset();
         }
