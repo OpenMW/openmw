@@ -936,7 +936,7 @@ namespace MWClass
         if (stats.getStance(MWMechanics::CreatureStats::Stance_Run))
             x *= gmst.fJumpRunMultiplier->mValue.getFloat();
         x *= stats.getFatigueTerm();
-        x -= -Constants::GravityConst * Constants::UnitsPerMeter;
+        x -= -Constants::GravityUnits;
         x /= 3.0f;
 
         return x;
