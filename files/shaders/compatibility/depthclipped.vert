@@ -4,6 +4,7 @@ varying vec2 diffuseMapUV;
 varying float alphaPassthrough;
 
 uniform mat4 texMat0;
+uniform float alpha;
 
 #include "lib/core/vertex.h.glsl"
 #include "lib/material/vertexcolors.glsl"
@@ -21,6 +22,8 @@ void main()
         alphaPassthrough = gl_Color.a;
     else
         alphaPassthrough = material.diffuse.a;
+
+    alphaPassthrough *= alpha;
 
     diffuseMapUV = (texMat0 * gl_MultiTexCoord0).xy;
 }
