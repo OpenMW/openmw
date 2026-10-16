@@ -22,6 +22,7 @@
     Bug #8464: Red-tinted NPCs and water on Apple Silicon
     Bug #8813: Water walking actors don't drown when getting knocked out
     Bug #8822: Default interaction raycasts need to ignore terrain
+    Bug #8853: Sun glare is cut off at the horizon
     Bug #9023: Telvanni Guard is aggressive towards exhibition piece in Dwemer Museum
     Bug #9052: Clamped per-vertex sunlight is slightly brighter than it should be
     Bug #9083: GetCastPenalty returns positive values
@@ -53,17 +54,25 @@
     Bug #9247: Position incorrectly uses minutes
     Bug #9249: Player can still pickup/move items through menu mode even though their character is a werewolf
     Bug #9252: Poor LOD range selection during active grid object paging
+    Bug #9257: Levitation doesn't bypass lava damage
     Bug #9258: Trying to ready your character for spellcasting or attacking before getting knocked down may break spellcasting/attacking
     Bug #9273: Additional instances of autocalculated NPCs do not get autocalculated spells
     Bug #9296: Summons fail to appear when Bloodmoon is disabled
+    Bug #9321: A part of crossbow shoot animation is skipped
     Bug #9324: Lua storage file loading is still not foolproof
     Bug #9328: Follower of another actor will continue fighting the player after calm effect expires
     Bug #9338: Fatal Crash when loading a save with pending Lua Object:teleport() actions
+    Bug #9342: Consuming from a container decrements inventory items first
     Bug #9343: Launcher discards launcher.cfg settings it does not recognise
+    Bug #9344: KeyboardNavigation's per-frame focus restore fights intended MyGUI key focus resets
+    Bug #9345: Revise moving target aiming for magic projectiles
     Bug #9346: Negative skillIncreasesForAttribute value causes "GameSetting 'iLevelUp-2Mult' not found" every frame
     Bug #9357: Night sky rotation is inconsistent and differs greatly from Morrowind.exe
+    Bug #9361: Elemental shields don't hurt actors who use marksman weapons
+    Bug #9398: Moon texture is softer than Morrowind.exe
     Feature #3602: Implement NiBillboardNode flags
     Feature #5712: Editor: Ensure content file order matches launcher order
+    Feature #5887: Ability to deselect a search field
     Feature #6900: Clustered forward rendering
     Feature #6938: Support NiLookAtController
     Feature #7586: Lua levelled item manipulation
@@ -73,6 +82,7 @@
     Feature #8948: Expose "corpses persist" flag to Lua
     Feature #9033: Controller joystick mouse emulation mode indicator circle
     Feature #9053: Make the light radius multiplier affect the fadeout radius
+    Feature #9082: Restore Sound SFX when loading a save
     Feature #9090: Add a setting for 3rd person camera max distance
     Feature #9104: Wind-up strength hit parameter (as opposed to attack strength)
     Feature #9122: Viewport resize engine handler
@@ -87,12 +97,15 @@
     Feature #9207: Lua TextureResource does not expose properties
     Feature #9214: Add MouseWheel event to Lua UI
     Feature #9216: Exposed Lua engine handlers for dropping and placing objects
+    Feature #9229: Method to unlock mouse cursor from Lua
     Feature #9253: Allow Lua to mark objects as unmodified
     Feature #9254: Add a way to find all instances of an object
     Feature #9265: Magic projectile onhit handler
     Feature #9274: Implement ignorePointerEvents prop for Lua UI widgets
     Feature #9301: In-game shadow settings
     Feature #9302: Spell projectiles should cause water ripples
+    Feature #9367: Make ori list NPC parts with their meshes and textures
+    Feature #9382: Spell effects applied during pause show magnitude 0
     Task #9043: Parallelize Lua GC
     Task #9084: cell:getAll() adds cell data to the save file
     Task #9116: element.content["name"] causes an error if it doesn't exist
