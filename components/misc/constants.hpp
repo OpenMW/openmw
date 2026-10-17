@@ -7,6 +7,7 @@ namespace Constants
 {
 
     // The game uses 64 units per yard
+    constexpr float UnitsPerYard = 64.0f;
     constexpr float UnitsPerMeter = 69.99125109f;
     constexpr float UnitsPerFoot = 21.33333333f;
 
@@ -14,12 +15,13 @@ namespace Constants
     constexpr float SoundSpeedInAir = 343.3f;
     constexpr float SoundSpeedUnderwater = 1484.0f;
 
-    // Gravity constant in m/sec^2
-    // Note: 8.96 m/sec^2 = 9.8 yards/sec^2
+    // Standard gravity in m/sec^2
     // Probably original engine's developers just forgot
     // that their engine uses yards instead of meters
-    // and used standard gravity value as it is
-    constexpr float GravityConst = 8.96f;
+    // and used standard gravity value as it is,
+    // so the game's gravity is 9.8 yards/sec^2
+    constexpr float GravityMetric = 9.8f;
+    constexpr float GravityUnits = GravityMetric * UnitsPerYard;
 
     // Size of one exterior cell in game units
     constexpr int CellSizeInUnits = 8192;
