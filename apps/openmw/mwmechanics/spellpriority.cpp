@@ -239,13 +239,19 @@ namespace MWMechanics
             || effect.mEffectID == ESM::MagicEffect::ResistBlightDisease
             || effect.mEffectID == ESM::MagicEffect::ResistCommonDisease
             || effect.mEffectID == ESM::MagicEffect::ResistCorprusDisease
-            || effect.mEffectID == ESM::MagicEffect::Invisibility || effect.mEffectID == ESM::MagicEffect::Chameleon
-            || effect.mEffectID == ESM::MagicEffect::NightEye || effect.mEffectID == ESM::MagicEffect::Vampirism
-            || effect.mEffectID == ESM::MagicEffect::StuntedMagicka || effect.mEffectID == ESM::MagicEffect::ExtraSpell
-            || effect.mEffectID == ESM::MagicEffect::RemoveCurse
+            || effect.mEffectID == ESM::MagicEffect::Invisibility || effect.mEffectID == ESM::MagicEffect::NightEye
+            || effect.mEffectID == ESM::MagicEffect::Vampirism || effect.mEffectID == ESM::MagicEffect::StuntedMagicka
+            || effect.mEffectID == ESM::MagicEffect::ExtraSpell || effect.mEffectID == ESM::MagicEffect::RemoveCurse
             || effect.mEffectID == ESM::MagicEffect::CommandCreature
             || effect.mEffectID == ESM::MagicEffect::CommandHumanoid)
             return 0.f;
+        else if (effect.mEffectID == ESM::MagicEffect::Chameleon)
+        {
+            const MWWorld::Store<ESM::GameSetting>& gmst
+                = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
+            static const float fCombatInvisoMult = gmst.find("fCombatInvisoMult")->mValue.getFloat();
+            rating *= fCombatInvisoMult;
+        }
         else if (effect.mEffectID == ESM::MagicEffect::Blind)
         {
             if (enemy.isEmpty())
