@@ -20,8 +20,8 @@ namespace Spt
                 {
                     SPTCollisionObject obj;
                     obj.mType = SPTCollisionType::Sphere;
-                    stream.readVec3f(obj.mPosition);
-                    obj.mRadius = stream.readFloat();
+                    stream.read(obj.mPosition);
+                    stream.read(obj.mRadius);
                     mObjects.push_back(std::move(obj));
                     break;
                 }
@@ -29,9 +29,9 @@ namespace Spt
                 {
                     SPTCollisionObject obj;
                     obj.mType = SPTCollisionType::Capsule;
-                    stream.readVec3f(obj.mPosition);
-                    obj.mRadius = stream.readFloat();
-                    obj.mLength = stream.readFloat();
+                    stream.read(obj.mPosition);
+                    stream.read(obj.mRadius);
+                    stream.read(obj.mLength);
                     mObjects.push_back(std::move(obj));
                     break;
                 }
@@ -39,8 +39,8 @@ namespace Spt
                 {
                     SPTCollisionObject obj;
                     obj.mType = SPTCollisionType::Box;
-                    stream.readVec3f(obj.mBoxMin);
-                    stream.readVec3f(obj.mBoxMax);
+                    stream.read(obj.mBoxMin);
+                    stream.read(obj.mBoxMax);
                     mObjects.push_back(std::move(obj));
                     break;
                 }
@@ -63,37 +63,37 @@ namespace Spt
             switch (section)
             {
                 case 16002:
-                    entry.mSegmentsPack = stream.readFloat();
+                    stream.read(entry.mSegmentsPack);
                     break;
                 case 16003:
-                    entry.mFlaresNumber = stream.readInt();
+                    stream.read(entry.mFlaresNumber);
                     break;
                 case 16004:
-                    entry.mFlaresBalance = stream.readFloat();
+                    stream.read(entry.mFlaresBalance);
                     break;
                 case 16005:
-                    entry.mRadialInfluence = stream.readFloat();
+                    stream.read(entry.mRadialInfluence);
                     break;
                 case 16006:
-                    entry.mRadialInfluenceVariance = stream.readFloat();
+                    stream.read(entry.mRadialInfluenceVariance);
                     break;
                 case 16007:
-                    entry.mRadialExponent = stream.readFloat();
+                    stream.read(entry.mRadialExponent);
                     break;
                 case 16008:
-                    entry.mRadialDistance = stream.readFloat();
+                    stream.read(entry.mRadialDistance);
                     break;
                 case 16009:
-                    entry.mRadialDistanceVariance = stream.readFloat();
+                    stream.read(entry.mRadialDistanceVariance);
                     break;
                 case 16010:
-                    entry.mLengthDistance = stream.readFloat();
+                    stream.read(entry.mLengthDistance);
                     break;
                 case 16011:
-                    entry.mLengthDistanceVariance = stream.readFloat();
+                    stream.read(entry.mLengthDistanceVariance);
                     break;
                 case 16012:
-                    entry.mLengthExponent = stream.readFloat();
+                    stream.read(entry.mLengthExponent);
                     mEntries.push_back(std::move(entry));
                     entry = {};
                     break;
@@ -113,13 +113,13 @@ namespace Spt
             switch (section)
             {
                 case 18002:
-                    stream.readVec3f(mUnknown18002);
+                    stream.read(mUnknown18002);
                     break;
                 case 18003:
-                    stream.readVec3f(mUnknown18003);
+                    stream.read(mUnknown18003);
                     break;
                 case 18004:
-                    stream.readVec3f(mUnknown18004);
+                    stream.read(mUnknown18004);
                     break;
                 case 18005:
                     mSelfShadowMap = stream.readIntString();
@@ -140,7 +140,7 @@ namespace Spt
             switch (section)
             {
                 case 19002:
-                    mUnknown19002 = stream.readInt();
+                    stream.read(mUnknown19002);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown section {} in shadow related block", section));

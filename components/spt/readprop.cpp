@@ -9,11 +9,11 @@ namespace Spt
 {
     void SPTLightingMaterial::read(SPTStream& stream)
     {
-        stream.readVec3f(mDiffuse);
-        stream.readVec3f(mAmbient);
-        stream.readVec3f(mSpecular);
-        stream.readVec3f(mEmissive);
-        mShine = stream.readFloat();
+        stream.read(mDiffuse);
+        stream.read(mAmbient);
+        stream.read(mSpecular);
+        stream.read(mEmissive);
+        stream.read(mShine);
     }
 
     void SPTLightingData::read(SPTStream& stream)
@@ -26,25 +26,25 @@ namespace Spt
             switch (section)
             {
                 case 8002:
-                    mBranchStyle = stream.readInt();
+                    stream.read(mBranchStyle);
                     break;
                 case 8003:
                     mBranchMaterial.read(stream);
                     break;
                 case 8004:
-                    mLeafStyle = stream.readInt();
+                    stream.read(mLeafStyle);
                     break;
                 case 8005:
                     mLeafMaterial.read(stream);
                     break;
                 case 8006:
-                    mLeafLightingAdjust = stream.readFloat();
+                    stream.read(mLeafLightingAdjust);
                     break;
                 case 8007:
-                    mLeafStaticShadows = stream.readInt();
+                    stream.read(mLeafStaticShadows);
                     break;
                 case 8008:
-                    mFrondStyle = stream.readInt();
+                    stream.read(mFrondStyle);
                     break;
                 case 8009:
                     mFrondMaterial.read(stream);
@@ -65,25 +65,25 @@ namespace Spt
             switch (section)
             {
                 case 9007:
-                    mBranchNumLods = stream.readInt();
+                    stream.read(mBranchNumLods);
                     break;
                 case 9008:
-                    mBranchMinVol = stream.readFloat();
+                    stream.read(mBranchMinVol);
                     break;
                 case 9010:
-                    mLeafReduction = stream.readFloat();
+                    stream.read(mLeafReduction);
                     break;
                 case 9011:
-                    mLeafNumLods = stream.readInt();
+                    stream.read(mLeafNumLods);
                     break;
                 case 9012:
-                    mBranchMaxVol = stream.readFloat();
+                    stream.read(mBranchMaxVol);
                     break;
                 case 9013:
-                    mBranchFuzziness = stream.readFloat();
+                    stream.read(mBranchFuzziness);
                     break;
                 case 9014:
-                    mBranchRetention = stream.readFloat();
+                    stream.read(mBranchRetention);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown section {} in LOD branches block", section));
@@ -101,16 +101,16 @@ namespace Spt
             switch (section)
             {
                 case 9002:
-                    mLeafTransitionMethod = stream.readInt();
+                    stream.read(mLeafTransitionMethod);
                     break;
                 case 9003:
-                    mLeafRadius = stream.readFloat();
+                    stream.read(mLeafRadius);
                     break;
                 case 9004:
-                    mLeafExponent = stream.readFloat();
+                    stream.read(mLeafExponent);
                     break;
                 case 9009:
-                    mLeafSize = stream.readFloat();
+                    stream.read(mLeafSize);
                     break;
                 case 9005:
                     mBranches.read(stream);
@@ -131,7 +131,7 @@ namespace Spt
             switch (section)
             {
                 case 11002:
-                    mFirstWindLevel = stream.readInt();
+                    stream.read(mFirstWindLevel);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown section {} in wind block", section));
@@ -149,11 +149,11 @@ namespace Spt
             if (section != 15002)
                 throw std::runtime_error(std::format("Expected section 15002, got {}", section));
             SPTTrunkTilingEntry entry;
-            entry.mRandomVOffset = stream.readByte();
+            stream.read(entry.mRandomVOffset);
             section = stream.readSection();
             if (section != 15003)
                 throw std::runtime_error(std::format("Expected section 15003, got {}", section));
-            entry.mTwist = stream.readFloat();
+            stream.read(entry.mTwist);
             mEntries.push_back(std::move(entry));
         }
     }

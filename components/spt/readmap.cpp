@@ -12,11 +12,12 @@ namespace Spt
     {
         std::vector<SPTCompositeMapData::Quad> readQuads(SPTStream& stream)
         {
-            int32_t n = stream.readInt();
+            int32_t n;
+            stream.read(n);
             std::vector<SPTCompositeMapData::Quad> quads(n);
             for (auto& quad : quads)
                 for (auto& corner : quad.mCorners)
-                    stream.readVec2f(corner);
+                    stream.read(corner);
             return quads;
         }
     }
@@ -58,14 +59,14 @@ namespace Spt
                     mFilename = stream.readIntString();
                     break;
                 case 20003:
-                    mUnknown20003 = stream.readByte();
+                    stream.read(mUnknown20003);
                     break;
                 case 20004:
-                    mUnknown20004 = stream.readByte();
+                    stream.read(mUnknown20004);
                     break;
                 case 20005:
                     for (auto& tc : mTexCoords)
-                        stream.readVec2f(tc);
+                        stream.read(tc);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown section {} in global composite map block", section));

@@ -125,31 +125,31 @@ namespace Spt
                 level.mGravityProfile = parseCurve(stream);
                 return;
             case 6008:
-                level.mSegmentsCrossSection = stream.readInt();
+                stream.read(level.mSegmentsCrossSection);
                 return;
             case 6009:
-                level.mSegmentsLength = stream.readInt();
+                stream.read(level.mSegmentsLength);
                 return;
             case 6010:
-                level.mGenerationFirst = stream.readFloat();
+                stream.read(level.mGenerationFirst);
                 return;
             case 6011:
-                level.mGenerationLast = stream.readFloat();
+                stream.read(level.mGenerationLast);
                 return;
             case 6012:
-                level.mGenerationFrequency = stream.readFloat();
+                stream.read(level.mGenerationFrequency);
                 return;
             case 6013:
-                level.mTextureTilingU = stream.readFloat();
+                stream.read(level.mTextureTilingU);
                 return;
             case 6014:
-                level.mTextureTilingV = stream.readFloat();
+                stream.read(level.mTextureTilingV);
                 return;
             case 6015:
-                level.mTextureTilingUAbs = stream.readByte();
+                stream.read(level.mTextureTilingUAbs);
                 return;
             case 6016:
-                level.mTextureTilingVAbs = stream.readByte();
+                stream.read(level.mTextureTilingVAbs);
                 return;
             default:
                 throw std::runtime_error(std::format("Unknown bezier section {} in SPT file", section));
@@ -177,28 +177,28 @@ namespace Spt
             switch (section)
             {
                 case 4000:
-                    tex.mMakeBlossom = stream.readByte();
+                    stream.read(tex.mMakeBlossom);
                     break;
                 case 4001:
-                    stream.readVec3f(tex.mColor);
+                    stream.read(tex.mColor);
                     break;
                 case 4002:
-                    tex.mOrientationVariance = stream.readFloat();
+                    stream.read(tex.mOrientationVariance);
                     break;
                 case 4003:
                     tex.mFilename = stream.readIntString();
                     break;
                 case 4004:
-                    stream.readVec3f(tex.mOrigin);
+                    stream.read(tex.mOrigin);
                     break;
                 case 4005:
-                    stream.readVec3f(tex.mSize);
+                    stream.read(tex.mSize);
                     break;
                 case 4006:
-                    stream.readVec3f(tex.mUnknown4006);
+                    stream.read(tex.mUnknown4006);
                     break;
                 case 4007:
-                    tex.mUnknown4007 = stream.readFloat();
+                    stream.read(tex.mUnknown4007);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown section {} in leaf texture map block", section));
@@ -216,37 +216,37 @@ namespace Spt
             switch (section)
             {
                 case 3000:
-                    mBlossomDistance = stream.readFloat();
+                    stream.read(mBlossomDistance);
                     break;
                 case 3001:
-                    mBlossomDepth = stream.readInt();
+                    stream.read(mBlossomDepth);
                     break;
                 case 3002:
-                    mBlossomWeight = stream.readFloat();
+                    stream.read(mBlossomWeight);
                     break;
                 case 3003:
-                    mUnknown3003 = stream.readByte();
+                    stream.read(mUnknown3003);
                     break;
                 case 3004:
-                    mUnknown3004 = stream.readFloat();
+                    stream.read(mUnknown3004);
                     break;
                 case 3009:
-                    mLightingDimmingToggle = stream.readByte();
+                    stream.read(mLightingDimmingToggle);
                     break;
                 case 3010:
-                    mLightingDimming = stream.readFloat();
+                    stream.read(mLightingDimming);
                     break;
                 case 3005:
-                    mUnknown3005 = stream.readFloat();
+                    stream.read(mUnknown3005);
                     break;
                 case 3006:
-                    mUnknown3006 = stream.readByte();
+                    stream.read(mUnknown3006);
                     break;
                 case 3007:
-                    mPlacementTolerance = stream.readFloat();
+                    stream.read(mPlacementTolerance);
                     break;
                 case 3008:
-                    mPlacementCollision = stream.readInt();
+                    stream.read(mPlacementCollision);
                     break;
                 case 1009:
                     while (true)
@@ -257,7 +257,7 @@ namespace Spt
                         switch (inner)
                         {
                             case 1006:
-                                mNumLeafTextures = stream.readInt();
+                                stream.read(mNumLeafTextures);
                                 break;
                             case 1007:
                             {
@@ -290,16 +290,16 @@ namespace Spt
                     mFilename = stream.readIntString();
                     break;
                 case 14003:
-                    mUnknown14003 = stream.readFloat();
+                    stream.read(mUnknown14003);
                     break;
                 case 14004:
-                    mSizeFactor = stream.readFloat();
+                    stream.read(mSizeFactor);
                     break;
                 case 14005:
-                    mMinOffsetAngle = stream.readFloat();
+                    stream.read(mMinOffsetAngle);
                     break;
                 case 14006:
-                    mMaxOffsetAngle = stream.readFloat();
+                    stream.read(mMaxOffsetAngle);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown section {} in frond texture map block", section));
@@ -317,46 +317,46 @@ namespace Spt
             switch (section)
             {
                 case 13002:
-                    mGenerationLevel = stream.readInt();
+                    stream.read(mGenerationLevel);
                     break;
                 case 13003:
-                    mBladesOrExtruded = stream.readInt();
+                    stream.read(mBladesOrExtruded);
                     break;
                 case 13004:
-                    mBladeCount = stream.readInt();
+                    stream.read(mBladeCount);
                     break;
                 case 13005:
                     mExtrudedProfile = stream.readIntString();
                     break;
                 case 13006:
-                    mExtrudedSegments = stream.readInt();
+                    stream.read(mExtrudedSegments);
                     break;
                 case 13007:
-                    mEnabled = stream.readByte();
+                    stream.read(mEnabled);
                     break;
                 case 13008:
-                    mNumTextureMaps = stream.readInt();
+                    stream.read(mNumTextureMaps);
                     break;
                 case 13009:
-                    mNumLods = stream.readInt();
+                    stream.read(mNumLods);
                     break;
                 case 13010:
-                    mMaxArea = stream.readFloat();
+                    stream.read(mMaxArea);
                     break;
                 case 13011:
-                    mMinArea = stream.readFloat();
+                    stream.read(mMinArea);
                     break;
                 case 13012:
-                    mFuzziness = stream.readFloat();
+                    stream.read(mFuzziness);
                     break;
                 case 13013:
-                    mRetention = stream.readFloat();
+                    stream.read(mRetention);
                     break;
                 case 14007:
-                    mMinExtrusionSegLength = stream.readInt();
+                    stream.read(mMinExtrusionSegLength);
                     break;
                 case 14008:
-                    mMinExtrusionSegProfile = stream.readInt();
+                    stream.read(mMinExtrusionSegProfile);
                     break;
                 case 14000:
                 {

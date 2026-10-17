@@ -18,25 +18,25 @@ namespace Spt
                     header.mTextureMap = stream.readIntString();
                     break;
                 case 2001:
-                    header.mLodFarDistance = stream.readFloat();
+                    stream.read(header.mLodFarDistance);
                     break;
                 case 2002:
-                    header.mUnknown2002 = stream.readByte();
+                    stream.read(header.mUnknown2002);
                     break;
                 case 2003:
-                    header.mLodNearDistance = stream.readFloat();
+                    stream.read(header.mLodNearDistance);
                     break;
                 case 2005:
-                    header.mSeed = stream.readInt();
+                    stream.read(header.mSeed);
                     break;
                 case 2006:
-                    header.mSize = stream.readFloat();
+                    stream.read(header.mSize);
                     break;
                 case 2007:
-                    header.mSizeVariance = stream.readFloat();
+                    stream.read(header.mSizeVariance);
                     break;
                 case 1014:
-                    header.mNumLevels = stream.readInt();
+                    stream.read(header.mNumLevels);
                     break;
                 case 1015:
                     break;
@@ -166,10 +166,10 @@ namespace Spt
                     file->mFlares.read(stream);
                     break;
                 case 16013:
-                    file->mFlares.mFlareSeed = stream.readInt();
+                    stream.read(file->mFlares.mFlareSeed);
                     break;
                 case 16014:
-                    file->mLod.mLeafTransition = stream.readFloat();
+                    stream.read(file->mLod.mLeafTransition);
                     break;
                 case 18000:
                     file->mShadow.read(stream);
@@ -181,13 +181,13 @@ namespace Spt
                     file->mCompositeMapGlobal.read(stream);
                     break;
                 case 21000:
-                    file->mLeafRockAngleScalar = stream.readFloat();
+                    stream.read(file->mLeafRockAngleScalar);
                     break;
                 case 21001:
-                    file->mLeafRustleAngleScalar = stream.readFloat();
+                    stream.read(file->mLeafRustleAngleScalar);
                     break;
                 case 22000:
-                    file->mBranchWeightingFlexibility = stream.readByte();
+                    stream.read(file->mBranchWeightingFlexibility);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
