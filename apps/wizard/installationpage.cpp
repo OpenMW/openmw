@@ -16,6 +16,7 @@ Wizard::InstallationPage::InstallationPage(QWidget* parent, Config::GameSettings
     mWizard = qobject_cast<MainWizard*>(parent);
 
     setupUi(this);
+    installProgressLabel->setTextFormat(Qt::PlainText);
 
     mFinished = false;
 
@@ -249,8 +250,8 @@ void Wizard::InstallationPage::installationError(const QString& text, const QStr
 {
     installProgressLabel->setText(tr("Installation failed!"));
 
-    logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"><b>Error: %1</b></p>").arg(text));
-    logTextEdit->appendHtml(tr("<p><span style=\"color:red;\"><b>%1</b></p>").arg(details));
+    logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"><b>Error: %1</b></p>").arg(text.toHtmlEscaped()));
+    logTextEdit->appendHtml(tr("<p><span style=\"color:red;\"><b>%1</b></p>").arg(details.toHtmlEscaped()));
 
     Log(Debug::Error) << "Error: " << qUtf8Printable(text);
     Log(Debug::Error) << qUtf8Printable(details);
@@ -264,7 +265,7 @@ void Wizard::InstallationPage::installationError(const QString& text, const QStr
         tr("<html><head/><body><p><b>The Wizard has encountered an error</b></p>"
            "<p>The error reported was:</p><p>%1</p>"
            "<p>Press &quot;Show Details...&quot; for more information.</p></body></html>")
-            .arg(text));
+            .arg(text.toHtmlEscaped()));
 
     msgBox.setDetailedText(details);
     msgBox.exec();

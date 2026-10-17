@@ -85,11 +85,13 @@ CSVWidget::TextureBrushWindow::TextureBrushWindow(CSMDoc::Document& document, QW
     {
         mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel)
             + landtexturesCollection.getData(index, landTextureFilename).value<QString>());
+        mSelectedBrush->setTextFormat(Qt::PlainText);
     }
     else
     {
         mBrushTextureLabel = "No selected texture or invalid texture";
         mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel));
+        mSelectedBrush->setTextFormat(Qt::PlainText);
     }
 
     mButtonPoint = new QPushButton(Misc::ScalableIcon::load(":scenetoolbar/brush-point"), "", this);

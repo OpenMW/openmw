@@ -64,12 +64,12 @@ namespace ContentSelectorModel
         {
             if (isMissing())
                 return tr("<b>This file is specified in a non-user config file, but does not exist in the VFS.</b>");
-            QString tooltip = mTooltipTemlate.arg(mAuthor)
-                                  .arg(mVersion)
+            QString tooltip = mTooltipTemlate.arg(mAuthor.toHtmlEscaped())
+                                  .arg(mVersion.toHtmlEscaped())
                                   .arg(mModified.toString(Qt::ISODate))
-                                  .arg(mPath)
-                                  .arg(mDescription)
-                                  .arg(mGameFiles.join(", "));
+                                  .arg(mPath.toHtmlEscaped())
+                                  .arg(mDescription.toHtmlEscaped())
+                                  .arg(mGameFiles.join(", ").toHtmlEscaped());
 
             if (mBuiltIn)
                 tooltip += tr("<br/><b>This content file cannot be disabled because it is part of OpenMW.</b><br/>");

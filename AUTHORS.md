@@ -146,6 +146,7 @@ Programmers
     Leon Krieg (lkrieg)
     Leon Saunders (emoose)
     logzero
+    Logan Sterling (solidest-snake)
     lohikaarme
     Lordrea
     Łukasz Gołębiewski (lukago)

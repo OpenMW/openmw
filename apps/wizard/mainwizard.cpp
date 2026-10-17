@@ -60,7 +60,7 @@ Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* pa
         const QString message = tr(
             "<html><head/><body><p><b>Could not create %1</b></p>"
             "<p>Please make sure you have the right permissions and try again.</p></body></html>");
-        QMessageBox::critical(nullptr, title, message.arg(userPath));
+        QMessageBox::critical(nullptr, title, message.arg(userPath.toHtmlEscaped()));
         QApplication::quit();
         return;
     }
@@ -98,7 +98,7 @@ void Wizard::MainWizard::setupGameSettings()
     {
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            QMessageBox::critical(nullptr, title, message.arg(file.fileName()));
+            QMessageBox::critical(nullptr, title, message.arg(file.fileName().toHtmlEscaped()));
             QApplication::quit();
             return;
         }
@@ -121,7 +121,7 @@ void Wizard::MainWizard::setupGameSettings()
         {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
-                QMessageBox::critical(nullptr, title, message.arg(file.fileName()));
+                QMessageBox::critical(nullptr, title, message.arg(file.fileName().toHtmlEscaped()));
                 QApplication::quit();
                 return;
             }
@@ -152,7 +152,7 @@ void Wizard::MainWizard::setupLauncherSettings()
                 "<html><head/><body><p><b>Could not open %1 for reading</b></p>"
                 "<p>Please make sure you have the right permissions "
                 "and try again.</p></body></html>");
-            QMessageBox::critical(nullptr, title, message.arg(file.fileName()));
+            QMessageBox::critical(nullptr, title, message.arg(file.fileName().toHtmlEscaped()));
             QApplication::quit();
             return;
         }
@@ -331,7 +331,7 @@ void Wizard::MainWizard::writeSettings()
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
     {
-        QMessageBox::critical(this, writeTitle, writeMessage.arg(file.fileName()));
+        QMessageBox::critical(this, writeTitle, writeMessage.arg(file.fileName().toHtmlEscaped()));
         QApplication::quit();
         return;
     }
@@ -345,7 +345,7 @@ void Wizard::MainWizard::writeSettings()
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
     {
-        QMessageBox::critical(this, writeTitle, writeMessage.arg(file.fileName()));
+        QMessageBox::critical(this, writeTitle, writeMessage.arg(file.fileName().toHtmlEscaped()));
         QApplication::quit();
         return;
     }

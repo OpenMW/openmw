@@ -24,8 +24,9 @@ void CSVWorld::GenericCreator::update()
 {
     mErrors = getErrors();
 
-    mCreate->setToolTip(QString::fromUtf8(mErrors.c_str()));
-    mId->setToolTip(QString::fromUtf8(mErrors.c_str()));
+    const QString tooltip = Qt::convertFromPlainText(QString::fromUtf8(mErrors.c_str()));
+    mCreate->setToolTip(tooltip);
+    mId->setToolTip(tooltip);
 
     mCreate->setEnabled(mErrors.empty() && !mLocked);
 }
