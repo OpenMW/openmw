@@ -138,7 +138,7 @@ namespace MWClass
 
         VFS::Path::Normalized getCorrectedModel(const MWWorld::ConstPtr& ptr) const override
         {
-            std::string_view model = getModel(ptr);
+            VFS::Path::NormalizedView model = getModel(ptr);
             if (model.empty())
                 return {};
             static constexpr VFS::Path::NormalizedView prefix("trees");

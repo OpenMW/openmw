@@ -698,7 +698,9 @@ namespace MWRender
             VFS::Path::Normalized model = getModel(type, ref.mRefId, store);
             if (model.empty())
                 continue;
-            if (type == ESM::REC_TREE4)
+            static constexpr VFS::Path::ExtensionView spt("spt");
+            // only fo3 and tes4 use esm4 and speedtree
+            if (type == ESM::REC_TREE4 && model.extension() == spt)
             {
                 static constexpr VFS::Path::NormalizedView prefix("trees");
                 model = prefix / model;
