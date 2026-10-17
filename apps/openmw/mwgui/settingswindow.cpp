@@ -774,6 +774,13 @@ namespace MWGui
         if (pos == MyGUI::ITEM_NONE)
             return;
 
+        if (pos == 1 && mShowShadowPlanesMethodWarning)
+        {
+            MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
+                "#{OMWEngine:ShadowPlanesComputationMethodWarning}", { "#{Interface:OK}" }, true);
+            mShowShadowPlanesMethodWarning = false;
+        }
+
         auto& shadowSettings = Settings::shadows();
         switch (pos)
         {

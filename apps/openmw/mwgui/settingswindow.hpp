@@ -61,6 +61,7 @@ namespace MWGui
         MyGUI::Button* mObjectShadowsButton;
         MyGUI::ComboBox* mShadowPlanesComputationMethod;
         MyGUI::ComboBox* mShadowMapResolution;
+        bool mShowShadowPlanesMethodWarning{ true };
 
         MyGUI::ComboBox* mPrimaryLanguage;
         MyGUI::ComboBox* mSecondaryLanguage;

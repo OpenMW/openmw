@@ -250,6 +250,7 @@ ShadowPlanesComputationMethodTooltip: |-
 ShadowPlanesComputationMethodBounds: "Bounds"
 ShadowPlanesComputationMethodPrimitives: "Primitives"
 ShadowPlanesComputationMethodNone: "None"
+ShadowPlanesComputationMethodWarning: "Using the primitives method may severely impact performance and is not recommended for normal gameplay."
 ShadowMapResolution: "Shadow Map Resolution"
 ShadowMapResolutionTooltip: "The resolution of each individual shadow map. Increasing it significantly improves shadow quality but may have a minor performance impact."
 ShadowsMaxDistanceValue: "Shadow Distance Limit ({value, number, :: group-off})"

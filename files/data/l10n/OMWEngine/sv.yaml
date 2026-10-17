@@ -250,6 +250,7 @@ ShadowPlanesComputationMethodTooltip: |-
 ShadowPlanesComputationMethodBounds: "Bounds"
 ShadowPlanesComputationMethodPrimitives: "Primitives"
 ShadowPlanesComputationMethodNone: "None"
+ShadowPlanesComputationMethodWarning: "Att använda primitives-metoden kan påverka prestandan kraftigt och rekommenderas inte för vanligt spelande."
 ShadowMapResolution: "Upplösning för skuggkarta"
 ShadowMapResolutionTooltip: "Upplösningen för varje individuell skuggkarta. Ökning av den ökar skuggkvalitén signifikant, men kan ha en lättare negativ prestandapåverkan."
 ShadowsMaxDistanceValue: "Maxavstånd för skuggor ({value, number, :: group-off})"

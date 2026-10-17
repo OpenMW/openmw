@@ -250,6 +250,7 @@ ShadowPlanesComputationMethodTooltip: |-
 ShadowPlanesComputationMethodBounds: "Granice"
 ShadowPlanesComputationMethodPrimitives: "Elementy podstawowe"
 ShadowPlanesComputationMethodNone: "Brak"
+ShadowPlanesComputationMethodWarning: "Użycie metody elementów podstawowych może znacznie obniżyć wydajność i nie jest zalecane podczas normalnej rozgrywki."
 ShadowMapResolution: "Rozdzielczość mapy cieni"
 ShadowMapResolutionTooltip: "Rozdzielczość każdej indywidualnej mapy cieni. Jej zwiększenie znacznie poprawia jakość cieni, ale może mieć niewielki wpływ na wydajność."
 ShadowsMaxDistanceValue: "Limit odległości cieni ({value, number, :: group-off})"
