@@ -19,6 +19,7 @@
 #include <sys/utsname.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <vector>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
@@ -178,6 +179,101 @@ namespace
         }
         std::unique_ptr<FILE, CloseFile> scopedFile(file);
 
+        bool forceDebuginfod = false;
+#ifdef __linux__
+        char* openmwDebuginfod = getenv("OPENMW_DEBUGINFOD");
+        if (openmwDebuginfod)
+        {
+            std::string_view asStringView(openmwDebuginfod);
+            forceDebuginfod = !(asStringView == "0" || asStringView == "OFF" || asStringView == "NO");
+        }
+        else
+        {
+            const auto buttons = std::to_array<SDL_MessageBoxButtonData>({
+                { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Yes" },
+                { SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "No" }
+            });
+            const SDL_MessageBoxData messageBoxData = {
+                SDL_MESSAGEBOX_ERROR,
+                nullptr,
+                "Fatal Error",
+                "OpenMW has encountered a fatal error.\n"
+                "Allow debugger to connect to debuginfod server to generate a more detailed crash log?\n"
+                "It may take longer to generate the crash log.",
+                buttons.size(),
+                buttons.data(),
+                nullptr
+            };
+            int buttonId;
+            if (!SDL_ShowMessageBox(&messageBoxData, &buttonId))
+                forceDebuginfod = buttonId != 0;
+            else
+                printf(
+                    "Failed to show SDL message box. Debuginfod server will not be force-enabled. "
+                    "Set an environment variable called OPENMW_DEBUGINFOD to override this.\n\n");
+        }
+
+        if (forceDebuginfod)
+        {
+            std::vector<std::string> debuginfodUrls;
+            auto add = [&](std::string_view url) {
+                if (url.empty())
+                    return;
+
+                // duplicates are removed automatically if the debuginfod client includes a commit from July 2021,
+                // so we might not need this check
+                if (std::find(debuginfodUrls.begin(), debuginfodUrls.end(), url) == debuginfodUrls.end())
+                {
+                    std::stringstream command;
+                    // filter out excessively slow servers, like the Ubuntu one that's been down for months
+                    // when https://sourceware.org/bugzilla/show_bug.cgi?id=34421 is resolved and propagated to enough
+                    // user machines, we may be able to remove this
+                    command << "curl --max-time 3 --silent '" << url << "' -o /dev/null";
+                    auto ret = system(command.str().c_str());
+                    if (ret == 0)
+                        debuginfodUrls.emplace_back(url);
+                    else
+                        printf("Skipping %s as it took too long to respond.\n", std::string(url).c_str());
+                }
+                else
+                    printf("Skipping %s as it is a duplicate.\n", std::string(url).c_str());
+            };
+#ifdef EXTRA_DEBUGINFOD_URLS
+            std::istringstream extraDebuginfodUrls(EXTRA_DEBUGINFOD_URLS);
+            while (extraDebuginfodUrls)
+            {
+                std::string url;
+                extraDebuginfodUrls >> url;
+                add(url);
+            }
+#endif
+            char* existingDebuginfodUrls = getenv("DEBUGINFOD_URLS");
+            if (existingDebuginfodUrls)
+            {
+                std::istringstream existingDebuginfodUrlsStream(existingDebuginfodUrls);
+                while (existingDebuginfodUrlsStream)
+                {
+                    std::string url;
+                    existingDebuginfodUrlsStream >> url;
+                    add(url);
+                }
+            }
+            
+            add("https://debuginfod.elfutils.org");
+
+            std::stringstream debuginfodUrlsStream;
+            for (const auto& url : debuginfodUrls)
+                debuginfodUrlsStream << url << " ";
+            setenv("DEBUGINFOD_URLS", debuginfodUrlsStream.str().c_str(), 1);
+
+            // The default timeout is ninety seconds per shared library per server, so if anything goes down,
+            // this takes far too long
+            // As of October 2026, the Ubuntu debuginfod server has been down for months,
+            // so we can't ignore this as a unlikely hypothetical
+            setenv("DEBUGINFOD_TIMEOUT", "3", 1);
+        }
+#endif
+
         if (fprintf(file, "%s", T::sScript) < 0)
         {
             printf("Failed to write debugger script to file \"%s\": %s\n", scriptPath,
@@ -188,8 +284,9 @@ namespace
         scopedFile = nullptr;
         scopedFd = nullptr;
 
-        char command[128];
-        snprintf(command, sizeof(command), T::sCommandTemplate, pid, scriptPath);
+        char command[192];
+        snprintf(command, sizeof(command), T::sCommandTemplate, pid, scriptPath,
+            forceDebuginfod ? T::sDebuginfodEnableArgument : "");
         printf("Executing: %s\n", command);
         fflush(stdout);
 
@@ -218,7 +315,10 @@ namespace
     struct Gdb
     {
         static constexpr char sName[] = "gdb";
+        static constexpr char sDebuginfodEnableArgument[] = "--init-eval-command=\"set debuginfod enabled on\"";
         static constexpr char sScript[] = R"(shell echo ""
+show debuginfod enabled
+show debuginfod urls
 shell echo "* Loaded Libraries"
 info sharedlibrary
 shell echo ""
@@ -236,12 +336,13 @@ thread apply all backtrace full 1000
 detach
 quit
 )";
-        static constexpr char sCommandTemplate[] = "gdb --pid %d --quiet --batch --command %s";
+        static constexpr char sCommandTemplate[] = "gdb --pid %d --quiet --batch --command %s %s";
     };
 
     struct Lldb
     {
         static constexpr char sName[] = "lldb";
+        static constexpr char sDebuginfodEnableArgument[] = ""; // debuginfod is always enabled if compiled in
         static constexpr char sScript[] = R"(script print("\n* Loaded Libraries")
 image list
 script print('\n* Threads')
@@ -253,7 +354,7 @@ script print(''.join(f'{t}\n' + ''.join(''.join([f'  {f}\n', ''.join(f'    {s}\n
 detach
 quit
 )";
-        static constexpr char sCommandTemplate[] = "lldb --attach-pid %d --batch --source %s";
+        static constexpr char sCommandTemplate[] = "lldb --attach-pid %d --batch --source %s %s";
     };
 
     void printProcessInfo(pid_t pid)

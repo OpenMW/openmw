@@ -402,6 +402,9 @@ elseif(NOT ANDROID)
     add_component_dir (crashcatcher
         crashcatcher
     )
+    if (EXTRA_DEBUGINFOD_URLS)
+        set_source_files_properties(crashcatcher/crashcatcher.cpp PROPERTIES COMPILE_DEFINITIONS "EXTRA_DEBUGINFOD_URLS=\"${EXTRA_DEBUGINFOD_URLS}\"")
+    endif ()
 endif()
 
 add_component_dir(detournavigator
