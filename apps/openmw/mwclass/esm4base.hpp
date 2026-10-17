@@ -141,8 +141,13 @@ namespace MWClass
             VFS::Path::NormalizedView model = getModel(ptr);
             if (model.empty())
                 return {};
-            static constexpr VFS::Path::NormalizedView prefix("trees");
-            return prefix / VFS::Path::Normalized(model);
+            static constexpr VFS::Path::ExtensionView spt("spt");
+            if (model.extension() == spt)
+            {
+                static constexpr VFS::Path::NormalizedView prefix("trees");
+                return prefix / VFS::Path::Normalized(model);
+            }
+            return MWWorld::Class::getCorrectedModel(ptr);
         }
     };
 
