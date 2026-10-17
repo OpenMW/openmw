@@ -244,6 +244,12 @@ ObjectShadows: "Włącz cienie obiektów"
 ObjectShadowsTooltip: "Włącz cienie dla głównie nieożywionych. Może mieć znaczący wpływ na wydajność."
 IndoorShadows: "Włącz cienie wewnątrz budynków"
 IndoorShadowsTooltip: "Z powodu ograniczeń danych Morrowind, tylko postacie mogą rzucać cienie wewnątrz budynków, co niektórych może rozpraszać. Nie ma efektu, jeśli cienie postaci/gracza nie są włączone."
+ShadowPlanesComputationMethod: "Metoda obliczania płaszczyzn cieni"
+ShadowPlanesComputationMethodTooltip: |-
+    Typ metody obliczania "granicy sceny" do użycia. "Granice" (domyślnie) zapewniają dobrą równowagę między wydajnością a jakością cieni, "elementy podstawowe" dla lepszego wyglądu cieni, a "brak" oznacza brak obliczeń.
+ShadowPlanesComputationMethodBounds: "Granice"
+ShadowPlanesComputationMethodPrimitives: "Elementy podstawowe"
+ShadowPlanesComputationMethodNone: "Brak"
 ShadowMapResolution: "Rozdzielczość mapy cieni"
 ShadowMapResolutionTooltip: "Rozdzielczość każdej indywidualnej mapy cieni. Jej zwiększenie znacznie poprawia jakość cieni, ale może mieć niewielki wpływ na wydajność."
 ShadowsMaxDistanceValue: "Limit odległości cieni ({value, number, :: group-off})"

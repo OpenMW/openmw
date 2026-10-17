@@ -59,6 +59,7 @@ namespace MWGui
         MyGUI::Button* mPlayerShadowsButton;
         MyGUI::Button* mTerrainShadowsButton;
         MyGUI::Button* mObjectShadowsButton;
+        MyGUI::ComboBox* mShadowPlanesComputationMethod;
         MyGUI::ComboBox* mShadowMapResolution;
 
         MyGUI::ComboBox* mPrimaryLanguage;
@@ -87,6 +88,7 @@ namespace MWGui
         void onTextureFilteringChanged(MyGUI::ComboBox* sender, size_t pos);
         void onAnisotropyChanged(MyGUI::ComboBox* sender, size_t pos);
         void onShadowsButtonClicked(MyGUI::Widget* sender);
+        void onComputeSceneBoundsChanged(MyGUI::ComboBox* sender, size_t pos);
         void onShadowMapResolutionChanged(MyGUI::ComboBox* sender, size_t pos);
         void onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
         void onButtonToggled(MyGUI::Widget* sender);

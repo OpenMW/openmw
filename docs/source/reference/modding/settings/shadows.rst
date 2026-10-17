@@ -62,6 +62,7 @@ Shadows Settings
    :type: string
    :range: primitives | bounds | none
    :default: bounds
+   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows`
 
    Method to compute shadow map coverage:
    - `primitives`: better shadows, higher CPU cost
