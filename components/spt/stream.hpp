@@ -50,8 +50,8 @@ namespace Spt
         void skip(size_t size) { mStream->ignore(size); }
 
         template <class T>
-            requires std::is_arithmetic_v<T> || std::is_same_v<T, osg::Vec2f> || std::is_same_v<T, osg::Vec3f>
-            || std::is_same_v<T, osg::Vec4f>
+        requires std::is_arithmetic_v<T> || std::is_same_v<T, osg::Vec2f> || std::is_same_v<T,
+            osg::Vec3f> || std::is_same_v<T, osg::Vec4f>
         void read(T& data)
         {
             if constexpr (std::is_arithmetic_v<T>)

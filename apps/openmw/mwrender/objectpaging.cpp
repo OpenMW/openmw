@@ -280,7 +280,7 @@ namespace MWRender
             void handleCallbacks(const osg::Node* node, osg::Node* cloned) const
             {
                 for (const osg::Callback* callback = node->getCullCallback(); callback != nullptr;
-                    callback = callback->getNestedCallback())
+                     callback = callback->getNestedCallback())
                 {
                     if (node->getCullCallback()->getNestedCallback())
                     {
