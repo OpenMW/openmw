@@ -250,7 +250,7 @@ ShadowPlanesComputationMethodTooltip: |-
 ShadowPlanesComputationMethodBounds: "bordures"
 ShadowPlanesComputationMethodPrimitives: "primitives"
 ShadowPlanesComputationMethodNone: "aucune"
-ShadowPlanesComputationMethodWarning: "L'utilisation de la méthode des primitives peut gravement affecter les performances et n'est pas recommandée pour un gameplay normal."
+ShadowPlanesComputationMethodWarning: "L'utilisation de la méthode des primitives affectera gravement les performances et n'est pas recommandée pour un gameplay normal."
 ShadowMapResolution: "Résolution des cartes d'ombres"
 ShadowMapResolutionTooltip: "La résolution de chaque carte d'ombre. Augmenter cette valeur de façon importante augmente la qualité des ombres, mais peut impliquer un impact mineur sur les performances."
 ShadowsMaxDistanceValue: "Limite de distance des ombres ({value, number, :: group-off})"

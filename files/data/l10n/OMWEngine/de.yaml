@@ -250,7 +250,7 @@ ShadowPlanesComputationMethodTooltip: |-
 ShadowPlanesComputationMethodBounds: "Begrenzungen"
 ShadowPlanesComputationMethodPrimitives: "Primitiven"
 ShadowPlanesComputationMethodNone: "Keine"
-ShadowPlanesComputationMethodWarning: "Die Verwendung der Primitiven-Methode kann die Leistung stark beeinträchtigen und wird für das normale Gameplay nicht empfohlen."
+ShadowPlanesComputationMethodWarning: "Die Verwendung der Primitiven-Methode wird die Leistung stark beeinträchtigen und wird für das normale Gameplay nicht empfohlen."
 ShadowMapResolution: "Schattenauflösung"
 ShadowMapResolutionTooltip: "Die Auflösung jeder einzelnen Shadow-Map. Eine Erhöhung verbessert die Schattenqualität erheblich, kann aber geringfügige Auswirkungen auf die Leistung haben."
 ShadowsMaxDistanceValue: "Schatten-Distanzlimit ({value, number, :: group-off})"

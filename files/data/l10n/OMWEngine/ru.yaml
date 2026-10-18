@@ -250,7 +250,7 @@ ShadowPlanesComputationMethodTooltip: |-
 ShadowPlanesComputationMethodBounds: "По границам объектов"
 ShadowPlanesComputationMethodPrimitives: "По примитивам"
 ShadowPlanesComputationMethodNone: "Отключено"
-ShadowPlanesComputationMethodWarning: "Вычисление по примитивам может серьезно ухудшить производительность и не рекомендуется к использованию в обычном геймплее."
+ShadowPlanesComputationMethodWarning: "Использование метода вычисления по примитивам серьезно повлияет на производительность и не рекомендуется для обычного игрового процесса."
 ShadowMapResolution: "Разрешение теневой карты"
 ShadowMapResolutionTooltip: "Разрешение отдельных теневых карт. Увеличение значения улучшает качество теней, но может незначительно снизить производительность."
 ShadowsMaxDistanceValue: "Максимальная дистанция теней ({value, number, :: group-off})"
