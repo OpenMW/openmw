@@ -38,6 +38,7 @@
 ---
 -- Runs the MWScript attached to `object` once, even if automatic execution is paused.
 -- Uses the object's local variables and implicit reference without changing its paused state.
+-- Works even if `getLocalScript` returns `nil`; the variables are initialized before the run.
 -- @function [parent=#MWScriptFunctions] runLocalScript
 -- @param openmw.core#GameObject object
 -- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to select the player's instance of the script. Currently has no effect.
@@ -76,6 +77,7 @@
 ---
 -- Starts a global MWScript with `target` as its implicit reference, if provided.
 -- An already running script is not restarted or retargeted.
+-- Works even if `getGlobalScript` returns `nil`; the instance is created when the start takes effect.
 -- @function [parent=#MWScriptFunctions] startGlobalScript
 -- @param #string recordId
 -- @param openmw.core#GameObject target (optional) The script's implicit reference.
