@@ -765,7 +765,6 @@ namespace MWWorld
         , mNextWindSpeed(0.f)
         , mIsStorm(false)
         , mPrecipitation(false)
-        , mStormDirection(Weather::defaultDirection())
         , mCurrentRegion()
         , mTimePassed(0)
         , mFastForward(false)
@@ -945,8 +944,7 @@ namespace MWWorld
         mPrecipitation = !(result.mParticleEffect.empty() && result.mRainEffect.empty())
             && result.mParticleEffect != Settings::models().mWeatherashcloud.get();
 
-        mStormDirection = calculateStormDirection(result.mParticleEffect);
-        mRendering.getSkyManager()->setStormParticleDirection(mStormDirection);
+        mRendering.getSkyManager()->setStormParticleDirection(calculateStormDirection(result.mParticleEffect));
 
         // disable sun during night
         if (time.getHour() >= mTimeSettings.mNightStart || time.getHour() <= mSunriseTime)
@@ -1082,11 +1080,6 @@ namespace MWWorld
     bool WeatherManager::isInStorm() const
     {
         return mIsStorm;
-    }
-
-    osg::Vec3f WeatherManager::getStormDirection() const
-    {
-        return mStormDirection;
     }
 
     void WeatherManager::advanceTime(double hours, bool incremental)

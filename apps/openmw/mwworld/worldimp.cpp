@@ -81,6 +81,7 @@
 #include "../mwrender/npcanimation.hpp"
 #include "../mwrender/postprocessor.hpp"
 #include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/sky.hpp"
 #include "../mwrender/vismask.hpp"
 
 #include "../mwscript/globalscripts.hpp"
@@ -2498,9 +2499,8 @@ namespace MWWorld
     osg::Vec3f World::getStormDirection() const
     {
         if (isCellExterior() || isCellQuasiExterior())
-            return mWeatherManager->getStormDirection();
-        else
-            return osg::Vec3f(0, 1, 0);
+            return mRendering->getSkyManager()->getStormParticleDirection();
+        return Weather::defaultDirection();
     }
 
     struct GetContainersOwnedByVisitor

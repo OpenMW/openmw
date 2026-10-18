@@ -81,6 +81,8 @@ namespace MWRender
 
         void setStormParticleDirection(const osg::Vec3f& direction);
 
+        osg::Vec3f getStormParticleDirection() const { return mStormParticleDirection; }
+
         void setSunDirection(const osg::Vec3f& direction);
 
         void setMasserState(const MoonState& state);
