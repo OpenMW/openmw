@@ -26,6 +26,7 @@ set(BUILTIN_DATA_MW_FILES
 
     scripts/omw/cellhandlers.lua
     scripts/omw/esmfallbacks.lua
+    scripts/omw/weather.lua
     scripts/omw/combat/common.lua
     scripts/omw/combat/global.lua
     scripts/omw/combat/local.lua

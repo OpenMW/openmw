@@ -12,3 +12,4 @@ LOAD: scripts/omw/esmfallbacks.lua
 CREATURE, NPC, PLAYER: scripts/omw/spellcasting/local.lua
 DOOR, CONTAINER: scripts/omw/spellcasting/lockable.lua
 GLOBAL: scripts/omw/spellcasting/global.lua
+PLAYER: scripts/omw/weather.lua
