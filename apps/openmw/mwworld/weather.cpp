@@ -944,8 +944,6 @@ namespace MWWorld
         mPrecipitation = !(result.mParticleEffect.empty() && result.mRainEffect.empty())
             && result.mParticleEffect != Settings::models().mWeatherashcloud.get();
 
-        mRendering.getSkyManager()->setStormParticleDirection(calculateStormDirection(result.mParticleEffect));
-
         // disable sun during night
         if (time.getHour() >= mTimeSettings.mNightStart || time.getHour() <= mSunriseTime)
             mRendering.getSkyManager()->sunDisable();
@@ -1442,6 +1440,7 @@ namespace MWWorld
             result.mSunDiscColor.a() = 1;
 
         result.mStormDirection = calculateStormDirection(result.mParticleEffect);
+        result.mStormParticleDirection = result.mStormDirection;
         return result;
     }
 
@@ -1488,6 +1487,7 @@ namespace MWWorld
         {
             result.mIsStorm = current.mIsStorm;
             result.mParticleEffect = current.mParticleEffect;
+            result.mStormParticleDirection = current.mStormParticleDirection;
             result.mRainEffect = current.mRainEffect;
             result.mRainSpeed = current.mRainSpeed;
             result.mRainEntranceSpeed = current.mRainEntranceSpeed;
@@ -1504,6 +1504,7 @@ namespace MWWorld
         {
             result.mIsStorm = other.mIsStorm;
             result.mParticleEffect = other.mParticleEffect;
+            result.mStormParticleDirection = other.mStormParticleDirection;
             result.mRainEffect = other.mRainEffect;
             result.mRainSpeed = other.mRainSpeed;
             result.mRainEntranceSpeed = other.mRainEntranceSpeed;

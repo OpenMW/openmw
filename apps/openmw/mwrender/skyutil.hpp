@@ -48,6 +48,7 @@ namespace MWRender
 
         osg::Vec3f mStormDirection;
         osg::Vec3f mNextStormDirection;
+        osg::Vec3f mStormParticleDirection;
 
         float mCloudBlendFactor{};
         float mFogDepth{};
