@@ -5,12 +5,11 @@
 #include <limits>
 #include <span>
 
-#include <osg/Stats>
-
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/loadinglistener/reporter.hpp>
 #include <components/misc/constants.hpp>
+#include <components/misc/framestats.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -469,7 +468,7 @@ namespace MWWorld
         mPreloadCells.clear();
     }
 
-    void CellPreloader::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    void CellPreloader::reportStats(unsigned int frameNumber, Misc::FrameStats& stats) const
     {
         stats.setAttribute(frameNumber, "CellPreloader Count", static_cast<double>(mPreloadCells.size()));
         stats.setAttribute(frameNumber, "CellPreloader Added", static_cast<double>(mAdded));

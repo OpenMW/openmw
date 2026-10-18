@@ -5,6 +5,8 @@
 #include <future>
 #include <system_error>
 
+#include <osg/Stats>
+#include <osg/Timer>
 #include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
 #include <osgViewer/Renderer>
@@ -15,6 +17,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/debug/gldebug.hpp>
 
+#include <components/misc/framestats.hpp>
 #include <components/misc/rng.hpp>
 
 #include <components/vfs/manager.hpp>
@@ -164,6 +167,25 @@ namespace
         int mMaxTextureImageUnits = 0;
     };
 
+    class OsgFrameStats final : public Misc::FrameStats
+    {
+    public:
+        explicit OsgFrameStats(osg::ref_ptr<osg::Stats> stats)
+            : mStats(std::move(stats))
+        {
+        }
+
+        bool collectStats(const std::string& category) const override { return mStats->collectStats(category); }
+
+        void setAttribute(unsigned int frameNumber, const std::string& name, double value) override
+        {
+            mStats->setAttribute(frameNumber, name, value);
+        }
+
+    private:
+        osg::ref_ptr<osg::Stats> mStats;
+    };
+
     void reportStats(unsigned frameNumber, osgViewer::Viewer& viewer, std::ostream& stream)
     {
         viewer.getViewerStats()->report(stream, frameNumber);
@@ -189,9 +211,13 @@ void OMW::Engine::executeLocalScripts()
 
 bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 {
-    const osg::Timer_t frameStart = mViewer->getStartTick();
     const osg::Timer* const timer = osg::Timer::instance();
+    // Viewer stats times are relative to the viewer start tick, so express it on the clock the subsystems use
+    const Misc::FrameClock::time_point statsEpoch = Misc::FrameClock::now()
+        - std::chrono::duration_cast<Misc::FrameClock::duration>(
+            std::chrono::duration<double>(timer->delta_s(mViewer->getStartTick(), timer->tick())));
     osg::Stats* const stats = mViewer->getViewerStats();
+    Misc::FrameStats& frameStats = *mFrameStats;
 
     mEnvironment.setFrameDuration(frametime);
 
@@ -204,7 +230,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
         // update input
         {
-            ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
+            ScopedProfile<UserStatsType::Input> profile(statsEpoch, frameNumber, frameStats);
             mInputManager->update(frametime, false);
         }
 
@@ -213,7 +239,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
         // changing widget textures (fixed in MyGUI 3.3.2), and destroyed widgets will not be deleted (not fixed yet,
         // https://github.com/MyGUI/mygui/issues/21)
         {
-            ScopedProfile<UserStatsType::Sound> profile(frameStart, frameNumber, *timer, *stats);
+            ScopedProfile<UserStatsType::Sound> profile(statsEpoch, frameNumber, frameStats);
 
             if (!mWindowManager->isWindowVisible())
             {
@@ -229,7 +255,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
         }
 
         {
-            ScopedProfile<UserStatsType::LuaSyncUpdate> profile(frameStart, frameNumber, *timer, *stats);
+            ScopedProfile<UserStatsType::LuaSyncUpdate> profile(statsEpoch, frameNumber, frameStats);
             // Should be called after input manager update and before any change to the game world.
             // It applies to the game world queued changes from the previous frame.
             mLuaManager->synchronizedUpdate();
@@ -237,14 +263,14 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
         // update game state
         {
-            ScopedProfile<UserStatsType::State> profile(frameStart, frameNumber, *timer, *stats);
+            ScopedProfile<UserStatsType::State> profile(statsEpoch, frameNumber, frameStats);
             mStateManager->update(frametime);
         }
 
         bool paused = mWorld->getTimeManager()->isPaused();
 
         {
-            ScopedProfile<UserStatsType::Script> profile(frameStart, frameNumber, *timer, *stats);
+            ScopedProfile<UserStatsType::Script> profile(statsEpoch, frameNumber, frameStats);
 
             if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
@@ -273,7 +299,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
         // update mechanics
         {
-            ScopedProfile<UserStatsType::Mechanics> profile(frameStart, frameNumber, *timer, *stats);
+            ScopedProfile<UserStatsType::Mechanics> profile(statsEpoch, frameNumber, frameStats);
 
             if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
@@ -290,17 +316,17 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
         // update physics
         {
-            ScopedProfile<UserStatsType::Physics> profile(frameStart, frameNumber, *timer, *stats);
+            ScopedProfile<UserStatsType::Physics> profile(statsEpoch, frameNumber, frameStats);
 
             if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
-                mWorld->updatePhysics(frametime, paused, frameStart, frameNumber, *stats);
+                mWorld->updatePhysics(frametime, paused, statsEpoch, frameNumber, frameStats);
             }
         }
 
         // update world
         {
-            ScopedProfile<UserStatsType::World> profile(frameStart, frameNumber, *timer, *stats);
+            ScopedProfile<UserStatsType::World> profile(statsEpoch, frameNumber, frameStats);
 
             if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
@@ -310,7 +336,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
         // update GUI
         {
-            ScopedProfile<UserStatsType::Gui> profile(frameStart, frameNumber, *timer, *stats);
+            ScopedProfile<UserStatsType::Gui> profile(statsEpoch, frameNumber, frameStats);
             mWindowManager->update(frametime);
         }
     }
@@ -335,9 +361,9 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
         stats->setAttribute(frameNumber, "WorkQueue", static_cast<double>(mWorkQueue->getNumItems()));
         stats->setAttribute(frameNumber, "WorkThread", static_cast<double>(mWorkQueue->getNumActiveThreads()));
 
-        mMechanicsManager->reportStats(frameNumber, *stats);
-        mWorld->reportStats(frameNumber, *stats);
-        mLuaManager->reportStats(frameNumber, *stats);
+        mMechanicsManager->reportStats(frameNumber, frameStats);
+        mWorld->reportStats(frameNumber, frameStats);
+        mLuaManager->reportStats(frameNumber, frameStats);
 
         stats->setAttribute(frameNumber, "StringRefId Count", static_cast<double>(ESM::StringRefId::totalCount()));
     }
@@ -349,16 +375,16 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
     // update focus object for GUI
     {
-        ScopedProfile<UserStatsType::Focus> profile(frameStart, frameNumber, *timer, *stats);
+        ScopedProfile<UserStatsType::Focus> profile(statsEpoch, frameNumber, frameStats);
         mWorld->updateFocusObject();
     }
 
     // if there is a separate Lua thread, it starts the update now
-    mLuaWorker->allowUpdate(frameStart, frameNumber, *stats);
+    mLuaWorker->allowUpdate(statsEpoch, frameNumber, frameStats);
 
     mViewer->renderingTraversals();
 
-    mLuaWorker->finishUpdate(frameStart, frameNumber, *stats);
+    mLuaWorker->finishUpdate(statsEpoch, frameNumber, frameStats);
 
     // The Lua state is unused until the next frame starts: the worker collects
     // garbage through the frame tail and the framerate-limiter sleep.
@@ -938,6 +964,7 @@ void OMW::Engine::prepareEngine()
     }
 
     // starts a separate lua thread if "lua num threads" > 0
+    mFrameStats = std::make_unique<OsgFrameStats>(mViewer->getViewerStats());
     mLuaWorker = std::make_unique<MWLua::Worker>(*mLuaManager);
 }
 

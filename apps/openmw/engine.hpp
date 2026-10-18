@@ -44,6 +44,11 @@ namespace MWLua
     class Worker;
 }
 
+namespace Misc
+{
+    class FrameStats;
+}
+
 namespace Stereo
 {
     class Manager;
@@ -141,6 +146,8 @@ namespace OMW
         std::unique_ptr<MWInput::InputManager> mInputManager;
         std::unique_ptr<MWState::StateManager> mStateManager;
         std::unique_ptr<MWLua::LuaManager> mLuaManager;
+        // Outlives mLuaWorker, which reports into it from its own thread
+        std::unique_ptr<Misc::FrameStats> mFrameStats;
         std::unique_ptr<MWLua::Worker> mLuaWorker;
         std::unique_ptr<L10n::Manager> mL10nManager;
         MWBase::Environment mEnvironment;

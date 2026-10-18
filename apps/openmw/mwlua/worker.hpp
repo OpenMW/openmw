@@ -1,18 +1,12 @@
 #ifndef OPENMW_MWLUA_WORKER_H
 #define OPENMW_MWLUA_WORKER_H
 
-#include <osg/Timer>
-#include <osg/ref_ptr>
+#include <components/misc/framestats.hpp>
 
 #include <condition_variable>
 #include <mutex>
 #include <optional>
 #include <thread>
-
-namespace osg
-{
-    class Stats;
-}
 
 namespace MWLua
 {
@@ -25,9 +19,9 @@ namespace MWLua
 
         ~Worker();
 
-        void allowUpdate(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+        void allowUpdate(Misc::FrameClock::time_point statsEpoch, unsigned int frameNumber, Misc::FrameStats& stats);
 
-        void finishUpdate(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+        void finishUpdate(Misc::FrameClock::time_point statsEpoch, unsigned int frameNumber, Misc::FrameStats& stats);
 
         // Starts incremental garbage collection on the Lua thread. Runs in small
         // steps until finishGc() is called or a full collection cycle completes.
@@ -44,12 +38,12 @@ namespace MWLua
     private:
         struct UpdateRequest
         {
-            osg::Timer_t mFrameStart;
+            Misc::FrameClock::time_point mStatsEpoch;
             unsigned mFrameNumber;
-            osg::ref_ptr<osg::Stats> mStats;
+            Misc::FrameStats* mStats;
         };
 
-        void update(osg::Timer_t frameStart, unsigned frameNumber, osg::Stats& stats);
+        void update(Misc::FrameClock::time_point statsEpoch, unsigned frameNumber, Misc::FrameStats& stats);
 
         void run() noexcept;
 

@@ -33,18 +33,18 @@ namespace MWLua
         }
     }
 
-    void Worker::allowUpdate(osg::Timer_t frameStart, unsigned frameNumber, osg::Stats& stats)
+    void Worker::allowUpdate(Misc::FrameClock::time_point statsEpoch, unsigned frameNumber, Misc::FrameStats& stats)
     {
         if (!mThread)
             return;
         {
             std::lock_guard<std::mutex> lk(mMutex);
-            mUpdateRequest = UpdateRequest{ .mFrameStart = frameStart, .mFrameNumber = frameNumber, .mStats = &stats };
+            mUpdateRequest = UpdateRequest{ .mStatsEpoch = statsEpoch, .mFrameNumber = frameNumber, .mStats = &stats };
         }
         mCV.notify_one();
     }
 
-    void Worker::finishUpdate(osg::Timer_t frameStart, unsigned frameNumber, osg::Stats& stats)
+    void Worker::finishUpdate(Misc::FrameClock::time_point statsEpoch, unsigned frameNumber, Misc::FrameStats& stats)
     {
         if (mThread)
         {
@@ -52,7 +52,7 @@ namespace MWLua
             mCV.wait(lk, [&] { return !mUpdateRequest.has_value(); });
         }
         else
-            update(frameStart, frameNumber, stats);
+            update(statsEpoch, frameNumber, stats);
     }
 
     void Worker::gc()
@@ -94,10 +94,9 @@ namespace MWLua
         }
     }
 
-    void Worker::update(osg::Timer_t frameStart, unsigned frameNumber, osg::Stats& stats)
+    void Worker::update(Misc::FrameClock::time_point statsEpoch, unsigned frameNumber, Misc::FrameStats& stats)
     {
-        const osg::Timer* const timer = osg::Timer::instance();
-        OMW::ScopedProfile<OMW::UserStatsType::Lua> profile(frameStart, frameNumber, *timer, stats);
+        OMW::ScopedProfile<OMW::UserStatsType::Lua> profile(statsEpoch, frameNumber, stats);
 
         mManager.update();
     }
@@ -141,7 +140,7 @@ namespace MWLua
 
             try
             {
-                update(mUpdateRequest->mFrameStart, mUpdateRequest->mFrameNumber, *mUpdateRequest->mStats);
+                update(mUpdateRequest->mStatsEpoch, mUpdateRequest->mFrameNumber, *mUpdateRequest->mStats);
             }
             catch (const std::exception& e)
             {

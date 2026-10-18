@@ -1,8 +1,7 @@
 #ifndef OPENMW_PROFILE_H
 #define OPENMW_PROFILE_H
 
-#include <osg/Stats>
-#include <osg/Timer>
+#include <components/misc/framestats.hpp>
 
 #include <cstddef>
 #include <string>
@@ -116,11 +115,10 @@ namespace OMW
     {
     public:
         explicit ScopedProfile(
-            osg::Timer_t frameStart, unsigned int frameNumber, const osg::Timer& timer, osg::Stats& stats)
-            : mScopeStart(timer.tick())
-            , mFrameStart(frameStart)
+            Misc::FrameClock::time_point statsEpoch, unsigned int frameNumber, Misc::FrameStats& stats)
+            : mScopeStart(Misc::FrameClock::now())
+            , mStatsEpoch(statsEpoch)
             , mFrameNumber(frameNumber)
-            , mTimer(timer)
             , mStats(stats)
         {
         }
@@ -133,20 +131,19 @@ namespace OMW
             if (!mStats.collectStats("engine"))
                 return;
 
-            const osg::Timer_t end = mTimer.tick();
+            const Misc::FrameClock::time_point end = Misc::FrameClock::now();
             const UserStats& stats = UserStatsValue<type>::sValue;
 
-            mStats.setAttribute(mFrameNumber, stats.mBegin, mTimer.delta_s(mFrameStart, mScopeStart));
-            mStats.setAttribute(mFrameNumber, stats.mTaken, mTimer.delta_s(mScopeStart, end));
-            mStats.setAttribute(mFrameNumber, stats.mEnd, mTimer.delta_s(mFrameStart, end));
+            mStats.setAttribute(mFrameNumber, stats.mBegin, Misc::secondsBetween(mStatsEpoch, mScopeStart));
+            mStats.setAttribute(mFrameNumber, stats.mTaken, Misc::secondsBetween(mScopeStart, end));
+            mStats.setAttribute(mFrameNumber, stats.mEnd, Misc::secondsBetween(mStatsEpoch, end));
         }
 
     private:
-        const osg::Timer_t mScopeStart;
-        const osg::Timer_t mFrameStart;
+        const Misc::FrameClock::time_point mScopeStart;
+        const Misc::FrameClock::time_point mStatsEpoch;
         const unsigned int mFrameNumber;
-        const osg::Timer& mTimer;
-        osg::Stats& mStats;
+        Misc::FrameStats& mStats;
     };
 }
 

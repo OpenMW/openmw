@@ -5,7 +5,6 @@
 
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Group>
-#include <osg/Timer>
 
 #include <MyGUI_TextIterator.h>
 
@@ -1390,11 +1389,12 @@ namespace MWWorld
         mPhysics->updateAnimatedCollisionShape(ptr);
     }
 
-    void World::doPhysics(float duration, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    void World::doPhysics(
+        float duration, Misc::FrameClock::time_point statsEpoch, unsigned int frameNumber, Misc::FrameStats& stats)
     {
         processDoors(duration);
         mProjectileManager->update(duration);
-        mPhysics->stepSimulation(duration, mDiscardMovements, frameStart, frameNumber, stats);
+        mPhysics->stepSimulation(duration, mDiscardMovements, statsEpoch, frameNumber, stats);
         mProjectileManager->processHits();
         mDiscardMovements = false;
         mPhysics->moveActors();
@@ -1616,12 +1616,12 @@ namespace MWWorld
         }
     }
 
-    void World::updatePhysics(
-        float duration, bool paused, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    void World::updatePhysics(float duration, bool paused, Misc::FrameClock::time_point statsEpoch,
+        unsigned int frameNumber, Misc::FrameStats& stats)
     {
         if (!paused)
         {
-            doPhysics(duration, frameStart, frameNumber, stats);
+            doPhysics(duration, statsEpoch, frameNumber, stats);
         }
         else
         {
@@ -3814,7 +3814,7 @@ namespace MWWorld
         return mPhysics->isAreaOccupiedByOtherActor(actor.mRef, position, 2 * maxHalfExtent);
     }
 
-    void World::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    void World::reportStats(unsigned int frameNumber, Misc::FrameStats& stats) const
     {
         DetourNavigator::reportStats(mNavigator->getStats(), frameNumber, stats);
         mPhysics->reportStats(frameNumber, stats);

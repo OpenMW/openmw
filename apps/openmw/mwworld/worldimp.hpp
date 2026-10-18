@@ -3,11 +3,11 @@
 
 #include <memory>
 
-#include <osg/Timer>
 #include <osg/ref_ptr>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/misc/framestats.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/pathutil.hpp>
@@ -28,7 +28,6 @@
 namespace osg
 {
     class Group;
-    class Stats;
 }
 
 namespace osgViewer
@@ -166,7 +165,8 @@ namespace MWWorld
         void processDoors(float duration);
         ///< Run physics simulation and modify \a world accordingly.
 
-        void doPhysics(float duration, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+        void doPhysics(
+            float duration, Misc::FrameClock::time_point statsEpoch, unsigned int frameNumber, Misc::FrameStats& stats);
         ///< Run physics simulation and modify \a world accordingly.
 
         void updateNavigator();
@@ -421,8 +421,8 @@ namespace MWWorld
         ///< \return Resulting mode
 
         void update(float duration, bool paused);
-        void updatePhysics(
-            float duration, bool paused, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+        void updatePhysics(float duration, bool paused, Misc::FrameClock::time_point statsEpoch,
+            unsigned int frameNumber, Misc::FrameStats& stats);
 
         void updateFocusObject();
 
@@ -672,7 +672,7 @@ namespace MWWorld
 
         bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& position) const override;
 
-        void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
+        void reportStats(unsigned int frameNumber, Misc::FrameStats& stats) const override;
 
         std::vector<MWWorld::Ptr> getAll(const ESM::RefId& id) override;
 

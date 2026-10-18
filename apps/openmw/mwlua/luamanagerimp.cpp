@@ -6,7 +6,6 @@
 #include <functional>
 
 #include <MyGUI_InputManager.h>
-#include <osg/Stats>
 
 #include <sol/object.hpp>
 #include <sol/table.hpp>
@@ -18,6 +17,7 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 
+#include <components/misc/framestats.hpp>
 #include <components/settings/values.hpp>
 
 #include <components/l10n/manager.hpp>
@@ -1042,7 +1042,7 @@ namespace MWLua
         mTeleportPlayerAction = DelayedAction(&mLua, std::move(action), "TeleportPlayer");
     }
 
-    void LuaManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    void LuaManager::reportStats(unsigned int frameNumber, Misc::FrameStats& stats) const
     {
         stats.setAttribute(frameNumber, "Lua UsedMemory", static_cast<double>(mLua.getTotalMemoryUsage()));
     }
