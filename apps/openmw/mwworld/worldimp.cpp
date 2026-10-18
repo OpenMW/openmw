@@ -3,7 +3,6 @@
 #include <charconv>
 #include <vector>
 
-#include <osg/ComputeBoundsVisitor>
 #include <osg/Group>
 
 #include <MyGUI_TextIterator.h>
@@ -951,19 +950,9 @@ namespace MWWorld
 
     osg::Matrixf World::getActorHeadTransform(const MWWorld::ConstPtr& actor) const
     {
-        const MWRender::Animation* anim = mRendering->getAnimation(actor);
-        if (anim)
-        {
-            const osg::Node* node = anim->getNode("Head");
-            if (!node)
-                node = anim->getNode("Bip01 Head");
-            if (node)
-            {
-                osg::NodePathList nodepaths = node->getParentalNodePaths();
-                if (!nodepaths.empty())
-                    return osg::computeLocalToWorld(nodepaths[0]);
-            }
-        }
+        if (const MWRender::Animation* anim = mRendering->getAnimation(actor))
+            if (std::optional<osg::Matrixf> transform = anim->getHeadWorldTransform())
+                return *transform;
         return osg::Matrixf::translate(actor.getRefData().getPosition().asVec3());
     }
 
@@ -1705,13 +1694,8 @@ namespace MWWorld
             if (!object.isEmpty())
             {
                 osg::BoundingBox bb = mPhysics->getBoundingBox(object);
-                if (!bb.valid() && object.getRefData().getBaseNode())
-                {
-                    osg::ComputeBoundsVisitor computeBoundsVisitor;
-                    computeBoundsVisitor.setTraversalMask(~(MWRender::Mask_ParticleSystem | MWRender::Mask_Effect));
-                    object.getRefData().getBaseNode()->accept(computeBoundsVisitor);
-                    bb = computeBoundsVisitor.getBoundingBox();
-                }
+                if (!bb.valid())
+                    bb = mRendering->getObjectBounds(object, MWRender::Mask_ParticleSystem | MWRender::Mask_Effect);
                 const osg::Vec2f pos = mRendering->getScreenCoords(bb);
                 MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(pos.x(), pos.y());
             }
@@ -2030,10 +2014,7 @@ namespace MWWorld
         if (!object.getClass().isActor() && adjustPos && object.getRefData().getBaseNode())
         {
             // Adjust position so the location we wanted ends up in the middle of the object bounding box
-            osg::ComputeBoundsVisitor computeBounds;
-            computeBounds.setTraversalMask(~MWRender::Mask_ParticleSystem);
-            object.getRefData().getBaseNode()->accept(computeBounds);
-            osg::BoundingBox bounds = computeBounds.getBoundingBox();
+            osg::BoundingBox bounds = mRendering->getObjectBounds(object, MWRender::Mask_ParticleSystem);
             if (bounds.valid())
             {
                 ESM::Position pos = object.getRefData().getPosition();
