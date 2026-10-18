@@ -369,7 +369,7 @@ namespace MWWorld
 
     void CellPreloader::setWorkQueue(std::shared_ptr<SceneUtil::WorkQueue> workQueue)
     {
-        mWorkQueue = workQueue;
+        mWorkQueue = std::move(workQueue);
     }
 
     void CellPreloader::syncTerrainLoad(Loading::Listener& listener)

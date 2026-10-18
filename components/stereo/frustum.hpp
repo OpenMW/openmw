@@ -46,7 +46,7 @@ namespace Stereo
         StereoFrustumManager(bool sharedShadowMaps, osg::Camera* camera);
         ~StereoFrustumManager();
 
-        void update(std::array<osg::Matrix, 2> projections);
+        void update(const std::array<osg::Matrix, 2>& projections);
 
         const osg::BoundingBoxd& boundingBox() const { return mBoundingBox; }
 

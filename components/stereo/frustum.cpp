@@ -133,10 +133,10 @@ namespace Stereo
         customClipSpace = mBoundingBox;
     }
 
-    void StereoFrustumManager::update(std::array<osg::Matrix, 2> projections)
+    void StereoFrustumManager::update(const std::array<osg::Matrix, 2>& projections)
     {
         mBoundingBox.init();
-        for (auto& projection : projections)
+        for (const auto& projection : projections)
             joinBoundingBoxes(mCamera->getProjectionMatrix(), projection, mBoundingBox);
     }
 }
