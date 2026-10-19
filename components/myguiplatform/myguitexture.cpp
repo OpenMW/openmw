@@ -4,8 +4,10 @@
 
 #include <osg/StateSet>
 #include <osg/Texture2D>
+#include <osgDB/ReadFile>
 
 #include <components/debug/debuglog.hpp>
+#include <components/files/memorystream.hpp>
 #include <components/resource/imagemanager.hpp>
 
 namespace MyGUIPlatform
@@ -162,5 +164,36 @@ namespace MyGUIPlatform
     void OSGTexture::setShader(const std::string& /*shaderName*/)
     {
         Log(Debug::Warning) << "OSGTexture::setShader is not implemented";
+    }
+
+    std::unique_ptr<MyGUI::ITexture> createTextureFromJpeg(std::span<const char> data)
+    {
+        Files::IMemStream instream(data.data(), data.size());
+
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
+        if (!readerwriter)
+        {
+            Log(Debug::Error) << "Can't decode JPEG image, no jpg readerwriter found";
+            return nullptr;
+        }
+
+        osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(instream);
+        if (!result.success())
+        {
+            Log(Debug::Error) << "Failed to decode JPEG image: " << result.message() << " code " << result.status();
+            return nullptr;
+        }
+
+        osg::ref_ptr<osg::Texture2D> texture(new osg::Texture2D);
+        texture->setImage(result.getImage());
+        texture->setInternalFormat(GL_RGB);
+        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        texture->setResizeNonPowerOfTwoHint(false);
+        texture->setUnRefImageDataAfterApply(true);
+
+        return std::make_unique<OSGTexture>(texture);
     }
 }

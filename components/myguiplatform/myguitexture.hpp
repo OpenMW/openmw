@@ -1,6 +1,9 @@
 #ifndef OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUITEXTURE_H
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUITEXTURE_H
 
+#include <memory>
+#include <span>
+
 #include <MyGUI_ITexture.h>
 
 #include <osg/ref_ptr>
@@ -68,6 +71,9 @@ namespace MyGUIPlatform
         /*internal:*/
         osg::Texture2D* getTexture() const { return mTexture.get(); }
     };
+
+    // Rows stay in the decoder's bottom-up order.
+    std::unique_ptr<MyGUI::ITexture> createTextureFromJpeg(std::span<const char> data);
 
 }
 
