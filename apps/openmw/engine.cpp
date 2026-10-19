@@ -22,6 +22,7 @@
 
 #include <components/sdlutil/imagetosurface.hpp>
 #include <components/sdlutil/sdlgraphicswindow.hpp>
+#include <components/sdlutil/sdlinputwrapper.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -836,8 +837,9 @@ void OMW::Engine::prepareEngine()
         mScreenCaptureHandler->setFramesToCapture(1);
         mScreenCaptureHandler->captureNextFrame(*mViewer);
     };
-    mInputManager = std::make_unique<MWInput::InputManager>(mWindow, mViewer, takeScreenshot, keybinderUser,
-        keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
+    mInputManager = std::make_unique<MWInput::InputManager>(mWindow,
+        std::make_unique<SDLUtil::InputWrapper>(mWindow, mViewer, mGrab), takeScreenshot, keybinderUser,
+        keybinderUserExists, userGameControllerdb, gameControllerdb);
     mEnvironment.setInputManager(*mInputManager);
 
     // Create sound system
