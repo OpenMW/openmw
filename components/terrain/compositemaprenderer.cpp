@@ -59,7 +59,7 @@ namespace Terrain
             {
                 // We did not compile the map fully.
                 // Place it back to queue to continue work in the next time.
-                mCompileSet.insert(node);
+                mCompileSet.insert(std::move(node));
             }
         }
         mTimer.setStartTick();

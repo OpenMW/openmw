@@ -288,8 +288,8 @@ namespace MWWorld
     private:
         struct CycleDay
         {
-            float mRiseHour;
-            float mHandoverHour;
+            float mRiseHour{};
+            float mHandoverHour{};
         };
 
         // Time constant for Morrowind parity.

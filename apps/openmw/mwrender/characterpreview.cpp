@@ -285,7 +285,7 @@ namespace MWRender
         light->setConstantAttenuation(1.f);
         light->setLinearAttenuation(0.f);
         light->setQuadraticAttenuation(0.f);
-        lightManager->setSunlight(light);
+        lightManager->setSunlight(std::move(light));
 
         mRTTNode->addChild(lightManager);
 
