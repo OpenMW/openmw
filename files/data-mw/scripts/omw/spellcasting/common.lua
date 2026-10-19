@@ -164,12 +164,25 @@ function common.findByIndex(effects, index)
     return nil
 end
 
+-- Magnitudes given in params override the effect's ones
+function common.withEffectParams(effect, params)
+    return setmetatable({
+        magnitudeMin = params.magnitudeMin,
+        magnitudeMax = params.magnitudeMax,
+    }, { __index = effect })
+end
+
 function common.filterByIndex(effects, filter)
     if not filter or #filter == 0 then return effects end
     local effectsByIndex = {}
-    for _, index in pairs(filter) do
+    for _, entry in pairs(filter) do
+        local params = type(entry) == 'table' and entry
+        local index = params and params.index or entry
         local effect = common.findByIndex(effects, index)
         if effect then
+            if params then
+                effect = common.withEffectParams(effect, params)
+            end
             effectsByIndex[#effectsByIndex + 1] = effect
         else
             print('Warning: Spell has no such effect [index='..tostring(index)..']')
@@ -196,15 +209,12 @@ function common.inflict(spellCast, target, range)
     end
 
     local record, type = common.getMagicRecord(spellCast.id)
+    if type == Ingredient then
+        error('SpellCasting.inflict does not support ingredients')
+    end
     local effectsWithParams = common.filterByRange(record.effects, range)
     if #effectsWithParams == 0 then
         return
-    end
-    if type == Ingredient then
-        -- Ingredients only inflict the first entry
-        effectsWithParams = {
-            effectsWithParams[1]
-        }
     end
 
     local targetIsActor = Actor.objectIsInstance(target)

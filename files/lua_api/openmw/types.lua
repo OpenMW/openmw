@@ -377,7 +377,7 @@
 -- @param #table options A table of parameters. Must contain the following required parameters:
 --
 --   * `id` - A string record ID. Valid records are @{openmw.core#Spell}, enchanted @{#Item}, @{#IngredientRecord}, or @{#PotionRecord}.
---   * `effects` - A list of indexes of the effects to be applied. These indexes must be in range of the record's list of @{openmw.core#MagicEffectWithParams}. Note that for Ingredients, normal ingredient consumption rules will be applied to effects.
+--   * `effects` - A list of effects to apply. Each entry is either an effect index (the `index` field of @{openmw.core#MagicEffectWithParams}) or a table with a required `index` and optional `magnitudeMin`, `magnitudeMax`, and `duration` fields overriding the record's values. Omitted fields use the record's values. For ingredients, each entry must be a table and omitted fields default to 0. `duration` is clamped to at least 0. Ingredient effects are applied without a success roll.
 --
 -- And may contain the following optional parameters:
 --
@@ -388,7 +388,6 @@
 --   * `caster` - A game object that identifies the caster. Default: nil
 --   * `item` - A game object that identifies the specific enchanted item instance used to cast the spell. Default: nil
 --   * `stackable` - If true, the spell will be able to stack. If false, existing instances of spells with the same id from the same source (where source is caster + item)
---   * `quiet` - If true, no messages will be printed if the spell is an Ingredient and it had no effect. Always true if the target is not the player.
 -- @usage
 -- -- Adds the effect of the chameleon spell to the character
 -- Actor.activeSpells(self):add({id = 'chameleon', effects = { 0 }})
@@ -400,10 +399,13 @@
 -- -- Adds the negative effect of Greef twice over, and renames it to Good Greef.
 -- Actor.activeSpells(self):add({id = 'potion_comberry_brandy_01', effects = { 1, 1 }, stackable = true, name = 'Good Greef'})
 -- @usage
--- -- Has the same effect as if the actor ate a chokeweed. With the same variable effect based on skill / random chance.
--- Actor.activeSpells(self):add({id = 'ingred_chokeweed_01', effects = { 0 }, stackable = true, name = 'Chokeweed'})
--- -- Same as above, but uses a different index. Note that if multiple indexes are used, the randomicity is applied separately for each effect.
--- Actor.activeSpells(self):add({id = 'ingred_chokeweed_01', effects = { 1 }, stackable = true, name = 'Chokeweed'})
+-- -- Adds the effect of the chameleon spell with a magnitude of 50 for 30 seconds.
+-- Actor.activeSpells(self):add({id = 'chameleon', effects = { { index = 0, magnitudeMin = 50, magnitudeMax = 50, duration = 30 } }})
+-- @usage
+-- -- Adds the first effect of chokeweed with a magnitude between 2 and 8 for 10 seconds.
+-- Actor.activeSpells(self):add({id = 'ingred_chokeweed_01', effects = { { index = 0, magnitudeMin = 2, magnitudeMax = 8, duration = 10 } }, stackable = true})
+-- -- Adds the same effect with a fixed magnitude of 5.
+-- Actor.activeSpells(self):add({id = 'ingred_chokeweed_01', effects = { { index = 0, magnitudeMin = 5, magnitudeMax = 5, duration = 10 } }, stackable = true})
 
 ---
 -- Return the spells (@{#ActorSpells}) of the given actor.
