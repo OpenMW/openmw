@@ -748,7 +748,7 @@ QString ContentSelectorModel::ContentModel::toolTip(const EsmFile* file) const
             assert(error.errorCode() != LoadOrderError::ErrorCode::ErrorCode_None);
 
             text += "<p>";
-            text += mErrorToolTips[error.errorCode() - 1].arg(error.fileName());
+            text += mErrorToolTips[error.errorCode() - 1].arg(error.fileName().toHtmlEscaped());
             text += "</p>";
         }
         text += ("</b>");

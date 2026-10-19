@@ -330,9 +330,8 @@ namespace NifOsg
             mat.preMultTranslate(-uvOrigin);
             mat.setTrans(mat.getTrans() + uvTrans);
 
-            // setting once is enough because all other texture units share the same TexMat (see setDefaults).
-            if (!mTextureUnits.empty())
-                SceneUtil::setupTexMatForStateSet(*stateset, *mTextureUnits.begin(), mat);
+            for (unsigned int unit : mTextureUnits)
+                SceneUtil::setupTexMatForStateSet(*stateset, unit, mat);
         }
     }
 

@@ -23,6 +23,7 @@ CSVDoc::AdjusterWidget::AdjusterWidget(QWidget* parent)
     layout->addWidget(mIcon, 0);
 
     mMessage = new QLabel(this);
+    mMessage->setTextFormat(Qt::RichText);
     mMessage->setWordWrap(true);
     mMessage->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
 
@@ -90,7 +91,7 @@ void CSVDoc::AdjusterWidget::setName(const QString& name, bool addon)
         if (!isFilePathChanged && !isLegacyPath)
         {
             // path already points to the local data directory
-            message = "Will be saved as: " + Files::pathToQString(path);
+            message = "Will be saved as: " + Files::pathToQString(path).toHtmlEscaped();
             mResultPath = std::move(path);
         }
         // in all other cases, ensure the path points to data-local and do an existing file check
@@ -100,7 +101,7 @@ void CSVDoc::AdjusterWidget::setName(const QString& name, bool addon)
             if (isFilePathChanged)
                 path = mLocalData / path.filename();
 
-            message = "Will be saved as: " + Files::pathToQString(path);
+            message = "Will be saved as: " + Files::pathToQString(path).toHtmlEscaped();
             mResultPath = path;
 
             if (std::filesystem::exists(path))

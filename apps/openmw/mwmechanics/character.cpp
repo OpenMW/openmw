@@ -20,7 +20,6 @@
 #include "character.hpp"
 
 #include <array>
-#include <unordered_set>
 
 #include <components/esm/records.hpp>
 #include <components/misc/mathutil.hpp>
@@ -1767,7 +1766,8 @@ namespace MWMechanics
             float maxAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " max attack");
             if (minAttackTime <= currentTime && currentTime <= maxAttackTime)
             {
-                std::string hit = mAttackType != "shoot" ? "hit" : "release";
+                // Play ranged release and follow-through as a single continuous section.
+                std::string stopKey = mAttackType != "shoot" ? "hit" : "follow stop";
 
                 float startPoint = 0.f;
 
@@ -1776,32 +1776,27 @@ namespace MWMechanics
                 {
                     startPoint = 1.f - mAttackStrength;
                     float minHitTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " min hit");
-                    float hitTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + ' ' + hit);
-                    if (maxAttackTime <= minHitTime && minHitTime < hitTime)
-                        startPoint *= (minHitTime - maxAttackTime) / (hitTime - maxAttackTime);
+                    float stopTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + ' ' + stopKey);
+                    if (maxAttackTime <= minHitTime && minHitTime < stopTime)
+                        startPoint *= (minHitTime - maxAttackTime) / (stopTime - maxAttackTime);
                 }
 
                 mAnimation->disable(mCurrentWeapon);
                 playBlendedAnimation(mCurrentWeapon, priorityWeapon, MWRender::BlendMask_All, false, weapSpeed,
-                    mAttackType + " max attack", mAttackType + ' ' + hit, startPoint, 0);
+                    mAttackType + " max attack", mAttackType + ' ' + stopKey, startPoint, 0);
+
+                if (mAttackType == "shoot")
+                    mUpperBodyState = UpperBodyState::AttackEnd;
             }
 
             animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
 
-            // Try playing the "follow" section if the attack animation ended naturally or didn't play at all.
-            if (!animPlaying || (currentTime >= maxAttackTime && complete >= 1.f))
+            // Try the strength-specific "follow" section if the attack animation ended naturally or didn't play.
+            if (mAttackType != "shoot" && (!animPlaying || (currentTime >= maxAttackTime && complete >= 1.f)))
             {
-                std::string start = "follow start";
-                std::string stop = "follow stop";
-
-                if (mAttackType != "shoot")
-                {
-                    std::string strength = mAttackStrength < 0.33f ? "small"
-                        : mAttackStrength < 0.66f                  ? "medium"
-                                                                   : "large";
-                    start = strength + ' ' + start;
-                    stop = strength + ' ' + stop;
-                }
+                std::string strength = mAttackStrength < 0.33f ? "small" : mAttackStrength < 0.66f ? "medium" : "large";
+                std::string start = strength + " follow start";
+                std::string stop = strength + " follow stop";
 
                 mReadyToHit = false;
 
@@ -1872,12 +1867,22 @@ namespace MWMechanics
 
             if (mUpperBodyState == UpperBodyState::AttackEnd)
             {
+                // The attack section includes the release, so calculate follow-through progress from its text keys.
+                float followProgress = complete;
+                float followStartTime
+                    = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " follow start");
+                float followStopTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " follow stop");
+                if (followStartTime >= 0.f && followStartTime < followStopTime)
+                    followProgress = std::clamp((mAnimation->getCurrentTime(mCurrentWeapon) - followStartTime)
+                            / (followStopTime - followStartTime),
+                        0.f, 1.f);
+
                 // technically we do not need a pitch for crossbow reload animation,
                 // but we should avoid abrupt repositioning
                 if (mWeaponTypeId == ESM::WeaponType::MarksmanCrossbow)
-                    mAnimation->setPitchFactor(std::max(0.f, 1.f - complete * 10.f));
+                    mAnimation->setPitchFactor(std::max(0.f, 1.f - followProgress * 10.f));
                 else
-                    mAnimation->setPitchFactor(1.f - complete);
+                    mAnimation->setPitchFactor(1.f - followProgress);
             }
             // Smooth transition for the pre-wind-up section. Random attack animations don't have one.
             else if (!isRandomAttackAnimation(mCurrentWeapon))

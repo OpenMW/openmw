@@ -123,7 +123,8 @@ namespace LuaUtil
         bool hasScript(int scriptId) const;
         void removeScript(int scriptId);
 
-        void processTimers(double simulationTime, double gameTime, double realTime);
+        // While paused, only real-time timers are processed
+        void processTimers(double simulationTime, double gameTime, double realTime, bool isPaused = false);
 
         // Calls `onUpdate` (if present) for every script in the container.
         // Handlers are called in the same order as scripts were added.

@@ -43,6 +43,7 @@ CSVDoc::LoadingDocument::LoadingDocument(CSMDoc::Document* document)
 
     // total progress
     mTotalRecordsLabel = new QLabel(this);
+    mTotalRecordsLabel->setTextFormat(Qt::PlainText);
 
     mLayout->addWidget(mTotalRecordsLabel);
 
@@ -60,6 +61,7 @@ CSVDoc::LoadingDocument::LoadingDocument(CSMDoc::Document* document)
 
     // record progress
     mLayout->addWidget(mRecordsLabel = new QLabel("Records", this));
+    mRecordsLabel->setTextFormat(Qt::PlainText);
 
     mRecordProgress = new QProgressBar(this);
 
@@ -71,6 +73,7 @@ CSVDoc::LoadingDocument::LoadingDocument(CSMDoc::Document* document)
 
     // error message
     mError = new QLabel(this);
+    mError->setTextFormat(Qt::RichText);
     mError->setWordWrap(true);
     mError->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
@@ -122,7 +125,8 @@ void CSVDoc::LoadingDocument::nextRecord(int records)
 void CSVDoc::LoadingDocument::abort(const std::string& error)
 {
     mAborted = true;
-    mError->setText(QString::fromUtf8(("<font color=red>Loading failed: " + error + "</font>").c_str()));
+    mError->setText(
+        QStringLiteral("<font color=red>Loading failed: %1</font>").arg(QString::fromStdString(error).toHtmlEscaped()));
     Log(Debug::Error) << "Loading failed: " << error;
     mButtons->setStandardButtons(QDialogButtonBox::Close);
 }

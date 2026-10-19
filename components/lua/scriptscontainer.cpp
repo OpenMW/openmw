@@ -778,12 +778,15 @@ namespace LuaUtil
         }
     }
 
-    void ScriptsContainer::processTimers(double simulationTime, double gameTime, double realTime)
+    void ScriptsContainer::processTimers(double simulationTime, double gameTime, double realTime, bool isPaused)
     {
         mLua.protectedCall([&](LuaView& view) {
             LoadedData& data = ensureLoaded();
-            updateTimerQueue(data.mSimulationTimersQueue, simulationTime);
-            updateTimerQueue(data.mGameTimersQueue, gameTime);
+            if (!isPaused)
+            {
+                updateTimerQueue(data.mSimulationTimersQueue, simulationTime);
+                updateTimerQueue(data.mGameTimersQueue, gameTime);
+            }
             updateTimerQueue(data.mRealTimeTimersQueue, realTime);
         });
     }

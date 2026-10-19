@@ -81,9 +81,11 @@ void MWWorld::LocalScripts::startIteration()
 
 bool MWWorld::LocalScripts::getNext(std::pair<ESM::RefId, Ptr>& script)
 {
-    if (mIter != mScripts.end())
+    while (mIter != mScripts.end())
     {
         auto iter = mIter++;
+        if (!iter->second.getRefData().isLocalScriptEnabled())
+            continue;
         script = *iter;
         return true;
     }
@@ -180,5 +182,6 @@ void MWWorld::LocalScripts::remove(const Ptr& ptr)
 
 bool MWWorld::LocalScripts::isRunning(const ESM::RefId& scriptName, const Ptr& ptr) const
 {
-    return std::ranges::find(mScripts, std::pair(scriptName, ptr)) != mScripts.end();
+    return ptr.getRefData().isLocalScriptEnabled()
+        && std::ranges::find(mScripts, std::pair(scriptName, ptr)) != mScripts.end();
 }

@@ -55,6 +55,8 @@ namespace MWBase
 
         virtual bool startDialogue(const MWWorld::Ptr& actor, ResponseCallback* callback) = 0;
 
+        virtual void executeScript(const std::string& script, const MWWorld::Ptr& actor) = 0;
+
         virtual bool inJournal(const ESM::RefId& topicId, const ESM::RefId& infoId) const = 0;
 
         virtual void addTopic(const ESM::RefId& topic) = 0;
