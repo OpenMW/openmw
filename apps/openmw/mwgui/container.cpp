@@ -301,7 +301,8 @@ namespace MWGui
                     MWBase::Environment::get().getMechanicsManager()->notifyDied(ptr);
 
                     const ESM::RefId& script = ptr.getClass().getScript(ptr);
-                    if (!script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled())
+                    if (!script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled()
+                        && ptr.getRefData().isLocalScriptEnabled())
                     {
                         MWScript::InterpreterContext interpreterContext(&ptr.getRefData().getLocals(), ptr);
                         MWBase::Environment::get().getScriptManager()->run(script, interpreterContext);

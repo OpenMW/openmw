@@ -117,6 +117,13 @@ namespace MWWorld
 
         MWScript::Locals& getLocals();
 
+        /// Whether automatic execution of this object's local MWScript is enabled.
+        bool isLocalScriptEnabled() const;
+
+        /// Enable or pause automatic local MWScript execution, preserving its variables.
+        /// @param enabled Whether to resume automatic execution when the object is active.
+        void setLocalScriptEnabled(bool enabled);
+
         bool isEnabled() const;
 
         void enable();
