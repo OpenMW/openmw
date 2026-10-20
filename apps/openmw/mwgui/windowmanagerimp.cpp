@@ -6,6 +6,8 @@
 #include <filesystem>
 #include <thread>
 
+#include <osg/Image>
+#include <osg/ref_ptr>
 #include <osgViewer/Viewer>
 
 #include <MyGUI_ClipboardManager.h>
@@ -63,6 +65,7 @@
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwrender/localmap.hpp"
 #include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/vismask.hpp"
 
