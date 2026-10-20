@@ -246,7 +246,7 @@ IndoorShadows: "Enable Indoor Shadows"
 IndoorShadowsTooltip: "Due to limitations with Morrowind's data, only actors can cast shadows indoors, which some might feel is distracting. Has no effect if actor/player shadows are not enabled."
 ShadowPlanesComputationMethod: "Shadow Planes Computation Method"
 ShadowPlanesComputationMethodTooltip: |-
-    Type of "compute scene bounds" computation method to be used. Bounds (default) for good balance between performance and shadow quality, primitives for better looking shadows or none for no computation.
+    Type of "compute scene bounds" computation method to be used. Bounds (default) for a good balance between performance and shadow quality, primitives for better-looking shadows or none for no computation.
 ShadowPlanesComputationMethodBounds: "Bounds"
 ShadowPlanesComputationMethodPrimitives: "Primitives"
 ShadowPlanesComputationMethodNone: "None"
