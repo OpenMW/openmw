@@ -9,8 +9,6 @@
 
 #include <LinearMath/btTransform.h>
 
-#include <osg/ref_ptr>
-
 #include <functional>
 #include <vector>
 

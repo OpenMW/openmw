@@ -3,8 +3,6 @@
 
 #include <components/bullethelpers/heightfield.hpp>
 
-#include <osg/Object>
-
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 

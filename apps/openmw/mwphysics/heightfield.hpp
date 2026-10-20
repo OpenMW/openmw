@@ -1,8 +1,6 @@
 #ifndef OPENMW_MWPHYSICS_HEIGHTFIELD_H
 #define OPENMW_MWPHYSICS_HEIGHTFIELD_H
 
-#include <osg/ref_ptr>
-
 #include <LinearMath/btScalar.h>
 
 #include <memory>
