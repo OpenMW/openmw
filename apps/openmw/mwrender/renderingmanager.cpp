@@ -77,6 +77,7 @@
 #include "effectmanager.hpp"
 #include "fogmanager.hpp"
 #include "groundcover.hpp"
+#include "localmap.hpp"
 #include "navmesh.hpp"
 #include "npcanimation.hpp"
 #include "objectpaging.hpp"
@@ -464,6 +465,11 @@ namespace MWRender
     std::unique_ptr<RaceSelectionPreview> RenderingManager::createRaceSelectionPreview()
     {
         return std::make_unique<RaceSelectionPreview>(mRootNode, mResourceSystem);
+    }
+
+    std::unique_ptr<LocalMap> RenderingManager::createLocalMap()
+    {
+        return std::make_unique<LocalMap>(mRootNode);
     }
 
     const std::shared_ptr<SceneUtil::WorkQueue>& RenderingManager::getWorkQueue() const
