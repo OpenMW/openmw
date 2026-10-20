@@ -9,11 +9,6 @@
 class btCollisionObject;
 class btHeightfieldTerrainShape;
 
-namespace osg
-{
-    class Object;
-}
-
 namespace ESMTerrain
 {
     class LandObject;

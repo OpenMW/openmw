@@ -22,11 +22,6 @@
 #include "collisiontype.hpp"
 #include "raycasting.hpp"
 
-namespace osg
-{
-    class Object;
-}
-
 namespace Resource
 {
     class BulletShapeManager;
