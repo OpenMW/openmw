@@ -73,6 +73,7 @@
 
 #include "actorspaths.hpp"
 #include "camera.hpp"
+#include "characterpreview.hpp"
 #include "effectmanager.hpp"
 #include "fogmanager.hpp"
 #include "groundcover.hpp"
@@ -453,6 +454,16 @@ namespace MWRender
     Resource::ResourceSystem* RenderingManager::getResourceSystem()
     {
         return mResourceSystem;
+    }
+
+    std::unique_ptr<InventoryPreview> RenderingManager::createInventoryPreview(const MWWorld::Ptr& character)
+    {
+        return std::make_unique<InventoryPreview>(mRootNode, mResourceSystem, character);
+    }
+
+    std::unique_ptr<RaceSelectionPreview> RenderingManager::createRaceSelectionPreview()
+    {
+        return std::make_unique<RaceSelectionPreview>(mRootNode, mResourceSystem);
     }
 
     const std::shared_ptr<SceneUtil::WorkQueue>& RenderingManager::getWorkQueue() const

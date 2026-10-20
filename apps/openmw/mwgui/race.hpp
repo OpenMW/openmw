@@ -15,22 +15,13 @@ namespace ESM
     struct NPC;
 }
 
-namespace osg
-{
-    class Group;
-}
-
-namespace Resource
-{
-    class ResourceSystem;
-}
-
 namespace MWGui
 {
     class RaceDialog : public WindowModal
     {
     public:
-        RaceDialog(osg::Group* parent, Resource::ResourceSystem* resourceSystem);
+        RaceDialog();
+        ~RaceDialog() override;
 
         enum Gender
         {
@@ -91,9 +82,6 @@ namespace MWGui
         void recountParts();
 
         void getBodyParts(int part, std::vector<ESM::RefId>& out);
-
-        osg::Group* mParent;
-        Resource::ResourceSystem* mResourceSystem;
 
         std::vector<ESM::RefId> mAvailableHeads;
         std::vector<ESM::RefId> mAvailableHairs;

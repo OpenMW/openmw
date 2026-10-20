@@ -21,6 +21,11 @@ namespace osg
     class StateSet;
 }
 
+namespace MyGUI
+{
+    class ITexture;
+}
+
 namespace MWRender
 {
 
@@ -42,9 +47,7 @@ namespace MWRender
 
         void rebuild();
 
-        osg::ref_ptr<osg::Texture2D> getTexture();
-        /// Get the osg::StateSet required to render the texture correctly, if any.
-        osg::StateSet* getTextureStateSet() { return mTextureStateSet; }
+        std::unique_ptr<MyGUI::ITexture> makeGuiTexture();
 
     private:
         CharacterPreview(const CharacterPreview&);

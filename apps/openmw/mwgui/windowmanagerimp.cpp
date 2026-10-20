@@ -342,8 +342,7 @@ namespace MWGui
         mWindows.push_back(std::move(statsWindow));
         trackWindow(mStatsWindow, makeStatsWindowSettingValues());
 
-        auto inventoryWindow = std::make_unique<InventoryWindow>(
-            *mDragAndDrop, *mItemTransfer, mViewer->getSceneData()->asGroup(), mResourceSystem);
+        auto inventoryWindow = std::make_unique<InventoryWindow>(*mDragAndDrop, *mItemTransfer);
         mInventoryWindow = inventoryWindow.get();
         mWindows.push_back(std::move(inventoryWindow));
 
@@ -531,7 +530,7 @@ namespace MWGui
 
         mHud->setVisible(true);
 
-        mCharGen = std::make_unique<CharacterCreation>(mViewer->getSceneData()->asGroup(), mResourceSystem);
+        mCharGen = std::make_unique<CharacterCreation>();
 
         updatePinnedWindows();
 
@@ -557,7 +556,7 @@ namespace MWGui
             disallowAll();
 
             mStatsWatcher->removeListener(mCharGen.get());
-            mCharGen = std::make_unique<CharacterCreation>(mViewer->getSceneData()->asGroup(), mResourceSystem);
+            mCharGen = std::make_unique<CharacterCreation>();
             mStatsWatcher->addListener(mCharGen.get());
         }
         else

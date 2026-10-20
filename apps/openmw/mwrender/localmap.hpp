@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <set>
 #include <vector>
 
@@ -10,6 +11,11 @@
 #include <osg/BoundingBox>
 #include <osg/Quat>
 #include <osg/ref_ptr>
+
+namespace MyGUI
+{
+    class ITexture;
+}
 
 namespace MWWorld
 {
@@ -61,7 +67,11 @@ namespace MWRender
 
         osg::ref_ptr<osg::Texture2D> getMapTexture(int x, int y);
 
-        osg::ref_ptr<osg::Texture2D> getFogOfWarTexture(int x, int y);
+        /// Return nullptr if the segment has no map texture yet.
+        std::unique_ptr<MyGUI::ITexture> makeMapGuiTexture(int x, int y);
+
+        /// Return nullptr if the segment has no fog of war texture.
+        std::unique_ptr<MyGUI::ITexture> makeFogOfWarGuiTexture(int x, int y);
 
         /**
          * Removes cameras that have already been rendered. Should be called every frame to ensure that
