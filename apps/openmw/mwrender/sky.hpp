@@ -79,7 +79,7 @@ namespace MWRender
 
         float getPrecipitationAlpha() const;
 
-        void setStormParticleDirection(const osg::Vec3f& direction);
+        osg::Vec3f getStormParticleDirection() const { return mStormParticleDirection; }
 
         void setSunDirection(const osg::Vec3f& direction);
 

@@ -55,21 +55,6 @@ namespace MWWorld
             float magnitude = numerator != 0.0f ? std::numeric_limits<float>::max() : 0.0f;
             return std::signbit(numerator) != std::signbit(divisor) ? -magnitude : magnitude;
         }
-
-        osg::Vec3f calculateStormDirection(VFS::Path::NormalizedView particleEffect)
-        {
-            osg::Vec3f stormDirection = MWWorld::Weather::defaultDirection();
-            if (particleEffect == Settings::models().mWeatherashcloud.get()
-                || particleEffect == Settings::models().mWeatherblightcloud.get())
-            {
-                osg::Vec3f playerPos = MWMechanics::getPlayer().getRefData().getPosition().asVec3();
-                playerPos.z() = 0;
-                osg::Vec3f redMountainPos = osg::Vec3f(25000.f, 70000.f, 0.f);
-                stormDirection = (playerPos - redMountainPos);
-                stormDirection.normalize();
-            }
-            return stormDirection;
-        }
     }
 
     template <typename T>
@@ -765,7 +750,6 @@ namespace MWWorld
         , mNextWindSpeed(0.f)
         , mIsStorm(false)
         , mPrecipitation(false)
-        , mStormDirection(Weather::defaultDirection())
         , mCurrentRegion()
         , mTimePassed(0)
         , mFastForward(false)
@@ -945,9 +929,6 @@ namespace MWWorld
         mPrecipitation = !(result.mParticleEffect.empty() && result.mRainEffect.empty())
             && result.mParticleEffect != Settings::models().mWeatherashcloud.get();
 
-        mStormDirection = calculateStormDirection(result.mParticleEffect);
-        mRendering.getSkyManager()->setStormParticleDirection(mStormDirection);
-
         // disable sun during night
         if (time.getHour() >= mTimeSettings.mNightStart || time.getHour() <= mSunriseTime)
             mRendering.getSkyManager()->sunDisable();
@@ -1082,11 +1063,6 @@ namespace MWWorld
     bool WeatherManager::isInStorm() const
     {
         return mIsStorm;
-    }
-
-    osg::Vec3f WeatherManager::getStormDirection() const
-    {
-        return mStormDirection;
     }
 
     void WeatherManager::advanceTime(double hours, bool incremental)
@@ -1448,7 +1424,9 @@ namespace MWWorld
         else
             result.mSunDiscColor.a() = 1;
 
-        result.mStormDirection = calculateStormDirection(result.mParticleEffect);
+        result.mStormDirection = current.mStormDirection;
+        result.mStormDirection.normalize();
+        result.mStormParticleDirection = result.mStormDirection;
         return result;
     }
 
@@ -1495,6 +1473,7 @@ namespace MWWorld
         {
             result.mIsStorm = current.mIsStorm;
             result.mParticleEffect = current.mParticleEffect;
+            result.mStormParticleDirection = current.mStormParticleDirection;
             result.mRainEffect = current.mRainEffect;
             result.mRainSpeed = current.mRainSpeed;
             result.mRainEntranceSpeed = current.mRainEntranceSpeed;
@@ -1511,6 +1490,7 @@ namespace MWWorld
         {
             result.mIsStorm = other.mIsStorm;
             result.mParticleEffect = other.mParticleEffect;
+            result.mStormParticleDirection = other.mStormParticleDirection;
             result.mRainEffect = other.mRainEffect;
             result.mRainSpeed = other.mRainSpeed;
             result.mRainEntranceSpeed = other.mRainEntranceSpeed;

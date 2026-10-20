@@ -632,6 +632,7 @@ namespace MWRender
 
     void SkyManager::setWeather(const WeatherResult& weather)
     {
+        mStormParticleDirection = weather.mStormParticleDirection;
         if (!mCreated)
             return;
 
@@ -867,11 +868,6 @@ namespace MWRender
             return;
 
         mSun->setVisible(false);
-    }
-
-    void SkyManager::setStormParticleDirection(const osg::Vec3f& direction)
-    {
-        mStormParticleDirection = direction;
     }
 
     void SkyManager::setSunDirection(const osg::Vec3f& direction)
