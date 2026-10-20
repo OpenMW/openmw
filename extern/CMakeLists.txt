@@ -130,7 +130,7 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
     include(FetchContent)
     FetchContent_Declare(osg
         URL https://github.com/OpenMW/osg/archive/9b384d5439977784e5cd250ff8ff7966928ddd27.zip
-        URL_HASH SHA512=ec9c0975e1d70a30fe68695c7a87cdbe86f69592488c77ece8222c6f089c7ac45b118616c8b6c045e74baf9ee8338243fc46c35d458a5ea4d98f1cea64fb44d6
+        URL_HASH SHA512=3d3db3b735658bfe743b82aa2fc1892bc5eb6a7da324ee55f7d0f980472fdcc76c80c4afd2e3361e84e933d088baf12a14c9d48fb21708f42f4d11ba2a82a171
         SOURCE_DIR fetched/osg
     )
     FetchContent_MakeAvailable(osg)
