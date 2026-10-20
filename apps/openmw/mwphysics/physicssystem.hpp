@@ -13,8 +13,8 @@
 
 #include <osg/BoundingBox>
 #include <osg/Quat>
-#include <osg/Timer>
 
+#include <components/misc/framestats.hpp>
 #include <components/vfs/pathutil.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -25,7 +25,6 @@
 namespace osg
 {
     class Object;
-    class Stats;
 }
 
 namespace Resource
@@ -195,8 +194,8 @@ namespace MWPhysics
         bool toggleCollisionMode();
 
         /// Determine new position based on all queued movements, then clear the list.
-        void stepSimulation(
-            float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+        void stepSimulation(float dt, bool skipSimulation, Misc::FrameClock::time_point statsEpoch,
+            unsigned int frameNumber, Misc::FrameStats& stats);
 
         /// Apply new positions to actors
         void moveActors();
@@ -286,7 +285,7 @@ namespace MWPhysics
         bool isAreaOccupiedByOtherActor(
             const MWWorld::LiveCellRefBase* actor, const osg::Vec3f& position, float radius) const;
 
-        void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
+        void reportStats(unsigned int frameNumber, Misc::FrameStats& stats) const;
         void reportCollision(const btVector3& position, const btVector3& normal);
 
         float mPhysicsDt;

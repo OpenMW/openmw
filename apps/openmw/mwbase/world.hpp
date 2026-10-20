@@ -29,7 +29,11 @@ namespace osg
     class Vec4f;
     class Matrixf;
     class Quat;
-    class Stats;
+}
+
+namespace Misc
+{
+    class FrameStats;
 }
 
 namespace Loading
@@ -599,7 +603,7 @@ namespace MWBase
 
         virtual bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& position) const = 0;
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
+        virtual void reportStats(unsigned int frameNumber, Misc::FrameStats& stats) const = 0;
 
         virtual std::vector<MWWorld::Ptr> getAll(const ESM::RefId& id) = 0;
 
