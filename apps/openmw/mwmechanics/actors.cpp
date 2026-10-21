@@ -2432,7 +2432,7 @@ namespace MWMechanics
     const std::set<MWWorld::Ptr>& SidingCache::getActorsSidingWith(const MWWorld::Ptr& actor)
     {
         // If we have already found actor's allies, use the cache
-        auto search = mCache.find(actor);
+        const auto search = mCache.find(actor);
         if (search != mCache.end())
             return search->second;
         std::set<MWWorld::Ptr>& out = mCache[actor];
@@ -2450,9 +2450,7 @@ namespace MWMechanics
         {
             if (iter == actor)
                 continue;
-            search = mCache.find(iter);
-            if (search == mCache.end())
-                mCache.emplace(iter, out);
+            mCache[iter].insert(out.begin(), out.end());
         }
         return out;
     }
