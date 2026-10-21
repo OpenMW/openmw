@@ -431,8 +431,8 @@ namespace MWPhysics
             actor.mInertia = osg::Vec3f(0.f, 0.f, 0.f);
         else
         {
-            constexpr float maxFallingSpeed = -4005.5f; // Morrowind max falling speed
-            actor.mInertia.z() = std::max(actor.mInertia.z() - time * Constants::GravityUnits, maxFallingSpeed);
+            actor.mInertia.z()
+                = std::max(actor.mInertia.z() - time * Constants::GravityUnits, Constants::MaxFallingSpeed);
             if (actor.mInertia.z() < 0)
                 actor.mInertia.z() *= actor.mSlowFall;
             if (actor.mSlowFall < 1.f)
