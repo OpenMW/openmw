@@ -458,6 +458,14 @@ namespace MWRender
         /// @note The matching is case-insensitive.
         const osg::Node* getNode(std::string_view name) const;
 
+        bool hasNode(std::string_view name) const { return getNode(name) != nullptr; }
+
+        /// Return the world transform of the node with the specified name, or nothing if not existing.
+        std::optional<osg::Matrixf> getNodeWorldTransform(std::string_view name) const;
+
+        /// Return the world transform of the head: the "Head" node if there is one, otherwise "Bip01 Head".
+        std::optional<osg::Matrixf> getHeadWorldTransform() const;
+
         MWWorld::MovementDirectionFlags getSupportedMovementDirections(
             std::span<const std::string_view> prefixes) const;
 

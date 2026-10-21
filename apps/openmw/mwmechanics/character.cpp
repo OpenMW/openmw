@@ -3123,8 +3123,7 @@ namespace MWMechanics
 
     void CharacterController::updateHeadTracking(float duration)
     {
-        const osg::Node* head = mAnimation->getNode("Bip01 Head");
-        if (!head)
+        if (!mAnimation->hasNode("Bip01 Head"))
             return;
 
         float zAngleRadians = 0.f;
@@ -3132,24 +3131,13 @@ namespace MWMechanics
 
         if (!mHeadTrackTarget.isEmpty())
         {
-            osg::NodePathList nodepaths = head->getParentalNodePaths();
-            if (nodepaths.empty())
-                return;
-            osg::Matrixf mat = osg::computeLocalToWorld(nodepaths[0]);
-            osg::Vec3f headPos = mat.getTrans();
+            const osg::Vec3f headPos = mAnimation->getNodeWorldTransform("Bip01 Head")->getTrans();
 
             osg::Vec3f direction;
             if (const MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mHeadTrackTarget))
             {
-                const osg::Node* node = anim->getNode("Head");
-                if (node == nullptr)
-                    node = anim->getNode("Bip01 Head");
-                if (node != nullptr)
-                {
-                    nodepaths = node->getParentalNodePaths();
-                    if (!nodepaths.empty())
-                        direction = osg::computeLocalToWorld(nodepaths[0]).getTrans() - headPos;
-                }
+                if (const std::optional<osg::Matrixf> targetHead = anim->getHeadWorldTransform())
+                    direction = targetHead->getTrans() - headPos;
                 else
                     // no head node to look at, fall back to look at center of collision box
                     direction = MWBase::Environment::get().getWorld()->aimToTarget(mPtr, mHeadTrackTarget, false);

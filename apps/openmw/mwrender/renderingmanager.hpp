@@ -191,6 +191,10 @@ namespace MWRender
         /// Get normalized screen coordinates of the bounding box's summit, where (0,0) is the top left corner
         osg::Vec2f getScreenCoords(const osg::BoundingBox& bb);
 
+        /// Get the bounding box of the object's scene graph, leaving out nodes in ignoreMask. Invalid if the object
+        /// is not in the scene.
+        osg::BoundingBox getObjectBounds(const MWWorld::Ptr& ptr, unsigned int ignoreMask) const;
+
         void setSkyEnabled(bool enabled);
 
         bool toggleRenderMode(RenderMode mode);

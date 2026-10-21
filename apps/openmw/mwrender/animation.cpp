@@ -1860,6 +1860,22 @@ namespace MWRender
             return found->second;
     }
 
+    std::optional<osg::Matrixf> Animation::getNodeWorldTransform(std::string_view name) const
+    {
+        const osg::Node* node = getNode(name);
+        if (node == nullptr)
+            return std::nullopt;
+        // Never empty: a node without parents still yields the path to itself
+        return osg::computeLocalToWorld(node->getParentalNodePaths()[0]);
+    }
+
+    std::optional<osg::Matrixf> Animation::getHeadWorldTransform() const
+    {
+        if (std::optional<osg::Matrixf> transform = getNodeWorldTransform("Head"))
+            return transform;
+        return getNodeWorldTransform("Bip01 Head");
+    }
+
     void Animation::setAlpha(float actorFade, float alpha)
     {
         if ((alpha == mAlpha && actorFade == mActorFade) || !mObjectRoot)
