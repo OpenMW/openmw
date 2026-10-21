@@ -105,14 +105,15 @@ namespace MWLua
 
     void setGlobalVariableValue(const std::string_view globalId, float value)
     {
-        char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
+        const std::string name = Misc::StringUtils::lowerCase(globalId);
+        char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(name);
         if (varType == 'f')
         {
-            MWBase::Environment::get().getWorld()->setGlobalFloat(globalId, value);
+            MWBase::Environment::get().getWorld()->setGlobalFloat(name, value);
         }
         else if (varType == 's' || varType == 'l')
         {
-            MWBase::Environment::get().getWorld()->setGlobalInt(globalId, static_cast<int>(value));
+            MWBase::Environment::get().getWorld()->setGlobalInt(name, static_cast<int>(value));
         }
     }
 
