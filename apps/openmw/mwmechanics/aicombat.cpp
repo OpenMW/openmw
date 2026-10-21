@@ -148,7 +148,6 @@ namespace MWMechanics
 
         if (!storage.isFleeing())
         {
-            const ESM::Weapon* weapon = nullptr;
             bool isRangedCombat = false;
 
             if (storage.mCurrentAction.get()) // need to wait to init action with its attack range
@@ -165,9 +164,7 @@ namespace MWMechanics
                 if (isTargetReached)
                     storage.mReadyToAttack = true;
 
-                weapon = storage.mCurrentAction->getWeapon();
                 storage.mCurrentAction->getCombatRange(isRangedCombat);
-
                 if (!isRangedCombat && storage.mShouldApproach && storage.mReadyToAttack)
                 {
                     if (getDistanceToBounds(actor, target) > 64.f)
@@ -199,7 +196,7 @@ namespace MWMechanics
                     return false;
             }
 
-            storage.updateAttack(actor, characterController, weapon, isRangedCombat, duration);
+            storage.updateAttack(actor, characterController);
         }
         else
         {
@@ -285,6 +282,9 @@ namespace MWMechanics
         float& rangeAttack = storage.mAttackRange;
         rangeAttack = currentAction->getCombatRange(isRangedCombat);
 
+        // Get weapon characteristics
+        const ESM::Weapon* weapon = currentAction->getWeapon();
+
         ESM::Position pos = actor.getRefData().getPosition();
         const osg::Vec3f vActorPos(pos.asVec3());
         const osg::Vec3f vTargetPos(target.getRefData().getPosition().asVec3());
@@ -296,6 +296,8 @@ namespace MWMechanics
         if (storage.mReadyToAttack)
         {
             storage.startCombatMove(isRangedCombat, distToTarget, rangeAttack, actor, target);
+            // start new attack
+            storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);
         }
         else
         {
@@ -654,23 +656,15 @@ namespace MWMechanics
         mCombatMove = false;
     }
 
-    void AiCombatStorage::updateAttack(const MWWorld::Ptr& actor, CharacterController& characterController,
-        const ESM::Weapon* weapon, bool distantCombat, float duration)
+    void AiCombatStorage::startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController,
+        const ESM::Weapon* weapon, bool distantCombat)
     {
-        const MWWorld::Class& actorClass = actor.getClass();
-        MWMechanics::CreatureStats& actorStats = actorClass.getCreatureStats(actor);
-
-        if (mAttack)
-        {
-            float attackStrength = characterController.calculateWindUp();
-            if (characterController.readyToPrepareAttack() || attackStrength >= mStrength || attackStrength == -1.f)
-                mAttack = false;
-        }
-        else if (mReadyToAttack && characterController.readyToStartAttack())
+        if (mReadyToAttack && characterController.readyToStartAttack())
         {
             if (mAttackCooldown <= 0)
             {
                 mAttack = true; // attack starts just now
+                actor.getClass().getCreatureStats(actor).setAttackingOrSpell(true);
 
                 if (!distantCombat)
                     characterController.setAIAttackType(chooseBestAttack(weapon));
@@ -700,22 +694,24 @@ namespace MWMechanics
                     }
                 }
 
-                if (mCurrentAction->getActionCooldown() > 0.f)
-                {
-                    mAttackCooldown = mCurrentAction->getActionCooldown();
-                }
-                else
-                {
-                    std::string_view delayGmst = actor.getClass().isNpc() ? "fCombatDelayNPC" : "fCombatDelayCreature";
-                    const float baseDelay = store.get<ESM::GameSetting>().find(delayGmst)->mValue.getFloat();
-                    mAttackCooldown = std::min(baseDelay + 0.01f * Misc::Rng::roll0to99(prng), baseDelay + 0.9f);
-                }
+                std::string_view delayGmst = actor.getClass().isNpc() ? "fCombatDelayNPC" : "fCombatDelayCreature";
+                const float baseDelay = store.get<ESM::GameSetting>().find(delayGmst)->mValue.getFloat();
+                mAttackCooldown = std::min(baseDelay + 0.01f * Misc::Rng::roll0to99(prng), baseDelay + 0.9f);
             }
             else
-                mAttackCooldown -= duration;
+                mAttackCooldown -= AI_REACTION_TIME;
         }
+    }
 
-        actorStats.setAttackingOrSpell(mAttack);
+    void AiCombatStorage::updateAttack(const MWWorld::Ptr& actor, CharacterController& characterController)
+    {
+        if (mAttack)
+        {
+            float attackStrength = characterController.calculateWindUp();
+            mAttack
+                = !characterController.readyToPrepareAttack() && attackStrength < mStrength && attackStrength != -1.f;
+        }
+        actor.getClass().getCreatureStats(actor).setAttackingOrSpell(mAttack);
     }
 
     void AiCombatStorage::stopAttack()
