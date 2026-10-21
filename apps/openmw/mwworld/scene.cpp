@@ -6,6 +6,8 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
+#include <osg/ref_ptr>
+
 #include <components/debug/debuglog.hpp>
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/detournavigator/debug.hpp>

@@ -3,7 +3,6 @@
 
 #include <osg/Vec2i>
 #include <osg/Vec4i>
-#include <osg/ref_ptr>
 
 #include "positioncellgrid.hpp"
 #include "ptr.hpp"

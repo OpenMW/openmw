@@ -8,8 +8,6 @@
 #include <string>
 
 #include <osg/BoundingBox>
-#include <osg/Referenced>
-#include <osg/ref_ptr>
 
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 
