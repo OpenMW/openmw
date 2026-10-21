@@ -22,6 +22,7 @@
 #include "stepper.hpp"
 #include "trace.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace MWPhysics
@@ -430,7 +431,8 @@ namespace MWPhysics
             actor.mInertia = osg::Vec3f(0.f, 0.f, 0.f);
         else
         {
-            actor.mInertia.z() -= time * Constants::GravityUnits;
+            constexpr float maxFallingSpeed = -4005.5f; // Morrowind max falling speed
+            actor.mInertia.z() = std::max(actor.mInertia.z() - time * Constants::GravityUnits, maxFallingSpeed);
             if (actor.mInertia.z() < 0)
                 actor.mInertia.z() *= actor.mSlowFall;
             if (actor.mSlowFall < 1.f)
