@@ -451,7 +451,7 @@ Game Settings
    :location: :bdg-success:`Launcher > Settings > Gameplay`
 
    Collision is used for both physics simulation and navigation mesh generation for pathfinding.
-   Cylinder gives the best consistency bewtween available navigation paths and ability to move by them.
+   Cylinder gives the best consistency between available navigation paths and ability to move by them.
    Changing this value affects navigation mesh generation therefore navigation mesh disk cache generated for one value
    will not be useful with another.
 
