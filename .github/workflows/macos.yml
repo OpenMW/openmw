@@ -34,6 +34,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1.2.22
       with:
         key: ${{ inputs.image }}-${{ inputs.build-type }}
+        install: binary
         max-size: 1000M
 
     - name: Configure
