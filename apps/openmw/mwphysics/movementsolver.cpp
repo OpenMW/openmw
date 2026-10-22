@@ -22,6 +22,7 @@
 #include "stepper.hpp"
 #include "trace.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace MWPhysics
@@ -433,12 +434,14 @@ namespace MWPhysics
             actor.mInertia.z() -= time * Constants::GravityUnits;
             if (actor.mInertia.z() < 0)
                 actor.mInertia.z() *= actor.mSlowFall;
+            actor.mInertia.z() = std::max(actor.mInertia.z(), Constants::MaxFallSpeed);
             if (actor.mSlowFall < 1.f)
             {
                 actor.mInertia.x() *= actor.mSlowFall;
                 actor.mInertia.y() *= actor.mSlowFall;
             }
         }
+
         actor.mIsOnGround = isOnGround;
         actor.mIsOnSlope = isOnSlope;
 

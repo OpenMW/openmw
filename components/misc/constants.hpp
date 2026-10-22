@@ -23,6 +23,9 @@ namespace Constants
     constexpr float GravityMetric = 9.8f;
     constexpr float GravityUnits = GravityMetric * UnitsPerYard;
 
+    // Morrowind max falling speed
+    constexpr float MaxFallSpeed = -4005.5f;
+
     // Size of one exterior cell in game units
     constexpr int CellSizeInUnits = 8192;
     constexpr int ESM4CellSizeInUnits = 4096;
