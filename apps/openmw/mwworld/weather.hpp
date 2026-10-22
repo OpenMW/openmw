@@ -173,6 +173,7 @@ namespace MWWorld
         osg::Vec4f mSunDiscSunsetColor;
 
         osg::Vec3f mStormDirection;
+        osg::Vec3f mStormParticleRotation;
         int mScriptId;
 
         // Used by scripts to animate signs, etc based on the wind (GetWindSpeed)
@@ -246,6 +247,8 @@ namespace MWWorld
         // - Slower movement when walking against the storm (fStromWalkMult)
         bool mIsStorm;
         bool mRipplesEnabled;
+        bool mUseTorches;
+        bool mOcclusionEnabled;
     };
 
     class WeatherStore;
@@ -449,7 +452,7 @@ namespace MWWorld
         float mCurrentWindSpeed;
         float mNextWindSpeed;
         bool mIsStorm;
-        bool mPrecipitation;
+        bool mUseTorches;
 
         ESM::RefId mCurrentRegion;
         float mTimePassed;

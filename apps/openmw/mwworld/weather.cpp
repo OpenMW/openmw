@@ -219,6 +219,16 @@ namespace MWWorld
             = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
         if (mAmbientLoopSoundID == "None")
             mAmbientLoopSoundID = ESM::RefId();
+
+        // Morrowind deliberately rotates the blizzard mesh, so so should we.
+        if (mParticleEffect == Settings::models().mWeatherblizzard.get())
+            mStormParticleRotation = osg::Vec3f(-1, 0, 0);
+        else
+            mStormParticleRotation = Weather::defaultDirection();
+        // For some reason Ash Storm is not considered as a precipitation weather in game
+        mUseTorches = (mRainEffect.empty() && mParticleEffect.empty())
+            || mParticleEffect == Settings::models().mWeatherashcloud.get();
+        mOcclusionEnabled = !mRainEffect.empty() || mParticleEffect == Settings::models().mWeathersnow.get();
     }
 
     float Weather::transitionDelta() const
@@ -753,7 +763,7 @@ namespace MWWorld
         , mCurrentWindSpeed(0.f)
         , mNextWindSpeed(0.f)
         , mIsStorm(false)
-        , mPrecipitation(false)
+        , mUseTorches(true)
         , mCurrentRegion()
         , mTimePassed(0)
         , mFastForward(false)
@@ -928,10 +938,7 @@ namespace MWWorld
         }
 
         mIsStorm = result.mIsStorm;
-
-        // For some reason Ash Storm is not considered as a precipitation weather in game
-        mPrecipitation = !(result.mParticleEffect.empty() && result.mRainEffect.empty())
-            && result.mParticleEffect != Settings::models().mWeatherashcloud.get();
+        mUseTorches = result.mUseTorches;
 
         // disable sun during night
         if (time.getHour() >= mTimeSettings.mNightStart || time.getHour() <= mSunriseTime)
@@ -1086,7 +1093,7 @@ namespace MWWorld
     {
         bool isDark = hour < mSunriseTime || hour > mTimeSettings.mNightStart;
 
-        return isDark && !mPrecipitation;
+        return isDark && mUseTorches;
     }
 
     float WeatherManager::getSunPercentage(float hour) const
@@ -1431,14 +1438,10 @@ namespace MWWorld
         result.mStormDirection = current.mStormDirection;
         result.mStormDirection.normalize();
         result.mStormParticleDirection = result.mStormDirection;
-        // Morrowind deliberately rotates the blizzard mesh, so so should we.
-        if (result.mParticleEffect == Settings::models().mWeatherblizzard.get())
-            result.mStormParticleRotation = osg::Vec3f(-1, 0, 0);
-        else
-            result.mStormParticleRotation = Weather::defaultDirection();
-        result.mOcclusionEnabled
-            = !result.mRainEffect.empty() || result.mParticleEffect == Settings::models().mWeathersnow.get();
+        result.mStormParticleRotation = current.mStormParticleRotation;
+        result.mOcclusionEnabled = current.mOcclusionEnabled;
         result.mRipplesEnabled = current.mRipplesEnabled;
+        result.mUseTorches = current.mUseTorches;
         return result;
     }
 
@@ -1500,6 +1503,7 @@ namespace MWWorld
             result.mRainMaxRaindrops = current.mRainMaxRaindrops;
             result.mOcclusionEnabled = current.mOcclusionEnabled;
             result.mRipplesEnabled = current.mRipplesEnabled;
+            result.mUseTorches = current.mUseTorches;
         }
         else
         {
@@ -1521,6 +1525,7 @@ namespace MWWorld
             result.mRainMaxRaindrops = other.mRainMaxRaindrops;
             result.mOcclusionEnabled = other.mOcclusionEnabled;
             result.mRipplesEnabled = other.mRipplesEnabled;
+            result.mUseTorches = other.mUseTorches;
         }
         return result;
     }

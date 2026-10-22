@@ -76,6 +76,7 @@ namespace MWRender
         bool mIsStorm{};
         bool mOcclusionEnabled{};
         bool mRipplesEnabled{};
+        bool mUseTorches{};
     };
 
     struct MoonState
