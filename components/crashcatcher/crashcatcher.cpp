@@ -220,8 +220,6 @@ namespace
                 if (url.empty())
                     return;
 
-                // duplicates are removed automatically if the debuginfod client includes a commit from July 2021,
-                // so we might not need this check
                 if (std::find(debuginfodUrls.begin(), debuginfodUrls.end(), url) == debuginfodUrls.end())
                 {
                     std::stringstream command;
@@ -230,13 +228,19 @@ namespace
                     // user machines, we may be able to remove this
                     command << "curl --max-time 3 --silent '" << url << "' -o /dev/null";
                     auto ret = system(command.str().c_str());
-                    if (ret == 0)
+                    if (WIFEXITED(ret) && WEXITSTATUS(ret) == 127)
+                    {
+                        command.clear();
+                        command << "wget --timeout=3 --tries=1 --quiet -O /dev/null '" << url << "'";
+                        ret = system(command.str().c_str());
+                        if (WIFEXITED(ret) && WEXITSTATUS(ret) == 127)
+                            ret = 0;
+                    }
+                    if (WEXITSTATUS(ret) == 0)
                         debuginfodUrls.emplace_back(url);
                     else
                         printf("Skipping %s as it took too long to respond.\n", std::string(url).c_str());
                 }
-                else
-                    printf("Skipping %s as it is a duplicate.\n", std::string(url).c_str());
             };
 #ifdef EXTRA_DEBUGINFOD_URLS
             std::istringstream extraDebuginfodUrls(EXTRA_DEBUGINFOD_URLS);
