@@ -64,8 +64,9 @@ namespace MWMechanics
             const MWWorld::Ptr& target);
         void updateCombatMove(float duration);
         void stopCombatMove();
-        void updateAttack(const MWWorld::Ptr& actor, CharacterController& characterController,
-            const ESM::Weapon* weapon, bool distantCombat, float duration);
+        void startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController,
+            const ESM::Weapon* weapon, bool distantCombat);
+        void updateAttack(const MWWorld::Ptr& actor, CharacterController& characterController);
         void stopAttack();
 
         void startFleeing();

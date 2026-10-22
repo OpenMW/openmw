@@ -14,7 +14,6 @@
     Bug #6912: Default terrain rendering is broken
     Bug #7029: Debug overlay does not work for underwater areas when water refraction is enabled
     Bug #7176: Post-processing normals are too imprecise for reflection effects
-    Bug #7776: Combat AI movement is not very responsive
     Bug #7853: Water refraction depth loses precision at far distances
     Bug #8134: Convert NiLODNode ranges so they don't overlap
     Bug #8257: Centurion Spider cannot self-heal with a spell
