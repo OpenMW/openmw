@@ -110,6 +110,14 @@ namespace MWWorld
     class TimeOfDayInterpolator
     {
     public:
+        explicit TimeOfDayInterpolator()
+            : mSunriseValue()
+            , mDayValue()
+            , mSunsetValue()
+            , mNightValue()
+        {
+        }
+
         TimeOfDayInterpolator(const T& sunrise, const T& day, const T& sunset, const T& night)
             : mSunriseValue(sunrise)
             , mDayValue(day)
@@ -130,6 +138,14 @@ namespace MWWorld
         void setSunsetValue(const T& sunsetValue) { mSunsetValue = sunsetValue; }
         void setNightValue(const T& nightValue) { mNightValue = nightValue; }
 
+        void blank()
+        {
+            mSunriseValue = {};
+            mDayValue = {};
+            mSunsetValue = {};
+            mNightValue = {};
+        }
+
     private:
         T mSunriseValue, mDayValue, mSunsetValue, mNightValue;
     };
@@ -138,8 +154,11 @@ namespace MWWorld
     class Weather
     {
     public:
+        static std::string_view getRecordType() { return "Weather"; }
+
         static osg::Vec3f defaultDirection();
 
+        Weather() = default;
         Weather(const ESM::RefId id, const int scriptId, const std::string& name, float stormWindSpeed, float dlFactor,
             float dlOffset, VFS::Path::NormalizedView particleEffect);
 
@@ -214,16 +233,6 @@ namespace MWWorld
         float mRainMaxHeight;
 
         float mCloudsMaximumPercent;
-
-        // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
-        // is broken in the vanilla game and was disabled.
-
-        float transitionDelta() const;
-        float cloudBlendFactor(const float transitionRatio) const;
-
-        float calculateThunder(const float transitionRatio, const float elapsedSeconds, const bool isPaused);
-
-    private:
         float mTransitionDelta;
 
         // Note: In MW, only thunderstorms support these attributes, but in the interest of making weather more
@@ -233,6 +242,17 @@ namespace MWWorld
         float mThunderThreshold;
         float mFlashDecrement;
 
+        // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
+        // is broken in the vanilla game and was disabled.
+
+        float transitionDelta() const;
+        float cloudBlendFactor(const float transitionRatio) const;
+
+        float calculateThunder(const float transitionRatio, const float elapsedSeconds, const bool isPaused);
+
+        void blank();
+
+    private:
         float mFlashBrightness;
 
         void flashDecrement(const float elapsedSeconds);
@@ -345,6 +365,7 @@ namespace MWWorld
 
     class WeatherStore
     {
+        std::vector<Weather> mInitial;
         std::unordered_map<ESM::RefId, Weather> mStatic;
         std::vector<Weather*> mShared;
 
@@ -353,7 +374,7 @@ namespace MWWorld
         WeatherStore(const WeatherStore&) = delete;
         WeatherStore& operator=(const WeatherStore&) = delete;
 
-        void reset(const MWWorld::ESMStore& store);
+        void reset();
 
         size_t getSize() const { return mShared.size(); }
         const Weather* at(size_t index) const { return mShared.at(index); }
@@ -362,7 +383,7 @@ namespace MWWorld
         const Weather* find(ESM::RefId id) const;
         Weather* search(ESM::RefId id);
 
-        Weather* insertStatic(Weather&& item);
+        Weather* insertStatic(const Weather& item);
         void eraseStatic(ESM::RefId id);
 
         auto begin() const { return mShared.begin(); }

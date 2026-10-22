@@ -101,7 +101,7 @@ namespace MWRender
     {
         if (mWeather)
             return mWeather->mStormParticleRotation;
-        return {};
+        return MWWorld::Weather::defaultDirection();
     }
 
     VFS::Path::NormalizedView WeatherResult::getRainEffect() const

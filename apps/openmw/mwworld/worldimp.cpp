@@ -1785,7 +1785,7 @@ namespace MWWorld
         return ESM::Cell::sDefaultWorldspaceId;
     }
 
-    const MWWorld::WeatherStore& World::getAllWeather() const
+    MWWorld::WeatherStore& World::getAllWeather() const
     {
         return *mWeatherStore;
     }

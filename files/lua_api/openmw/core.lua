@@ -1552,6 +1552,14 @@
 -- @field #TimeOfDayInterpolatorColor ambientColor
 -- @field #TimeOfDayInterpolatorColor fogColor
 -- @field #TimeOfDayInterpolatorColor sunColor
+-- @field #number transitionDelta
+-- @field #number thunderFrequency
+-- @field #number thunderThreshold
+-- @field #number flashDecrement
+-- @field openmw.util#Vector3 stormParticleRotation
+-- @field #boolean hasRipples If true, creates ripples on water
+-- @field #boolean isOccluded Whether this weather's particle effect is affected by occlusion
+-- @field #boolean canUseTorches If false, actors will not take out their torches when it's dark
 
 ---
 -- Interpolates numbers for weathers based on time of day
