@@ -262,7 +262,7 @@ namespace
                     add(url);
                 }
             }
-            
+
             add("https://debuginfod.elfutils.org");
 
             std::stringstream debuginfodUrlsStream;
