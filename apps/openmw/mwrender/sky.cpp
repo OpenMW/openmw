@@ -616,19 +616,19 @@ namespace MWRender
         if (!mCreated)
             return;
 
-        mRainEntranceSpeed = weather.mRainEntranceSpeed;
-        mRainMaxRaindrops = weather.mRainMaxRaindrops;
-        mRainDiameter = weather.mRainDiameter;
-        mRainMinHeight = weather.mRainMinHeight;
-        mRainMaxHeight = weather.mRainMaxHeight;
-        mRainSpeed = weather.mRainSpeed;
+        mRainEntranceSpeed = weather.getRainEntranceSpeed();
+        mRainMaxRaindrops = weather.getRainMaxRaindrops();
+        mRainDiameter = weather.getRainDiameter();
+        mRainMinHeight = weather.getRainMinHeight();
+        mRainMaxHeight = weather.getRainMaxHeight();
+        mRainSpeed = weather.getRainSpeed();
         mWindSpeed = weather.mWindSpeed;
         mBaseWindSpeed = weather.mBaseWindSpeed;
-        mRipplesEnabled = weather.mRipplesEnabled;
+        mRipplesEnabled = weather.getRipplesEnabled();
 
-        if (mRainEffect != weather.mRainEffect)
+        if (mRainEffect != weather.getRainEffect())
         {
-            mRainEffect = weather.mRainEffect;
+            mRainEffect = weather.getRainEffect();
             if (!mRainEffect.empty())
             {
                 createRain();
@@ -641,15 +641,15 @@ namespace MWRender
 
         updateRainParameters();
 
-        mIsStorm = weather.mIsStorm;
+        mIsStorm = weather.getIsStorm();
 
         if (mIsStorm)
             mStormDirection = weather.mStormDirection;
 
-        if (mDirtyParticlesEffect || (mCurrentParticleEffect != weather.mParticleEffect))
+        if (mDirtyParticlesEffect || (mCurrentParticleEffect != weather.getParticleEffect()))
         {
             mDirtyParticlesEffect = false;
-            mCurrentParticleEffect = weather.mParticleEffect;
+            mCurrentParticleEffect = weather.getParticleEffect();
 
             // cleanup old particles
             if (mParticleEffect)
@@ -699,7 +699,7 @@ namespace MWRender
                         = static_cast<osgParticle::ParticleSystem*>(findPSVisitor.mFoundNodes[i]);
 
                     osg::ref_ptr<osgParticle::ModularProgram> program = new osgParticle::ModularProgram;
-                    if (weather.mOcclusionEnabled)
+                    if (weather.getOcclusionEnabled())
                         program->addOperator(new WrapAroundOperator(mCamera, defaultWrapRange));
                     program->addOperator(new WeatherAlphaOperator(mPrecipitationAlpha, false));
                     program->setParticleSystem(ps);
@@ -714,13 +714,13 @@ namespace MWRender
 
                     ps->setUserValue("simpleLighting", true);
 
-                    if (weather.mOcclusionEnabled)
+                    if (weather.getOcclusionEnabled())
                         ps->setUserValue("particleOcclusion", true);
                 }
 
                 mSceneManager->recreateShaders(mParticleNode);
 
-                if (mPrecipitationOcclusion && weather.mOcclusionEnabled)
+                if (mPrecipitationOcclusion && weather.getOcclusionEnabled())
                 {
                     mPrecipitationOccluder->enable();
                     mPrecipitationOccluder->updateRange(defaultWrapRange);
@@ -819,7 +819,7 @@ namespace MWRender
         if (mIsStorm && mParticleNode)
         {
             osg::Quat quat;
-            quat.makeRotate(weather.mStormParticleRotation, mStormParticleDirection);
+            quat.makeRotate(weather.getStormParticleRotation(), mStormParticleDirection);
             mParticleNode->setAttitude(quat);
         }
     }

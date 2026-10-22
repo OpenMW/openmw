@@ -21,6 +21,11 @@ namespace Resource
     class SceneManager;
 }
 
+namespace MWWorld
+{
+    class Weather;
+}
+
 namespace MWRender
 {
     struct MoonUpdater;
@@ -32,11 +37,6 @@ namespace MWRender
     {
         VFS::Path::NormalizedView mCloudTexture;
         VFS::Path::NormalizedView mNextCloudTexture;
-        VFS::Path::NormalizedView mParticleEffect;
-        VFS::Path::NormalizedView mRainEffect;
-
-        ESM::RefId mAmbientLoopSoundID;
-        ESM::RefId mRainLoopSoundID;
 
         osg::Vec4f mFogColor;
         osg::Vec4f mAmbientColor;
@@ -46,10 +46,11 @@ namespace MWRender
         // alpha is the sun transparency
         osg::Vec4f mSunDiscColor;
 
+        const MWWorld::Weather* mWeather{};
+
         osg::Vec3f mStormDirection;
-        osg::Vec3f mNextStormDirection;
         osg::Vec3f mStormParticleDirection;
-        osg::Vec3f mStormParticleRotation;
+        osg::Vec3f mNextStormDirection;
 
         float mCloudBlendFactor{};
         float mFogDepth{};
@@ -64,19 +65,24 @@ namespace MWRender
         float mNightFade{}; // fading factor for night skybox
         float mAmbientSoundVolume{};
         float mPrecipitationAlpha{};
-        float mRainDiameter{};
-        float mRainMinHeight{};
-        float mRainMaxHeight{};
-        float mRainSpeed{};
-        float mRainEntranceSpeed{};
-
-        int mRainMaxRaindrops{};
 
         bool mNight{}; // use night skybox
-        bool mIsStorm{};
-        bool mOcclusionEnabled{};
-        bool mRipplesEnabled{};
-        bool mUseTorches{};
+
+        VFS::Path::NormalizedView getParticleEffect() const;
+        osg::Vec3f getStormParticleRotation() const;
+        VFS::Path::NormalizedView getRainEffect() const;
+        float getRainSpeed() const;
+        float getRainEntranceSpeed() const;
+        ESM::RefId getAmbientLoopSoundID() const;
+        ESM::RefId getRainLoopSoundID() const;
+        float getRainDiameter() const;
+        float getRainMinHeight() const;
+        float getRainMaxHeight() const;
+        int getRainMaxRaindrops() const;
+        bool getIsStorm() const;
+        bool getOcclusionEnabled() const;
+        bool getRipplesEnabled() const;
+        bool getUseTorches() const;
     };
 
     struct MoonState

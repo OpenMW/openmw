@@ -33,6 +33,7 @@
 #include <components/sceneutil/statesetupdater.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwworld/weather.hpp"
 
 #include "renderbin.hpp"
 #include "vismask.hpp"
@@ -89,6 +90,111 @@ namespace
 
 namespace MWRender
 {
+    VFS::Path::NormalizedView WeatherResult::getParticleEffect() const
+    {
+        if (mWeather)
+            return mWeather->mParticleEffect;
+        return {};
+    }
+
+    osg::Vec3f WeatherResult::getStormParticleRotation() const
+    {
+        if (mWeather)
+            return mWeather->mStormParticleRotation;
+        return {};
+    }
+
+    VFS::Path::NormalizedView WeatherResult::getRainEffect() const
+    {
+        if (mWeather)
+            return mWeather->mRainEffect;
+        return {};
+    }
+
+    float WeatherResult::getRainSpeed() const
+    {
+        if (mWeather)
+            return mWeather->mRainSpeed;
+        return {};
+    }
+
+    float WeatherResult::getRainEntranceSpeed() const
+    {
+        if (mWeather)
+            return mWeather->mRainEntranceSpeed;
+        return {};
+    }
+
+    ESM::RefId WeatherResult::getAmbientLoopSoundID() const
+    {
+        if (mWeather)
+            return mWeather->mAmbientLoopSoundID;
+        return {};
+    }
+
+    ESM::RefId WeatherResult::getRainLoopSoundID() const
+    {
+        if (mWeather)
+            return mWeather->mRainLoopSoundID;
+        return {};
+    }
+
+    float WeatherResult::getRainDiameter() const
+    {
+        if (mWeather)
+            return mWeather->mRainDiameter;
+        return {};
+    }
+
+    float WeatherResult::getRainMinHeight() const
+    {
+        if (mWeather)
+            return mWeather->mRainMinHeight;
+        return {};
+    }
+
+    float WeatherResult::getRainMaxHeight() const
+    {
+        if (mWeather)
+            return mWeather->mRainMaxHeight;
+        return {};
+    }
+
+    int WeatherResult::getRainMaxRaindrops() const
+    {
+        if (mWeather)
+            return mWeather->mRainMaxRaindrops;
+        return {};
+    }
+
+    bool WeatherResult::getIsStorm() const
+    {
+        if (mWeather)
+            return mWeather->mIsStorm;
+        return {};
+    }
+
+    bool WeatherResult::getOcclusionEnabled() const
+    {
+        if (mWeather)
+            return mWeather->mOcclusionEnabled;
+        return {};
+    }
+
+    bool WeatherResult::getRipplesEnabled() const
+    {
+        if (mWeather)
+            return mWeather->mRipplesEnabled;
+        return {};
+    }
+
+    bool WeatherResult::getUseTorches() const
+    {
+        if (mWeather)
+            return mWeather->mUseTorches;
+        return {};
+    }
+
     class SunUpdater : public SceneUtil::StateSetUpdater
     {
     public:

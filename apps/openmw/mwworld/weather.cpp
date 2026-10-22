@@ -937,8 +937,8 @@ namespace MWWorld
             mNextWindSpeed = result.mNextWindSpeed;
         }
 
-        mIsStorm = result.mIsStorm;
-        mUseTorches = result.mUseTorches;
+        mIsStorm = result.getIsStorm();
+        mUseTorches = result.getUseTorches();
 
         // disable sun during night
         if (time.getHour() >= mTimeSettings.mNightStart || time.getHour() <= mSunriseTime)
@@ -1004,32 +1004,32 @@ namespace MWWorld
         mRendering.getSkyManager()->setWeather(result);
 
         // Play sounds
-        if (mPlayingAmbientSoundID != result.mAmbientLoopSoundID)
+        if (mPlayingAmbientSoundID != result.getAmbientLoopSoundID())
         {
             if (mAmbientSound)
             {
                 MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
                 mAmbientSound = nullptr;
             }
-            if (!result.mAmbientLoopSoundID.empty())
-                mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(result.mAmbientLoopSoundID,
+            mPlayingAmbientSoundID = result.getAmbientLoopSoundID();
+            if (!mPlayingAmbientSoundID.empty())
+                mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(mPlayingAmbientSoundID,
                     result.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
-            mPlayingAmbientSoundID = result.mAmbientLoopSoundID;
         }
         else if (mAmbientSound)
             mAmbientSound->setVolume(result.mAmbientSoundVolume);
 
-        if (mPlayingRainSoundID != result.mRainLoopSoundID)
+        if (mPlayingRainSoundID != result.getRainLoopSoundID())
         {
             if (mRainSound)
             {
                 MWBase::Environment::get().getSoundManager()->stopSound(mRainSound);
                 mRainSound = nullptr;
             }
-            if (!result.mRainLoopSoundID.empty())
-                mRainSound = MWBase::Environment::get().getSoundManager()->playSound(result.mRainLoopSoundID,
-                    result.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
-            mPlayingRainSoundID = result.mRainLoopSoundID;
+            mPlayingRainSoundID = result.getRainLoopSoundID();
+            if (!mPlayingRainSoundID.empty())
+                mRainSound = MWBase::Environment::get().getSoundManager()->playSound(
+                    mPlayingRainSoundID, result.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
         }
         else if (mRainSound)
             mRainSound->setVolume(result.mAmbientSoundVolume);
@@ -1366,22 +1366,9 @@ namespace MWWorld
 
         result.mCloudSpeed = current.mCloudSpeed;
         result.mGlareView = current.mGlareView;
-        result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
-        result.mRainLoopSoundID = current.mRainLoopSoundID;
+        result.mWeather = &current;
         result.mAmbientSoundVolume = 1.f;
         result.mPrecipitationAlpha = 1.f;
-
-        result.mIsStorm = current.mIsStorm;
-
-        result.mRainSpeed = current.mRainSpeed;
-        result.mRainEntranceSpeed = current.mRainEntranceSpeed;
-        result.mRainDiameter = current.mRainDiameter;
-        result.mRainMinHeight = current.mRainMinHeight;
-        result.mRainMaxHeight = current.mRainMaxHeight;
-        result.mRainMaxRaindrops = current.mRainMaxRaindrops;
-
-        result.mParticleEffect = current.mParticleEffect;
-        result.mRainEffect = current.mRainEffect;
 
         result.mNight = (gameHour < mSunriseTime
             || gameHour
@@ -1438,10 +1425,6 @@ namespace MWWorld
         result.mStormDirection = current.mStormDirection;
         result.mStormDirection.normalize();
         result.mStormParticleDirection = result.mStormDirection;
-        result.mStormParticleRotation = current.mStormParticleRotation;
-        result.mOcclusionEnabled = current.mOcclusionEnabled;
-        result.mRipplesEnabled = current.mRipplesEnabled;
-        result.mUseTorches = current.mUseTorches;
         return result;
     }
 
@@ -1486,46 +1469,15 @@ namespace MWWorld
 
         if (factor < threshold)
         {
-            result.mIsStorm = current.mIsStorm;
-            result.mParticleEffect = current.mParticleEffect;
-            result.mStormParticleDirection = current.mStormParticleDirection;
-            result.mStormParticleRotation = current.mStormParticleRotation;
-            result.mRainEffect = current.mRainEffect;
-            result.mRainSpeed = current.mRainSpeed;
-            result.mRainEntranceSpeed = current.mRainEntranceSpeed;
+            result.mWeather = current.mWeather;
             result.mAmbientSoundVolume = 1.f - factor / threshold;
             result.mPrecipitationAlpha = result.mAmbientSoundVolume;
-            result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
-            result.mRainLoopSoundID = current.mRainLoopSoundID;
-            result.mRainDiameter = current.mRainDiameter;
-            result.mRainMinHeight = current.mRainMinHeight;
-            result.mRainMaxHeight = current.mRainMaxHeight;
-            result.mRainMaxRaindrops = current.mRainMaxRaindrops;
-            result.mOcclusionEnabled = current.mOcclusionEnabled;
-            result.mRipplesEnabled = current.mRipplesEnabled;
-            result.mUseTorches = current.mUseTorches;
         }
         else
         {
-            result.mIsStorm = other.mIsStorm;
-            result.mParticleEffect = other.mParticleEffect;
-            result.mStormParticleDirection = other.mStormParticleDirection;
-            result.mStormParticleRotation = other.mStormParticleRotation;
-            result.mRainEffect = other.mRainEffect;
-            result.mRainSpeed = other.mRainSpeed;
-            result.mRainEntranceSpeed = other.mRainEntranceSpeed;
+            result.mWeather = other.mWeather;
             result.mAmbientSoundVolume = (factor - threshold) / (1 - threshold);
             result.mPrecipitationAlpha = result.mAmbientSoundVolume;
-            result.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
-            result.mRainLoopSoundID = other.mRainLoopSoundID;
-
-            result.mRainDiameter = other.mRainDiameter;
-            result.mRainMinHeight = other.mRainMinHeight;
-            result.mRainMaxHeight = other.mRainMaxHeight;
-            result.mRainMaxRaindrops = other.mRainMaxRaindrops;
-            result.mOcclusionEnabled = other.mOcclusionEnabled;
-            result.mRipplesEnabled = other.mRipplesEnabled;
-            result.mUseTorches = other.mUseTorches;
         }
         return result;
     }
