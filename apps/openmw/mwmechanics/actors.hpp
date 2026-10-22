@@ -92,7 +92,7 @@ namespace MWMechanics
         void rest(double hours, bool sleep) const;
         ///< Update actors while the player is waiting or sleeping.
 
-        void updateSneaking(CharacterController* ctrl, float duration);
+        void updateSneaking(CharacterController* ctrl, float duration, SidingCache& cachedAllies);
         ///< Update the sneaking indicator state according to the given player character controller.
 
         void restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep) const;
