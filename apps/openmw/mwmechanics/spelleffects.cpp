@@ -620,7 +620,7 @@ namespace MWMechanics
             }
             else if (effect.mEffectId == ESM::MagicEffect::Soultrap)
             {
-                if (target.getClass().isNpc() || target.get<ESM::Creature>()->mBase->mData.mSoul == 0)
+                if (target.getClass().isNpc() || target.get<ESM::Creature>()->mBase->mData.mSoul <= 0)
                 {
                     if (caster == getPlayer())
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");
