@@ -35,7 +35,6 @@ namespace Launcher
         void slotAnimSourcesToggled(bool checked);
         void slotPostProcessToggled(bool checked);
         void slotSkyBlendingToggled(bool checked);
-        void slotShadowDistLimitToggled(bool checked);
         void slotDistantLandToggled(bool checked);
         void slotControllerMenusToggled(bool checked);
         void slotOpenFile(QTreeWidgetItem* item);

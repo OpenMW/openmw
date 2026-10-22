@@ -244,6 +244,13 @@ ObjectShadows: "Enable Object Shadows"
 ObjectShadowsTooltip: "Enable shadows for primarily inanimate objects. May have a significant performance impact."
 IndoorShadows: "Enable Indoor Shadows"
 IndoorShadowsTooltip: "Due to limitations with Morrowind's data, only actors can cast shadows indoors, which some might feel is distracting. Has no effect if actor/player shadows are not enabled."
+ShadowPlanesComputationMethod: "Shadow Planes Computation Method"
+ShadowPlanesComputationMethodTooltip: |-
+    Type of "compute scene bounds" computation method to be used. Bounds (default) for a good balance between performance and shadow quality, primitives for better-looking shadows or none for no computation.
+ShadowPlanesComputationMethodBounds: "Bounds"
+ShadowPlanesComputationMethodPrimitives: "Primitives"
+ShadowPlanesComputationMethodNone: "None"
+ShadowPlanesComputationMethodWarning: "Using the primitives method will severely impact performance and is not recommended for normal gameplay."
 ShadowMapResolution: "Shadow Map Resolution"
 ShadowMapResolutionTooltip: "The resolution of each individual shadow map. Increasing it significantly improves shadow quality but may have a minor performance impact."
 ShadowsMaxDistanceValue: "Shadow Distance Limit ({value, number, :: group-off})"

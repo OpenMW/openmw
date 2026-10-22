@@ -1035,70 +1035,6 @@ Les logs et préférences modifiées y seront sauvegardés.</translation>
         <translation>cellules</translation>
     </message>
     <message>
-        <source>Shadows</source>
-        <translation>Ombres</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of &quot;compute scene bounds&quot; computation method to be used. Bounds (default) for good balance between performance and shadow quality, primitives for better looking shadows or none for no computation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Type de méthode utilisée pour calculer de &quot;compute scene bound&quot; (limite de scène). Le choix &quot;bordures&quot; (par défaut) donne un bon équilibre entre qualité des ombres et performances, &quot;primitives&quot; pour un meilleur rendu ou &quot;aucun&quot; pour éviter ce calcul.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;64 game units is 1 real life yard or about 0.9 m&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;64 unités de jeu correspondent à 1 yard, c&apos;est-à-dire environ 0.9 m.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source> unit(s)</source>
-        <translation> unité(s)</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for NPCs and creatures besides the player character. May have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cette option affiche l&apos;ombre des PNJ et des créatures. Elle peut avoir un impact faible sur les performances.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>512</source>
-        <translation>512</translation>
-    </message>
-    <message>
-        <source>1024</source>
-        <translation>1024</translation>
-    </message>
-    <message>
-        <source>2048</source>
-        <translation>2048</translation>
-    </message>
-    <message>
-        <source>4096</source>
-        <translation>4096</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The fraction of the limit above at which shadows begin to gradually fade away.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Fraction de la limite ci-dessus à partir de laquelle les ombres commencent à disparaître.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows exclusively for the player character. May have a very minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Cette option affiche l&apos;ombre du personnage joueur. Elle pourrait avoir un impact très faible sur les performances.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The resolution of each individual shadow map. Increasing it significantly improves shadow quality but may have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;La résolution de chaque carte d&apos;ombre. Augmenter cette valeur, de façon importante, augmente la qualité des ombres, mais peut impliquer un impact mineur sur les performances.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The distance from the camera at which shadows completely disappear.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Distance à la caméra à partir de laquelle les ombres disparaissent entièrement.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for primarily inanimate objects. May have a significant performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cette option affiche l&apos;ombre des objets. Elle peut avoir un impact significative sur les performances.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Due to limitations with Morrowind&apos;s data, only actors can cast shadows indoors, which some might feel is distracting.&lt;/p&gt;&lt;p&gt;Has no effect if actor/player shadows are not enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;À cause de certaines limitations avec les données de Morrowind, seuls les personnages et les créatures peuvent projeter une ombre en intérieur, ceci peut déconcerter certains joueurs.&lt;/p&gt;&lt;p&gt;Cette option n&apos;a aucun effet si les ombres des PNJ/créature et du personnage joueur n&apos;ont pas été activées.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for the terrain including distant terrain. May have a significant performance and shadow quality impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cette option affiche l&apos;ombre des terrains. Elle peut avoir un impact faible sur les performances et la qualité des ombres.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Tooltip</source>
         <translation>Infobulles</translation>
     </message>
@@ -1299,42 +1235,6 @@ Les logs et préférences modifiées y seront sauvegardés.</translation>
         <translation>Activer le post-traitement</translation>
     </message>
     <message>
-        <source>Shadow Planes Computation Method</source>
-        <translation>Méthode de calcul pour les plans d&apos;ombre</translation>
-    </message>
-    <message>
-        <source>Enable Actor Shadows</source>
-        <translation>Ombre des PNJ/créatures</translation>
-    </message>
-    <message>
-        <source>Fade Start Multiplier</source>
-        <translation>Début de l&apos;atténuation (multiplicateur)</translation>
-    </message>
-    <message>
-        <source>Enable Player Shadows</source>
-        <translation>Ombre du personnage joueur</translation>
-    </message>
-    <message>
-        <source>Shadow Map Resolution</source>
-        <translation>Résolution des crates d&apos;ombres</translation>
-    </message>
-    <message>
-        <source>Shadow Distance Limit:</source>
-        <translation>Limite de distance des ombres</translation>
-    </message>
-    <message>
-        <source>Enable Object Shadows</source>
-        <translation>Ombre des objets</translation>
-    </message>
-    <message>
-        <source>Enable Indoor Shadows</source>
-        <translation>Ombres en intérieur</translation>
-    </message>
-    <message>
-        <source>Enable Terrain Shadows</source>
-        <translation>Ombre des terrains</translation>
-    </message>
-    <message>
         <source>Audio Device</source>
         <translation>Périphérique audio</translation>
     </message>
@@ -1397,18 +1297,6 @@ Les logs et préférences modifiées y seront sauvegardés.</translation>
     <message>
         <source>Default Cell</source>
         <translation>la cellule par défaut</translation>
-    </message>
-    <message>
-        <source>Bounds</source>
-        <translation>bordures</translation>
-    </message>
-    <message>
-        <source>Primitives</source>
-        <translation>primitives</translation>
-    </message>
-    <message>
-        <source>None</source>
-        <translation>aucune</translation>
     </message>
     <message>
         <source>Always Allow Actors to Follow over Water</source>

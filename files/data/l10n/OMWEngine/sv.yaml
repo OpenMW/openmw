@@ -244,6 +244,14 @@ ObjectShadows: "Aktivera skuggor för objekt"
 ObjectShadowsTooltip: "Aktivera skuggor för huvudsakligen icke-rörliga objekt. Kan ha en signifikant negativ prestandapåverkan."
 IndoorShadows: "Aktivera skuggor inomhus"
 IndoorShadowsTooltip: "På grund av begränsningar med Morrowinds data kan endast figurer ge ifrån sig skuggor inomhus, vilket vissa kan tycka vara distraherande. Har ingen effekt om figur/spelarskuggor inte är aktiverat."
+ShadowPlanesComputationMethod: "Beräkningsmetod för skuggplan"
+ShadowPlanesComputationMethodTooltip: |-
+    Typ av "compute scene bounds"-beräkningsmetod som ska användas. Bounds (standard) för en bra balans mellan prestanda och skuggkvalitet, primitives för snyggare skuggor eller none för ingen beräkning.
+ShadowPlanesComputationMethodBounds: "Bounds"
+ShadowPlanesComputationMethodPrimitives: "Primitives"
+ShadowPlanesComputationMethodNone: "None"
+ShadowPlanesComputationMethodWarning: |-
+    Metoden "Primitives" påverkar prestandan kraftigt och rekommenderas inte för normalt spelande.
 ShadowMapResolution: "Upplösning för skuggkarta"
 ShadowMapResolutionTooltip: "Upplösningen för varje individuell skuggkarta. Ökning av den ökar skuggkvalitén signifikant, men kan ha en lättare negativ prestandapåverkan."
 ShadowsMaxDistanceValue: "Maxavstånd för skuggor ({value, number, :: group-off})"

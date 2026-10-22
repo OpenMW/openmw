@@ -244,6 +244,13 @@ ObjectShadows: "Ombre des objets"
 ObjectShadowsTooltip: "Cette option affiche l'ombre des objets. Elle peut avoir un impact significatif sur les performances."
 IndoorShadows: "Ombres en intérieur"
 IndoorShadowsTooltip: "À cause de certaines limitations avec les données de Morrowind, seuls les personnages et les créatures peuvent projeter une ombre en intérieur, ceci peut déconcerter certains joueurs. Cette option n'a aucun effet si les ombres des PNJ/créatures et du personnage joueur n'ont pas été activées."
+ShadowPlanesComputationMethod: "Méthode de calcul pour les plans d'ombre"
+ShadowPlanesComputationMethodTooltip: |-
+    Type de méthode utilisée pour calculer de "compute scene bound" (limite de scène). Le choix "bordures" (par défaut) donne un bon équilibre entre qualité des ombres et performances, "primitives" pour un meilleur rendu ou "aucun" pour éviter ce calcul.
+ShadowPlanesComputationMethodBounds: "bordures"
+ShadowPlanesComputationMethodPrimitives: "primitives"
+ShadowPlanesComputationMethodNone: "aucune"
+ShadowPlanesComputationMethodWarning: "L'utilisation de la méthode des primitives affectera gravement les performances et n'est pas recommandée pour un gameplay normal."
 ShadowMapResolution: "Résolution des cartes d'ombres"
 ShadowMapResolutionTooltip: "La résolution de chaque carte d'ombre. Augmenter cette valeur de façon importante augmente la qualité des ombres, mais peut impliquer un impact mineur sur les performances."
 ShadowsMaxDistanceValue: "Limite de distance des ombres ({value, number, :: group-off})"

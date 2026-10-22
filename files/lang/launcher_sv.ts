@@ -1040,70 +1040,6 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
         <translation> celler</translation>
     </message>
     <message>
-        <source>Shadows</source>
-        <translation>Skuggor</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of &quot;compute scene bounds&quot; computation method to be used. Bounds (default) for good balance between performance and shadow quality, primitives for better looking shadows or none for no computation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Typ av &quot;compute scene bounds&quot; beräkningsmetod att använda. Bounds (förvalt) för en bra balans mellan prestanda och skuggkvalitet, primitives för snyggare skuggor eller none för ingen beräkning alls.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;64 game units is 1 real life yard or about 0.9 m&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;64 spelenheter är 1 yard eller ungefär 0,9 meter i verkligheten&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source> unit(s)</source>
-        <translation> enhet(er)</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for NPCs and creatures besides the player character. May have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktiverar skuggor för bifigurer och varelser bortsett från spelarrollpersonen. Kan ha en liten negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>512</source>
-        <translation>512</translation>
-    </message>
-    <message>
-        <source>1024</source>
-        <translation>1024</translation>
-    </message>
-    <message>
-        <source>2048</source>
-        <translation>2048</translation>
-    </message>
-    <message>
-        <source>4096</source>
-        <translation>4096</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The fraction of the limit above at which shadows begin to gradually fade away.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Den fraktion av gränsen ovan vid vilken skuggor gradvis börjar blekna bort.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows exclusively for the player character. May have a very minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktivera skuggor exklusivt för spelarrollpersonen. Kan ha en mycket liten negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The resolution of each individual shadow map. Increasing it significantly improves shadow quality but may have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upplösningen för varje individuell skuggkarta. Ökning av den ökar skuggkvalitén signifikant, men kan ha en lättare negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The distance from the camera at which shadows completely disappear.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Avståndet från kameran vid vilken skuggor helt försvinner.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for primarily inanimate objects. May have a significant performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktivera skuggor för huvudsakligen icke-rörliga objekt. Kan ha en signifikant negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Due to limitations with Morrowind&apos;s data, only actors can cast shadows indoors, which some might feel is distracting.&lt;/p&gt;&lt;p&gt;Has no effect if actor/player shadows are not enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;På grund av begränsningar med Morrowinds data kan endast figurer ge ifrån sig skuggor inomhus, vilket vissa kan tycka vara distraherande.&lt;/p&gt;&lt;p&gt;Har ingen effekt om figur/spelarskuggor inte är aktiverat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for the terrain including distant terrain. May have a significant performance and shadow quality impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktivera skuggor för terräng, inklusive avlägsen terräng. Kan ha en signifikant negativ påverkan på prestanda och skuggkvalité.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Tooltip</source>
         <translation>Inforuta</translation>
     </message>
@@ -1307,42 +1243,6 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
         <translation>Aktivera efterbehandling (post processing)</translation>
     </message>
     <message>
-        <source>Shadow Planes Computation Method</source>
-        <translation>Skuggplaner beräkningsmetod</translation>
-    </message>
-    <message>
-        <source>Enable Actor Shadows</source>
-        <translation>Aktivera rollpersonskuggor</translation>
-    </message>
-    <message>
-        <source>Fade Start Multiplier</source>
-        <translation>Blekningsstartmultiplikator</translation>
-    </message>
-    <message>
-        <source>Enable Player Shadows</source>
-        <translation>Aktivera spelarskuggor</translation>
-    </message>
-    <message>
-        <source>Shadow Map Resolution</source>
-        <translation>Skuggkartsupplösning</translation>
-    </message>
-    <message>
-        <source>Shadow Distance Limit:</source>
-        <translation>Skuggavståndsgräns:</translation>
-    </message>
-    <message>
-        <source>Enable Object Shadows</source>
-        <translation>Aktivera objektskuggor</translation>
-    </message>
-    <message>
-        <source>Enable Indoor Shadows</source>
-        <translation>Aktivera interiöra skuggor</translation>
-    </message>
-    <message>
-        <source>Enable Terrain Shadows</source>
-        <translation>Aktivera terrängskuggor</translation>
-    </message>
-    <message>
         <source>Audio Device</source>
         <translation>Ljudenhet</translation>
     </message>
@@ -1405,18 +1305,6 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     <message>
         <source>Default Cell</source>
         <translation>Förinställd cell</translation>
-    </message>
-    <message>
-        <source>Bounds</source>
-        <translation>Bounds</translation>
-    </message>
-    <message>
-        <source>Primitives</source>
-        <translation>Primitives</translation>
-    </message>
-    <message>
-        <source>None</source>
-        <translation>None</translation>
     </message>
     <message>
         <source>Always Allow Actors to Follow over Water</source>
