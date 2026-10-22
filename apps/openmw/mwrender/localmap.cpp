@@ -14,6 +14,7 @@
 #include <components/esm3/loadcell.hpp>
 #include <components/files/memorystream.hpp>
 #include <components/misc/constants.hpp>
+#include <components/myguiplatform/myguitexture.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/fog.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -228,14 +229,21 @@ namespace MWRender
             return found->second.mMapTexture;
     }
 
-    osg::ref_ptr<osg::Texture2D> LocalMap::getFogOfWarTexture(int x, int y)
+    std::unique_ptr<MyGUI::ITexture> LocalMap::makeMapGuiTexture(int x, int y)
+    {
+        osg::ref_ptr<osg::Texture2D> texture = getMapTexture(x, y);
+        if (!texture)
+            return nullptr;
+        return std::make_unique<MyGUIPlatform::OSGTexture>(texture);
+    }
+
+    std::unique_ptr<MyGUI::ITexture> LocalMap::makeFogOfWarGuiTexture(int x, int y)
     {
         auto& segments(mInterior ? mInteriorSegments : mExteriorSegments);
         SegmentMap::iterator found = segments.find(std::make_pair(x, y));
-        if (found == segments.end())
-            return osg::ref_ptr<osg::Texture2D>();
-        else
-            return found->second.mFogOfWarTexture;
+        if (found == segments.end() || !found->second.mFogOfWarTexture)
+            return nullptr;
+        return std::make_unique<MyGUIPlatform::OSGTexture>(found->second.mFogOfWarTexture);
     }
 
     void LocalMap::cleanupCameras()

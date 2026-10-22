@@ -1,22 +1,24 @@
 #include "race.hpp"
 
 #include <MyGUI_Gui.h>
+#include <MyGUI_ITexture.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ListBox.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_UString.h>
 
-#include <osg/Texture2D>
+#include <osg/Math>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadrace.hpp>
-#include <components/myguiplatform/myguitexture.hpp>
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwrender/characterpreview.hpp"
+#include "../mwrender/renderingmanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "tooltips.hpp"
@@ -33,10 +35,8 @@ namespace
 namespace MWGui
 {
 
-    RaceDialog::RaceDialog(osg::Group* parent, Resource::ResourceSystem* resourceSystem)
+    RaceDialog::RaceDialog()
         : WindowModal("openmw_chargen_race.layout")
-        , mParent(parent)
-        , mResourceSystem(resourceSystem)
         , mGenderIndex(0)
         , mFaceIndex(0)
         , mHairIndex(0)
@@ -121,6 +121,8 @@ namespace MWGui
         updateSpellPowers();
     }
 
+    RaceDialog::~RaceDialog() = default;
+
     void RaceDialog::setNextButtonShow(bool shown)
     {
         MyGUI::Button* okButton;
@@ -156,12 +158,11 @@ namespace MWGui
         mPreview.reset(nullptr);
         mPreviewTexture.reset(nullptr);
 
-        mPreview = std::make_unique<MWRender::RaceSelectionPreview>(mParent, mResourceSystem);
+        mPreview = MWBase::Environment::get().getWorld()->getRenderingManager()->createRaceSelectionPreview();
         mPreview->rebuild();
         mPreview->setAngle(mCurrentAngle);
 
-        mPreviewTexture
-            = std::make_unique<MyGUIPlatform::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
+        mPreviewTexture = mPreview->makeGuiTexture();
         mPreviewImage->setRenderItemTexture(mPreviewTexture.get());
         // The widget is Y-down, the RTT image is Y-up, so this UV is inverted
         mPreviewImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));

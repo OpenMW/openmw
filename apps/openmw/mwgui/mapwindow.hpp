@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 
 #include <osg/Vec2f>
 
@@ -139,8 +140,9 @@ namespace MWGui
 
             MyGUI::ImageBox* mMapWidget;
             MyGUI::ImageBox* mFogWidget;
-            std::unique_ptr<MyGUI::ITexture> mMapTexture;
-            std::unique_ptr<MyGUI::ITexture> mFogTexture;
+            // nullopt until requested; nullptr if the renderer had no texture for this segment
+            std::optional<std::unique_ptr<MyGUI::ITexture>> mMapTexture;
+            std::optional<std::unique_ptr<MyGUI::ITexture>> mFogTexture;
             int mCellX;
             int mCellY;
         };

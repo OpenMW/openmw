@@ -10,10 +10,7 @@
 #include <memory>
 #include <vector>
 
-#include <osg/ref_ptr>
-
 #include "../mwbase/windowmanager.hpp"
-#include "../mwrender/localmap.hpp"
 
 #include <components/misc/guarded.hpp>
 #include <components/myguiplatform/myguiplatform.hpp>
@@ -45,6 +42,11 @@ namespace MyGUI
     class Window;
     class UString;
     class ImageBox;
+}
+
+namespace MWRender
+{
+    class LocalMap;
 }
 
 namespace MWWorld

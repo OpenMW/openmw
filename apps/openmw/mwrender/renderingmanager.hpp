@@ -108,6 +108,9 @@ namespace MWRender
     class ObjectPaging;
     class Groundcover;
     class PostProcessor;
+    class InventoryPreview;
+    class RaceSelectionPreview;
+    class LocalMap;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -123,6 +126,10 @@ namespace MWRender
         MWRender::Objects& getObjects() override;
 
         Resource::ResourceSystem* getResourceSystem();
+
+        std::unique_ptr<InventoryPreview> createInventoryPreview(const MWWorld::Ptr& character);
+        std::unique_ptr<RaceSelectionPreview> createRaceSelectionPreview();
+        std::unique_ptr<LocalMap> createLocalMap();
 
         const std::shared_ptr<SceneUtil::WorkQueue>& getWorkQueue() const;
         Terrain::World* getTerrain();

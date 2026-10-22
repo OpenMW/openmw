@@ -13,6 +13,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/myguiplatform/myguitexture.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
@@ -326,9 +327,10 @@ namespace MWRender
         setBlendMode();
     }
 
-    osg::ref_ptr<osg::Texture2D> CharacterPreview::getTexture()
+    std::unique_ptr<MyGUI::ITexture> CharacterPreview::makeGuiTexture()
     {
-        return static_cast<osg::Texture2D*>(mRTTNode->getColorTexture(nullptr));
+        return std::make_unique<MyGUIPlatform::OSGTexture>(
+            static_cast<osg::Texture2D*>(mRTTNode->getColorTexture(nullptr)), mTextureStateSet);
     }
 
     void CharacterPreview::rebuild()

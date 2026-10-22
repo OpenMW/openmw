@@ -6,6 +6,8 @@
 #include <filesystem>
 #include <thread>
 
+#include <osg/Image>
+#include <osg/ref_ptr>
 #include <osgViewer/Viewer>
 
 #include <MyGUI_ClipboardManager.h>
@@ -63,6 +65,8 @@
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwrender/localmap.hpp"
+#include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/vismask.hpp"
 
 #include "../mwworld/cellstore.hpp"
@@ -330,7 +334,7 @@ namespace MWGui
         mGuiModeStates[GM_MainMenu] = GuiModeState(menu.get());
         mWindows.push_back(std::move(menu));
 
-        mLocalMapRender = std::make_unique<MWRender::LocalMap>(mViewer->getSceneData()->asGroup());
+        mLocalMapRender = MWBase::Environment::get().getWorld()->getRenderingManager()->createLocalMap();
         auto map = std::make_unique<MapWindow>(mCustomMarkers, mDragAndDrop.get(), mLocalMapRender.get(), mWorkQueue);
         mMap = map.get();
         mWindows.push_back(std::move(map));
@@ -342,8 +346,7 @@ namespace MWGui
         mWindows.push_back(std::move(statsWindow));
         trackWindow(mStatsWindow, makeStatsWindowSettingValues());
 
-        auto inventoryWindow = std::make_unique<InventoryWindow>(
-            *mDragAndDrop, *mItemTransfer, mViewer->getSceneData()->asGroup(), mResourceSystem);
+        auto inventoryWindow = std::make_unique<InventoryWindow>(*mDragAndDrop, *mItemTransfer);
         mInventoryWindow = inventoryWindow.get();
         mWindows.push_back(std::move(inventoryWindow));
 
@@ -531,7 +534,7 @@ namespace MWGui
 
         mHud->setVisible(true);
 
-        mCharGen = std::make_unique<CharacterCreation>(mViewer->getSceneData()->asGroup(), mResourceSystem);
+        mCharGen = std::make_unique<CharacterCreation>();
 
         updatePinnedWindows();
 
@@ -557,7 +560,7 @@ namespace MWGui
             disallowAll();
 
             mStatsWatcher->removeListener(mCharGen.get());
-            mCharGen = std::make_unique<CharacterCreation>(mViewer->getSceneData()->asGroup(), mResourceSystem);
+            mCharGen = std::make_unique<CharacterCreation>();
             mStatsWatcher->addListener(mCharGen.get());
         }
         else

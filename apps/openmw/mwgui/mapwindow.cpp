@@ -1,7 +1,5 @@
 #include "mapwindow.hpp"
 
-#include <osg/Texture2D>
-
 #include <MyGUI_Button.h>
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_Gui.h>
@@ -16,7 +14,6 @@
 
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/globalmap.hpp>
-#include <components/myguiplatform/myguitexture.hpp>
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -624,33 +621,26 @@ namespace MWGui
                     requestMapRender(&MWBase::Environment::get().getWorldModel()->getExterior(
                         ESM::ExteriorCellLocation(entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId)));
 
-                osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(entry.mCellX, entry.mCellY);
-                if (texture)
+                entry.mMapTexture = mLocalMapRender->makeMapGuiTexture(entry.mCellX, entry.mCellY);
+                if (*entry.mMapTexture)
                 {
-                    entry.mMapTexture = std::make_unique<MyGUIPlatform::OSGTexture>(texture);
-                    entry.mMapWidget->setRenderItemTexture(entry.mMapTexture.get());
+                    entry.mMapWidget->setRenderItemTexture(entry.mMapTexture->get());
                     // The widget is Y-down, the RTT image is Y-up, so this UV is inverted
                     entry.mMapWidget->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
                     needRedraw = true;
                 }
-                else
-                    entry.mMapTexture = std::make_unique<MyGUIPlatform::OSGTexture>(std::string(), nullptr);
             }
             if (!entry.mFogTexture && mFogOfWarToggled && mFogOfWarEnabled)
             {
-                osg::ref_ptr<osg::Texture2D> tex = mLocalMapRender->getFogOfWarTexture(entry.mCellX, entry.mCellY);
-                if (tex)
+                entry.mFogTexture = mLocalMapRender->makeFogOfWarGuiTexture(entry.mCellX, entry.mCellY);
+                if (*entry.mFogTexture)
                 {
-                    entry.mFogTexture = std::make_unique<MyGUIPlatform::OSGTexture>(tex);
-                    entry.mFogWidget->setRenderItemTexture(entry.mFogTexture.get());
+                    entry.mFogWidget->setRenderItemTexture(entry.mFogTexture->get());
                     // For inexplicable historical reasons the fog texture is Y-down so this UV is *not* inverted
                     entry.mFogWidget->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
                 }
                 else
-                {
                     entry.mFogWidget->setImageTexture("black");
-                    entry.mFogTexture = std::make_unique<MyGUIPlatform::OSGTexture>(std::string(), nullptr);
-                }
                 needRedraw = true;
                 // Newly uncovered chunk, make sure to draw door markers right away instead of waiting for a cell
                 // transition
@@ -1153,7 +1143,7 @@ namespace MWGui
     void MapWindow::cellExplored(int x, int y)
     {
         mGlobalMapRender->cleanupCameras();
-        mGlobalMapRender->exploreCell(x, y, mLocalMapRender->getMapTexture(x, y));
+        mGlobalMapRender->exploreCell(x, y, *mLocalMapRender);
     }
 
     void MapWindow::onFrame(float dt)
@@ -1330,12 +1320,11 @@ namespace MWGui
             // The generated unexplored map and explored map RTT images are Y-up so the UVs are inverted
             // The unexplored map isn't saved so we *could* consider generating it the "right" way
             // but mixing conventions for map images could make things confusing
-            mGlobalMapTexture = std::make_unique<MyGUIPlatform::OSGTexture>(mGlobalMapRender->getBaseTexture());
+            mGlobalMapTexture = mGlobalMapRender->makeBaseGuiTexture();
             mGlobalMapImage->setRenderItemTexture(mGlobalMapTexture.get());
             mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
 
-            mGlobalMapOverlayTexture
-                = std::make_unique<MyGUIPlatform::OSGTexture>(mGlobalMapRender->getOverlayTexture());
+            mGlobalMapOverlayTexture = mGlobalMapRender->makeOverlayGuiTexture();
             mGlobalMapOverlay->setRenderItemTexture(mGlobalMapOverlayTexture.get());
             mGlobalMapOverlay->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
 
