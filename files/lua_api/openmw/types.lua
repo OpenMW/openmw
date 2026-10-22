@@ -970,9 +970,6 @@
 -- @field #boolean canWalk whether the creature can walk
 -- @field #boolean canUseWeapons whether the creature can use weapons and shields
 -- @field #boolean isBiped whether the creature is a biped
--- @field #boolean isAutocalc If true, the actor's stats will be automatically calculated based on level and class.
--- @field #string primaryFaction Faction ID of the NPCs default faction. Nil if no faction
--- @field #number primaryFactionRank Faction rank of the NPCs default faction. Nil if no faction
 -- @field #boolean isEssential whether the creature is essential
 -- @field #boolean isPersistent If true, the creature will not despawn after death.
 -- @field #boolean isRespawning whether the creature respawns after death
@@ -1262,6 +1259,8 @@
 -- @field #string mwscript MWScript on this NPC (can be nil)
 -- @field #string hair ID of the hair body part
 -- @field #string head ID of the head body part
+-- @field #string primaryFaction ID of the NPC's primary faction (can be nil)
+-- @field #number primaryFactionRank Rank index (from 1) in the primary faction, 0 if the NPC has no faction
 -- @field #number baseGold The base barter gold of the NPC
 -- @field #number baseDisposition NPC's starting disposition
 -- @field #boolean isMale The gender setting of the NPC
