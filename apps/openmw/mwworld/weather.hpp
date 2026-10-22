@@ -194,6 +194,7 @@ namespace MWWorld
         // animation)
         // - Slower movement when walking against the storm (fStromWalkMult)
         bool mIsStorm;
+        bool mRipplesEnabled;
 
         // How fast does rain travel down?
         // In Morrowind.ini this is set globally, but we may want to change it per weather later.

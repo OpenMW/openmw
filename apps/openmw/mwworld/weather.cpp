@@ -203,6 +203,7 @@ namespace MWWorld
         if (!mRainEffect.empty()) // NOTE: in vanilla, the weathers with rain seem to be hardcoded; changing
                                   // Using_Precip has no effect
         {
+            mRipplesEnabled = Fallback::Map::getBool("Weather_Rain_Ripples");
             mRainLoopSoundID
                 = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Rain_Loop_Sound_ID"));
             if (mRainLoopSoundID.empty()) // default to "rain" if not set
@@ -210,6 +211,9 @@ namespace MWWorld
             else if (mRainLoopSoundID == "None")
                 mRainLoopSoundID = ESM::RefId();
         }
+        else
+            mRipplesEnabled = particleEffect == Settings::models().mWeathersnow.get()
+                && Fallback::Map::getBool("Weather_Snow_Ripples");
 
         mAmbientLoopSoundID
             = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
@@ -1427,6 +1431,14 @@ namespace MWWorld
         result.mStormDirection = current.mStormDirection;
         result.mStormDirection.normalize();
         result.mStormParticleDirection = result.mStormDirection;
+        // Morrowind deliberately rotates the blizzard mesh, so so should we.
+        if (result.mParticleEffect == Settings::models().mWeatherblizzard.get())
+            result.mStormParticleRotation = osg::Vec3f(-1, 0, 0);
+        else
+            result.mStormParticleRotation = Weather::defaultDirection();
+        result.mOcclusionEnabled
+            = !result.mRainEffect.empty() || result.mParticleEffect == Settings::models().mWeathersnow.get();
+        result.mRipplesEnabled = current.mRipplesEnabled;
         return result;
     }
 
@@ -1474,6 +1486,7 @@ namespace MWWorld
             result.mIsStorm = current.mIsStorm;
             result.mParticleEffect = current.mParticleEffect;
             result.mStormParticleDirection = current.mStormParticleDirection;
+            result.mStormParticleRotation = current.mStormParticleRotation;
             result.mRainEffect = current.mRainEffect;
             result.mRainSpeed = current.mRainSpeed;
             result.mRainEntranceSpeed = current.mRainEntranceSpeed;
@@ -1485,12 +1498,15 @@ namespace MWWorld
             result.mRainMinHeight = current.mRainMinHeight;
             result.mRainMaxHeight = current.mRainMaxHeight;
             result.mRainMaxRaindrops = current.mRainMaxRaindrops;
+            result.mOcclusionEnabled = current.mOcclusionEnabled;
+            result.mRipplesEnabled = current.mRipplesEnabled;
         }
         else
         {
             result.mIsStorm = other.mIsStorm;
             result.mParticleEffect = other.mParticleEffect;
             result.mStormParticleDirection = other.mStormParticleDirection;
+            result.mStormParticleRotation = other.mStormParticleRotation;
             result.mRainEffect = other.mRainEffect;
             result.mRainSpeed = other.mRainSpeed;
             result.mRainEntranceSpeed = other.mRainEntranceSpeed;
@@ -1503,6 +1519,8 @@ namespace MWWorld
             result.mRainMinHeight = other.mRainMinHeight;
             result.mRainMaxHeight = other.mRainMaxHeight;
             result.mRainMaxRaindrops = other.mRainMaxRaindrops;
+            result.mOcclusionEnabled = other.mOcclusionEnabled;
+            result.mRipplesEnabled = other.mRipplesEnabled;
         }
         return result;
     }

@@ -49,6 +49,7 @@ namespace MWRender
         osg::Vec3f mStormDirection;
         osg::Vec3f mNextStormDirection;
         osg::Vec3f mStormParticleDirection;
+        osg::Vec3f mStormParticleRotation;
 
         float mCloudBlendFactor{};
         float mFogDepth{};
@@ -73,6 +74,8 @@ namespace MWRender
 
         bool mNight{}; // use night skybox
         bool mIsStorm{};
+        bool mOcclusionEnabled{};
+        bool mRipplesEnabled{};
     };
 
     struct MoonState

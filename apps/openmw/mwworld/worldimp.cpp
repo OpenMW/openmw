@@ -201,6 +201,7 @@ namespace MWWorld
         : mResourceSystem(resourceSystem)
         , mLocalScripts(mStore)
         , mWorldModel(mStore, mReaders)
+        , mWeatherStore(std::make_unique<MWWorld::WeatherStore>())
         , mTimeManager(std::make_unique<DateTimeManager>())
         , mSky(true)
         , mGodMode(false)
@@ -261,10 +262,9 @@ namespace MWWorld
             viewer, rootNode, mResourceSystem, workQueue, *mNavigator, mGroundcoverStore, unrefQueue);
         mProjectileManager = std::make_unique<ProjectileManager>(
             mRendering->getLightRoot()->asGroup(), mResourceSystem, mRendering.get(), mPhysics.get());
-        mRendering->preloadCommonAssets();
 
-        mWeatherStore = std::make_unique<MWWorld::WeatherStore>();
         mWeatherManager = std::make_unique<MWWorld::WeatherManager>(*mRendering, mStore, *mWeatherStore);
+        mRendering->preloadCommonAssets(*mWeatherStore.get());
 
         mWorldScene = std::make_unique<Scene>(*this, *mRendering.get(), mPhysics.get(), *mNavigator);
     }
