@@ -141,8 +141,8 @@ namespace MWWorld
     Weather::Weather(ESM::RefId id, int scriptId, const std::string& name, float stormWindSpeed, float dlFactor,
         float dlOffset, VFS::Path::NormalizedView particleEffect)
         : mId(id)
-        , mScriptId(scriptId)
         , mName(name)
+        , mParticleEffect(particleEffect)
         , mSkyColor(Fallback::Map::getColour("Weather_" + name + "_Sky_Sunrise_Color"),
               Fallback::Map::getColour("Weather_" + name + "_Sky_Day_Color"),
               Fallback::Map::getColour("Weather_" + name + "_Sky_Sunset_Color"),
@@ -164,10 +164,11 @@ namespace MWWorld
               Fallback::Map::getFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
               Fallback::Map::getFloat("Weather_" + name + "_Land_Fog_Night_Depth"))
         , mSunDiscSunsetColor(Fallback::Map::getColour("Weather_" + name + "_Sun_Disc_Sunset_Color"))
+        , mStormDirection(Weather::defaultDirection())
+        , mScriptId(scriptId)
         , mWindSpeed(Fallback::Map::getFloat("Weather_" + name + "_Wind_Speed"))
         , mCloudSpeed(Fallback::Map::getFloat("Weather_" + name + "_Cloud_Speed"))
         , mGlareView(Fallback::Map::getFloat("Weather_" + name + "_Glare_View"))
-        , mIsStorm(mWindSpeed > stormWindSpeed)
         , mRainSpeed(Fallback::Map::getFloat("Weather_Precip_Gravity"))
         , mRainEntranceSpeed(Fallback::Map::getFloat("Weather_" + name + "_Rain_Entrance_Speed"))
         , mRainMaxRaindrops(Fallback::Map::getInt("Weather_" + name + "_Max_Raindrops"))
@@ -175,14 +176,13 @@ namespace MWWorld
         , mRainThreshold(Fallback::Map::getFloat("Weather_" + name + "_Rain_Threshold"))
         , mRainMinHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Min"))
         , mRainMaxHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Max"))
-        , mParticleEffect(particleEffect)
-        , mStormDirection(Weather::defaultDirection())
         , mCloudsMaximumPercent(Fallback::Map::getFloat("Weather_" + name + "_Clouds_Maximum_Percent"))
         , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
         , mThunderFrequency(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Frequency"))
         , mThunderThreshold(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Threshold"))
         , mFlashDecrement(Fallback::Map::getFloat("Weather_" + name + "_Flash_Decrement"))
         , mFlashBrightness(0.0f)
+        , mIsStorm(mWindSpeed > stormWindSpeed)
     {
         const auto* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
         mCloudTexture = Misc::ResourceHelpers::correctTexturePath(

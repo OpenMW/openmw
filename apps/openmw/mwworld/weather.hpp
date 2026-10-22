@@ -144,9 +144,18 @@ namespace MWWorld
             float dlOffset, VFS::Path::NormalizedView particleEffect);
 
         ESM::RefId mId;
-        int mScriptId;
         std::string mName;
         VFS::Path::Normalized mCloudTexture;
+        VFS::Path::Normalized mParticleEffect;
+        VFS::Path::Normalized mRainEffect;
+
+        // Sound effects
+        // This is used for Blight, Ashstorm and Blizzard (Bloodmoon)
+        ESM::RefId mAmbientLoopSoundID;
+        // This is used for Rain and Thunderstorm
+        ESM::RefId mRainLoopSoundID;
+
+        std::array<ESM::RefId, 4> mThunderSoundID;
 
         // Sky (atmosphere) color
         TimeOfDayInterpolator<osg::Vec4f> mSkyColor;
@@ -162,6 +171,9 @@ namespace MWWorld
 
         // Color modulation for the sun itself during sunset
         osg::Vec4f mSunDiscSunsetColor;
+
+        osg::Vec3f mStormDirection;
+        int mScriptId;
 
         // Used by scripts to animate signs, etc based on the wind (GetWindSpeed)
         float mWindSpeed;
@@ -179,22 +191,6 @@ namespace MWWorld
             float FogFactor;
             float FogOffset;
         } mDL;
-
-        // Sound effects
-        // This is used for Blight, Ashstorm and Blizzard (Bloodmoon)
-        ESM::RefId mAmbientLoopSoundID;
-        // This is used for Rain and Thunderstorm
-        ESM::RefId mRainLoopSoundID;
-
-        std::array<ESM::RefId, 4> mThunderSoundID;
-
-        // Is this an ash storm / blight storm? If so, the following will happen:
-        // - The particles and clouds will be oriented so they appear to come from the Red Mountain.
-        // - Characters will animate their hand to protect eyes from the storm when looking in its direction (idlestorm
-        // animation)
-        // - Slower movement when walking against the storm (fStromWalkMult)
-        bool mIsStorm;
-        bool mRipplesEnabled;
 
         // How fast does rain travel down?
         // In Morrowind.ini this is set globally, but we may want to change it per weather later.
@@ -215,12 +211,6 @@ namespace MWWorld
         // Height of rain particles spawn
         float mRainMinHeight;
         float mRainMaxHeight;
-
-        VFS::Path::Normalized mParticleEffect;
-
-        VFS::Path::Normalized mRainEffect;
-
-        osg::Vec3f mStormDirection;
 
         float mCloudsMaximumPercent;
 
@@ -247,6 +237,15 @@ namespace MWWorld
         void flashDecrement(const float elapsedSeconds);
         float thunderChance(const float transitionRatio, const float elapsedSeconds) const;
         void lightningAndThunder(void);
+
+    public:
+        // Is this an ash storm / blight storm? If so, the following will happen:
+        // - The particles and clouds will be oriented so they appear to come from the Red Mountain.
+        // - Characters will animate their hand to protect eyes from the storm when looking in its direction (idlestorm
+        // animation)
+        // - Slower movement when walking against the storm (fStromWalkMult)
+        bool mIsStorm;
+        bool mRipplesEnabled;
     };
 
     class WeatherStore;
