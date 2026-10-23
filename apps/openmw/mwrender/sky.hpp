@@ -187,6 +187,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::RTTNode> mSkyRTT;
 
         bool mPrecipitationOcclusion = false;
+        bool mParticleOcclusion = false;
         bool mCreated = false;
         bool mIsStorm = false;
         bool mTimescaleClouds;

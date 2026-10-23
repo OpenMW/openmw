@@ -638,10 +638,12 @@ namespace MWRender
         if (mIsStorm)
             mStormDirection = weather.mStormDirection;
 
-        if (mDirtyParticlesEffect || (mCurrentParticleEffect != weather.getParticleEffect()))
+        if (mDirtyParticlesEffect || mCurrentParticleEffect != weather.getParticleEffect()
+            || mParticleOcclusion != weather.getOcclusionEnabled())
         {
             mDirtyParticlesEffect = false;
             mCurrentParticleEffect = weather.getParticleEffect();
+            mParticleOcclusion = weather.getOcclusionEnabled();
 
             // cleanup old particles
             if (mParticleEffect)
@@ -691,7 +693,7 @@ namespace MWRender
                         = static_cast<osgParticle::ParticleSystem*>(findPSVisitor.mFoundNodes[i]);
 
                     osg::ref_ptr<osgParticle::ModularProgram> program = new osgParticle::ModularProgram;
-                    if (weather.getOcclusionEnabled())
+                    if (mParticleOcclusion)
                         program->addOperator(new WrapAroundOperator(mCamera, defaultWrapRange));
                     program->addOperator(new WeatherAlphaOperator(mPrecipitationAlpha, false));
                     program->setParticleSystem(ps);
@@ -706,13 +708,13 @@ namespace MWRender
 
                     ps->setUserValue("simpleLighting", true);
 
-                    if (weather.getOcclusionEnabled())
+                    if (mParticleOcclusion)
                         ps->setUserValue("particleOcclusion", true);
                 }
 
                 mSceneManager->recreateShaders(mParticleNode);
 
-                if (mPrecipitationOcclusion && weather.getOcclusionEnabled())
+                if (mPrecipitationOcclusion && mParticleOcclusion)
                 {
                     mPrecipitationOccluder->enable();
                     mPrecipitationOccluder->updateRange(defaultWrapRange);
