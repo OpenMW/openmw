@@ -81,7 +81,7 @@
                         <Property key="Caption" value="#{OMWEngine:ActorsProcessingRange}"/>
                     </Widget>
                     <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
-                        <Property key="Range" value="3584"/>
+                        <Property key="Range" value="3585"/>
                         <Property key="Page" value="300"/>
                         <Property key="WheelPage" value="300"/>
                         <UserString key="SettingType" value="Slider"/>

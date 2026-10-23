@@ -1,6 +1,7 @@
 #include "settingswindow.hpp"
 
 #include <array>
+#include <cmath>
 
 #include <unicode/locid.h>
 
@@ -92,16 +93,17 @@ namespace
         return widget->getUserString("SettingValueType");
     }
 
-    void getSettingMinMax(MyGUI::Widget* widget, float& min, float& max)
+    template <class T>
+    void getSettingMinMax(MyGUI::Widget* widget, T& min, T& max)
     {
         const char* settingMin = "SettingMin";
         const char* settingMax = "SettingMax";
-        min = 0.f;
-        max = 1.f;
+        min = 0;
+        max = 1;
         if (!widget->getUserString(settingMin).empty())
-            min = MyGUI::utility::parseFloat(widget->getUserString(settingMin));
+            min = MyGUI::utility::parseValue<T>(widget->getUserString(settingMin));
         if (!widget->getUserString(settingMax).empty())
-            max = MyGUI::utility::parseFloat(widget->getUserString(settingMax));
+            max = MyGUI::utility::parseValue<T>(widget->getUserString(settingMax));
     }
 
     void updateMaxLightsComboBox(MyGUI::ComboBox* box)
@@ -188,7 +190,7 @@ namespace MWGui
                 std::string_view valueType = getSettingValueType(current);
                 std::vector<icu::UnicodeString> argNames;
                 std::vector<icu::Formattable> args;
-                if (valueType == "Float" || valueType == "Integer" || valueType == "Cell")
+                if (valueType == "Float" || valueType == "Cell")
                 {
                     // TODO: ScrollBar isn't meant for this. should probably use a dedicated FloatSlider widget
                     float min, max;
@@ -201,24 +203,26 @@ namespace MWGui
                         argNames.emplace_back("cells");
                         args.emplace_back(value / Constants::CellSizeInUnits);
                     }
-                    else if (valueType == "Float")
+                    else
                     {
                         value = Settings::get<float>(getSettingCategory(current), getSettingName(current));
                         argNames.emplace_back("value");
                         args.emplace_back(value);
                     }
-                    else
-                    {
-                        const int intValue = Settings::get<int>(getSettingCategory(current), getSettingName(current));
-                        argNames.emplace_back("value");
-                        args.emplace_back(intValue);
-                        value = static_cast<float>(intValue);
-                    }
 
                     value = std::clamp(value, min, max);
                     value = (value - min) / (max - min);
 
-                    scroll->setScrollPosition(static_cast<size_t>(value * (scroll->getScrollRange() - 1)));
+                    scroll->setScrollPosition(static_cast<size_t>(std::round(value * (scroll->getScrollRange() - 1))));
+                }
+                else if (valueType == "Integer")
+                {
+                    int min, max;
+                    getSettingMinMax(scroll, min, max);
+                    const int value = Settings::get<int>(getSettingCategory(current), getSettingName(current));
+                    argNames.emplace_back("value");
+                    args.emplace_back(value);
+                    scroll->setScrollPosition(static_cast<size_t>(std::clamp(value, min, max) - min));
                 }
                 else
                 {
@@ -849,7 +853,7 @@ namespace MWGui
             std::vector<icu::UnicodeString> argNames;
             std::vector<icu::Formattable> args;
             std::string_view valueType = getSettingValueType(scroller);
-            if (valueType == "Float" || valueType == "Integer" || valueType == "Cell")
+            if (valueType == "Float" || valueType == "Cell")
             {
                 float value = pos / float(scroller->getScrollRange() - 1);
 
@@ -863,19 +867,21 @@ namespace MWGui
                     argNames.emplace_back("cells");
                     args.emplace_back(value / Constants::CellSizeInUnits);
                 }
-                else if (valueType == "Float")
+                else
                 {
                     Settings::get<float>(getSettingCategory(scroller), getSettingName(scroller)).set(value);
                     argNames.emplace_back("value");
                     args.emplace_back(value);
                 }
-                else
-                {
-                    int intValue = static_cast<int>(value);
-                    Settings::get<int>(getSettingCategory(scroller), getSettingName(scroller)).set(intValue);
-                    argNames.emplace_back("value");
-                    args.emplace_back(intValue);
-                }
+            }
+            else if (valueType == "Integer")
+            {
+                int min, max;
+                getSettingMinMax(scroller, min, max);
+                const int value = min + static_cast<int>(pos);
+                Settings::get<int>(getSettingCategory(scroller), getSettingName(scroller)).set(value);
+                argNames.emplace_back("value");
+                args.emplace_back(value);
             }
             else
             {
