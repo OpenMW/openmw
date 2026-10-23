@@ -293,8 +293,7 @@ namespace MWWorld
 
         // we don't want old weather to persist on a new game
         // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
-        mWeatherManager.reset();
-        mWeatherManager = std::make_unique<MWWorld::WeatherManager>(*mRendering.get(), mStore, *mWeatherStore);
+        mWeatherManager->clear();
 
         if (!bypass)
         {

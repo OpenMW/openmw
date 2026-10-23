@@ -222,8 +222,8 @@ namespace MWWorld
         mSunColor.blank();
         mLandFogDepth.blank();
         mSunDiscSunsetColor = {};
-        mStormDirection = {};
-        mStormParticleRotation = {};
+        mStormDirection = defaultDirection();
+        mStormParticleRotation = defaultDirection();
         mScriptId = {};
         mWindSpeed = {};
         mCloudSpeed = {};
@@ -731,11 +731,7 @@ namespace MWWorld
 
         mWeatherStore->reset();
 
-        Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
-        for (; it != store.get<ESM::Region>().end(); ++it)
-        {
-            mRegions.insert(std::make_pair(it->mId, RegionWeather(*it)));
-        }
+        importRegions();
 
         forceWeather(ESM::Weather::indexToRefId(0));
     }
@@ -1124,9 +1120,17 @@ namespace MWWorld
         mCurrentRegion = ESM::RefId();
         mTimePassed = 0.0f;
         mWeatherUpdateTime = 0.0f;
+        mWindSpeed = 0.f;
+        mCurrentWindSpeed = 0.f;
+        mNextWindSpeed = 0.f;
+        mIsStorm = false;
+        mUseTorches = true;
+        mFastForward = false;
+        mNightDayMode = Default;
         forceWeather(ESM::Weather::indexToRefId(0));
         mRegions.clear();
         importRegions();
+        mWeatherStore->reset();
     }
 
     inline void WeatherManager::importRegions()

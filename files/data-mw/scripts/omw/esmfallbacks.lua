@@ -212,8 +212,7 @@ local function generateDefaultWeathers()
     local gmsts = content.gameSettings.records
     local commaString = util.color.commaString
     local function getColor(id)
-        local c
-        local ok = pcall(function() c = commaString(gmsts[id]) end)
+        local ok, c = pcall(function() return commaString(gmsts[id]) end)
         if not ok then
             print('Setting', id, 'is not a valid color, using middle gray as a fallback')
             return util.color.rgba(0.5, 0.5, 0.5, 1)
@@ -244,7 +243,6 @@ local function generateDefaultWeathers()
             night = getInterpolatorColor(name, color, 'Night'),
         }
     end
-    local defaultDirection = util.vector3(0, 1, 0)
     local rainSpeed = getFloat('Weather_Precip_Gravity')
     local rainRipples = getBool('Weather_Rain_Ripples')
     local snowRipples = getBool('Weather_Snow_Ripples')
@@ -271,7 +269,6 @@ local function generateDefaultWeathers()
                 night = fogDepthNight,
             },
             sunDiscSunsetColor = getColor(('Weather_%s_Sun_Disc_Sunset_Color'):format(recordId)),
-            stormDirection = defaultDirection,
             windSpeed = windSpeed,
             cloudSpeed = getFloat(('Weather_%s_Cloud_Speed'):format(recordId)),
             glareView = getFloat(('Weather_%s_Glare_View'):format(recordId)),
@@ -298,7 +295,6 @@ local function generateDefaultWeathers()
             thunderFrequency = getFloat(('Weather_%s_Thunder_Frequency'):format(recordId)),
             thunderThreshold = getFloat(('Weather_%s_Thunder_Threshold'):format(recordId)),
             flashDecrement = getFloat(('Weather_%s_Flash_Decrement'):format(recordId)),
-            stormParticleRotation = defaultDirection,
         }
         if weather.ambientLoopSoundID == 'None' then
             weather.ambientLoopSoundID = nil
