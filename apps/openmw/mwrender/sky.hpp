@@ -150,14 +150,8 @@ namespace MWRender
         osg::ref_ptr<RainCounter> mCounter;
         osg::ref_ptr<RainShooter> mRainShooter;
 
-        bool mPrecipitationOcclusion = false;
         std::unique_ptr<PrecipitationOccluder> mPrecipitationOccluder;
 
-        bool mCreated;
-
-        bool mIsStorm;
-
-        bool mTimescaleClouds;
         float mCloudAnimationTimer;
 
         // particle system rotation is independent of cloud rotation internally
@@ -168,6 +162,8 @@ namespace MWRender
         // remember some settings so we don't have to apply them again if they didn't change
         VFS::Path::Normalized mClouds;
         VFS::Path::Normalized mNextClouds;
+        VFS::Path::Normalized mCurrentParticleEffect;
+        VFS::Path::Normalized mRainEffect;
         float mCloudBlendFactor;
         float mCloudSpeed;
         float mStarsOpacity;
@@ -175,28 +171,29 @@ namespace MWRender
         osg::Vec4f mSkyColour;
         osg::Vec4f mFogColour;
 
-        VFS::Path::Normalized mCurrentParticleEffect;
-
-        VFS::Path::Normalized mRainEffect;
         float mRainSpeed;
         float mRainDiameter;
         float mRainMinHeight;
         float mRainMaxHeight;
         float mRainEntranceSpeed;
         int mRainMaxRaindrops;
-        bool mRipplesEnabled;
         float mWindSpeed;
         float mBaseWindSpeed;
 
-        bool mEnabled;
-        bool mSunglareEnabled;
-
         float mPrecipitationAlpha;
-        bool mDirtyParticlesEffect;
 
         osg::Vec4f mMoonScriptColor;
 
         osg::ref_ptr<SceneUtil::RTTNode> mSkyRTT;
+
+        bool mPrecipitationOcclusion = false;
+        bool mCreated = false;
+        bool mIsStorm = false;
+        bool mTimescaleClouds;
+        bool mRipplesEnabled = false;
+        bool mEnabled = true;
+        bool mSunglareEnabled = true;
+        bool mDirtyParticlesEffect = false;
     };
 }
 
