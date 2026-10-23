@@ -191,7 +191,7 @@ namespace
         {
             const auto buttons = std::to_array<SDL_MessageBoxButtonData>({
                 { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Yes" },
-                { SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "No" }
+                { SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "No" },
             });
             const SDL_MessageBoxData messageBoxData = {
                 SDL_MESSAGEBOX_ERROR,
@@ -202,7 +202,7 @@ namespace
                 "It may take several minutes longer to generate the crash log.",
                 buttons.size(),
                 buttons.data(),
-                nullptr
+                nullptr,
             };
             int buttonId;
             if (!SDL_ShowMessageBox(&messageBoxData, &buttonId))
@@ -475,6 +475,9 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
             std::generic_category().message(errno).c_str());
         exit(1);
     }
+
+    if (crash_info.pid > 0)
+        kill(crash_info.pid, SIGSTOP);
 
     const char* sigdesc = findSignalDescription(signals, crash_info.signum);
 
