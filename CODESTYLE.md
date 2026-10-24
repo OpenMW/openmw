@@ -113,3 +113,231 @@ Pushing a branch to a forked repo will also start a CI pipeline; one does not ne
 - the `Ubuntu_Clang_Tidy_*` jobs, which run on pushes to forks and on MRs.
 
 Pushing to your fork is a fallback for anyone who can't run the checks locally, e.g. clang-tidy, which requires a full build. It is a final check before opening an MR. The [MR template](./.gitlab/merge_request_templates/Default.md) also asks for it, making it a requirement instead of merely a convenience (see [CONTRIBUTING.md](./CONTRIBUTING.md#fork-ci)).
+
+## Formatting
+
+- The code is indented with four spaces rather than tabs.
+- The lines of code are limited to 120 characters.
+- Braces follow the Allman style throughout, with the sole exception of lambda bodies.
+- All content inside a namespace is indented (`NamespaceIndentation: All`), while access specifiers align with the class keyword (`AccessModifierOffset: -4`).
+- The `case` labels are indented.
+- References and pointers have the ampersand or asterisk against the type name, not the variable name. Example: `int* var`, not `int *var`.
+- Lines break before binary operators and ternaries, and constructor initializer lists break before the comma.
+- One-line functions are permitted only inside the class body; one-line `if` statements, loops and blocks are not allowed.
+
+```cpp
+// Allowed
+if (condition)
+    return 0;
+
+while (var != 0)
+    var--;
+
+// Not allowed
+if (condition) return 0;
+
+while (var != 0) var--;
+```
+
+- A `template <...>` declaration is always followed by a line break, and no more than one consecutive blank line is permitted.
+- Closing namespace comments such as `} // namespace X` are not used (`FixNamespaceComments: false`).
+- Single-statement bodies without braces are acceptable.
+- A space is expected after `if`, `for`, `while` and `switch`, but not between a function name and the opening parenthesis.
+- There should be no spaces inside parentheses, square brackets or angle brackets.
+- One space is expected before a trailing `//` comment.
+
+## Files and Layout
+
+- File names contain only lowercase letters and digits, followed by a `.cpp`, `.hpp` or `.h` extension. This is enforced by CI.
+- Headers are protected with `#ifndef` include guards rather than `#pragma once`.
+
+```cpp
+#ifndef MWMECHANICS_SPELLCASTING_H
+#define MWMECHANICS_SPELLCASTING_H
+...
+#endif
+```
+
+- Function bodies are placed in the `.cpp` file, with the exception of one-line getters and setters. Templates, as well as `constexpr` and `inline` functions, must be defined in the header, since the compiler needs the full definition wherever they are used.
+- Class members are ordered with the `public` section first, followed by `protected` and then `private`.
+
+```cpp
+// somefile.hpp
+namespace SomeSpace
+{
+    class SomeClass
+    {
+    public:
+        float someFunction(float p1, float p2) const;
+
+        int getSomeVar() const { return mSomeVar; } // One-line getters and setters may stay in the header.
+        void setSomeVar(int v) { mSomeVar = v; }
+
+    protected:
+        void onSomeVarChanged();
+
+    private:
+        int mSomeVar = 0;
+    };
+
+    template <class T>
+    T twice(const T& value) // Templates must be defined in the header.
+    {
+        return value + value;
+    }
+}
+
+// somefile.cpp
+namespace SomeSpace
+{
+    float SomeClass::someFunction(float p1, float p2) const
+    {
+        return p1 + p2;
+    }
+}
+```
+
+- Dependencies flow in one direction only: `apps/` may depend on `components/` or `extern/`, and `components/` on `extern/`, but never the reverse (not yet enforced by the build; see [#20](https://gitlab.com/OpenMW/openmw/-/issues/20)).
+
+## Naming
+
+- Namespaces use CamelCase, which is checked by clang-tidy. Namespaces in `apps/openmw` start with `MW`, those in OpenMW-CS start with `CSM` (model) or `CSV` (view), other applications use their own name as the namespace (e.g. `Launcher`, `Wizard`, `EsmTool`), and namespaces in `components/` use plain names without a prefix.
+- Classes use CamelCase, while functions, local variables and parameters use camelBack, i.e. they start with a lowercase letter. The naming of local variables and parameters is checked by clang-tidy.
+- Enum types and concepts use CamelCase, which is also checked by clang-tidy.
+- Member variables are prefixed with `m` and static members with `s`, as in `mName` and `sName`. A trailing underscore is not used. These prefixes are a convention only and are not checked by any tool. Static constants often use the `s` prefix as well, but not consistently; many `static constexpr` members use plain names, and their naming is not settled yet.
+
+```cpp
+namespace MWMechanics
+{
+    class NpcStats
+    {
+    public:
+        int getSkillLevel(int skillIndex) const;
+
+    private:
+        int mFatigue = 0;
+        static int sInstanceCount;
+    };
+
+    int NpcStats::getSkillLevel(int skillIndex) const
+    {
+        const int baseLevel = skillIndex * 2;
+        return baseLevel + mFatigue;
+    }
+}
+```
+
+- Global variables are not used. Macros are written in all caps and are reserved for include guards and conditional compilation.
+- Acronyms are written as ordinary words, e.g. `Npc` rather than `NPC`. Established exceptions are the `ESM`, `ESM4` and `VFS` namespaces (and classes such as `ESMReader`), as well as names that mirror types from Bethesda's file formats, such as `BSKeyframeController` in `components/nif/`. Cryptic abbreviations should be avoided.
+
+## Includes
+
+- A `.cpp` file includes its own header first.
+- The remaining includes are arranged in groups separated by blank lines, usually in the following order: the standard library, external libraries (one group per library), `<components/...>`, other subsystems of the same application (one group per subsystem), and finally local headers in quotes.
+
+```cpp
+// apps/openmw/mwworld/actionharvest.cpp
+#include "actionharvest.hpp"
+
+#include <sstream>
+
+#include <MyGUI_LanguageManager.h>
+
+#include <components/misc/strings/format.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwrender/animation.hpp"
+
+#include "class.hpp"
+#include "containerstore.hpp"
+```
+
+- Headers from `components/` are included with angle brackets, as in `<components/...>`, rather than with quotes.
+- In `apps/openmw`, headers from other subsystems are included with a relative path, as in `"../mwbase/..."`. This allows clangd to detect unused includes (see [!3727](https://gitlab.com/OpenMW/openmw/-/merge_requests/3727)).
+- clang-format sorts the includes within each group but does not create the groups (`IncludeBlocks: Preserve`), so the grouping has to be done by hand.
+
+## Namespaces and `using`
+
+- `using namespace` directives are not allowed in headers. In `.cpp` files they are rare and appear mostly in tests.
+- `using` declarations (e.g. `using std::swap;`) are kept to the narrowest possible scope, and fully qualified names are generally preferred over them. Type aliases (`using Name = Type;`) are a different construct and are used freely.
+- OpenMW's own code is not placed in the global namespace; the only exception is the file containing `main()`. Forward declarations of third-party types, such as `class QWidget;`, stay in the global namespace because that is where those types live.
+- Helpers that are used only within a single file are placed in an anonymous namespace rather than declared `static`.
+
+```cpp
+// somefile.cpp
+#include "somefile.hpp"
+
+#include <string>
+#include <vector>
+
+namespace SomeSpace
+{
+    namespace
+    {
+        bool isEmptyName(const std::string& name) // Visible only in this file.
+        {
+            return name.empty();
+        }
+    }
+
+    std::size_t countEmptyNames(const std::vector<std::string>& names)
+    {
+        std::size_t result = 0;
+        for (const std::string& name : names)
+            if (isEmptyName(name))
+                ++result;
+        return result;
+    }
+}
+```
+
+## Language and Idioms
+
+- The code is written in C++20, as set in `CMakeLists.txt`.
+- Null pointers are written as `nullptr` rather than `NULL`, and overriding virtual functions are marked with `override`.
+- OSG objects are created with `new` and held in an `osg::ref_ptr`. Other heap-allocated objects are created with `std::make_unique` or `std::make_shared`.
+- Standard containers are preferred over raw arrays, and objects are given automatic storage wherever possible.
+- OSG's own utilities are used where they exist: `osg::PI` and `osg::PIf` rather than `M_PI`, and `osg::Vec3f` for vectors. Values are clamped with `std::clamp`.
+- Engine code logs through `Log` with the appropriate level: `Debug::Error`, `Debug::Warning`, `Debug::Info`, `Debug::Verbose` or `Debug::Debug`. `std::cout` is used only in command-line tools, in `esm4` and in the logging implementation itself.
+
+```cpp
+if (count < 0)
+    Log(Debug::Warning) << "Negative count " << count << ", ignoring it";
+```
+
+- Strings are formatted with `std::format`, or with `Misc::StringUtils::format` from `components/misc/strings/format.hpp`. `std::string_view` is commonly used for passing strings.
+
+## Comments
+
+- Documentation comments use the Doxygen `///` style rather than `/** */`.
+- Classes and public functions should be documented where their purpose is not obvious; trivial functions such as getters and setters may be left undocumented. Doxygen commands such as `\brief`, `\param`, `\return` and `\note` are used for this; the `@brief` form also appears in the code and works the same way.
+
+```cpp
+/// \brief Keeps track of the player's bounty.
+///
+/// The bounty is reset when the player pays the fine or serves time in jail.
+class Bounty
+{
+public:
+    /// Adds to the current bounty.
+    /// \param amount Gold to add; must not be negative.
+    /// \return The bounty after the change.
+    int add(int amount);
+};
+```
+
+- The full list of Doxygen commands is available in the [Doxygen manual](https://www.doxygen.nl/manual/commands.html).
+
+## Tests
+
+- Tests are written with GoogleTest and GoogleMock and are located in `apps/components_tests`, `apps/openmw_tests` and `apps/opencs_tests`.
+- Test suite names use CamelCase, usually start with the name of the subsystem under test and end with the suffix `Test`.
+
+## Other File Types
+
+- CMake files are indented with four spaces rather than tabs; CI rejects tabs in them. Shaders are also indented with four spaces, as set in `.editorconfig`.
+- The built-in Lua scripts in `files/data/scripts/omw/` are indented with four spaces, and local functions use camelBack. There is no linter configuration for Lua, so these conventions are not checked by any tool.
