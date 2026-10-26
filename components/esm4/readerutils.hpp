@@ -69,7 +69,7 @@ namespace ESM4
         template <typename RecordInvocable, typename GroupInvocable>
         static bool readItem(ESM4::Reader& reader, RecordInvocable&& recordInvocable, GroupInvocable&& groupInvocable)
         {
-            if (!reader.getRecordHeader() || !reader.hasMoreRecs())
+            if (!reader.hasMoreRecs() || !reader.getRecordHeader())
                 return false;
 
             const ESM4::RecordHeader& header = reader.hdr();
