@@ -61,6 +61,7 @@ void ESM4::LightingTemplate::load(ESM4::Reader& reader)
                     reader.skipSubRecordData(); // throw?
                 break;
             case ESM::fourCC("DALC"): // TES5
+            case ESM::fourCC("WGDR"): // FO4 god rays (GDRY FormId)
                 reader.skipSubRecordData();
                 break;
             default:
