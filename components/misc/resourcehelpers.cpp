@@ -291,6 +291,7 @@ namespace
                 return far;
             case ESM::VER_094:
             case ESM::VER_170:
+            case ESM::VER_171:
                 return lod;
             default:
                 return std::string_view();

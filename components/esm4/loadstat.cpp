@@ -56,7 +56,8 @@ void ESM4::Static::load(ESM4::Reader& reader)
             case ESM::fourCC("MODT"):
             {
                 // version is only availabe in TES5 (seems to be 27 or 28?)
-                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
+                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170
+                // || reader.esmVersion() == ESM::VER_171)
                 // std::cout << "STAT MODT ver: " << std::hex << reader.hdr().record.version << std::endl;
 
                 // for TES4 these are just a sequence of bytes

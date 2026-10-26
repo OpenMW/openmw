@@ -71,7 +71,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     // (may be easier to update the context before saving?)
     reader.setCurrCell(formId); // save for LAND (and other children) to access later
     std::uint32_t esmVer = reader.esmVersion();
-    bool isSkyrim = (esmVer == ESM::VER_170 || esmVer == ESM::VER_094);
+    bool isSkyrim = (esmVer == ESM::VER_170 || esmVer == ESM::VER_171 || esmVer == ESM::VER_094);
 
     while (reader.getSubRecordHeader())
     {

@@ -72,7 +72,8 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
                     else
                         throw std::runtime_error("ESM4::LVLN::load - " + mEditorId + " LVLO size error");
                 }
-                //              else if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
+                //              else if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || esmVer == ESM::VER_171
+                //                       || isFONV)
                 //              {
                 //                  std::uint32_t level;
                 //                  reader.get(level);

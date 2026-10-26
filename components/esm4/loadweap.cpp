@@ -51,7 +51,8 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("DATA"):
             {
-                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
+                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170
+                // || reader.esmVersion() == ESM::VER_171)
                 if (subHdr.dataSize == 10) // FO3 has 15 bytes even though VER_094
                 {
                     reader.get(mData.value);

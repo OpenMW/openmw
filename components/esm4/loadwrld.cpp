@@ -48,7 +48,8 @@ void ESM4::World::load(ESM4::Reader& reader)
     std::uint32_t esmVer = reader.esmVersion();
     // bool isTES4 = (esmVer == ESM::VER_080 || esmVer == ESM::VER_100);
     // bool isFONV = (esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134);
-    bool isTES5 = (esmVer == ESM::VER_094 || esmVer == ESM::VER_170); // WARN: FO3 is also VER_094
+    bool isTES5
+        = (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || esmVer == ESM::VER_171); // WARN: FO3 is also VER_094
     bool usingDefaultLevels = true;
 
     while (reader.getSubRecordHeader())

@@ -341,7 +341,8 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             {
                 // Can only read TES4 navmesh data
                 // Note FO4 FIXME above
-                if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV || esmVer == ESM::VER_100)
+                if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || esmVer == ESM::VER_171 || isFONV
+                    || esmVer == ESM::VER_100)
                 {
                     reader.skipSubRecordData();
                     break;

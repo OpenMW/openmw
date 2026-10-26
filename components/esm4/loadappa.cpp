@@ -48,7 +48,8 @@ void ESM4::Apparatus::load(ESM4::Reader& reader)
                 reader.getLocalizedString(mFullName);
                 break;
             case ESM::fourCC("DATA"):
-                if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
+                if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170
+                    || reader.esmVersion() == ESM::VER_171)
                 {
                     reader.get(mData.value);
                     reader.get(mData.weight);
