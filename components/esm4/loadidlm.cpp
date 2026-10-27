@@ -36,8 +36,6 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
-    std::uint32_t esmVer = reader.esmVersion();
-
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
@@ -63,8 +61,8 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("IDLA"):
             {
-                bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
-                if (esmVer == ESM::VER_094 || isFONV) // FO3? 4 or 8 bytes
+                const ESM::GameFormat format = reader.gameFormat();
+                if (format == ESM::GameFormat::FO3 || format == ESM::GameFormat::FONV) // 4 or 8 bytes
                 {
                     reader.skipSubRecordData();
                     break;

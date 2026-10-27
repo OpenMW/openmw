@@ -70,8 +70,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     // cell child groups if we are loading them after restoring the context
     // (may be easier to update the context before saving?)
     reader.setCurrCell(formId); // save for LAND (and other children) to access later
-    std::uint32_t esmVer = reader.esmVersion();
-    bool isSkyrim = (esmVer == ESM::VER_170 || esmVer == ESM::VER_171 || esmVer == ESM::VER_094);
+    const bool isSkyrim = reader.gameFormat() == ESM::GameFormat::TES5;
 
     while (reader.getSubRecordHeader())
     {

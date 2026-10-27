@@ -66,9 +66,8 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("DATA"):
             {
-                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170
-                // || reader.esmVersion() == ESM::VER_171)
-                if (subHdr.dataSize == 8) // FO3 is size 4 even though VER_094
+                // if (format == TES5)
+                if (subHdr.dataSize == 8) // FO3 is size 4
                     reader.get(mData);
                 else
                     reader.get(mData.weight);

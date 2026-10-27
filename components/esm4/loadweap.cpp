@@ -35,8 +35,7 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
-    std::uint32_t esmVer = reader.esmVersion();
-    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
+    const bool isFONV = reader.gameFormat() == ESM::GameFormat::FONV;
 
     while (reader.getSubRecordHeader())
     {
@@ -51,9 +50,8 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("DATA"):
             {
-                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170
-                // || reader.esmVersion() == ESM::VER_171)
-                if (subHdr.dataSize == 10) // FO3 has 15 bytes even though VER_094
+                // if (format == TES5)
+                if (subHdr.dataSize == 10) // FO3 has 15 bytes
                 {
                     reader.get(mData.value);
                     reader.get(mData.weight);

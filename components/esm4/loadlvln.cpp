@@ -35,7 +35,7 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
-    // std::uint32_t esmVer = reader.esmVersion(); // currently unused
+    // const ESM::GameFormat format = reader.gameFormat(); // currently unused
 
     while (reader.getSubRecordHeader())
     {
@@ -72,8 +72,7 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
                     else
                         throw std::runtime_error("ESM4::LVLN::load - " + mEditorId + " LVLO size error");
                 }
-                //              else if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || esmVer == ESM::VER_171
-                //                       || isFONV)
+                //              else if (format == FO3 || format == FONV || format == TES5)
                 //              {
                 //                  std::uint32_t level;
                 //                  reader.get(level);

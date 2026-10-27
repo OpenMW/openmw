@@ -49,10 +49,10 @@ void ESM4::Race::load(ESM4::Reader& reader)
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
-    std::uint32_t esmVer = reader.esmVersion();
-    bool isTES4 = (esmVer == ESM::VER_080 || esmVer == ESM::VER_100) && !reader.hasFormVersion();
-    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
-    bool isFO3 = false;
+    const ESM::GameFormat format = reader.gameFormat();
+    const bool isTES4 = format == ESM::GameFormat::TES4;
+    const bool isFONV = format == ESM::GameFormat::FONV;
+    const bool isFO3 = format == ESM::GameFormat::FO3;
 
     bool isMale = false;
     int currPart = -1; // 0 = head, 1 = body, 2 = egt, 3 = hkx
@@ -134,9 +134,6 @@ void ESM4::Race::load(ESM4::Reader& reader)
 #else
                 if (subHdr.dataSize == 36) // TES4/FO3/FONV
                 {
-                    if (!isTES4 && !isFONV && !mIsTES5)
-                        isFO3 = true;
-
                     std::uint8_t skill;
                     std::uint8_t bonus;
                     for (unsigned int i = 0; i < 8; ++i)

@@ -38,28 +38,27 @@ namespace
 {
     void assignDefaultTextures(ESM4::Land& land, ESM4::Reader& reader)
     {
-        std::uint32_t esmVer = reader.esmVersion();
+        const ESM::GameFormat format = reader.gameFormat();
 
         // Note: in games after TES4 it can be configured in ini file (sDefaultLandDiffuseTexture)
-        if (!reader.hasFormVersion() && (esmVer == ESM::VER_080 || esmVer == ESM::VER_100)) // TES4
+        if (format == ESM::GameFormat::TES4)
         {
             land.mDefaultDiffuseMap = VFS::Path::NormalizedView("textures/landscape/terrainhddirt01.dds");
             land.mDefaultNormalMap = VFS::Path::NormalizedView("textures/landscape/terrainhddirt01_n.dds");
         }
-        else if (reader.hasFormVersion() && reader.formVersion() >= 16
-            && (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || esmVer == ESM::VER_171)) // TES5
+        else if (format == ESM::GameFormat::TES5)
         {
             land.mDefaultDiffuseMap = VFS::Path::NormalizedView("textures/landscape/dirt02.dds");
             land.mDefaultNormalMap = VFS::Path::NormalizedView("textures/landscape/dirt02_n.dds");
         }
-        else if (esmVer == ESM::VER_095 || esmVer == ESM::VER_100) // FO4
+        else if (format == ESM::GameFormat::FO4)
         {
             land.mDefaultDiffuseMap
                 = VFS::Path::NormalizedView("textures/landscape/ground/commonwealthdefault01_d.dds");
             land.mDefaultNormalMap = VFS::Path::NormalizedView("textures/landscape/ground/commonwealthdefault01_n.dds");
         }
-        else if (esmVer == ESM::VER_094 || esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134)
-        { // FO3, FONV
+        else if (format == ESM::GameFormat::FO3 || format == ESM::GameFormat::FONV)
+        {
             land.mDefaultDiffuseMap = VFS::Path::NormalizedView("textures/landscape/dirtwasteland01.dds");
             land.mDefaultNormalMap = VFS::Path::NormalizedView("textures/landscape/dirtwasteland01_n.dds");
         }

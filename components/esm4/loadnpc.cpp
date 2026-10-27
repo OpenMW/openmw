@@ -17,7 +17,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 
-  cc9cii cc9c@iinet.net.au
+  cc9cii cc9c@iinet.net.au                                                            
 
   Much of the information on the data structures are based on the information
   from Tes4Mod:Mod_File_Format and Tes5Mod:File_Formats but also refined by
@@ -38,11 +38,10 @@ void ESM4::Npc::load(ESM4::Reader& reader)
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
-    std::uint32_t esmVer = reader.esmVersion();
-    mIsTES4 = (esmVer == ESM::VER_080 || esmVer == ESM::VER_100) && !reader.hasFormVersion();
-    mIsFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
-    // mIsTES5 = esmVer == ESM::VER_094 || esmVer == ESM::VER_170 ||
-    // esmVer == ESM::VER_171; // WARN: FO3 is also VER_094
+    const ESM::GameFormat format = reader.gameFormat();
+    mIsTES4 = format == ESM::GameFormat::TES4;
+    mIsFONV = format == ESM::GameFormat::FONV;
+    // mIsTES5 = format == TES5;
 
     while (reader.getSubRecordHeader())
     {
@@ -156,8 +155,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM::fourCC("WNAM"):
             {
                 // FIXME: should be read into mWornArmor for FO4
-                if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170
-                    || reader.esmVersion() == ESM::VER_171)
+                if (format == ESM::GameFormat::TES5)
                     reader.getFormId(mWornArmor);
                 else
                     reader.get(mFootWeight);
