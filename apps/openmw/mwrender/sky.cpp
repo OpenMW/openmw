@@ -238,7 +238,6 @@ namespace MWRender
         Resource::SceneManager* sceneManager, bool enableSkyRTT)
         : mSceneManager(sceneManager)
         , mCamera(camera)
-        , mTimescaleClouds(Fallback::Map::getBool("Weather_Timescale_Clouds"))
         , mCloudAnimationTimer(0.f)
         , mStormParticleDirection(MWWorld::Weather::defaultDirection())
         , mStormDirection(MWWorld::Weather::defaultDirection())
@@ -254,6 +253,7 @@ namespace MWRender
         , mWindSpeed(0.f)
         , mBaseWindSpeed(0.f)
         , mPrecipitationAlpha(0.f)
+        , mTimescaleClouds(Fallback::Map::getBool("Weather_Timescale_Clouds"))
     {
         mSkyRootNode = new CameraRelativeTransform;
         mSkyRootNode->setName("Sky Root");

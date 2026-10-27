@@ -158,10 +158,6 @@ namespace MWWorld
 
         static osg::Vec3f defaultDirection();
 
-        Weather() = default;
-        Weather(const ESM::RefId id, const int scriptId, const std::string& name, float stormWindSpeed, float dlFactor,
-            float dlOffset, VFS::Path::NormalizedView particleEffect);
-
         ESM::RefId mId;
         std::string mName;
         VFS::Path::Normalized mCloudTexture;

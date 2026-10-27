@@ -245,7 +245,7 @@ namespace MWWorld
         mFlashBrightness = {};
         mIsStorm = {};
         mRipplesEnabled = {};
-        mUseTorches = {};
+        mUseTorches = true;
         mOcclusionEnabled = {};
     }
 
