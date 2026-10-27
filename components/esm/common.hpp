@@ -2,7 +2,11 @@
 #define COMPONENT_ESM_COMMON_H
 
 #include <cstdint>
+#include <optional>
 #include <string>
+#include <vector>
+
+#include <components/misc/strings/algorithm.hpp>
 
 namespace ESM
 {
@@ -41,6 +45,54 @@ namespace ESM
         std::string name;
         std::uint64_t size;
     };
+
+    enum class GameFormat
+    {
+        Unknown,
+        TES3,
+        TES4,
+        FO3,
+        FONV,
+        TES5,
+        FO4,
+    };
+
+    // The expected format for a file, from clues. TES4 and FO4 share VER_100, but only FO4's records have
+    // a form version in the header. FO3 and TES5 share VER_094, so we check for a relevant master, then
+    // fall back to the header form version.
+    inline GameFormat getGameFormat(
+        std::uint32_t version, std::optional<std::uint16_t> headerFormVersion, const std::vector<MasterData>& masters)
+    {
+        switch (version)
+        {
+            case VER_120:
+            case VER_130:
+                return GameFormat::TES3;
+            case VER_080:
+                return GameFormat::TES4;
+            case VER_100:
+                return headerFormVersion.has_value() ? GameFormat::FO4 : GameFormat::TES4;
+            case VER_094:
+                for (const MasterData& master : masters)
+                {
+                    if (Misc::StringUtils::ciEqual(master.name, "Fallout3.esm"))
+                        return GameFormat::FO3;
+                    if (Misc::StringUtils::ciEqual(master.name, "Skyrim.esm"))
+                        return GameFormat::TES5;
+                }
+                return headerFormVersion.value_or(0) <= 15 ? GameFormat::FO3 : GameFormat::TES5;
+            case VER_132:
+            case VER_133:
+            case VER_134:
+                return GameFormat::FONV;
+            case VER_170:
+            case VER_171:
+                return GameFormat::TES5;
+            case VER_095:
+                return GameFormat::FO4;
+        }
+        return GameFormat::Unknown;
+    }
 
     inline std::string printName(const std::uint32_t typeId)
     {

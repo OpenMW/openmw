@@ -148,6 +148,7 @@ namespace ESM4
     {
         VFS::Manager const* mVFS;
         Header mHeader; // ESM4 header
+        ESM::GameFormat mGameFormat = ESM::GameFormat::Unknown;
 
         ReaderContext mCtx;
 
@@ -257,6 +258,7 @@ namespace ESM4
 
         inline bool hasFormVersion() const { return mCtx.recHeaderSize == sizeof(RecordHeader); }
         inline unsigned int formVersion() const { return mCtx.recordHeader.record.version; }
+        inline ESM::GameFormat gameFormat() const { return mGameFormat; }
 
         void buildLStringIndex();
         void getLocalizedString(std::string& str);
