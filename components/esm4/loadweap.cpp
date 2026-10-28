@@ -35,7 +35,10 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
+    const bool isTES4 = reader.gameFormat() == ESM::GameFormat::TES4;
+    const bool isFO3 = reader.gameFormat() == ESM::GameFormat::FO3;
     const bool isFONV = reader.gameFormat() == ESM::GameFormat::FONV;
+    const bool isTES5 = reader.gameFormat() == ESM::GameFormat::TES5;
 
     while (reader.getSubRecordHeader())
     {
@@ -50,14 +53,13 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("DATA"):
             {
-                // if (format == TES5)
-                if (subHdr.dataSize == 10) // FO3 has 15 bytes
+                if (isTES5 || subHdr.dataSize == 10)
                 {
                     reader.get(mData.value);
                     reader.get(mData.weight);
                     reader.get(mData.damage);
                 }
-                else if (isFONV || subHdr.dataSize == 15)
+                else if (isFO3 || isFONV || subHdr.dataSize == 15)
                 {
                     reader.get(mData.value);
                     reader.get(mData.health);
@@ -65,7 +67,7 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                     reader.get(mData.damage);
                     reader.get(mData.clipSize);
                 }
-                else
+                else if (isTES4 || subHdr.dataSize == 30)
                 {
                     reader.get(mData.type);
                     reader.get(mData.speed);
@@ -76,6 +78,8 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                     reader.get(mData.weight);
                     reader.get(mData.damage);
                 }
+                else // FO4 doesn't have this subrecord, so nothing should reach here
+                    reader.skipSubRecordData();
                 break;
             }
             case ESM::fourCC("MODL"):

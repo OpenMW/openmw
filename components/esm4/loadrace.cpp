@@ -150,8 +150,6 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 }
                 else if (subHdr.dataSize == 128 || subHdr.dataSize == 164) // TES5
                 {
-                    mIsTES5 = true;
-
                     std::uint8_t skill;
                     std::uint8_t bonus;
                     for (unsigned int i = 0; i < 7; ++i)

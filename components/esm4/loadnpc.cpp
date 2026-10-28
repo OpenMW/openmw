@@ -40,8 +40,10 @@ void ESM4::Npc::load(ESM4::Reader& reader)
 
     const ESM::GameFormat format = reader.gameFormat();
     mIsTES4 = format == ESM::GameFormat::TES4;
+    mIsFO3 = format == ESM::GameFormat::FO3;
     mIsFONV = format == ESM::GameFormat::FONV;
-    // mIsTES5 = format == TES5;
+    mIsTES5 = format == ESM::GameFormat::TES5;
+    mIsFO4 = format == ESM::GameFormat::FO4;
 
     while (reader.getSubRecordHeader())
     {
@@ -117,8 +119,6 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 switch (subHdr.dataSize)
                 {
                     case 20: // FO4
-                        mIsFO4 = true;
-                        [[fallthrough]];
                     case 16: // TES4
                     case 24: // FO3/FNV, TES5
                         reader.get(&mBaseConfig, subHdr.dataSize);

@@ -35,15 +35,12 @@ namespace MWRender
             return;
         if (traits->mIsTES4)
             updatePartsTES4(*traits);
-        else if (traits->mIsFONV)
+        else if (traits->mIsFO3 || traits->mIsFONV)
         {
             // Not implemented yet
         }
-        else
+        else if (traits->mIsTES5 || traits->mIsFO4)
         {
-            // There is no easy way to distinguish TES5 and FO3.
-            // In case of FO3 the function shouldn't crash the game and will
-            // only lead to the NPC not being rendered.
             updatePartsTES5(*traits);
         }
     }

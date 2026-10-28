@@ -38,11 +38,8 @@ namespace MWClass
         {
             if (rec->mIsTES4)
                 return rec;
-            else if (rec->mIsFONV)
+            else if (rec->mIsFO3 || rec->mIsFONV)
             {
-                // TODO: FO3 should use this branch as well. But it is not clear how to distinguish FO3 from
-                // TES5. Currently FO3 uses wrong template flags that can lead to "ESM4 NPC traits not found"
-                // exception the NPC will not be added to the scene. But in any way it shouldn't cause a crash.
                 if (!(rec->mBaseConfig.fo3.templateFlags & flag))
                     return rec;
             }
@@ -51,8 +48,11 @@ namespace MWClass
                 if (!(rec->mBaseConfig.fo4.templateFlags & flag))
                     return rec;
             }
-            else if (!(rec->mBaseConfig.tes5.templateFlags & flag))
-                return rec;
+            else if (rec->mIsTES5)
+            {
+                if (!(rec->mBaseConfig.tes5.templateFlags & flag))
+                    return rec;
+            }
         }
         return nullptr;
     }
@@ -108,13 +108,13 @@ namespace MWClass
             data->mRace = store->get<ESM4::Race>().find(data->mTraits->mRace);
             if (data->mTraits->mIsTES4)
                 data->mIsFemale = data->mTraits->mBaseConfig.tes4.flags & ESM4::Npc::TES4_Female;
-            else if (data->mTraits->mIsFONV)
+            else if (data->mTraits->mIsFO3 || data->mTraits->mIsFONV)
                 data->mIsFemale = data->mTraits->mBaseConfig.fo3.flags & ESM4::Npc::FO3_Female;
+            else if (data->mTraits->mIsTES5)
+                data->mIsFemale = data->mTraits->mBaseConfig.tes5.flags & ESM4::Npc::TES5_Female;
             else if (data->mTraits->mIsFO4)
                 data->mIsFemale
                     = data->mTraits->mBaseConfig.fo4.flags & ESM4::Npc::TES5_Female; // FO4 flags are the same as TES5
-            else
-                data->mIsFemale = data->mTraits->mBaseConfig.tes5.flags & ESM4::Npc::TES5_Female;
         }
 
         if (auto inv = chooseTemplate(npcRecs, ESM4::Npc::Template_UseInventory))
