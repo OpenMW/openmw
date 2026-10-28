@@ -230,7 +230,7 @@ namespace
                     auto ret = system(command.str().c_str());
                     if (WIFEXITED(ret) && WEXITSTATUS(ret) == 127)
                     {
-                        command.clear();
+                        command = {};
                         command << "wget --timeout=3 --tries=1 --quiet -O /dev/null '" << url << "'";
                         ret = system(command.str().c_str());
                         if (WIFEXITED(ret) && WEXITSTATUS(ret) == 127)
