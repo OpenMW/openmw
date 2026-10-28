@@ -17,7 +17,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 
-  cc9cii cc9c@iinet.net.au                                                            
+  cc9cii cc9c@iinet.net.au
 
   Much of the information on the data structures are based on the information
   from Tes4Mod:Mod_File_Format and Tes5Mod:File_Formats but also refined by

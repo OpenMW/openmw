@@ -115,6 +115,8 @@ namespace MWClass
             else if (data->mTraits->mIsFO4)
                 data->mIsFemale
                     = data->mTraits->mBaseConfig.fo4.flags & ESM4::Npc::TES5_Female; // FO4 flags are the same as TES5
+            else
+                data->mIsFemale = false; // TODO: Starfield, FO76
         }
 
         if (auto inv = chooseTemplate(npcRecs, ESM4::Npc::Template_UseInventory))
