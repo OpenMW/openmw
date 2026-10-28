@@ -236,7 +236,7 @@ namespace
                         if (WIFEXITED(ret) && WEXITSTATUS(ret) == 127)
                             ret = 0;
                     }
-                    if (WEXITSTATUS(ret) == 0)
+                    if (!WIFEXITED(ret) || WEXITSTATUS(ret) == 0)
                         debuginfodUrls.emplace_back(url);
                     else
                         printf("Skipping %s as it took too long to respond.\n", std::string(url).c_str());
