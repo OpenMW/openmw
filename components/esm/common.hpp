@@ -57,9 +57,8 @@ namespace ESM
         FO4,
     };
 
-    // The expected format for a file, from clues. TES4 and FO4 share VER_100, but only FO4's records have
-    // a form version in the header. FO3 and TES5 share VER_094, so we check for a relevant master, then
-    // fall back to the header form version.
+    // The likely format for a content file. Games weren't meant to coexist, so it's our best educated guess.
+    // Where ambiguous, check ESM format version > list of masters > header form version (from last-saved tool).
     inline GameFormat getGameFormat(
         std::uint32_t version, std::optional<std::uint16_t> headerFormVersion, const std::vector<MasterData>& masters)
     {

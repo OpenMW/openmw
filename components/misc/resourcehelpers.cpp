@@ -283,15 +283,19 @@ namespace
 
         switch (esmVersion)
         {
-            case ESM::VER_120:
-            case ESM::VER_130:
+            case ESM::VER_120: // TES3
+            case ESM::VER_130: // TES3
                 return dist;
-            case ESM::VER_080:
-            case ESM::VER_100:
+            case ESM::VER_080: // TES4
+            case ESM::VER_100: // FIXME: TES4, FO4
                 return far;
-            case ESM::VER_094:
-            case ESM::VER_170:
-            case ESM::VER_171:
+            case ESM::VER_094: // FO3, TES5
+            case ESM::VER_095: // FO4
+            case ESM::VER_132: // FONV
+            case ESM::VER_133: // FONV
+            case ESM::VER_134: // FONV
+            case ESM::VER_170: // TES5
+            case ESM::VER_171: // TES5
                 return lod;
             default:
                 return std::string_view();
