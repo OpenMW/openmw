@@ -70,6 +70,7 @@ namespace MWWorld
                     mEncoder != nullptr ? &mEncoder->getStatelessEncoder() : nullptr);
                 reader.setModIndex(index);
                 reader.updateModIndices(mNameToIndex);
+                mESMVersions[index] = reader.esmVersion();
                 mStore.loadESM4(reader, listener);
                 break;
             }
