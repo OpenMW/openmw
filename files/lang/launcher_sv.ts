@@ -1133,7 +1133,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>Axis-Aligned Bounding Box</source>
-        <translation>Axeljusterad begränsningslåda</translation>
+        <translation>Axelorienterad avgränsningslåda (AABB)</translation>
     </message>
     <message>
         <source>Rotating Box</source>
