@@ -95,6 +95,7 @@ if [[ $CI_OPENMW_USE_VCPKG ]]; then
         -DVCPKG_HOST_TRIPLET="$VCPKG_TARGET_TRIPLET"
         -DVCPKG_TARGET_TRIPLET="$VCPKG_TARGET_TRIPLET"
         -DCMAKE_TOOLCHAIN_FILE="$DEPENDENCIES_ROOT_PATH/scripts/buildsystems/vcpkg.cmake"
+        -DEXTRA_DEBUGINFOD_URLS="https://openmw-sym.rgw.ctrl-c.liu.se"
     )
 else
     CMAKE_CONF_OPTS+=(
