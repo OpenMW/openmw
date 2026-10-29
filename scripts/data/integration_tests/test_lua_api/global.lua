@@ -100,7 +100,7 @@ testing.registerGlobalTest('getGMST', function()
 end)
 
 testing.registerGlobalTest('MWScript', function()
-    local variableStoreCount = 19
+    local variableStoreCount = 20
     local variableStore = world.mwscript.getGlobalVariables(player)
     testing.expectEqual(variableStoreCount, #variableStore)
 
