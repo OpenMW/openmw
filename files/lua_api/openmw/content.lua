@@ -252,4 +252,13 @@
 -- @usage
 -- content.sounds.records.MySound = { template = content.sounds.records['MournDayAmb'], fileName = 'sound/fx/funny.wav' }
 
+--- @{#WeatherContent}: Weather manipulation.
+-- @field [parent=#content] #WeatherContent weathers
+
+---
+-- A mutable list of all @{openmw.core#WeatherRecord}s.
+-- @field [parent=#WeatherContent] #list<openmw.core#WeatherRecord> records
+-- @usage
+-- content.weathers.records.MyWeather = { template = content.weathers.records['snow'], particleEffect = 'meshes/fire_small.nif' }
+
 return nil

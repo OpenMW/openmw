@@ -238,14 +238,9 @@ namespace MWRender
         Resource::SceneManager* sceneManager, bool enableSkyRTT)
         : mSceneManager(sceneManager)
         , mCamera(camera)
-        , mCreated(false)
-        , mIsStorm(false)
-        , mTimescaleClouds(Fallback::Map::getBool("Weather_Timescale_Clouds"))
         , mCloudAnimationTimer(0.f)
         , mStormParticleDirection(MWWorld::Weather::defaultDirection())
         , mStormDirection(MWWorld::Weather::defaultDirection())
-        , mClouds()
-        , mNextClouds()
         , mCloudBlendFactor(0.f)
         , mCloudSpeed(0.f)
         , mStarsOpacity(0.f)
@@ -255,14 +250,10 @@ namespace MWRender
         , mRainMaxHeight(0.f)
         , mRainEntranceSpeed(1.f)
         , mRainMaxRaindrops(0)
-        , mRainRipplesEnabled(Fallback::Map::getBool("Weather_Rain_Ripples"))
-        , mSnowRipplesEnabled(Fallback::Map::getBool("Weather_Snow_Ripples"))
         , mWindSpeed(0.f)
         , mBaseWindSpeed(0.f)
-        , mEnabled(true)
-        , mSunglareEnabled(true)
         , mPrecipitationAlpha(0.f)
-        , mDirtyParticlesEffect(false)
+        , mTimescaleClouds(Fallback::Map::getBool("Weather_Timescale_Clouds"))
     {
         mSkyRootNode = new CameraRelativeTransform;
         mSkyRootNode->setName("Sky Root");
@@ -508,16 +499,7 @@ namespace MWRender
 
     bool SkyManager::getRainRipplesEnabled() const
     {
-        if (!mEnabled)
-            return false;
-
-        if (hasRain())
-            return mRainRipplesEnabled;
-
-        if (mParticleNode && mCurrentParticleEffect == Settings::models().mWeathersnow.get())
-            return mSnowRipplesEnabled;
-
-        return false;
+        return mEnabled && mRipplesEnabled;
     }
 
     float SkyManager::getPrecipitationAlpha() const
@@ -531,16 +513,6 @@ namespace MWRender
             return;
 
         switchUnderwaterRain();
-
-        if (mIsStorm && mParticleNode)
-        {
-            osg::Quat quat;
-            quat.makeRotate(MWWorld::Weather::defaultDirection(), mStormParticleDirection);
-            // Morrowind deliberately rotates the blizzard mesh, so so should we.
-            if (mCurrentParticleEffect == Settings::models().mWeatherblizzard.get())
-                quat.makeRotate(osg::Vec3f(-1, 0, 0), mStormParticleDirection);
-            mParticleNode->setAttitude(quat);
-        }
 
         const MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
 
@@ -636,18 +608,19 @@ namespace MWRender
         if (!mCreated)
             return;
 
-        mRainEntranceSpeed = weather.mRainEntranceSpeed;
-        mRainMaxRaindrops = weather.mRainMaxRaindrops;
-        mRainDiameter = weather.mRainDiameter;
-        mRainMinHeight = weather.mRainMinHeight;
-        mRainMaxHeight = weather.mRainMaxHeight;
-        mRainSpeed = weather.mRainSpeed;
+        mRainEntranceSpeed = weather.getRainEntranceSpeed();
+        mRainMaxRaindrops = weather.getRainMaxRaindrops();
+        mRainDiameter = weather.getRainDiameter();
+        mRainMinHeight = weather.getRainMinHeight();
+        mRainMaxHeight = weather.getRainMaxHeight();
+        mRainSpeed = weather.getRainSpeed();
         mWindSpeed = weather.mWindSpeed;
         mBaseWindSpeed = weather.mBaseWindSpeed;
+        mRipplesEnabled = weather.getRipplesEnabled();
 
-        if (mRainEffect != weather.mRainEffect)
+        if (mRainEffect != weather.getRainEffect())
         {
-            mRainEffect = weather.mRainEffect;
+            mRainEffect = weather.getRainEffect();
             if (!mRainEffect.empty())
             {
                 createRain();
@@ -660,15 +633,17 @@ namespace MWRender
 
         updateRainParameters();
 
-        mIsStorm = weather.mIsStorm;
+        mIsStorm = weather.getIsStorm();
 
         if (mIsStorm)
             mStormDirection = weather.mStormDirection;
 
-        if (mDirtyParticlesEffect || (mCurrentParticleEffect != weather.mParticleEffect))
+        if (mDirtyParticlesEffect || mCurrentParticleEffect != weather.getParticleEffect()
+            || mParticleOcclusion != weather.getOcclusionEnabled())
         {
             mDirtyParticlesEffect = false;
-            mCurrentParticleEffect = weather.mParticleEffect;
+            mCurrentParticleEffect = weather.getParticleEffect();
+            mParticleOcclusion = weather.getOcclusionEnabled();
 
             // cleanup old particles
             if (mParticleEffect)
@@ -711,8 +686,6 @@ namespace MWRender
                 mParticleEffect->accept(findPSVisitor);
 
                 const osg::Vec3 defaultWrapRange = osg::Vec3(1024, 1024, 800);
-                const bool occlusionEnabledForEffect
-                    = !mRainEffect.empty() || mCurrentParticleEffect == Settings::models().mWeathersnow.get();
 
                 for (unsigned int i = 0; i < findPSVisitor.mFoundNodes.size(); ++i)
                 {
@@ -720,7 +693,7 @@ namespace MWRender
                         = static_cast<osgParticle::ParticleSystem*>(findPSVisitor.mFoundNodes[i]);
 
                     osg::ref_ptr<osgParticle::ModularProgram> program = new osgParticle::ModularProgram;
-                    if (occlusionEnabledForEffect)
+                    if (mParticleOcclusion)
                         program->addOperator(new WrapAroundOperator(mCamera, defaultWrapRange));
                     program->addOperator(new WeatherAlphaOperator(mPrecipitationAlpha, false));
                     program->setParticleSystem(ps);
@@ -735,13 +708,13 @@ namespace MWRender
 
                     ps->setUserValue("simpleLighting", true);
 
-                    if (occlusionEnabledForEffect)
+                    if (mParticleOcclusion)
                         ps->setUserValue("particleOcclusion", true);
                 }
 
                 mSceneManager->recreateShaders(mParticleNode);
 
-                if (mPrecipitationOcclusion && occlusionEnabledForEffect)
+                if (mPrecipitationOcclusion && mParticleOcclusion)
                 {
                     mPrecipitationOccluder->enable();
                     mPrecipitationOccluder->updateRange(defaultWrapRange);
@@ -836,6 +809,13 @@ namespace MWRender
 
         mAtmosphereNightNode->setNodeMask(weather.mNight ? ~0u : 0);
         mPrecipitationAlpha = weather.mPrecipitationAlpha;
+
+        if (mIsStorm && mParticleNode)
+        {
+            osg::Quat quat;
+            quat.makeRotate(weather.getStormParticleRotation(), mStormParticleDirection);
+            mParticleNode->setAttitude(quat);
+        }
     }
 
     float SkyManager::getBaseWindSpeed() const
@@ -912,11 +892,6 @@ namespace MWRender
             models.push_back(Settings::models().mSkynight02);
         models.push_back(Settings::models().mSkynight01);
         models.push_back(Settings::models().mSkyclouds);
-
-        models.push_back(Settings::models().mWeatherashcloud);
-        models.push_back(Settings::models().mWeatherblightcloud);
-        models.push_back(Settings::models().mWeathersnow);
-        models.push_back(Settings::models().mWeatherblizzard);
 
         textures.emplace_back("textures/tx_mooncircle_full_s.dds");
         textures.emplace_back("textures/tx_mooncircle_full_m.dds");

@@ -29,10 +29,6 @@ namespace Settings
         SettingValue<VFS::Path::Normalized> mSkyclouds{ mIndex, "Models", "skyclouds" };
         SettingValue<VFS::Path::Normalized> mSkynight01{ mIndex, "Models", "skynight01" };
         SettingValue<VFS::Path::Normalized> mSkynight02{ mIndex, "Models", "skynight02" };
-        SettingValue<VFS::Path::Normalized> mWeatherashcloud{ mIndex, "Models", "weatherashcloud" };
-        SettingValue<VFS::Path::Normalized> mWeatherblightcloud{ mIndex, "Models", "weatherblightcloud" };
-        SettingValue<VFS::Path::Normalized> mWeathersnow{ mIndex, "Models", "weathersnow" };
-        SettingValue<VFS::Path::Normalized> mWeatherblizzard{ mIndex, "Models", "weatherblizzard" };
     };
 }
 

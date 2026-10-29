@@ -138,85 +138,6 @@ namespace MWWorld
         return direction;
     }
 
-    Weather::Weather(ESM::RefId id, int scriptId, const std::string& name, float stormWindSpeed, float dlFactor,
-        float dlOffset, VFS::Path::NormalizedView particleEffect)
-        : mId(id)
-        , mScriptId(scriptId)
-        , mName(name)
-        , mSkyColor(Fallback::Map::getColour("Weather_" + name + "_Sky_Sunrise_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Sky_Day_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Sky_Sunset_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Sky_Night_Color"))
-        , mFogColor(Fallback::Map::getColour("Weather_" + name + "_Fog_Sunrise_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Fog_Day_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Fog_Sunset_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Fog_Night_Color"))
-        , mAmbientColor(Fallback::Map::getColour("Weather_" + name + "_Ambient_Sunrise_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Ambient_Day_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Ambient_Sunset_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Ambient_Night_Color"))
-        , mSunColor(Fallback::Map::getColour("Weather_" + name + "_Sun_Sunrise_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Sun_Day_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Sun_Sunset_Color"),
-              Fallback::Map::getColour("Weather_" + name + "_Sun_Night_Color"))
-        , mLandFogDepth(Fallback::Map::getFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
-              Fallback::Map::getFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
-              Fallback::Map::getFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
-              Fallback::Map::getFloat("Weather_" + name + "_Land_Fog_Night_Depth"))
-        , mSunDiscSunsetColor(Fallback::Map::getColour("Weather_" + name + "_Sun_Disc_Sunset_Color"))
-        , mWindSpeed(Fallback::Map::getFloat("Weather_" + name + "_Wind_Speed"))
-        , mCloudSpeed(Fallback::Map::getFloat("Weather_" + name + "_Cloud_Speed"))
-        , mGlareView(Fallback::Map::getFloat("Weather_" + name + "_Glare_View"))
-        , mIsStorm(mWindSpeed > stormWindSpeed)
-        , mRainSpeed(Fallback::Map::getFloat("Weather_Precip_Gravity"))
-        , mRainEntranceSpeed(Fallback::Map::getFloat("Weather_" + name + "_Rain_Entrance_Speed"))
-        , mRainMaxRaindrops(Fallback::Map::getInt("Weather_" + name + "_Max_Raindrops"))
-        , mRainDiameter(Fallback::Map::getFloat("Weather_" + name + "_Rain_Diameter"))
-        , mRainThreshold(Fallback::Map::getFloat("Weather_" + name + "_Rain_Threshold"))
-        , mRainMinHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Min"))
-        , mRainMaxHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Max"))
-        , mParticleEffect(particleEffect)
-        , mStormDirection(Weather::defaultDirection())
-        , mCloudsMaximumPercent(Fallback::Map::getFloat("Weather_" + name + "_Clouds_Maximum_Percent"))
-        , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
-        , mThunderFrequency(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Frequency"))
-        , mThunderThreshold(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Threshold"))
-        , mFlashDecrement(Fallback::Map::getFloat("Weather_" + name + "_Flash_Decrement"))
-        , mFlashBrightness(0.0f)
-    {
-        const auto* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-        mCloudTexture = Misc::ResourceHelpers::correctTexturePath(
-            VFS::Path::toNormalized(Fallback::Map::getString("Weather_" + name + "_Cloud_Texture")), *vfs);
-        if (Fallback::Map::getBool("Weather_" + name + "_Using_Precip"))
-            mRainEffect = VFS::Path::NormalizedView("meshes/raindrop.nif");
-        mDL.FogFactor = dlFactor;
-        mDL.FogOffset = dlOffset;
-        mThunderSoundID[0]
-            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_0"));
-        mThunderSoundID[1]
-            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_1"));
-        mThunderSoundID[2]
-            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_2"));
-        mThunderSoundID[3]
-            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_3"));
-
-        if (!mRainEffect.empty()) // NOTE: in vanilla, the weathers with rain seem to be hardcoded; changing
-                                  // Using_Precip has no effect
-        {
-            mRainLoopSoundID
-                = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Rain_Loop_Sound_ID"));
-            if (mRainLoopSoundID.empty()) // default to "rain" if not set
-                mRainLoopSoundID = ESM::RefId::stringRefId("rain");
-            else if (mRainLoopSoundID == "None")
-                mRainLoopSoundID = ESM::RefId();
-        }
-
-        mAmbientLoopSoundID
-            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
-        if (mAmbientLoopSoundID == "None")
-            mAmbientLoopSoundID = ESM::RefId();
-    }
-
     float Weather::transitionDelta() const
     {
         // Transition Delta describes how quickly transitioning to the weather in question will take, in Hz. Note that
@@ -284,6 +205,48 @@ namespace MWWorld
         // Flash brightness appears additive, since if multiple strikes occur, it takes longer for it to decay to 0.
         mFlashBrightness += 1 - (distance * 0.25f);
         MWBase::Environment::get().getSoundManager()->playSound(mThunderSoundID[distance], 1.0, 1.0);
+    }
+
+    void Weather::blank()
+    {
+        mName.clear();
+        mCloudTexture.clear();
+        mParticleEffect.clear();
+        mRainEffect.clear();
+        mAmbientLoopSoundID = {};
+        mRainLoopSoundID = {};
+        mThunderSoundID.fill({});
+        mSkyColor.blank();
+        mFogColor.blank();
+        mAmbientColor.blank();
+        mSunColor.blank();
+        mLandFogDepth.blank();
+        mSunDiscSunsetColor = {};
+        mStormDirection = defaultDirection();
+        mStormParticleRotation = defaultDirection();
+        mScriptId = {};
+        mWindSpeed = {};
+        mCloudSpeed = {};
+        mGlareView = {};
+        mDL.FogFactor = {};
+        mDL.FogOffset = {};
+        mRainSpeed = {};
+        mRainEntranceSpeed = 1.f;
+        mRainMaxRaindrops = {};
+        mRainDiameter = {};
+        mRainThreshold = {};
+        mRainMinHeight = {};
+        mRainMaxHeight = {};
+        mCloudsMaximumPercent = 1.f;
+        mTransitionDelta = {};
+        mThunderFrequency = {};
+        mThunderThreshold = {};
+        mFlashDecrement = {};
+        mFlashBrightness = {};
+        mIsStorm = {};
+        mRipplesEnabled = {};
+        mUseTorches = true;
+        mOcclusionEnabled = {};
     }
 
     RegionWeather::RegionWeather(const ESM::Region& region)
@@ -645,31 +608,17 @@ namespace MWWorld
             return 0.0f;
     }
 
-    void WeatherStore::reset(const MWWorld::ESMStore& store)
+    void WeatherStore::reset()
     {
+        if (mInitial.empty())
+        {
+            for (const Weather* weather : mShared)
+                mInitial.push_back(*weather);
+        }
         mShared.clear();
         mStatic.clear();
-        static const float fStromWindSpeed = store.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
-        const auto addWeather = [&](const std::string& name, float dlFactor, float dlOffset,
-                                    VFS::Path::NormalizedView particleEffect = {}) {
-            const int index = static_cast<int>(getSize());
-            Weather weather(
-                ESM::Weather::indexToRefId(index), index, name, fStromWindSpeed, dlFactor, dlOffset, particleEffect);
-
-            insertStatic(std::move(weather));
-        };
-        // These distant land fog factor and offset values are the defaults MGE XE provides. Should be
-        // provided by settings somewhere?
-        addWeather("Clear", 1.0f, 0.0f); // 0
-        addWeather("Cloudy", 0.9f, 0.0f); // 1
-        addWeather("Foggy", 0.2f, 30.0f); // 2
-        addWeather("Overcast", 0.7f, 0.0f); // 3
-        addWeather("Rain", 0.5f, 10.0f); // 4
-        addWeather("Thunderstorm", 0.5f, 20.0f); // 5
-        addWeather("Ashstorm", 0.2f, 50.0f, Settings::models().mWeatherashcloud.get()); // 6
-        addWeather("Blight", 0.2f, 60.0f, Settings::models().mWeatherblightcloud.get()); // 7
-        addWeather("Snow", 0.5f, 40.0f, Settings::models().mWeathersnow.get()); // 8
-        addWeather("Blizzard", 0.16f, 70.0f, Settings::models().mWeatherblizzard.get()); // 9
+        for (const Weather& weather : mInitial)
+            insertStatic(weather);
     }
 
     const Weather* WeatherStore::search(ESM::RefId id) const
@@ -693,9 +642,9 @@ namespace MWWorld
         return const_cast<Weather*>(self->search(id));
     }
 
-    Weather* WeatherStore::insertStatic(Weather&& item)
+    Weather* WeatherStore::insertStatic(const Weather& item)
     {
-        const auto [it, inserted] = mStatic.insert_or_assign(item.mId, std::move(item));
+        const auto [it, inserted] = mStatic.insert_or_assign(item.mId, item);
         Weather* ptr = &it->second;
         if (inserted)
             mShared.push_back(ptr);
@@ -749,7 +698,7 @@ namespace MWWorld
         , mCurrentWindSpeed(0.f)
         , mNextWindSpeed(0.f)
         , mIsStorm(false)
-        , mPrecipitation(false)
+        , mUseTorches(true)
         , mCurrentRegion()
         , mTimePassed(0)
         , mFastForward(false)
@@ -780,13 +729,9 @@ namespace MWWorld
 
         mTimeSettings.mSunriseTransitions["Stars"] = starSetting;
 
-        mWeatherStore->reset(mStore);
+        mWeatherStore->reset();
 
-        Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
-        for (; it != store.get<ESM::Region>().end(); ++it)
-        {
-            mRegions.insert(std::make_pair(it->mId, RegionWeather(*it)));
-        }
+        importRegions();
 
         forceWeather(ESM::Weather::indexToRefId(0));
     }
@@ -923,11 +868,8 @@ namespace MWWorld
             mNextWindSpeed = result.mNextWindSpeed;
         }
 
-        mIsStorm = result.mIsStorm;
-
-        // For some reason Ash Storm is not considered as a precipitation weather in game
-        mPrecipitation = !(result.mParticleEffect.empty() && result.mRainEffect.empty())
-            && result.mParticleEffect != Settings::models().mWeatherashcloud.get();
+        mIsStorm = result.getIsStorm();
+        mUseTorches = result.getUseTorches();
 
         // disable sun during night
         if (time.getHour() >= mTimeSettings.mNightStart || time.getHour() <= mSunriseTime)
@@ -993,32 +935,32 @@ namespace MWWorld
         mRendering.getSkyManager()->setWeather(result);
 
         // Play sounds
-        if (mPlayingAmbientSoundID != result.mAmbientLoopSoundID)
+        if (mPlayingAmbientSoundID != result.getAmbientLoopSoundID())
         {
             if (mAmbientSound)
             {
                 MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
                 mAmbientSound = nullptr;
             }
-            if (!result.mAmbientLoopSoundID.empty())
-                mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(result.mAmbientLoopSoundID,
+            mPlayingAmbientSoundID = result.getAmbientLoopSoundID();
+            if (!mPlayingAmbientSoundID.empty())
+                mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(mPlayingAmbientSoundID,
                     result.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
-            mPlayingAmbientSoundID = result.mAmbientLoopSoundID;
         }
         else if (mAmbientSound)
             mAmbientSound->setVolume(result.mAmbientSoundVolume);
 
-        if (mPlayingRainSoundID != result.mRainLoopSoundID)
+        if (mPlayingRainSoundID != result.getRainLoopSoundID())
         {
             if (mRainSound)
             {
                 MWBase::Environment::get().getSoundManager()->stopSound(mRainSound);
                 mRainSound = nullptr;
             }
-            if (!result.mRainLoopSoundID.empty())
-                mRainSound = MWBase::Environment::get().getSoundManager()->playSound(result.mRainLoopSoundID,
-                    result.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
-            mPlayingRainSoundID = result.mRainLoopSoundID;
+            mPlayingRainSoundID = result.getRainLoopSoundID();
+            if (!mPlayingRainSoundID.empty())
+                mRainSound = MWBase::Environment::get().getSoundManager()->playSound(
+                    mPlayingRainSoundID, result.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
         }
         else if (mRainSound)
             mRainSound->setVolume(result.mAmbientSoundVolume);
@@ -1082,7 +1024,7 @@ namespace MWWorld
     {
         bool isDark = hour < mSunriseTime || hour > mTimeSettings.mNightStart;
 
-        return isDark && !mPrecipitation;
+        return isDark && mUseTorches;
     }
 
     float WeatherManager::getSunPercentage(float hour) const
@@ -1178,9 +1120,17 @@ namespace MWWorld
         mCurrentRegion = ESM::RefId();
         mTimePassed = 0.0f;
         mWeatherUpdateTime = 0.0f;
+        mWindSpeed = 0.f;
+        mCurrentWindSpeed = 0.f;
+        mNextWindSpeed = 0.f;
+        mIsStorm = false;
+        mUseTorches = true;
+        mFastForward = false;
+        mNightDayMode = Default;
         forceWeather(ESM::Weather::indexToRefId(0));
         mRegions.clear();
         importRegions();
+        mWeatherStore->reset();
     }
 
     inline void WeatherManager::importRegions()
@@ -1355,22 +1305,9 @@ namespace MWWorld
 
         result.mCloudSpeed = current.mCloudSpeed;
         result.mGlareView = current.mGlareView;
-        result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
-        result.mRainLoopSoundID = current.mRainLoopSoundID;
+        result.mWeather = &current;
         result.mAmbientSoundVolume = 1.f;
         result.mPrecipitationAlpha = 1.f;
-
-        result.mIsStorm = current.mIsStorm;
-
-        result.mRainSpeed = current.mRainSpeed;
-        result.mRainEntranceSpeed = current.mRainEntranceSpeed;
-        result.mRainDiameter = current.mRainDiameter;
-        result.mRainMinHeight = current.mRainMinHeight;
-        result.mRainMaxHeight = current.mRainMaxHeight;
-        result.mRainMaxRaindrops = current.mRainMaxRaindrops;
-
-        result.mParticleEffect = current.mParticleEffect;
-        result.mRainEffect = current.mRainEffect;
 
         result.mNight = (gameHour < mSunriseTime
             || gameHour
@@ -1471,38 +1408,17 @@ namespace MWWorld
 
         if (factor < threshold)
         {
-            result.mIsStorm = current.mIsStorm;
-            result.mParticleEffect = current.mParticleEffect;
             result.mStormParticleDirection = current.mStormParticleDirection;
-            result.mRainEffect = current.mRainEffect;
-            result.mRainSpeed = current.mRainSpeed;
-            result.mRainEntranceSpeed = current.mRainEntranceSpeed;
+            result.mWeather = current.mWeather;
             result.mAmbientSoundVolume = 1.f - factor / threshold;
             result.mPrecipitationAlpha = result.mAmbientSoundVolume;
-            result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
-            result.mRainLoopSoundID = current.mRainLoopSoundID;
-            result.mRainDiameter = current.mRainDiameter;
-            result.mRainMinHeight = current.mRainMinHeight;
-            result.mRainMaxHeight = current.mRainMaxHeight;
-            result.mRainMaxRaindrops = current.mRainMaxRaindrops;
         }
         else
         {
-            result.mIsStorm = other.mIsStorm;
-            result.mParticleEffect = other.mParticleEffect;
             result.mStormParticleDirection = other.mStormParticleDirection;
-            result.mRainEffect = other.mRainEffect;
-            result.mRainSpeed = other.mRainSpeed;
-            result.mRainEntranceSpeed = other.mRainEntranceSpeed;
+            result.mWeather = other.mWeather;
             result.mAmbientSoundVolume = (factor - threshold) / (1 - threshold);
             result.mPrecipitationAlpha = result.mAmbientSoundVolume;
-            result.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
-            result.mRainLoopSoundID = other.mRainLoopSoundID;
-
-            result.mRainDiameter = other.mRainDiameter;
-            result.mRainMinHeight = other.mRainMinHeight;
-            result.mRainMaxHeight = other.mRainMaxHeight;
-            result.mRainMaxRaindrops = other.mRainMaxRaindrops;
         }
         return result;
     }

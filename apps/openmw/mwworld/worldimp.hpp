@@ -320,7 +320,7 @@ namespace MWWorld
 
         void changeWeather(ESM::RefId region, ESM::RefId id) override;
 
-        const MWWorld::WeatherStore& getAllWeather() const override;
+        MWWorld::WeatherStore& getAllWeather() const override;
 
         int getCurrentWeatherScriptId() const override;
         const MWWorld::Weather* getCurrentWeather() const override;

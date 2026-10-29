@@ -93,6 +93,7 @@ namespace MWLua::Types
         constexpr static bool isMutable = false;
 
         static const Record& asRecord(const T& rec) { return rec; }
+        static Record& asRecord(T& rec) { return rec; }
     };
 
     template <class T>
@@ -102,6 +103,7 @@ namespace MWLua::Types
         constexpr static bool isMutable = true;
 
         static const Record& asRecord(const MutableRecord<T>& rec) { return rec.find(); }
+        static Record& asRecord(MutableRecord<T>& rec) { return rec.find(); }
     };
 
     template <class Type, class... Member>

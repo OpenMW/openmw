@@ -31,9 +31,11 @@
 #include "stats.hpp"
 #include "types/modelproperty.hpp"
 #include "types/types.hpp"
+#include "weatherbindings.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/weather.hpp"
 
 namespace
 {
@@ -41,6 +43,12 @@ namespace
     struct MutableStore
     {
         MWWorld::Store<T>& mStore;
+    };
+
+    template <>
+    struct MutableStore<MWWorld::Weather>
+    {
+        MWWorld::WeatherStore& mStore;
     };
 
     template <class T>
@@ -504,6 +512,15 @@ namespace MWLua
             api["records"] = MutableStore<ESM::Sound>{ store };
             return LuaUtil::makeReadOnly(api);
         }
+
+        sol::table initWeatherBindings(sol::state_view& lua, MWWorld::WeatherStore& store)
+        {
+            addRecordStoreBindings<MWWorld::Weather>(lua, &MWLua::tableToWeather);
+            addMutableWeatherType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<MWWorld::Weather>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
     }
 
     sol::table initContentPackage(const Context& context)
@@ -536,6 +553,7 @@ namespace MWLua
         api["spells"] = initSpellBindings(lua, esmStore.getWritable<ESM::Spell>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());
         api["sounds"] = initSoundBindings(lua, esmStore.getWritable<ESM::Sound>());
+        api["weathers"] = initWeatherBindings(lua, MWBase::Environment::get().getWorld()->getAllWeather());
         api["RANGE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, ESM::RangeType>(lua,
             {
                 { "Self", ESM::RT_Self },

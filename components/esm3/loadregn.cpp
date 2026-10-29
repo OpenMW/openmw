@@ -63,25 +63,35 @@ namespace ESM
                 case fourCC("WEAT"):
                 {
                     esm.getSubHeader();
-                    std::array<uint8_t, Weather::Length> probabilities;
-                    // Cold weather not included before 1.3
-                    if (esm.getSubSize() == Weather::Length)
+                    if (esm.getFormatVersion() <= ESM::MaxWeatherIndexFormatVersion)
                     {
-                        esm.getT(probabilities);
-                    }
-                    else if (esm.getSubSize() == Weather::Length - 2)
-                    {
-                        probabilities.fill(0);
-                        esm.getExact(&probabilities, esm.getSubSize());
+                        std::array<uint8_t, Weather::Length> probabilities;
+                        // Cold weather not included before 1.3
+                        if (esm.getSubSize() == Weather::Length)
+                        {
+                            esm.getT(probabilities);
+                        }
+                        else if (esm.getSubSize() == Weather::Length - 2)
+                        {
+                            probabilities.fill(0);
+                            esm.getExact(&probabilities, esm.getSubSize());
+                        }
+                        else
+                        {
+                            esm.fail("Don't know what to do in this version");
+                        }
+                        for (int i = 0; i < Weather::Length; ++i)
+                        {
+                            if (probabilities[i] != 0)
+                                mData.mProbabilities[Weather::indexToRefId(i)] = probabilities[i];
+                        }
                     }
                     else
                     {
-                        esm.fail("Don't know what to do in this version");
-                    }
-                    for (int i = 0; i < Weather::Length; ++i)
-                    {
-                        if (probabilities[i] != 0)
-                            mData.mProbabilities[Weather::indexToRefId(i)] = probabilities[i];
+                        uint8_t chance;
+                        esm.getT(chance);
+                        ESM::RefId weather = esm.getRefId(esm.getSubSize() - sizeof(chance));
+                        mData.mProbabilities[weather] = chance;
                     }
                     break;
                 }
@@ -126,18 +136,33 @@ namespace ESM
 
         esm.writeHNOCString("FNAM", mName);
 
-        std::array<uint8_t, Weather::Length> probabilities;
-        probabilities.fill(0);
-        for (const auto& [id, chance] : mData.mProbabilities)
+        if (esm.getFormatVersion() <= ESM::MaxWeatherIndexFormatVersion)
         {
-            const int index = Weather::refIdToIndex(id);
-            if (index >= 0)
-                probabilities[index] = chance;
+            std::array<uint8_t, Weather::Length> probabilities;
+            probabilities.fill(0);
+            for (const auto& [id, chance] : mData.mProbabilities)
+            {
+                const int index = Weather::refIdToIndex(id);
+                if (index >= 0)
+                    probabilities[index] = chance;
+            }
+            if (esm.getVersion() == VER_120)
+                esm.writeHNT("WEAT", probabilities, probabilities.size() - 2);
+            else
+                esm.writeHNT("WEAT", probabilities);
         }
-        if (esm.getVersion() == VER_120)
-            esm.writeHNT("WEAT", probabilities, probabilities.size() - 2);
         else
-            esm.writeHNT("WEAT", probabilities);
+        {
+            for (const auto& [id, chance] : mData.mProbabilities)
+            {
+                if (chance == 0)
+                    continue;
+                esm.startSubRecord("WEAT");
+                esm.writeT(chance);
+                esm.writeHRefId(id);
+                esm.endRecord("WEAT");
+            }
+        }
 
         esm.writeHNOCRefId("BNAM", mSleepList);
 

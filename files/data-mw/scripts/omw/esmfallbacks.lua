@@ -1,4 +1,5 @@
 local content = require('openmw.content')
+local util = require('openmw.util')
 
 local function asNumber(value)
     if type(value) ~= 'number' then
@@ -195,6 +196,130 @@ local function setMagicEffectNames()
     end
 end
 
+local function generateDefaultWeathers()
+    local weathers = {
+        { "Clear", 1, 0 },
+        { "Cloudy", 0.9, 0 },
+        { "Foggy", 0.2, 30 },
+        { "Overcast", 0.7, 0 },
+        { "Rain", 0.5, 10 },
+        { "Thunderstorm", 0.5, 20 },
+        { "Ashstorm", 0.2, 50, 'meshes/ashcloud.nif' },
+        { "Blight", 0.2, 60, 'meshes/blightcloud.nif' },
+        { "Snow", 0.5, 40, 'meshes/snow.nif' },
+        { "Blizzard", 0.16, 70, 'meshes/blizzard.nif' },
+    }
+    local gmsts = content.gameSettings.records
+    local commaString = util.color.commaString
+    local function getColor(id)
+        local ok, c = pcall(function() return commaString(gmsts[id]) end)
+        if not ok then
+            print('Setting', id, 'is not a valid color, using middle gray as a fallback')
+            return util.color.rgba(0.5, 0.5, 0.5, 1)
+        end
+        return c
+    end
+    local function getFloat(id)
+        return asNumber(gmsts[id])
+    end
+    local function getString(id, fallback)
+        local v = gmsts[id]
+        if type(v) ~= 'string' or v == '' then
+            return fallback or ''
+        end
+        return v
+    end
+    local function getBool(id)
+        return asNumber(gmsts[id]) ~= 0
+    end
+    local function getInterpolatorColor(name, color, time)
+        return getColor(('Weather_%s_%s_%s_Color'):format(name, color, time))
+    end
+    local function getColorInterpolator(name, color)
+        return {
+            sunrise = getInterpolatorColor(name, color, 'Sunrise'),
+            day = getInterpolatorColor(name, color, 'Day'),
+            sunset = getInterpolatorColor(name, color, 'Sunset'),
+            night = getInterpolatorColor(name, color, 'Night'),
+        }
+    end
+    local rainSpeed = getFloat('Weather_Precip_Gravity')
+    local rainRipples = getBool('Weather_Rain_Ripples')
+    local snowRipples = getBool('Weather_Snow_Ripples')
+    local records = content.weathers.records
+    for index, table in ipairs(weathers) do
+        local recordId, dlFactor, dlOffset, particleEffect = unpack(table)
+        local fogDepthDay = getFloat(('Weather_%s_Land_Fog_Day_Depth'):format(recordId))
+        local fogDepthNight = getFloat(('Weather_%s_Land_Fog_Night_Depth'):format(recordId))
+        local windSpeed = getFloat(('Weather_%s_Wind_Speed'):format(recordId))
+        local fStromWindSpeed = getFloat('fStromWindSpeed')
+        local rainEntranceSpeed = getFloat(('Weather_%s_Rain_Entrance_Speed'):format(recordId))
+        local weather = {
+            scriptId = index - 1,
+            name = recordId,
+            particleEffect = particleEffect,
+            skyColor = getColorInterpolator(recordId, 'Sky'),
+            fogColor = getColorInterpolator(recordId, 'Fog'),
+            ambientColor = getColorInterpolator(recordId, 'Ambient'),
+            sunColor = getColorInterpolator(recordId, 'Sun'),
+            landFogDepth = {
+                sunrise = fogDepthDay,
+                day = fogDepthDay,
+                sunset = fogDepthDay,
+                night = fogDepthNight,
+            },
+            sunDiscSunsetColor = getColor(('Weather_%s_Sun_Disc_Sunset_Color'):format(recordId)),
+            windSpeed = windSpeed,
+            cloudSpeed = getFloat(('Weather_%s_Cloud_Speed'):format(recordId)),
+            glareView = getFloat(('Weather_%s_Glare_View'):format(recordId)),
+            rainSpeed = rainSpeed,
+            rainEntranceSpeed = rainEntranceSpeed > 0 and rainEntranceSpeed or nil,
+            rainMaxRaindrops = getFloat(('Weather_%s_Max_Raindrops'):format(recordId)),
+            rainDiameter = getFloat(('Weather_%s_Rain_Diameter'):format(recordId)),
+            rainThreshold = getFloat(('Weather_%s_Rain_Threshold'):format(recordId)),
+            rainMinHeight = getFloat(('Weather_%s_Rain_Height_Min'):format(recordId)),
+            rainMaxHeight = getFloat(('Weather_%s_Rain_Height_Max'):format(recordId)),
+            cloudsMaximumPercent = getFloat(('Weather_%s_Clouds_Maximum_Percent'):format(recordId)),
+            isStorm = windSpeed > fStromWindSpeed,
+            cloudTexture = getString(('Weather_%s_Cloud_Texture'):format(recordId)),
+            distantLandFogFactor = dlFactor,
+            distantLandFogOffset = dlOffset,
+            thunderSoundID = {
+                getString(('Weather_%s_Thunder_Sound_ID_0'):format(recordId)),
+                getString(('Weather_%s_Thunder_Sound_ID_1'):format(recordId)),
+                getString(('Weather_%s_Thunder_Sound_ID_2'):format(recordId)),
+                getString(('Weather_%s_Thunder_Sound_ID_3'):format(recordId)),
+            },
+            ambientLoopSoundID = getString(('Weather_%s_Ambient_Loop_Sound_ID'):format(recordId)),
+            transitionDelta = getFloat(('Weather_%s_Transition_Delta'):format(recordId)),
+            thunderFrequency = getFloat(('Weather_%s_Thunder_Frequency'):format(recordId)),
+            thunderThreshold = getFloat(('Weather_%s_Thunder_Threshold'):format(recordId)),
+            flashDecrement = getFloat(('Weather_%s_Flash_Decrement'):format(recordId)),
+        }
+        if weather.ambientLoopSoundID == 'None' then
+            weather.ambientLoopSoundID = nil
+        end
+        if getBool(('Weather_%s_Using_Precip'):format(recordId)) then
+            weather.rainEffect = 'meshes/raindrop.nif'
+            weather.rainLoopSoundID = getString(('Weather_%s_Rain_Loop_Sound_ID'):format(recordId), 'rain')
+            if weather.rainLoopSoundID == 'None' then
+                weather.rainLoopSoundID = nil
+            end
+            weather.hasRipples = rainRipples
+            weather.isOccluded = true
+        elseif recordId == 'Snow' then
+            weather.hasRipples = snowRipples
+            weather.isOccluded = true
+        end
+        -- Morrowind deliberately rotates the blizzard mesh, so so should we.
+        if recordId == 'Blizzard' then
+            weather.stormParticleRotation = util.vector3(-1, 0, 0)
+        end
+        weather.canUseTorches = (not weather.rainEffect and not particleEffect) or recordId == 'Ashstorm'
+        records[recordId] = weather
+    end
+end
+
 return {
     engineHandlers = {
         onContentFilesLoaded = function()
@@ -202,6 +327,7 @@ return {
             setSkillProperties()
             generateDefaultDoors()
             generateDefaultGMSTs()
+            generateDefaultWeathers()
             generateDefaultStatics()
             setMagicEffectNames()
         end
