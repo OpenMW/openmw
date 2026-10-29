@@ -571,11 +571,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Error writing Launcher configuration backup file</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось сохранить данные в резервную копию файла с настройками лаунчера</translation>
     </message>
     <message>
         <source>Error opening OpenMW configuration backup file</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось открыть резервную копию файла с настройками OpenMW</translation>
     </message>
 </context>
 <context>

@@ -477,7 +477,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Error opening OpenMW configuration file</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler beim Öffnen der OpenMW-Konfigurationsdatei</translation>
     </message>
     <message>
         <source>First run</source>
@@ -525,7 +525,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Error writing Launcher configuration file</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler beim Schreiben der Launcher-Konfigurationsdatei</translation>
     </message>
     <message>
         <source>No game file selected</source>
@@ -569,11 +569,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Error writing Launcher configuration backup file</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler beim Schreiben der Sicherungskopie der Launcher-Konfigurationsdatei</translation>
     </message>
     <message>
         <source>Error opening OpenMW configuration backup file</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler beim Öffnen der Sicherungskopie der OpenMW-Konfigurationsdatei</translation>
     </message>
 </context>
 <context>
