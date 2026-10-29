@@ -571,6 +571,14 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
         <source>&lt;br&gt;&lt;b&gt;You do not have a game file selected.&lt;/b&gt;&lt;br&gt;&lt;br&gt;OpenMW will not start without a game file selected.&lt;br&gt;</source>
         <translation>&lt;br&gt;&lt;b&gt;Nie wybrano pliku gry.&lt;/b&gt;&lt;br&gt;&lt;br&gt;OpenMW nie uruchomi się bez wybranego pliku gry.&lt;br&gt;</translation>
     </message>
+    <message>
+        <source>Error writing Launcher configuration backup file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error opening OpenMW configuration backup file</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Launcher::SettingsPage</name>

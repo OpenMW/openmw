@@ -314,13 +314,14 @@ bool Launcher::MainDialog::setupLauncherSettings()
 {
     mLauncherSettings.clear();
 
+    // Launcher settings
     const QString path
         = Files::pathToQString(mCfgMgr.getUserConfigPath() / Config::LauncherSettings::sLauncherConfigFileName);
 
     if (!QFile::exists(path))
         return true;
 
-    Log(Debug::Info) << "Loading config file: " << path.toUtf8().constData();
+    Log(Debug::Info) << "Loading Launcher config file: " << path.toUtf8().constData();
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -338,6 +339,35 @@ bool Launcher::MainDialog::setupLauncherSettings()
     Misc::ensureUtf8Encoding(stream);
 
     mLauncherSettings.readFile(stream);
+    file.close();
+
+    // Launcher settings backup
+    file.setFileName(
+        Files::pathToQString(mCfgMgr.getUserConfigPath() / Config::LauncherSettings::sLauncherConfigBackupFileName));
+
+    // Read from the backup only if the watchdog is unset and the backup exists
+    if (mLauncherSettings.getWatchdog() || !file.exists())
+        return true;
+
+    Log(Debug::Warning) << "Watchdog unset. Restoring missing keys from Launcher config backup file: "
+                        << file.fileName().toUtf8().constData();
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        cfgError(tr("Error opening OpenMW configuration backup file"),
+            tr("<br><b>Could not open %0 for reading:</b><br><br>%1<br><br>"
+               "Please make sure you have the right permissions "
+               "and try again.<br>")
+                .arg(file.fileName().toHtmlEscaped())
+                .arg(file.errorString().toHtmlEscaped()));
+        return true;
+    }
+
+    QTextStream backupStream(&file);
+    Misc::ensureUtf8Encoding(backupStream);
+
+    mLauncherSettings.readFile(backupStream, true); // Restore missing settings
+    file.close();
 
     return true;
 }
@@ -528,6 +558,9 @@ bool Launcher::MainDialog::writeSettings()
         return false;
     }
 
+    // Set a watchdog value so future reads can check for dropped launcher settings
+    mLauncherSettings.setWatchdog(true);
+
     // Launcher settings
     file.setFileName(Files::pathToQString(userPath / Config::LauncherSettings::sLauncherConfigFileName));
 
@@ -543,10 +576,29 @@ bool Launcher::MainDialog::writeSettings()
     }
 
     QTextStream stream(&file);
-    stream.setDevice(&file);
     Misc::ensureUtf8Encoding(stream);
 
     mLauncherSettings.writeFile(stream);
+    file.close();
+
+    // Launcher settings backup
+    file.setFileName(Files::pathToQString(userPath / Config::LauncherSettings::sLauncherConfigBackupFileName));
+
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
+    {
+        // File cannot be opened or created
+        cfgError(tr("Error writing Launcher configuration backup file"),
+            tr("<br><b>Could not open or create %0 for writing</b><br><br>"
+               "Please make sure you have the right permissions "
+               "and try again.<br>")
+                .arg(file.fileName().toHtmlEscaped()));
+        return false;
+    }
+
+    QTextStream backupStream(&file);
+    Misc::ensureUtf8Encoding(backupStream);
+
+    mLauncherSettings.writeFile(backupStream);
     file.close();
 
     return true;

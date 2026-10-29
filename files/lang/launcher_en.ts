@@ -567,6 +567,14 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>&lt;br&gt;&lt;b&gt;You do not have a game file selected.&lt;/b&gt;&lt;br&gt;&lt;br&gt;OpenMW will not start without a game file selected.&lt;br&gt;</source>
         <translation></translation>
     </message>
+    <message>
+        <source>Error writing Launcher configuration backup file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error opening OpenMW configuration backup file</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Launcher::SettingsPage</name>

@@ -569,6 +569,14 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>&lt;br&gt;&lt;b&gt;Could not create directory %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;%1&lt;br&gt;</source>
         <translation>&lt;br&gt;&lt;b&gt;Не удалось создать директорию %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;%1&lt;br&gt;</translation>
     </message>
+    <message>
+        <source>Error writing Launcher configuration backup file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error opening OpenMW configuration backup file</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Launcher::SettingsPage</name>
