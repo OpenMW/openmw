@@ -66,7 +66,7 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("DATA"):
             {
-                // if (format == TES5)
+                // if (format == ESM::GameFormat::TES5)
                 if (subHdr.dataSize == 8) // FO3 is size 4
                     reader.get(mData);
                 else

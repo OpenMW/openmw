@@ -46,8 +46,8 @@ void ESM4::World::load(ESM4::Reader& reader)
     reader.setCurrWorld(mId); // save for CELL later
 
     const ESM::GameFormat format = reader.gameFormat();
-    // bool isTES4 = format == TES4;
-    // bool isFONV = format == FONV;
+    // bool isTES4 = format == ESM::GameFormat::TES4;
+    // bool isFONV = format == ESM::GameFormat::FONV;
     const bool isTES5 = format == ESM::GameFormat::TES5;
     bool usingDefaultLevels = true;
 
