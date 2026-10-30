@@ -194,8 +194,15 @@ namespace MWClass
         const ESM4NpcCustomData& data = getCustomData(ptr);
         if (data.mTraits == nullptr)
             return {};
-        if (data.mTraits->mGameFormat == ESM::GameFormat::TES4)
-            return data.mTraits->mModel.getNormalized();
+        switch (data.mTraits->mGameFormat)
+        {
+            case ESM::GameFormat::TES4:
+            case ESM::GameFormat::FO3:
+            case ESM::GameFormat::FONV:
+                return data.mTraits->mModel.getNormalized(); // Skeleton kept in the NPC record
+            default:
+                break;
+        }
         return data.mIsFemale ? data.mRace->mModelFemale.getNormalized() : data.mRace->mModelMale.getNormalized();
     }
 
