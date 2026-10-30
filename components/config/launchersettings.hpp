@@ -20,7 +20,7 @@ namespace Config
     {
     public:
         static constexpr char sLauncherConfigFileName[] = "launcher.cfg";
-        static constexpr char sLauncherConfigBackupFileName[] = "launcher.cfg.bak";
+        static constexpr char sLauncherConfigBackupFileName[] = "launcher-wd.dat";
 
         /// Keys of a section this version does not use, in file order, written back as read
         using UnknownKeys = QList<QPair<QString, QString>>;

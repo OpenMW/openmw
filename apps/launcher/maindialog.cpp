@@ -595,6 +595,9 @@ bool Launcher::MainDialog::writeSettings()
     QTextStream backupStream(&file);
     Misc::ensureUtf8Encoding(backupStream);
 
+    backupStream << "# Written automatically by the OpenMW launcher. Do not edit or rename.\n"
+                    "# Your settings are located in launcher.cfg\n";
+
     mLauncherSettings.writeFile(backupStream);
     file.close();
 
