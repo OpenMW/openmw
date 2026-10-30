@@ -1,5 +1,6 @@
 #include "nifloader.hpp"
 
+#include <algorithm>
 #include <mutex>
 #include <string_view>
 
@@ -1732,6 +1733,19 @@ namespace NifOsg
                     rig->setRootBone(rootBone->mName);
 
                 drawable = rig;
+
+                // FO3 and FONV body parts 100-299 are caps where a limb cuts off.
+                // TODO: Later games have different ids.
+                // TODO: Handle actual dismemberment.
+                if (skin->mRecordType == Nif::RC_BSDismemberSkinInstance
+                    && mBethVersion <= Nif::NIFFile::BethVersion::BETHVER_FO3)
+                {
+                    const auto& parts = static_cast<const Nif::BSDismemberSkinInstance*>(skin)->mParts;
+                    if (!parts.empty() && std::all_of(parts.begin(), parts.end(), [](const auto& part) {
+                            return part.mType >= 100 && part.mType < 300;
+                        }))
+                        drawable->setNodeMask(Loader::getHiddenNodeMask());
+                }
             }
 
             for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
