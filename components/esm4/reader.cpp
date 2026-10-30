@@ -538,7 +538,7 @@ namespace ESM4
             mStream->read(compressed.data(), recordSize);
             mSavedStream = std::move(mStream);
 
-            mCtx.recordHeader.record.dataSize = uncompressedSize - sizeof(uncompressedSize);
+            mCtx.recordHeader.record.dataSize = uncompressedSize;
 
             auto memoryStreamPtr = decompress(position, compressed, uncompressedSize);
 
