@@ -26,7 +26,7 @@ access_token="${GITLAB_ACCESS_TOKEN:-${CI_JOB_TOKEN}}"
 api="${CI_API_V4_URL:-https://gitlab.com/api/v4}"
 project_url="$api/projects/$project"
 
-if curl --no-progress-meter --header "PRIVATE-TOKEN: $access_token" --url "$project_url/pipelines/$CI_PIPELINE_ID/jobs?per_page=100" | jq -e '[ .[] | select(.name == "Windows_Ninja_RelWithDebInfo_GroupOne" or .name == "Windows_Ninja_RelWithDebInfo_GroupTwo") | .status == "success" ] | all' > /dev/null; then
+if curl --no-progress-meter --fail --header "PRIVATE-TOKEN: $access_token" --url "$project_url/pipelines/$CI_PIPELINE_ID/jobs?per_page=100" | jq -e '[ .[] | select(.name == "Windows_Ninja_RelWithDebInfo_GroupOne" or .name == "Windows_Ninja_RelWithDebInfo_GroupTwo") | .status == "success" ] | all' > /dev/null; then
     echo "Ninja jobs all passed."
     DESIRED_EXIT_CODE=0
 else
@@ -36,6 +36,6 @@ fi
 
 echo "Running ReportStatus job with exit code $DESIRED_EXIT_CODE..."
 while IFS= read -r job_id; do
-    curl --no-progress-meter --request POST --header "PRIVATE-TOKEN: $access_token" --url "$project_url/jobs/$job_id/play" --header "Content-Type: application/json" --data "{ \"job_variables_attributes\": [ { \"key\": \"DESIRED_EXIT_CODE\", \"value\": \"$DESIRED_EXIT_CODE\" } ] }"
-done < <(curl --no-progress-meter --header "PRIVATE-TOKEN: $access_token" --url "$project_url/pipelines/$CI_PIPELINE_ID/jobs?per_page=100" | jq '.[] | select(.name == "ReportStatus") | .id')
+    curl --no-progress-meter --fail --request POST --header "PRIVATE-TOKEN: $access_token" --url "$project_url/jobs/$job_id/play" --header "Content-Type: application/json" --data "{ \"job_variables_attributes\": [ { \"key\": \"DESIRED_EXIT_CODE\", \"value\": \"$DESIRED_EXIT_CODE\" } ] }"
+done < <(curl --no-progress-meter --fail --header "PRIVATE-TOKEN: $access_token" --url "$project_url/pipelines/$CI_PIPELINE_ID/jobs?per_page=100" | jq '.[] | select(.name == "ReportStatus") | .id')
 echo "Done."
