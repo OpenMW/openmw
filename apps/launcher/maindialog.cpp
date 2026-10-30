@@ -558,9 +558,6 @@ bool Launcher::MainDialog::writeSettings()
         return false;
     }
 
-    // Set a watchdog value so future reads can check for dropped launcher settings
-    mLauncherSettings.setWatchdog(true);
-
     // Launcher settings
     file.setFileName(Files::pathToQString(userPath / Config::LauncherSettings::sLauncherConfigFileName));
 

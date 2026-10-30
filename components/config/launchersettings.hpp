@@ -106,8 +106,6 @@ namespace Config
 
         bool getWatchdog() const { return mSettings.mWatchdog; }
 
-        void setWatchdog(bool value) { mSettings.mWatchdog = value; }
-
         MainWindow getMainWindow() const { return mGeneral.mMainWindow; }
 
         void setMainWindow(const MainWindow& value) { mGeneral.mMainWindow = value; }

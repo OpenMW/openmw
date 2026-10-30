@@ -7,10 +7,18 @@
 
 namespace
 {
-    void read(Config::LauncherSettings& settings, QString text)
+    void read(Config::LauncherSettings& settings, QString text, bool missingOnly = false)
     {
         QTextStream stream(&text);
-        settings.readFile(stream);
+        settings.readFile(stream, missingOnly);
+    }
+
+    Config::LauncherSettings restore(const QString& main, const QString& backup)
+    {
+        Config::LauncherSettings settings;
+        read(settings, main);
+        read(settings, backup, true);
+        return settings;
     }
 
     Config::LauncherSettings parse(const QString& text)
@@ -63,6 +71,7 @@ thing=5
         EXPECT_EQ(write(settings).toStdString(), R"(
 [Settings]
 language=en
+watchdog=true
 future=1
 
 [Profiles]
@@ -149,7 +158,7 @@ thing=5
         EXPECT_TRUE(write(settings).contains("Default/future=one\nDefault/future=two\nDefault/future=three\n"));
     }
 
-    TEST(LauncherSettingsTest, ContentOrderSurvivesAWriteAndRead)
+    TEST(LauncherSettingsTest, contentOrderSurvivesAWriteAndRead)
     {
         Config::LauncherSettings settings;
         settings.setContentList("Default", { "/games/morrowind/Data Files" }, { "Morrowind.bsa" },
@@ -162,7 +171,7 @@ thing=5
         EXPECT_EQ(reread.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
     }
 
-    TEST(LauncherSettingsTest, ALauncherConfigWrittenBeforeTheOrderKeyStillLoads)
+    TEST(LauncherSettingsTest, launcherConfigWrittenBeforeTheOrderKeyStillLoads)
     {
         const Config::LauncherSettings settings = parse(QString::fromUtf8(sConfig));
 
@@ -171,7 +180,7 @@ thing=5
         EXPECT_TRUE(settings.getUserFilesInOrder("Default").isEmpty());
     }
 
-    TEST(LauncherSettingsTest, TheOrderKeyDoesNotLeakIntoTheOtherProfileLists)
+    TEST(LauncherSettingsTest, orderKeyDoesNotLeakIntoTheOtherProfileLists)
     {
         const Config::LauncherSettings settings = parse(QString::fromUtf8(sConfig)
             + "Default/order=Morrowind.esm\n"
@@ -183,5 +192,53 @@ thing=5
         EXPECT_EQ(settings.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
         EXPECT_EQ(settings.getDataDirectoryList("Default"), QStringList({ "/games/morrowind/Data Files" }));
         EXPECT_EQ(settings.getArchiveList("Default"), QStringList({ "Morrowind.bsa" }));
+    }
+
+    TEST(LauncherSettingsTest, watchdogRestoreShouldAddMissingKeysAndMaintainFileOrder)
+    {
+        const QString current = QString::fromUtf8(sConfig);
+        const QString backup = QString::fromUtf8(sConfig) +
+              "Default/order=Morrowind.esm\n"
+              "Default/order=SomethingDisabled.esp\n"
+              "Default/order=Tribunal.esm\n";
+
+        const Config::LauncherSettings settings = restore(current, backup);
+
+        EXPECT_EQ(settings.getUserFilesInOrder("Default"),
+            QStringList({ "Morrowind.esm", "SomethingDisabled.esp", "Tribunal.esm" }));
+        EXPECT_EQ(settings.getContentListFiles("Default"), QStringList({ "Morrowind.esm", "Tribunal.esm" }));
+    }
+
+    TEST(LauncherSettingsTest, watchdogRestoreShouldMaintainExistingKeyValues)
+    {
+        const QString current = QString::fromUtf8(sConfig) +
+              "Default/order=Morrowind.esm\n"
+              "Default/order=SomethingDisabled.esp\n"
+              "Default/order=Tribunal.esm\n";
+        const QString backup = QString::fromUtf8(sConfig) +
+              "Default/order=SomethingDisabled.esp\n"
+              "Default/order=Morrowind.esm\n"
+              "Default/order=Tribunal.esm\n";
+
+        const Config::LauncherSettings settings = restore(current, backup);
+
+        EXPECT_EQ(settings.getCurrentContentListName(), "Default");
+        EXPECT_EQ(settings.getUserFilesInOrder("Default"),
+            QStringList({ "Morrowind.esm", "SomethingDisabled.esp", "Tribunal.esm" }));
+    }
+
+    TEST(LauncherSettingsTest, watchdogShouldBeUnsetByDefault)
+    {
+        const Config::LauncherSettings settings = parse(QString::fromUtf8(sConfig));
+
+        EXPECT_FALSE(settings.getWatchdog());
+    }
+
+    TEST(LauncherSettingsTest, watchdogShouldBeSetOnSuccessfulWrite)
+    {
+        const QString written = write(parse("[Settings]\nlanguage=English\n"));
+
+        EXPECT_EQ(written.count("watchdog="), 1);
+        EXPECT_TRUE(written.contains("watchdog=true\n"));
     }
 }

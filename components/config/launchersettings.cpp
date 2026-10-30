@@ -213,7 +213,7 @@ namespace Config
         {
             writeSectionHeader(sSettingsSection, stream);
             writeKeyValue(sLanguageKey, value.mLanguage, stream);
-            writeKeyValue(sWatchdogKey, value.mWatchdog, stream);
+            writeKeyValue(sWatchdogKey, true, stream); // Set so future reads check for dropped launcher settings
             writeUnknownKeys(value.mUnknown, stream);
         }
 
