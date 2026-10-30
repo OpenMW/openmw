@@ -23,13 +23,21 @@ namespace EsmTool
     {
         struct Params
         {
-            const bool mQuite;
+            const bool mQuiet;
 
             explicit Params(const Arguments& info)
-                : mQuite(info.quiet_given || info.mode == "clone")
+                : mQuiet(info.quiet_given || info.mode == "clone")
             {
             }
         };
+
+        std::string_view toString(ESM::GameFormat format)
+        {
+            for (const auto& [name, value] : gameFormatNames)
+                if (value == format)
+                    return name;
+            return "<unknown>";
+        }
 
         std::string toString(ESM4::GroupType type)
         {
@@ -142,7 +150,7 @@ namespace EsmTool
             T value;
             value.load(reader);
 
-            if (params.mQuite)
+            if (params.mQuiet)
                 return;
 
             std::cout << "\n  Record: " << ESM::NAME(reader.hdr().record.typeId).toStringView();
@@ -549,7 +557,7 @@ namespace EsmTool
                     break;
             }
 
-            if (!params.mQuite)
+            if (!params.mQuiet)
                 std::cout << "\n  Unsupported record: " << ESM::NAME(reader.hdr().record.typeId).toStringView() << '\n';
             return false;
         }
@@ -566,13 +574,14 @@ namespace EsmTool
             ESM4::Reader reader(std::move(stream), info.filename, nullptr, &encoder, true);
             const Params params(info);
 
-            if (!params.mQuite)
+            const std::vector<ESM::MasterData>& masterData = reader.getGameFiles();
+            if (!params.mQuiet)
             {
                 std::cout << "Author: " << reader.getAuthor() << '\n'
                           << "Description: " << reader.getDesc() << '\n'
                           << "File format version: " << reader.esmVersionF() << '\n';
 
-                if (const std::vector<ESM::MasterData>& masterData = reader.getGameFiles(); !masterData.empty())
+                if (!masterData.empty())
                 {
                     std::cout << "Masters:" << '\n';
                     for (const auto& master : masterData)
@@ -580,9 +589,20 @@ namespace EsmTool
                 }
             }
 
+            // Handle game format override or ambiguous version
+            if (info.gameFormat != ESM::GameFormat::Unknown)
+                reader.setGameFormat(info.gameFormat);
+            else if (reader.esmVersion() == ESM::VER_094)
+            {
+                const char* source = ESM::getGameFormatFromMasters(masterData) ? "masters" : "header form version";
+                std::cerr << "Warning: ESM version 0.94 is used by both Fallout 3 and Skyrim; assuming "
+                          << toString(reader.gameFormat()) << " from its " << source
+                          << ". If this is incorrect, re-run with --game-format to set it explicitly.\n";
+            }
+
             auto visitorRec = [&params](ESM4::Reader& r) { return readRecord(params, r); };
             auto visitorGroup = [&params](ESM4::Reader& r) {
-                if (params.mQuite)
+                if (params.mQuiet)
                     return;
                 auto groupType = static_cast<ESM4::GroupType>(r.hdr().group.type);
                 std::cout << "\nGroup: " << toString(groupType) << " " << ESM::NAME(r.hdr().group.typeId).toStringView()

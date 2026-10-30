@@ -96,7 +96,7 @@ namespace MWWorld
         MWWorld::Globals mGlobalVariables;
         Misc::Rng::Generator mPrng;
         WorldModel mWorldModel;
-        std::vector<int> mESMVersions; // the versions of esm files
+        std::vector<ESM::GameFormat> mGameFormats; // the game formats of esm files
 
         std::string mCurrentWorldSpace;
 
@@ -246,7 +246,7 @@ namespace MWWorld
 
         const MWWorld::ESMStore& getStore() const override { return mStore; }
 
-        const std::vector<int>& getESMVersions() const override;
+        const std::vector<ESM::GameFormat>& getGameFormats() const override;
 
         LocalScripts& getLocalScripts() override;
 

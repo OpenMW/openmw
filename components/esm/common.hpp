@@ -3,7 +3,10 @@
 
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 #include <components/misc/strings/algorithm.hpp>
@@ -57,10 +60,32 @@ namespace ESM
         FO4,
     };
 
-    // The likely format for a content file. Games weren't meant to coexist, so it's our best educated guess.
-    // Where ambiguous, check ESM format version > list of masters > header form version (from last-saved tool).
-    inline GameFormat getGameFormat(
-        std::uint32_t version, std::optional<std::uint16_t> headerFormVersion, const std::vector<MasterData>& masters)
+    // The game format associated with a list of masters.
+    inline std::optional<GameFormat> getGameFormatFromMasters(
+        const std::vector<MasterData>& masters, std::span<const GameFormat> masterFormats = {})
+    {
+        static constexpr std::pair<std::string_view, GameFormat> ambiguousMainFiles[] = {
+            { "Fallout3.esm", GameFormat::FO3 },
+            { "Skyrim.esm", GameFormat::TES5 },
+        };
+
+        // Search through previously-loaded masters
+        for (GameFormat format : masterFormats)
+            if (format != GameFormat::Unknown)
+                return format;
+
+        // Otherwise, find a matching name. Still useful for the ESM tool, which doesn't load masters.
+        for (const MasterData& master : masters)
+            for (const auto& [name, format] : ambiguousMainFiles)
+                if (Misc::StringUtils::ciEqual(master.name, name))
+                    return format;
+        return std::nullopt;
+    }
+
+    // The game format for a content file. Games weren't meant to coexist, so it's our best educated guess.
+    // ESM version -> previous-masters' game format -> matching master names -> header form version
+    inline GameFormat getGameFormat(std::uint32_t version, std::optional<std::uint16_t> headerFormVersion,
+        const std::vector<MasterData>& masters, std::span<const GameFormat> masterFormats = {})
     {
         switch (version)
         {
@@ -72,13 +97,8 @@ namespace ESM
             case VER_100:
                 return headerFormVersion.has_value() ? GameFormat::FO4 : GameFormat::TES4;
             case VER_094:
-                for (const MasterData& master : masters)
-                {
-                    if (Misc::StringUtils::ciEqual(master.name, "Fallout3.esm"))
-                        return GameFormat::FO3;
-                    if (Misc::StringUtils::ciEqual(master.name, "Skyrim.esm"))
-                        return GameFormat::TES5;
-                }
+                if (const std::optional<GameFormat> format = getGameFormatFromMasters(masters, masterFormats))
+                    return *format;
                 return headerFormVersion.value_or(0) <= 15 ? GameFormat::FO3 : GameFormat::TES5;
             case VER_132:
             case VER_133:

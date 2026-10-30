@@ -724,7 +724,7 @@ namespace MWRender
                 else
                     model = mLODNameCache
                                 .emplace_hint(found, std::move(key),
-                                    Misc::ResourceHelpers::getLODMeshName(world.getESMVersions()[refNum.mContentFile],
+                                    Misc::ResourceHelpers::getLODMeshName(world.getGameFormats()[refNum.mContentFile],
                                         model, *mSceneManager->getVFS(), lod))
                                 ->second;
             }
