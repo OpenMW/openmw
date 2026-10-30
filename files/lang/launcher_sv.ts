@@ -575,8 +575,12 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <translation>Fel när säkerhetskopia av Startarens-konfigurationsfil skulle skrivas</translation>
     </message>
     <message>
-        <source>Error opening OpenMW configuration backup file</source>
-        <translation>Fel när säkerhetskopia av OpenMW-konfigurationsfil skulle öppnas</translation>
+        <source>Error opening Launcher configuration file</source>
+        <translation>Fel när Startarens-konfigurationsfil skulle öppnas</translation>
+    </message>
+    <message>
+        <source>Error opening Launcher configuration backup file</source>
+        <translation>Fel när säkerhetskopia av Startarens-konfigurationsfil skulle öppnas</translation>
     </message>
 </context>
 <context>

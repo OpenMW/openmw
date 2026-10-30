@@ -572,7 +572,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation></translation>
     </message>
     <message>
-        <source>Error opening OpenMW configuration backup file</source>
+        <source>Error opening Launcher configuration file</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Error opening Launcher configuration backup file</source>
         <translation></translation>
     </message>
 </context>

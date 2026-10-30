@@ -326,7 +326,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        cfgError(tr("Error opening OpenMW configuration file"),
+        cfgError(tr("Error opening Launcher configuration file"),
             tr("<br><b>Could not open %0 for reading:</b><br><br>%1<br><br>"
                "Please make sure you have the right permissions "
                "and try again.<br>")
@@ -354,7 +354,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        cfgError(tr("Error opening OpenMW configuration backup file"),
+        cfgError(tr("Error opening Launcher configuration backup file"),
             tr("<br><b>Could not open %0 for reading:</b><br><br>%1<br><br>"
                "Please make sure you have the right permissions "
                "and try again.<br>")
@@ -595,7 +595,7 @@ bool Launcher::MainDialog::writeSettings()
     QTextStream backupStream(&file);
     Misc::ensureUtf8Encoding(backupStream);
 
-    backupStream << "# Written automatically by the OpenMW launcher. Do not edit or rename.\n"
+    backupStream << "# Backup file written automatically by the OpenMW launcher. Do not edit or rename.\n"
                     "# Your settings are located in launcher.cfg\n";
 
     mLauncherSettings.writeFile(backupStream);

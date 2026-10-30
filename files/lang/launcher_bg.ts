@@ -574,8 +574,12 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Грешка при записване на резервното копие на конфигурационния файл на стартиращата програма</translation>
     </message>
     <message>
-        <source>Error opening OpenMW configuration backup file</source>
-        <translation>Грешка при отваряне на резервното копие на конфигурационния файл на OpenMW</translation>
+        <source>Error opening Launcher configuration file</source>
+        <translation>Грешка при отваряне на конфигурационния файл на стартиращата програма</translation>
+    </message>
+    <message>
+        <source>Error opening Launcher configuration backup file</source>
+        <translation>Грешка при отваряне на резервното копие на конфигурационния файл на стартиращата програма</translation>
     </message>
 </context>
 <context>

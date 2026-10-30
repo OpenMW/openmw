@@ -569,11 +569,15 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Error writing Launcher configuration backup file</source>
-        <translation>Erreur lors de l&apos;écriture dans le fichier de sauvegarde des paramètres du Lanceur</translation>
+        <translation>Erreur lors de l&apos;écriture du fichier de sauvegarde des paramètres du Lanceur</translation>
     </message>
     <message>
-        <source>Error opening OpenMW configuration backup file</source>
-        <translation>Erreur lors de l&apos;ouverture du fichier de sauvegarde de la configuration d&apos;OpenMW</translation>
+        <source>Error opening Launcher configuration file</source>
+        <translation>Erreur lors de l&apos;ouverture du fichier de paramètres du Lanceur</translation>
+    </message>
+    <message>
+        <source>Error opening Launcher configuration backup file</source>
+        <translation>Erreur lors de l&apos;ouverture du fichier de sauvegarde des paramètres du Lanceur</translation>
     </message>
 </context>
 <context>

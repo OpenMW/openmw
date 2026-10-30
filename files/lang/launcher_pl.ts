@@ -576,8 +576,12 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
         <translation>Błąd zapisu kopii zapasowej pliku konfiguracyjnego programu uruchamiającego</translation>
     </message>
     <message>
-        <source>Error opening OpenMW configuration backup file</source>
-        <translation>Wystąpił błąd podczas otwierania kopii zapasowej pliku konfiguracyjnego OpenMW</translation>
+        <source>Error opening Launcher configuration file</source>
+        <translation>Wystąpił błąd podczas otwierania pliku konfiguracyjnego programu uruchamiającego</translation>
+    </message>
+    <message>
+        <source>Error opening Launcher configuration backup file</source>
+        <translation>Wystąpił błąd podczas otwierania kopii zapasowej pliku konfiguracyjnego programu uruchamiającego</translation>
     </message>
 </context>
 <context>

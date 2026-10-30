@@ -574,8 +574,12 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Не удалось сохранить данные в резервную копию файла с настройками лаунчера</translation>
     </message>
     <message>
-        <source>Error opening OpenMW configuration backup file</source>
-        <translation>Не удалось открыть резервную копию файла с настройками OpenMW</translation>
+        <source>Error opening Launcher configuration file</source>
+        <translation>Не удалось открыть файл с настройками лаунчера</translation>
+    </message>
+    <message>
+        <source>Error opening Launcher configuration backup file</source>
+        <translation>Не удалось открыть резервную копию файла с настройками лаунчера</translation>
     </message>
 </context>
 <context>
