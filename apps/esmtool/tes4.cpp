@@ -589,7 +589,7 @@ namespace EsmTool
                 const char* source = ESM::getGameFormatFromMasters(masterData) ? "masters" : "header form version";
                 std::cerr << "Warning: ESM version 0.94 is used by both Fallout 3 and Skyrim; assuming "
                           << reader.gameFormat() << " from its " << source
-                          << ". If this is incorrect, re-run with --game-format to set it explicitly.\n";
+                          << ". If this is incorrect, set it with --game-format\n";
             }
 
             auto visitorRec = [&params](ESM4::Reader& r) { return readRecord(params, r); };
