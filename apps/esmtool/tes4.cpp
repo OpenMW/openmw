@@ -31,14 +31,6 @@ namespace EsmTool
             }
         };
 
-        std::string_view toString(ESM::GameFormat format)
-        {
-            for (const auto& [name, value] : gameFormatNames)
-                if (value == format)
-                    return name;
-            return "<unknown>";
-        }
-
         std::string toString(ESM4::GroupType type)
         {
             switch (type)
@@ -596,7 +588,7 @@ namespace EsmTool
             {
                 const char* source = ESM::getGameFormatFromMasters(masterData) ? "masters" : "header form version";
                 std::cerr << "Warning: ESM version 0.94 is used by both Fallout 3 and Skyrim; assuming "
-                          << toString(reader.gameFormat()) << " from its " << source
+                          << reader.gameFormat() << " from its " << source
                           << ". If this is incorrect, re-run with --game-format to set it explicitly.\n";
             }
 

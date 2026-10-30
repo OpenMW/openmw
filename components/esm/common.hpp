@@ -1,8 +1,11 @@
 #ifndef COMPONENT_ESM_COMMON_H
 #define COMPONENT_ESM_COMMON_H
 
+#include <algorithm>
 #include <cstdint>
+#include <istream>
 #include <optional>
+#include <ostream>
 #include <span>
 #include <string>
 #include <string_view>
@@ -59,6 +62,34 @@ namespace ESM
         TES5,
         FO4,
     };
+
+    inline constexpr std::pair<std::string_view, GameFormat> gameFormatNames[] = {
+        { "TES3", GameFormat::TES3 },
+        { "TES4", GameFormat::TES4 },
+        { "FO3", GameFormat::FO3 },
+        { "FONV", GameFormat::FONV },
+        { "TES5", GameFormat::TES5 },
+        { "FO4", GameFormat::FO4 },
+    };
+
+    inline std::istream& operator>>(std::istream& stream, GameFormat& format)
+    {
+        std::string name;
+        stream >> name;
+        const auto it = std::ranges::find_if(
+            gameFormatNames, [&](const auto& entry) { return Misc::StringUtils::ciEqual(entry.first, name); });
+        if (it == std::end(gameFormatNames))
+            stream.setstate(std::ios::failbit);
+        else
+            format = it->second;
+        return stream;
+    }
+
+    inline std::ostream& operator<<(std::ostream& stream, GameFormat format)
+    {
+        const auto it = std::ranges::find(gameFormatNames, format, &std::pair<std::string_view, GameFormat>::second);
+        return stream << (it != std::end(gameFormatNames) ? it->first : "Unknown");
+    }
 
     // The game format associated with a list of masters.
     inline std::optional<GameFormat> getGameFormatFromMasters(

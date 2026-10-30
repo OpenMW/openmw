@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <cmath>
 #include <deque>
 #include <fstream>
@@ -84,7 +83,7 @@ Allowed options)");
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default");
 
-        addOption("game-format,g", bpo::value<std::string>()->default_value(""),
+        addOption("game-format,g", bpo::value<ESM::GameFormat>(&info.gameFormat),
             "Override for auto-detected game format:\n"
             "\n\tTES3 - Elder Scrolls III: Morrowind\n"
             "\n\tTES4 - Elder Scrolls IV: Oblivion\n"
@@ -190,19 +189,6 @@ Allowed options)");
             info.encoding = "win1252";
         }
         std::cout << ToUTF8::encodingUsingMessage(info.encoding) << std::endl;
-
-        // Game format override option
-        if (const std::string& gameFormat = variables["game-format"].as<std::string>(); !gameFormat.empty())
-        {
-            const auto it = std::ranges::find_if(EsmTool::gameFormatNames,
-                [&](const auto& entry) { return Misc::StringUtils::ciEqual(entry.first, gameFormat); });
-            if (it == std::end(EsmTool::gameFormatNames))
-            {
-                std::cout << gameFormat << " is not a valid game format option.\n";
-                return false;
-            }
-            info.gameFormat = it->second;
-        }
 
         return true;
     }

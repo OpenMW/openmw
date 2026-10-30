@@ -4,6 +4,7 @@
 
 #include <initializer_list>
 #include <optional>
+#include <sstream>
 #include <vector>
 
 namespace
@@ -73,6 +74,29 @@ namespace
     {
         const std::vector<GameFormat> fo3 = { GameFormat::FO3 };
         EXPECT_EQ(ESM::getGameFormat(ESM::VER_171, 44, masters({ "Skyrim.esm" }), fo3), GameFormat::TES5);
+    }
+
+    TEST(EsmGameFormat, shouldReadNameIgnoringCase)
+    {
+        GameFormat format = GameFormat::Unknown;
+        std::istringstream stream("fo3");
+        EXPECT_TRUE(stream >> format);
+        EXPECT_EQ(format, GameFormat::FO3);
+    }
+
+    TEST(EsmGameFormat, shouldFailToReadUnknownName)
+    {
+        GameFormat format = GameFormat::TES5;
+        std::istringstream stream("FNV");
+        EXPECT_FALSE(stream >> format);
+        EXPECT_EQ(format, GameFormat::TES5);
+    }
+
+    TEST(EsmGameFormat, shouldWriteName)
+    {
+        std::ostringstream stream;
+        stream << GameFormat::FONV << ' ' << GameFormat::Unknown;
+        EXPECT_EQ(stream.str(), "FONV Unknown");
     }
 
     TEST(EsmGameFormat, getGameFormatFromMastersShouldReturnNulloptWithNoValidMaster)
