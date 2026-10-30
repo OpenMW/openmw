@@ -17,7 +17,7 @@ KeyboardControls: |
 PostProcessHUD: "Post Processor HUD"
 ResetShader: "Reset shader to default state"
 ShaderLocked: "Locked"
-ShaderLockedDescription: "Cannot be toggled or moved, controlled by external Lua script"
+ShaderLockedDescription: "Cannot be toggled or moved, controlled by external Lua script."
 ShaderResetUniform: "r"
 Underwater: "Underwater"
 Version: "Version"
