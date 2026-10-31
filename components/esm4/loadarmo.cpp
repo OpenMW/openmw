@@ -193,6 +193,7 @@ void ESM4::Armor::load(ESM4::Reader& reader)
             case ESM::fourCC("MO3T"):
             case ESM::fourCC("MO4T"):
             case ESM::fourCC("MO4S"):
+            case ESM::fourCC("MODC"): // FO4 color remapping index
             case ESM::fourCC("OBND"):
             case ESM::fourCC("RNAM"): // race formid
             case ESM::fourCC("KSIZ"):
