@@ -172,49 +172,16 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     }
 }
 
-// NVPP data seems to be organised this way (total is 0x64 = 100)
+// NVPP is a matrix of preferred paths between N "node" navmeshes
+// (TES5 10, FO4 14, fewer in some mods):
 //
-//  (0) total | 0x1 | formid (index 0) | count | formid's
-//  (1)                                | count | formid's
-//  (2)                                | count | formid's
-//  (3)                                | count | formid's
-//  (4)                                | count | formid's
-//  (5)                                | count | formid's
-//  (6)                                | count | formid's
-//  (7)                                | count | formid's
-//  (8)                                | count | formid's
-//  (9)                                | count | formid's
-// (10)       | 0x1 | formid (index 1) | count | formid's
-// (11)                                | count | formid's
-// (12)                                | count | formid's
-// (13)                                | count | formid's
-// (14)                                | count | formid's
-// (15)                                | count | formid's
-//  ...
+//   N * N | N * N x { count | navmesh formid's } | N | N x { node formid | index }
 //
-// (88)                                | count | formid's
-// (89)                                | count | formid's
+// Entry i * N + j is the path of navmeshes from node i to node j, and a node's path to itself is just that node.
+// Index is a node's row and column in the matrix. The index values are not sequential, and the same nodes can
+// have different indices in different files (e.g. Update.esm).
 //
-// Here the pattern changes (final count is 0xa = 10)
-//
-// (90)       | 0x1 | formid (index 9) | count | formid | index
-// (91)                                        | formid | index
-// (92)                                        | formid | index
-// (93)                                        | formid | index
-// (94)                                        | formid | index
-// (95)                                        | formid | index
-// (96)                                        | formid | index
-// (97)                                        | formid | index
-// (98)                                        | formid | index
-// (99)                                        | formid | index
-//
-// Note that the index values are not sequential, i.e. the first index value
-// (i.e. row 90) for Update.esm is 2.
-//
-// Also note that there's no list of formid's following the final node (index 9)
-//
-// The same 10 formids seem to be used for the indices, but not necessarily
-// with the same index value (but only Update.esm differs?)
+// Skyrim.esm's nodes:
 //
 // formid   cellid   X   Y Editor ID                   other formids in same X,Y    S U D D
 // -------- ------ --- --- --------------------------- ---------------------------- - - - -
@@ -248,84 +215,25 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("NVPP"):
             {
-                // FIXME: FO4 updates the format
-                if (mGameFormat == ESM::GameFormat::FO4)
-                {
-                    reader.skipSubRecordData();
-                    break;
-                }
-                std::uint32_t total;
                 std::uint32_t count;
-                reader.get(total);
-                if (!total)
-                {
-                    reader.get(count); // throw away
-                    break;
-                }
-
-                if (total >= 10)
-                    total -= 10; // HACK
-                else
-                    throw std::runtime_error("expected total amount of chunks >= 0xa");
-
-                std::uint32_t node = 0;
-                bool nodeFound = false;
-                for (std::uint32_t i = 0; i < total; ++i)
-                {
-                    std::vector<ESM::FormId> preferredPaths;
-                    reader.get(count);
-                    if (count == 1)
-                    {
-                        reader.get(node);
-                        reader.get(count);
-                        nodeFound = true;
-                    }
-                    if (count > 0)
-                    {
-                        preferredPaths.resize(count);
-                        for (ESM::FormId& value : preferredPaths)
-                            reader.getFormId(value);
-                    }
-                    if (!nodeFound)
-                        throw std::runtime_error("node not found");
-
-                    mPreferredPaths.push_back(std::make_pair(node, preferredPaths));
-#if 0
-                    std::cout << "node " << std::hex << node // FIXME: debugging only
-                        << ", count " << count << ", i " << std::dec << i << std::endl;
-#endif
-                }
                 reader.get(count);
-                if (count != 1)
-                    throw std::runtime_error("expected separator");
+                mPreferredPaths.resize(count);
+                for (std::vector<ESM::FormId>& path : mPreferredPaths)
+                {
+                    reader.get(count);
+                    path.resize(count);
+                    for (ESM::FormId& navMesh : path)
+                        reader.getFormId(navMesh);
+                }
 
-                reader.get(node); // HACK
-                std::vector<ESM::FormId> preferredPaths;
-                mPreferredPaths.push_back(std::make_pair(node, preferredPaths)); // empty
-#if 0
-                std::cout << "node " << std::hex << node // FIXME: debugging only
-                        << ", count " << 0 << std::endl;
-#endif
-
-                reader.get(count); // HACK
-                if (count != 10)
-                    throw std::runtime_error("expected 0xa");
-
-                std::uint32_t index;
+                reader.get(count);
                 for (std::uint32_t i = 0; i < count; ++i)
                 {
-                    reader.get(node);
+                    ESM::FormId node;
+                    std::uint32_t index;
+                    reader.getFormId(node);
                     reader.get(index);
-#if 0
-                    std::cout << "node " << std::hex << node // FIXME: debugging only
-                        << ", index " << index << ", i " << std::dec << total+i << std::endl;
-#endif
-                    ESM::FormId nodeFormId = ESM::FormId::fromUint32(node); // should we apply reader.adjustFormId?
-                    // std::pair<std::map<FormId, std::uint32_t>::iterator, bool> res =
-                    mPathIndexMap.emplace(nodeFormId, index);
-                    // FIXME: this throws if more than one file is being loaded
-                    // if (!res.second)
-                    // throw std::runtime_error ("node already exists in the preferred path index map");
+                    mPathIndexMap.emplace(node, index);
                 }
                 break;
             }
@@ -339,7 +247,6 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             case ESM::fourCC("NVMI"): // multiple
             {
                 // Can only read TES4 navmesh data
-                // Note FO4 FIXME above
                 if (mGameFormat != ESM::GameFormat::TES4)
                 {
                     reader.skipSubRecordData();

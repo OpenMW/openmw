@@ -211,7 +211,6 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
         {
             case ESM::fourCC("NVNM"):
             {
-                // See FIXME in ESM4::Navigation::load.
                 // FO4 updates the format
                 if (mGameFormat == ESM::GameFormat::FO4)
                 {

@@ -107,9 +107,9 @@ namespace ESM4
 
         std::vector<NavMeshInfo> mNavMeshInfo;
 
-        std::vector<std::pair<std::uint32_t, std::vector<ESM::FormId>>> mPreferredPaths;
+        std::vector<std::vector<ESM::FormId>> mPreferredPaths; // N x N navmesh paths between nodes
 
-        std::map<ESM::FormId, std::uint32_t> mPathIndexMap;
+        std::map<ESM::FormId, std::uint32_t> mPathIndexMap; // node -> row and column in mPreferredPaths
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
