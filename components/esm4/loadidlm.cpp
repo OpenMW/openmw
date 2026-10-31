@@ -83,6 +83,7 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
             case ESM::fourCC("MODC"):
             case ESM::fourCC("MODS"):
             case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("PNAM"): // FO4 animation archetype
             case ESM::fourCC("QNAM"):
                 reader.skipSubRecordData();
                 break;
