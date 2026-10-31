@@ -163,13 +163,12 @@ void CSVWidget::TextureBrushWindow::setBrushTexture(ESM::RefId brushTexture)
     CSMWorld::IdCollection<ESM::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
     int landTextureFilename = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
 
-    int row = landtexturesCollection.getIndex(brushTexture);
-    const auto& record = landtexturesCollection.getRecord(row);
+    const int row = landtexturesCollection.searchId(brushTexture);
 
-    if (!record.isDeleted())
+    if (row != -1 && !landtexturesCollection.getRecord(row).isDeleted())
     {
         // Ensure the texture is defined by the current plugin
-        if (!record.isModified())
+        if (!landtexturesCollection.getRecord(row).isModified())
         {
             CSMWorld::CommandMacro macro(undoStack);
             macro.push(new CSMWorld::TouchCommand(ltexTable, brushTexture.getRefIdString()));
@@ -220,8 +219,6 @@ CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush(
     , mPanel(new SceneToolListPanel(2, this))
     , mTextureBrushWindow(new TextureBrushWindow(document, this))
 {
-    mBrushHistory.resize(1);
-
     setAcceptDrops(true);
     connect(mTextureBrushWindow, &TextureBrushWindow::passBrushShape, this, &SceneToolTextureBrush::setButtonIcon);
     setButtonIcon(mTextureBrushWindow->mBrushShape);
@@ -324,7 +321,7 @@ void CSVWidget::SceneToolTextureBrush::selectRow(int row)
     const ESM::RefId brushTexture = mBrushHistory[row];
     std::swap(mBrushHistory[row], mBrushHistory[0]);
     mTextureBrushWindow->setBrushTexture(brushTexture);
-    emit passTextureId(brushTexture);
+    emit passTextureId(mTextureBrushWindow->mBrushTexture);
 }
 
 void CSVWidget::SceneToolTextureBrush::removeRow(int row)
