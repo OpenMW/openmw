@@ -51,7 +51,7 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                 switch (subHdr.dataSize)
                 {
                     case 18: // TES4
-                    case 13: // FO3/FNV
+                    case 13: // FO3/FONV
                     {
                         reader.get(mData.mSpeed);
                         reader.get(mData.mFlags);

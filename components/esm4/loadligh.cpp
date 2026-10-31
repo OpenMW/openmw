@@ -49,7 +49,7 @@ void ESM4::Light::load(ESM4::Reader& reader)
             case ESM::fourCC("DATA"):
             {
                 // 24: older TES4 records (found in GOG release)
-                // 32: newer TES4 records, FO3/FNV
+                // 32: newer TES4 records, FO3/FONV
                 // 48: TES5
                 // 64: FO4/FO76
                 if (subHdr.dataSize != 24 && subHdr.dataSize != 32 && subHdr.dataSize != 48 && subHdr.dataSize != 64)

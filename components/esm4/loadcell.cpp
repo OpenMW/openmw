@@ -184,7 +184,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                     case 36: // TES4
                         reader.get(&mLighting, 36);
                         break;
-                    case 40: // FO3/FNV
+                    case 40: // FO3/FONV
                     case 92: // TES5 (FIXME)
                     case 136: // FO4 (FIXME)
                         reader.get(mLighting);

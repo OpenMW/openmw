@@ -54,7 +54,7 @@ void ESM4::Armor::load(ESM4::Reader& reader)
                     case 14: // TES4
                         reader.get(mData);
                         break;
-                    case 12: // FO3, FNV, FO4
+                    case 12: // FO3, FONV, FO4
                         reader.get(mData.value);
                         reader.get(mData.health);
                         reader.get(mData.weight);

@@ -105,7 +105,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 switch (subHdr.dataSize)
                 {
                     case 28:
-                    case 32: // FO3, FNV, TES5
+                    case 32: // FO3, FONV, TES5
                     case 36: // FO4
                     {
                         reader.getFormId(mDoor.destDoor);

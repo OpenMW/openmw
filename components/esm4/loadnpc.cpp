@@ -114,7 +114,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 {
                     case 20: // FO4
                     case 16: // TES4
-                    case 24: // FO3/FNV, TES5
+                    case 24: // FO3/FONV, TES5
                         reader.get(&mBaseConfig, subHdr.dataSize);
                         break;
                     default:

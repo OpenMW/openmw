@@ -33,7 +33,7 @@ namespace ESM4
 {
 #pragma pack(push, 1)
 
-    // FO3/FNV version of the struct
+    // FO3/FONV version of the struct
     struct Lighting
     { //                                  | Aichan Prison values
         std::uint32_t ambient = 0; //     | 16 17 19 00 (RGBA)

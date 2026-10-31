@@ -48,7 +48,7 @@ void ESM4::LandTexture::load(ESM4::Reader& reader)
             {
                 switch (subHdr.dataSize)
                 {
-                    case 3: // TES4, FO3, FNV
+                    case 3: // TES4, FO3, FONV
                         reader.get(mHavokMaterial);
                         [[fallthrough]];
                     case 2:

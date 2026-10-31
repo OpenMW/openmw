@@ -55,7 +55,7 @@ void ESM4::Book::load(ESM4::Reader& reader)
             {
                 switch (subHdr.dataSize)
                 {
-                    case 10: // TES4, FO3, FNV
+                    case 10: // TES4, FO3, FONV
                         reader.get(mData.flags);
                         reader.get(mData.bookSkill);
                         reader.get(mData.value);
