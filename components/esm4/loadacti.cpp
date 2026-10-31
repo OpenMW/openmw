@@ -76,6 +76,9 @@ void ESM4::Activator::load(ESM4::Reader& reader)
             case ESM::fourCC("XATO"):
                 reader.getZString(mActivationPrompt);
                 break; // FONV
+            case ESM::fourCC("ATTX"): // FO4 activation text override
+                reader.getLocalizedString(mActivationPrompt);
+                break;
             case ESM::fourCC("MODT"): // Model data
             case ESM::fourCC("MODC"):
             case ESM::fourCC("MODS"):
@@ -102,7 +105,6 @@ void ESM4::Activator::load(ESM4::Reader& reader)
             case ESM::fourCC("CIS2"):
             case ESM::fourCC("CITC"):
             case ESM::fourCC("NVNM"):
-            case ESM::fourCC("ATTX"): // FO4
             case ESM::fourCC("FTYP"): // FO4
             case ESM::fourCC("NTRM"): // FO4
             case ESM::fourCC("PTRN"): // FO4
