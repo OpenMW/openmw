@@ -44,6 +44,7 @@ Merge request guidelines
 * When pulling changes from master, prefer rebase over merge. Consider using a merge if there are conflicts or for long-running MRs.
 * Don't rebase without a good reason. Some good reasons include cleaning up the commit history, resolving merge conflicts, and pulling in related changes or build pipeline changes.
 * Review threads should be resolved by the thread author so that they can confirm that their concerns have been adequately dealt with. This rule does not apply to threads consisting solely of [suggested code changes](https://docs.gitlab.com/user/project/merge_requests/reviews/suggestions/)—if applied, they can be left as resolved.
+* If your merge request changes the Lua API, bump `OPENMW_LUA_API_REVISION` in `CMakeLists.txt`.
 
 Guidelines for original engine "fixes"
 =================================
