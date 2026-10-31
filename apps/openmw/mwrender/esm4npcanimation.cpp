@@ -75,11 +75,13 @@ namespace MWRender
 
         // TODO: Body and head parts are placed incorrectly, need to attach to bones
 
-        for (const ESM4::Race::BodyPart& bodyPart : (isFemale ? race->mBodyPartsFemale : race->mBodyPartsMale))
+        const std::vector<ESM4::Race::BodyPart>& bodyParts = isFemale ? race->mBodyPartsFemale : race->mBodyPartsMale;
+        for (std::size_t i = 0; i < bodyParts.size(); ++i)
         {
-            // FO3 stores the upper body's FaceGen texture (.egt) with the body parts
-            if (!Misc::StringUtils::ciEndsWith(bodyPart.mesh, ".egt"))
-                insertPart(bodyPart.mesh);
+            // FO3 and FONV's body part 3 is upper body texture
+            if (i == 3 && (traits.mIsFO3 || traits.mIsFONV))
+                continue;
+            insertPart(bodyParts[i].mesh);
         }
 
         // Oblivion genders share head parts, but later games have female-specific
