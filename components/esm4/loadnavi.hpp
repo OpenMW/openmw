@@ -48,7 +48,7 @@ namespace ESM4
 #pragma pack(push, 1)
         struct DoorRef
         {
-            std::uint32_t unknown;
+            std::uint32_t crc; // CRC hash of "PathingDoor"
             ESM::FormId32 formId;
         };
 
@@ -89,12 +89,12 @@ namespace ESM4
             float x;
             float y;
             float z;
-            std::uint32_t flagPrefMerges;
+            float preferredPercent; // percent of triangles flagged "preferred"
             std::vector<ESM::FormId> formIdMerged;
             std::vector<ESM::FormId> formIdPrefMerged;
             std::vector<DoorRef> linkedDoors;
             std::vector<IslandInfo> islandInfo;
-            std::uint32_t locationMarker;
+            std::uint32_t crc; // CRC hash of "PathingCell"
             ESM::FormId worldSpaceId;
             CellGrid cellGrid;
 

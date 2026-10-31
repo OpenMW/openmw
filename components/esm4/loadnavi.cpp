@@ -106,7 +106,7 @@ void ESM4::Navigation::NavMeshInfo::loadFO3(ESM4::Reader& reader)
         islandInfo.push_back(std::move(island));
     }
 
-    reader.get(flagPrefMerges); // preferred %
+    reader.get(preferredPercent);
 }
 
 void ESM4::Navigation::NavMeshInfo::loadTES5(ESM4::Reader& reader)
@@ -133,7 +133,7 @@ void ESM4::Navigation::NavMeshInfo::loadTES5(ESM4::Reader& reader)
     std::cout << padding << "NVMI center: " << std::dec << x << ", " << y << ", " << z << std::endl;
 #endif
 
-    reader.get(flagPrefMerges);
+    reader.get(preferredPercent);
 
     reader.get(count); // countMerged;
     if (count)
@@ -175,40 +175,22 @@ void ESM4::Navigation::NavMeshInfo::loadTES5(ESM4::Reader& reader)
     // else if (flags == FLG_Island) // FIXME: debug only
     //   std::cerr << "nvmi no island but has 0x20 flag" << std::endl;
 
-    reader.get(locationMarker);
+    reader.get(crc);
 
+    // Exterior navmeshes have worldspace and grid; interiors have null worldspace and a cell
     reader.getFormId(worldSpaceId);
-    // FLG_Tamriel    = 0x0000003c, // grid info follows, possibly Tamriel?
-    // FLG_Morrowind  = 0x01380000, // grid info follows, probably Skywind
-    // FIXME: this check doesn't work because `getFormId` changes the index of content file.
-    if (worldSpaceId == ESM::FormId{ 0x3c, 0 } || worldSpaceId == ESM::FormId{ 0x380000, 1 })
+    if (worldSpaceId.mIndex != 0)
     {
         Grid grid;
         reader.get(grid.y); // NOTE: reverse order
         reader.get(grid.x);
         cellGrid = grid;
-// FIXME: debugging only
-#if 0
-    std::string padding;
-    padding.insert(0, reader.stackSize()*2, ' ');
-    if (worldSpaceId == ESM4::FLG_Morrowind)
-        std::cout << padding << "NVMI MW: X " << std::dec << cellGrid.grid.x << ", Y " << cellGrid.grid.y << std::endl;
-    else
-        std::cout << padding << "NVMI SR: X " << std::dec << cellGrid.grid.x << ", Y " << cellGrid.grid.y << std::endl;
-#endif
     }
     else
     {
         ESM::FormId cellId;
         reader.getFormId(cellId);
         cellGrid = cellId;
-
-#if 0
-        if (worldSpaceId == 0) // interior
-            std::cout << "NVMI Interior: cellId " << std::hex << cellGrid.cellId << std::endl;
-        else
-            std::cout << "NVMI FormID: cellId " << std::hex << cellGrid.cellId << std::endl;
-#endif
     }
 }
 

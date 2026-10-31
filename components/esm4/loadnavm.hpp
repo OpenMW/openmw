@@ -74,8 +74,8 @@ namespace ESM4
 
         struct NVNMstruct
         {
-            std::uint32_t unknownNVER;
-            std::uint32_t unknownLCTN;
+            std::uint32_t version;
+            std::uint32_t crc; // CRC hash of "PathingCell"
             ESM::FormId worldSpaceId;
             CellGrid cellGrid;
             std::vector<Vertex> verticies;
