@@ -64,6 +64,7 @@ void ESM4::Tree::load(ESM4::Reader& reader)
             case ESM::fourCC("OBND"):
             case ESM::fourCC("PFIG"):
             case ESM::fourCC("PFPC"):
+            case ESM::fourCC("VMAD"):
                 reader.skipSubRecordData();
                 break;
             default:
