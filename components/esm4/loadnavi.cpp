@@ -69,7 +69,47 @@ void ESM4::Navigation::IslandInfo::load(ESM4::Reader& reader)
     }
 }
 
-void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
+void ESM4::Navigation::NavMeshInfo::loadFO3(ESM4::Reader& reader)
+{
+    reader.get(flags);
+    reader.getFormId(formId);
+    reader.getFormId(worldSpaceId); // the cell or worldspace
+    Grid grid;
+    reader.get(grid.y); // NOTE: reverse order
+    reader.get(grid.x);
+    cellGrid = grid;
+    reader.get(x);
+    reader.get(y);
+    reader.get(z);
+
+    if (flags & FLG_Island)
+    {
+        IslandInfo island;
+        reader.get(island.minX);
+        reader.get(island.minY);
+        reader.get(island.minZ);
+        reader.get(island.maxX);
+        reader.get(island.maxY);
+        reader.get(island.maxZ);
+
+        std::uint16_t vertexCount;
+        std::uint16_t triangleCount;
+        reader.get(vertexCount);
+        reader.get(triangleCount);
+        island.verticies.resize(vertexCount);
+        for (ESM4::Vertex& vertex : island.verticies)
+            reader.get(vertex);
+        island.triangles.resize(triangleCount);
+        for (Triangle& triangle : island.triangles)
+            reader.get(triangle);
+
+        islandInfo.push_back(std::move(island));
+    }
+
+    reader.get(flagPrefMerges); // preferred %
+}
+
+void ESM4::Navigation::NavMeshInfo::loadTES5(ESM4::Reader& reader)
 {
     std::uint32_t count;
 
@@ -246,17 +286,18 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("NVMI"): // FO3+
             {
+                // std::cout << "\nNVMI start" << std::endl;
                 if (mGameFormat == ESM::GameFormat::FO3 || mGameFormat == ESM::GameFormat::FONV)
                 {
-                    // FIXME: FO3/FONV have different form of NavMeshInfo
-                    reader.skipSubRecordData();
+                    NavMeshInfo nvmi;
+                    nvmi.loadFO3(reader);
+                    mNavMeshInfo.push_back(std::move(nvmi));
                     break;
                 }
                 else if (mGameFormat == ESM::GameFormat::TES5 || mGameFormat == ESM::GameFormat::FO4)
                 {
-                    // std::cout << "\nNVMI start" << std::endl;
                     NavMeshInfo nvmi;
-                    nvmi.load(reader);
+                    nvmi.loadTES5(reader);
                     mNavMeshInfo.push_back(std::move(nvmi));
                     break;
                 }

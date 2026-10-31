@@ -98,7 +98,8 @@ namespace ESM4
             ESM::FormId worldSpaceId;
             CellGrid cellGrid;
 
-            void load(ESM4::Reader& reader);
+            void loadFO3(ESM4::Reader& reader); // FO3 and FONV
+            void loadTES5(ESM4::Reader& reader); // TES5 and FO4
         };
 
         ESM::GameFormat mGameFormat = ESM::GameFormat::Unknown; // assumed per-file from context clues
