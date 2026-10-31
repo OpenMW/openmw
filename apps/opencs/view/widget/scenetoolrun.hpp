@@ -7,15 +7,13 @@
 
 #include "scenetool.hpp"
 
-class QFrame;
-class QTableWidget;
-class QModelIndex;
 class QObject;
 class QPoint;
 
 namespace CSVWidget
 {
     class SceneToolbar;
+    class SceneToolListPanel;
 
     class SceneToolRun : public SceneTool
     {
@@ -24,8 +22,7 @@ namespace CSVWidget
         std::set<std::string> mProfiles;
         std::set<std::string>::iterator mSelected;
         QString mToolTip;
-        QFrame* mPanel;
-        QTableWidget* mTable;
+        SceneToolListPanel* mPanel;
 
     private:
         void adjustToolTips();
@@ -54,7 +51,9 @@ namespace CSVWidget
 
     private slots:
 
-        void clicked(const QModelIndex& index);
+        void selectRow(int row);
+
+        void removeRow(int row);
 
     signals:
 

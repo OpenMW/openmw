@@ -2,16 +2,12 @@
 
 #include <iterator>
 
-#include <QApplication>
-#include <QFrame>
-#include <QHBoxLayout>
-#include <QHeaderView>
-#include <QTableWidget>
-
 #include <components/misc/scalableicon.hpp>
 
 #include <apps/opencs/view/widget/pushbutton.hpp>
 #include <apps/opencs/view/widget/scenetool.hpp>
+
+#include "scenetoollistpanel.hpp"
 
 class QPoint;
 
@@ -42,17 +38,13 @@ void CSVWidget::SceneToolRun::updateIcon()
 
 void CSVWidget::SceneToolRun::updatePanel()
 {
-    mTable->setRowCount(static_cast<int>(mProfiles.size()));
+    std::vector<QStringList> rows;
+    rows.reserve(mProfiles.size());
 
-    int i = 0;
+    for (const std::string& profile : mProfiles)
+        rows.push_back(QStringList{ QString::fromUtf8(profile.c_str()) });
 
-    for (std::set<std::string>::const_iterator iter(mProfiles.begin()); iter != mProfiles.end(); ++iter, ++i)
-    {
-        mTable->setItem(i, 0, new QTableWidgetItem(QString::fromUtf8(iter->c_str())));
-
-        mTable->setItem(
-            i, 1, new QTableWidgetItem(QApplication::style()->standardIcon(QStyle::SP_TitleBarCloseButton), ""));
-    }
+    mPanel->setRows(rows);
 }
 
 CSVWidget::SceneToolRun::SceneToolRun(
@@ -61,37 +53,21 @@ CSVWidget::SceneToolRun::SceneToolRun(
     , mProfiles(profiles.begin(), profiles.end())
     , mSelected(mProfiles.begin())
     , mToolTip(toolTip)
+    , mPanel(new SceneToolListPanel(1, this))
 {
     setIcon(Misc::ScalableIcon::load(icon));
     updateIcon();
     adjustToolTips();
 
-    mPanel = new QFrame(this, Qt::Popup);
-
-    QHBoxLayout* layout = new QHBoxLayout(mPanel);
-
-    layout->setContentsMargins(QMargins(0, 0, 0, 0));
-
-    mTable = new QTableWidget(0, 2, this);
-
-    mTable->setShowGrid(false);
-    mTable->verticalHeader()->hide();
-    mTable->horizontalHeader()->hide();
-    mTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    mTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    mTable->setSelectionMode(QAbstractItemView::NoSelection);
-
-    layout->addWidget(mTable);
-
-    connect(mTable, &QTableWidget::clicked, this, &SceneToolRun::clicked);
+    connect(mPanel, &SceneToolListPanel::selectRequest, this, &SceneToolRun::selectRow);
+    connect(mPanel, &SceneToolListPanel::removeRequest, this, &SceneToolRun::removeRow);
 }
 
 void CSVWidget::SceneToolRun::showPanel(const QPoint& position)
 {
     updatePanel();
 
-    mPanel->move(position);
-    mPanel->show();
+    mPanel->showAt(position);
 }
 
 void CSVWidget::SceneToolRun::activate()
@@ -141,22 +117,17 @@ void CSVWidget::SceneToolRun::addProfile(const std::string& profile)
     }
 }
 
-void CSVWidget::SceneToolRun::clicked(const QModelIndex& index)
+void CSVWidget::SceneToolRun::selectRow(int row)
 {
-    if (index.column() == 0)
-    {
-        // select profile
-        mSelected = mProfiles.begin();
-        std::advance(mSelected, index.row());
-        mPanel->hide();
-        adjustToolTips();
-    }
-    else if (index.column() == 1)
-    {
-        // remove profile from list
-        std::set<std::string>::iterator iter = mProfiles.begin();
-        std::advance(iter, index.row());
-        removeProfile(*iter);
-        updatePanel();
-    }
+    mSelected = mProfiles.begin();
+    std::advance(mSelected, row);
+    adjustToolTips();
+}
+
+void CSVWidget::SceneToolRun::removeRow(int row)
+{
+    std::set<std::string>::iterator iter = mProfiles.begin();
+    std::advance(iter, row);
+    removeProfile(*iter);
+    updatePanel();
 }
