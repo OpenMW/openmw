@@ -244,20 +244,27 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                 // std::cout << "NAVI version " << std::dec << version << std::endl;
                 break;
             }
-            case ESM::fourCC("NVMI"): // multiple
+            case ESM::fourCC("NVMI"): // FO3+
             {
-                // Can only read TES4 navmesh data
-                if (mGameFormat != ESM::GameFormat::TES4)
+                if (mGameFormat == ESM::GameFormat::FO3 || mGameFormat == ESM::GameFormat::FONV)
+                {
+                    // FIXME: FO3/FONV have different form of NavMeshInfo
+                    reader.skipSubRecordData();
+                    break;
+                }
+                else if (mGameFormat == ESM::GameFormat::TES5 || mGameFormat == ESM::GameFormat::FO4)
+                {
+                    // std::cout << "\nNVMI start" << std::endl;
+                    NavMeshInfo nvmi;
+                    nvmi.load(reader);
+                    mNavMeshInfo.push_back(std::move(nvmi));
+                    break;
+                }
+                else
                 {
                     reader.skipSubRecordData();
                     break;
                 }
-
-                // std::cout << "\nNVMI start" << std::endl;
-                NavMeshInfo nvmi;
-                nvmi.load(reader);
-                mNavMeshInfo.push_back(std::move(nvmi));
-                break;
             }
             case ESM::fourCC("NVSI"): // from Dawnguard onwards
             case ESM::fourCC("NVCI"): // FO3
