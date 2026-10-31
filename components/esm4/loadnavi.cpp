@@ -26,6 +26,7 @@
 */
 #include "loadnavi.hpp"
 
+#include <iostream> // for the debugging blocks
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -122,10 +123,10 @@ void ESM4::Navigation::NavMeshInfo::loadTES5(ESM4::Reader& reader)
 // FIXME: for debugging only
 #if 0
     std::string padding;
-    if (flags == ESM4::FLG_Modified)
-        padding.insert(0, 2, '-');
-    else if (flags == ESM4::FLG_Unmodified)
+    if (flags & FLG_Unmodified)
         padding.insert(0, 4, '.');
+    else
+        padding.insert(0, 2, '-');
 
     padding.insert(0, reader.stackSize()*2, ' ');
     std::cout << padding << "NVMI formId: 0x" << std::hex << formId << std::endl;
@@ -289,10 +290,10 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     break;
                 }
             }
-            case ESM::fourCC("NVSI"): // from Dawnguard onwards
-            case ESM::fourCC("NVCI"): // FO3
+            case ESM::fourCC("NVSI"): // TES5 deleted navmeshes, from Dawnguard onwards
+            case ESM::fourCC("NVCI"): // FO3 and FONV navmesh connections
             {
-                reader.skipSubRecordData(); // FIXME:
+                reader.skipSubRecordData(); // FIXME: not decoded yet
                 break;
             }
             default:

@@ -71,14 +71,15 @@ namespace ESM4
             std::vector<Triangle> triangles;
             std::vector<Vertex> verticies;
 
-            void load(ESM4::Reader& reader);
+            void load(ESM4::Reader& reader); // TES5 and FO4
         };
 
-        enum Flags // NVMI island flags (not certain)
+        enum Flags // NVMI flags
         {
+            FLG_InitiallyDisabled = 0x00000010, // FO3 and FONV
             FLG_Island = 0x00000020,
-            FLG_Modified = 0x00000000, // not island
-            FLG_Unmodified = 0x00000040 // not island
+            FLG_Modified = 0x00000000, // Unused?
+            FLG_Unmodified = 0x00000040 // TES5 and FO4
         };
 
         struct NavMeshInfo
