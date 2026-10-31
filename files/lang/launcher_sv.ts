@@ -570,6 +570,18 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <source>&lt;br&gt;&lt;b&gt;Could not create directory %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;%1&lt;br&gt;</source>
         <translation>&lt;br&gt;&lt;b&gt;Kunde inte skapa katalog %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;%1&lt;br&gt;</translation>
     </message>
+    <message>
+        <source>Error writing Launcher configuration backup file</source>
+        <translation>Fel när säkerhetskopia av Startarens-konfigurationsfil skulle skrivas</translation>
+    </message>
+    <message>
+        <source>Error opening Launcher configuration file</source>
+        <translation>Fel när Startarens-konfigurationsfil skulle öppnas</translation>
+    </message>
+    <message>
+        <source>Error opening Launcher configuration backup file</source>
+        <translation>Fel när säkerhetskopia av Startarens-konfigurationsfil skulle öppnas</translation>
+    </message>
 </context>
 <context>
     <name>Launcher::SettingsPage</name>

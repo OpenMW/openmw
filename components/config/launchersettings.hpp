@@ -4,6 +4,7 @@
 #include <QList>
 #include <QMap>
 #include <QPair>
+#include <QSet>
 #include <QString>
 #include <QStringList>
 
@@ -19,6 +20,7 @@ namespace Config
     {
     public:
         static constexpr char sLauncherConfigFileName[] = "launcher.cfg";
+        static constexpr char sLauncherConfigBackupFileName[] = "launcher-wd.dat";
 
         /// Keys of a section this version does not use, in file order, written back as read
         using UnknownKeys = QList<QPair<QString, QString>>;
@@ -26,6 +28,7 @@ namespace Config
         struct Settings
         {
             QString mLanguage;
+            bool mWatchdog = false;
             UnknownKeys mUnknown;
         };
 
@@ -66,7 +69,7 @@ namespace Config
             UnknownKeys mUnknown;
         };
 
-        void readFile(QTextStream& stream);
+        void readFile(QTextStream& stream, bool missingOnly = false);
 
         void clear();
 
@@ -101,6 +104,8 @@ namespace Config
 
         void setLanguage(const QString& value) { mSettings.mLanguage = value; }
 
+        bool getWatchdog() const { return mSettings.mWatchdog; }
+
         MainWindow getMainWindow() const { return mGeneral.mMainWindow; }
 
         void setMainWindow(const MainWindow& value) { mGeneral.mMainWindow = value; }
@@ -118,6 +123,7 @@ namespace Config
         Profiles mProfiles;
         General mGeneral;
         Importer mImporter;
+        QSet<QString> mReadKeys;
         /// Sections this version does not know at all, in name order, written back as read
         QMap<QString, UnknownKeys> mUnknownSections;
 

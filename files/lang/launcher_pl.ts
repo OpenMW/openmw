@@ -561,7 +561,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Error writing Launcher configuration file</source>
-        <translation>Błąd zapisu pliku konfiguracyjnego programu uruchamiącego</translation>
+        <translation>Błąd zapisu pliku konfiguracyjnego programu uruchamiającego</translation>
     </message>
     <message>
         <source>No game file selected</source>
@@ -570,6 +570,18 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     <message>
         <source>&lt;br&gt;&lt;b&gt;You do not have a game file selected.&lt;/b&gt;&lt;br&gt;&lt;br&gt;OpenMW will not start without a game file selected.&lt;br&gt;</source>
         <translation>&lt;br&gt;&lt;b&gt;Nie wybrano pliku gry.&lt;/b&gt;&lt;br&gt;&lt;br&gt;OpenMW nie uruchomi się bez wybranego pliku gry.&lt;br&gt;</translation>
+    </message>
+    <message>
+        <source>Error writing Launcher configuration backup file</source>
+        <translation>Błąd zapisu kopii zapasowej pliku konfiguracyjnego programu uruchamiającego</translation>
+    </message>
+    <message>
+        <source>Error opening Launcher configuration file</source>
+        <translation>Wystąpił błąd podczas otwierania pliku konfiguracyjnego programu uruchamiającego</translation>
+    </message>
+    <message>
+        <source>Error opening Launcher configuration backup file</source>
+        <translation>Wystąpił błąd podczas otwierania kopii zapasowej pliku konfiguracyjnego programu uruchamiającego</translation>
     </message>
 </context>
 <context>

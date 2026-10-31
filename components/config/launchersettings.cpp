@@ -34,6 +34,7 @@ namespace Config
         constexpr char sMainWindowHeightKey[] = "MainWindow/height";
         constexpr char sMainWindowPosXKey[] = "MainWindow/posx";
         constexpr char sMainWindowPosYKey[] = "MainWindow/posy";
+        constexpr char sWatchdogKey[] = "watchdog";
 
         QString makeNewContentListName()
         {
@@ -122,6 +123,8 @@ namespace Config
                 settings.mLanguage = value;
                 return true;
             }
+            if (key == sWatchdogKey)
+                return parseBool(value, settings.mWatchdog);
 
             settings.mUnknown.emplaceBack(key, value);
             return true;
@@ -210,6 +213,7 @@ namespace Config
         {
             writeSectionHeader(sSettingsSection, stream);
             writeKeyValue(sLanguageKey, value.mLanguage, stream);
+            writeKeyValue(sWatchdogKey, true, stream); // Set so future reads check for dropped launcher settings
             writeUnknownKeys(value.mUnknown, stream);
         }
 
@@ -411,10 +415,12 @@ bool Config::LauncherSettings::setValue(const QString& sectionPrefix, const QStr
     return true;
 }
 
-void Config::LauncherSettings::readFile(QTextStream& stream)
+void Config::LauncherSettings::readFile(QTextStream& stream, bool missingOnly)
 {
     const QRegularExpression sectionRe("^\\[([^]]+)\\]$");
     const QRegularExpression keyRe("^([^=]+)\\s*=\\s*(.+)$");
+
+    QSet<QString> readKeys;
 
     QString section;
 
@@ -442,11 +448,18 @@ void Config::LauncherSettings::readFile(QTextStream& stream)
         const QString key = keyMatch.captured(1).trimmed();
         const QString value = keyMatch.captured(2).trimmed();
 
+        const QString id = "[" + section + "]." + key;
+        if (missingOnly && mReadKeys.contains(id))
+            continue;
+
         if (!setValue(section, key, value))
             Log(Debug::Warning) << "Invalid value in the launcher config file: section: "
                                 << section.toUtf8().constData() << " key: " << key.toUtf8().constData()
                                 << " value: " << value.toUtf8().constData();
+        else
+            readKeys.insert(id);
     }
+    mReadKeys.unite(readKeys);
 }
 
 const Config::LauncherSettings::Profile* Config::LauncherSettings::findProfile(const QString& name) const
@@ -463,5 +476,6 @@ void Config::LauncherSettings::clear()
     mGeneral = General{};
     mProfiles = Profiles{};
     mImporter = Importer{};
+    mReadKeys.clear();
     mUnknownSections.clear();
 }
