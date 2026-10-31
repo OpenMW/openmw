@@ -149,13 +149,23 @@ while (var != 0) var--;
 ## Files and Layout
 
 - File names contain only lowercase letters and digits, followed by a `.cpp`, `.hpp` or `.h` extension. This is enforced by CI.
-- Headers are protected with `#ifndef` include guards rather than `#pragma once`.
+- Headers are protected with `#ifndef` include guards rather than `#pragma once`. New guards follow the pattern `APP[_ROOTLEVELDIRECTORY][_SUBDIRECTORY]_HEADERNAME_HPP`, built from the path of the header. Headers in `components/` use `OPENMW_COMPONENTS` as the start of the guard. Existing guards are not consistent, so they should not be used as a model.
 
 ```cpp
-#ifndef MWMECHANICS_SPELLCASTING_H
-#define MWMECHANICS_SPELLCASTING_H
+// apps/openmw/mwmechanics/spellcasting.hpp
+#ifndef OPENMW_MWMECHANICS_SPELLCASTING_HPP
+#define OPENMW_MWMECHANICS_SPELLCASTING_HPP
 ...
 #endif
+
+// apps/opencs/model/world/data.hpp
+#ifndef OPENCS_MODEL_WORLD_DATA_HPP
+
+// apps/launcher/maindialog.hpp
+#ifndef LAUNCHER_MAINDIALOG_HPP
+
+// components/misc/strings/format.hpp
+#ifndef OPENMW_COMPONENTS_MISC_STRINGS_FORMAT_HPP
 ```
 
 - Function bodies are placed in the `.cpp` file, with the exception of one-line getters and setters. Templates, as well as `constexpr` and `inline` functions, must be defined in the header, since the compiler needs the full definition wherever they are used.
@@ -204,7 +214,27 @@ namespace SomeSpace
 - Namespaces use CamelCase, which is checked by clang-tidy. Namespaces in `apps/openmw` start with `MW`, those in OpenMW-CS start with `CSM` (model) or `CSV` (view), other applications use their own name as the namespace (e.g. `Launcher`, `Wizard`, `EsmTool`), and namespaces in `components/` use plain names without a prefix.
 - Classes use CamelCase, while functions, local variables and parameters use camelBack, i.e. they start with a lowercase letter. The naming of local variables and parameters is checked by clang-tidy.
 - Enum types and concepts use CamelCase, which is also checked by clang-tidy.
-- Member variables are prefixed with `m` and static members with `s`, as in `mName` and `sName`. A trailing underscore is not used. These prefixes are a convention only and are not checked by any tool. Static constants often use the `s` prefix as well, but not consistently; many `static constexpr` members use plain names, and their naming is not settled yet.
+- New enumerations are declared as `enum class` with CamelCase enumerators, rather than as a plain `enum` with `TypePrefix_Name` enumerators. The latter remain in existing code but should not be copied. clang-tidy checks the name of the enum type, not its enumerators.
+
+```cpp
+// New code
+enum class GetNextRefMode
+{
+    LoadAll,
+    LoadOnlyMoved,
+    LoadOnlyNotMoved,
+};
+
+// Existing code only
+enum Flag
+{
+    Flag_ForceRun = 1,
+    Flag_ForceSneak = 2,
+};
+```
+
+- Member variables are prefixed with `m` and static members with `s`, as in `mName` and `sName`. A trailing underscore is not used. These prefixes are a convention only and are not checked by any tool.
+- `constexpr` constants at namespace or class scope use CamelCase rather than camelBack or all caps. This includes `static constexpr` members, which do not take the `s` prefix. Existing code also uses other forms, which should not be copied. Function-local `constexpr` variables are ordinary local variables and use camelBack.
 
 ```cpp
 namespace MWMechanics
@@ -212,6 +242,8 @@ namespace MWMechanics
     class NpcStats
     {
     public:
+        static constexpr int MaxSkillLevel = 100;
+
         int getSkillLevel(int skillIndex) const;
 
     private:
@@ -301,6 +333,7 @@ namespace SomeSpace
 - Null pointers are written as `nullptr` rather than `NULL`, and overriding virtual functions are marked with `override`.
 - OSG objects are created with `new` and held in an `osg::ref_ptr`. Other heap-allocated objects are created with `std::make_unique` or `std::make_shared`.
 - Standard containers are preferred over raw arrays, and objects are given automatic storage wherever possible.
+- Classes follow the Rule of Zero: resources are held in members that manage themselves, such as `std::unique_ptr` or `std::vector`, so that no special member functions have to be written. A class that does need a custom destructor, copy operation or move operation follows the Rule of Five and declares all five, using `= default` or `= delete` where appropriate.
 - OSG's own utilities are used where they exist: `osg::PI` and `osg::PIf` rather than `M_PI`, and `osg::Vec3f` for vectors. Values are clamped with `std::clamp`.
 - Engine code logs through `Log` with the appropriate level: `Debug::Error`, `Debug::Warning`, `Debug::Info`, `Debug::Verbose` or `Debug::Debug`. `std::cout` is used only in command-line tools, in `esm4` and in the logging implementation itself.
 
@@ -336,6 +369,11 @@ public:
 
 - Tests are written with GoogleTest and GoogleMock and are located in `apps/components_tests`, `apps/openmw_tests` and `apps/opencs_tests`.
 - Test suite names use CamelCase, usually start with the name of the subsystem under test and end with the suffix `Test`.
+- Test names use camelBack and start with `should`, followed by the expected behaviour. Existing tests also use the `for_x_should_y` form, which should not be copied.
+
+```cpp
+TEST(VFSPathNormalizedTest, shouldSupportConstructorFromStringView)
+```
 
 ## Other File Types
 
