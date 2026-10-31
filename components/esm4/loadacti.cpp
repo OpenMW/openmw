@@ -66,7 +66,12 @@ void ESM4::Activator::load(ESM4::Reader& reader)
                 reader.getFormId(mRadioTemplate);
                 break; // FONV
             case ESM::fourCC("RNAM"):
-                reader.getFormId(mRadioStation);
+                if (reader.gameFormat() == ESM::GameFormat::FO3 || reader.gameFormat() == ESM::GameFormat::FONV)
+                    reader.getFormId(mRadioStation); // Radio station
+                else if (reader.gameFormat() == ESM::GameFormat::TES5)
+                    reader.getLocalizedString(mActivationPrompt); // Activation text override
+                else
+                    reader.skipSubRecordData();
                 break;
             case ESM::fourCC("XATO"):
                 reader.getZString(mActivationPrompt);
