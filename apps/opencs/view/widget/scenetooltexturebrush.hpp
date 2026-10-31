@@ -11,12 +11,10 @@
 
 #include <components/esm/refid.hpp>
 
-class QTableWidget;
 class QDragEnterEvent;
 class QDropEvent;
 class QHBoxLayout;
 class QLabel;
-class QModelIndex;
 class QObject;
 class QPoint;
 class QPushButton;
@@ -37,6 +35,7 @@ namespace CSMDoc
 namespace CSVWidget
 {
     class SceneToolbar;
+    class SceneToolListPanel;
 
     /// \brief Layout-box for some brush button settings
     class BrushSizeControls : public QGroupBox
@@ -103,8 +102,7 @@ namespace CSVWidget
 
         QString mToolTip;
         CSMDoc::Document& mDocument;
-        QFrame* mPanel;
-        QTableWidget* mTable;
+        SceneToolListPanel* mPanel;
         std::vector<ESM::RefId> mBrushHistory;
         TextureBrushWindow* mTextureBrushWindow;
 
@@ -125,8 +123,11 @@ namespace CSVWidget
     public slots:
         void setButtonIcon(CSVWidget::BrushShape brushShape);
         void updateBrushHistory(ESM::RefId mBrushTexture);
-        void clicked(const QModelIndex& index);
         void activate() override;
+
+    private slots:
+        void selectRow(int row);
+        void removeRow(int row);
 
     signals:
         void passEvent(QDropEvent* event);
