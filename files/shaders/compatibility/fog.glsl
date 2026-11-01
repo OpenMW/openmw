@@ -74,7 +74,10 @@ void computeFog(vec3 pos, float euclideanDist, float linearDist, float near, flo
 #if @exponentialFog
     float fogValue = 1.0 - exp(-2.0 * max(0.0, dist - start / 2.0) / (end - start / 2.0));
 #else
-    float fogValue = clamp((dist - start) * (1.0 / (end - start)), 0.0, 1.0);
+    // with no fade range switch directly from no fog to full fog at start.
+    float fogValue = step(start, dist);
+    if (end != start)
+        fogValue = clamp((dist - start) * (1.0 / (end - start)), 0.0, 1.0);
 #endif
     colorScale = 1.0 - fogValue;
 #ifdef ADDITIVE_BLENDING
