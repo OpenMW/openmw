@@ -80,6 +80,8 @@
     Bug #9431: Melee combat AI should approach the target when entering the attack range
     Bug #9433: Combat AI should turn every frame
     Bug #9444: Integer setting sliders skip numbers
+    Bug #9447: ESM4 reader incorrectly subtracts 4 bytes from decompressed data size
+    Bug #9448: ESM4 reader skips last record in content files
     Feature #3602: Implement NiBillboardNode flags
     Feature #5712: Editor: Ensure content file order matches launcher order
     Feature #5887: Ability to deselect a search field
@@ -87,6 +89,7 @@
     Feature #6938: Support NiLookAtController
     Feature #7586: Lua levelled item manipulation
     Feature #7110: Lua bindings for starting and stopping global MWScripts
+    Feature #7359: Custom skills and attributes
     Feature #7743: Lua UI - Add padding property
     Feature #8241: Allow adding data directories to the launcher via dragging-and-dropping
     Feature #8546: Windows: Support reading files larger than 4GB
