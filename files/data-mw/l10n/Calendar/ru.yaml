@@ -41,4 +41,5 @@ weekday7: "Лордас"
 
 am: "д.п."
 pm: "п.п."
+timeFormat: "{hour} ч"
 day: "День"

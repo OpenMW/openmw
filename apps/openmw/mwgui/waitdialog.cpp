@@ -160,17 +160,10 @@ namespace MWGui
 
         const MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
         std::string_view month = timeManager.getMonthName();
-        int hour = static_cast<int>(timeManager.getTimeStamp().getHour());
-        bool pm = hour >= 12;
-        if (hour >= 13)
-            hour -= 12;
-        if (hour == 0)
-            hour = 12;
-
         ESM::EpochTimeStamp currentDate = timeManager.getEpochTimeStamp();
-        std::string_view formattedHour(pm ? "#{Calendar:pm}" : "#{Calendar:am}");
-        std::string dateTimeText = std::format("{} {} (#{{Calendar:day}} {}) {} {}", currentDate.mDay, month,
-            timeManager.getTimeStamp().getDay(), hour, formattedHour);
+        std::string timeOfDay = timeManager.formatTimeOfDay(timeManager.getTimeStamp().getHour());
+        std::string dateTimeText = std::format(
+            "{} {} (#{{Calendar:day}} {}) {}", currentDate.mDay, month, timeManager.getTimeStamp().getDay(), timeOfDay);
         mDateTimeText->setCaptionWithReplacing(dateTimeText);
     }
 

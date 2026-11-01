@@ -46,4 +46,5 @@ weekday7: "Samstag"
 # In case of ambiguity, "vormittags" ("mornings") and "nachmittags" ("in the afternoon") are used.
 am: "vormittags"
 pm: "nachmittags"
+timeFormat: "{hour} Uhr"
 day: "Tag"

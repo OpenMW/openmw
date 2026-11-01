@@ -151,18 +151,11 @@ namespace MWGui
             // "Day 24 - Last Steed 7 p.m."
             const MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
             std::string_view month = timeManager.getMonthName();
-            int hour = static_cast<int>(timeManager.getTimeStamp().getHour());
-            bool pm = hour >= 12;
-            if (hour >= 13)
-                hour -= 12;
-            if (hour == 0)
-                hour = 12;
-
             ESM::EpochTimeStamp currentDate = timeManager.getEpochTimeStamp();
-            std::string_view formattedHour(pm ? "#{Calendar:pm}" : "#{Calendar:am}");
+            std::string timeOfDay = timeManager.formatTimeOfDay(timeManager.getTimeStamp().getHour());
 
-            std::string autoFilename = std::format("#{{Calendar:day}} {} - {} {} {} {}",
-                timeManager.getTimeStamp().getDay(), currentDate.mDay, month, hour, formattedHour);
+            std::string autoFilename = std::format("#{{Calendar:day}} {} - {} {} {}",
+                timeManager.getTimeStamp().getDay(), currentDate.mDay, month, timeOfDay);
 
             mSaveNameEdit->setCaptionWithReplacing(autoFilename);
         }
@@ -453,17 +446,10 @@ namespace MWGui
             text << "#{OMWEngine:Health} " << static_cast<int>(mCurrentSlot->mProfile.mCurrentHealth) << "/"
                  << static_cast<int>(mCurrentSlot->mProfile.mMaximumHealth) << "\n";
 
-        int hour = int(mCurrentSlot->mProfile.mInGameTime.mGameHour);
-        bool pm = hour >= 12;
-        if (hour >= 13)
-            hour -= 12;
-        if (hour == 0)
-            hour = 12;
-
+        const MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
         text << mCurrentSlot->mProfile.mInGameTime.mDay << " "
-             << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(
-                    mCurrentSlot->mProfile.mInGameTime.mMonth)
-             << " " << hour << " " << (pm ? "#{Calendar:pm}" : "#{Calendar:am}") << "\n";
+             << timeManager.getMonthName(mCurrentSlot->mProfile.mInGameTime.mMonth) << " "
+             << timeManager.formatTimeOfDay(mCurrentSlot->mProfile.mInGameTime.mGameHour) << "\n";
 
         if (mCurrentSlot->mProfile.mTimePlayed > 0)
         {
