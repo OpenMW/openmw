@@ -7,12 +7,10 @@
 #include <QFrame>
 #include <QGroupBox>
 #include <QHBoxLayout>
-#include <QHeaderView>
 #include <QIcon>
 #include <QLabel>
 #include <QSizePolicy>
 #include <QSlider>
-#include <QTableWidget>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -175,25 +173,6 @@ CSVWidget::SceneToolShapeBrush::SceneToolShapeBrush(
     setAcceptDrops(true);
     connect(mShapeBrushWindow, &ShapeBrushWindow::passBrushShape, this, &SceneToolShapeBrush::setButtonIcon);
     setButtonIcon(mShapeBrushWindow->mBrushShape);
-
-    mPanel = new QFrame(this, Qt::Popup);
-
-    QHBoxLayout* layout = new QHBoxLayout(mPanel);
-
-    layout->setContentsMargins(QMargins(0, 0, 0, 0));
-
-    mTable = new QTableWidget(0, 2, this);
-
-    mTable->setShowGrid(true);
-    mTable->verticalHeader()->hide();
-    mTable->horizontalHeader()->hide();
-    mTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    mTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    mTable->setSelectionMode(QAbstractItemView::NoSelection);
-
-    layout->addWidget(mTable);
-
-    connect(mTable, &QTableWidget::clicked, this, &SceneToolShapeBrush::clicked);
 }
 
 void CSVWidget::SceneToolShapeBrush::setButtonIcon(CSVWidget::BrushShape brushShape)
@@ -231,10 +210,6 @@ void CSVWidget::SceneToolShapeBrush::setButtonIcon(CSVWidget::BrushShape brushSh
 }
 
 void CSVWidget::SceneToolShapeBrush::showPanel(const QPoint& position) {}
-
-void CSVWidget::SceneToolShapeBrush::updatePanel() {}
-
-void CSVWidget::SceneToolShapeBrush::clicked(const QModelIndex& index) {}
 
 void CSVWidget::SceneToolShapeBrush::activate()
 {
