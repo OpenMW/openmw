@@ -234,7 +234,7 @@ enum Flag
 ```
 
 - Member variables are prefixed with `m` and static members with `s`, as in `mName` and `sName`. A trailing underscore is not used. These prefixes are a convention only and are not checked by any tool.
-- `constexpr` constants at namespace or class scope use CamelCase rather than camelBack or all caps. This includes `static constexpr` members, which do not take the `s` prefix. Existing code also uses other forms, which should not be copied. Function-local `constexpr` variables are ordinary local variables and use camelBack.
+- `constexpr` constants at namespace scope use CamelCase rather than camelBack or all caps. `static constexpr` members are static members, so the `s` prefix takes precedence, as in `sMaxSkillLevel`. Existing code also uses other forms, which should not be copied. Function-local `constexpr` variables are ordinary local variables and use camelBack.
 
 ```cpp
 namespace MWMechanics
@@ -242,7 +242,7 @@ namespace MWMechanics
     class NpcStats
     {
     public:
-        static constexpr int MaxSkillLevel = 100;
+        static constexpr int sMaxSkillLevel = 100;
 
         int getSkillLevel(int skillIndex) const;
 
