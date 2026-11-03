@@ -30,6 +30,7 @@ variables:
   ARTIFACT_COMPRESSION_LEVEL: "fast"
   CACHE_COMPRESSION_LEVEL: "fast"
   FF_TIMESTAMPS: "true"
+  OPENMW_DEBUGINFOD: OFF
 
 .Ubuntu_Image:
   tags:
