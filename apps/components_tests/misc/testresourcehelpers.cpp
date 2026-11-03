@@ -1,3 +1,4 @@
+#include <components/esm/gameformat.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/testing/util.hpp>
 
@@ -154,6 +155,36 @@ namespace Misc::ResourceHelpers
             std::string path = "texture/bar";
             EXPECT_FALSE(changeExtensionToDds(path));
             EXPECT_EQ(path, "texture/bar");
+        }
+
+        struct MiscResourceHelpersGetLODMeshName : Test
+        {
+            const std::unique_ptr<const VFS::Manager> mVFS = TestingOpenMW::createTestVFS({
+                { VFS::Path::NormalizedView("meshes/foo_dist.nif"), nullptr },
+                { VFS::Path::NormalizedView("meshes/foo_far.nif"), nullptr },
+                { VFS::Path::NormalizedView("meshes/foo_lod.nif"), nullptr },
+                { VFS::Path::NormalizedView("meshes/foo_lod_1.nif"), nullptr },
+            });
+            const VFS::Path::NormalizedView mPath{ "meshes/foo.nif" };
+        };
+
+        TEST_F(MiscResourceHelpersGetLODMeshName, shouldUseGamePattern)
+        {
+            EXPECT_EQ(getLODMeshName(ESM::GameFormat::TES3, mPath, *mVFS), "meshes/foo_dist.nif");
+            EXPECT_EQ(getLODMeshName(ESM::GameFormat::TES4, mPath, *mVFS), "meshes/foo_far.nif");
+            EXPECT_EQ(getLODMeshName(ESM::GameFormat::FONV, mPath, *mVFS), "meshes/foo_lod.nif");
+            EXPECT_EQ(getLODMeshName(ESM::GameFormat::FO4, mPath, *mVFS), "meshes/foo_lod.nif");
+        }
+
+        TEST_F(MiscResourceHelpersGetLODMeshName, shouldPreferNumberedLevelAtOrBelowRequested)
+        {
+            EXPECT_EQ(getLODMeshName(ESM::GameFormat::TES5, mPath, *mVFS, 2), "meshes/foo_lod_1.nif");
+            EXPECT_EQ(getLODMeshName(ESM::GameFormat::TES5, mPath, *mVFS, 0), "meshes/foo_lod.nif");
+        }
+
+        TEST_F(MiscResourceHelpersGetLODMeshName, shouldKeepPathForUnknownFormat)
+        {
+            EXPECT_EQ(getLODMeshName(ESM::GameFormat::Unknown, mPath, *mVFS), "meshes/foo.nif");
         }
     }
 }

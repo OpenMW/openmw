@@ -85,7 +85,7 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                     reader.get(mAIData); // 12 bytes
                 break;
             case ESM::fourCC("ACBS"):
-                // if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || mIsFONV)
+                // if (format == ESM::GameFormat::FO3 || format == ESM::GameFormat::FONV)
                 if (subHdr.dataSize == 24)
                     reader.get(mBaseConfig);
                 else

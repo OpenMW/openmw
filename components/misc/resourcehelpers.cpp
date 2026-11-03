@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string_view>
 
-#include <components/esm/common.hpp>
+#include <components/esm/gameformat.hpp>
 #include <components/esm/refid.hpp>
 
 #include <components/misc/pathhelpers.hpp>
@@ -275,22 +275,22 @@ namespace
         return VFS::Path::Normalized(resPath);
     }
 
-    std::string_view getDistantMeshPattern(int esmVersion)
+    std::string_view getDistantMeshPattern(ESM::GameFormat gameFormat)
     {
         static constexpr std::string_view dist = "_dist";
         static constexpr std::string_view far = "_far";
         static constexpr std::string_view lod = "_lod";
 
-        switch (esmVersion)
+        switch (gameFormat)
         {
-            case ESM::VER_120:
-            case ESM::VER_130:
+            case ESM::GameFormat::TES3:
                 return dist;
-            case ESM::VER_080:
-            case ESM::VER_100:
+            case ESM::GameFormat::TES4:
                 return far;
-            case ESM::VER_094:
-            case ESM::VER_170:
+            case ESM::GameFormat::FO3:
+            case ESM::GameFormat::FONV:
+            case ESM::GameFormat::TES5:
+            case ESM::GameFormat::FO4:
                 return lod;
             default:
                 return std::string_view();
@@ -299,9 +299,9 @@ namespace
 }
 
 VFS::Path::Normalized Misc::ResourceHelpers::getLODMeshName(
-    int esmVersion, VFS::Path::NormalizedView resPath, const VFS::Manager& vfs, unsigned char lod)
+    ESM::GameFormat gameFormat, VFS::Path::NormalizedView resPath, const VFS::Manager& vfs, unsigned char lod)
 {
-    const std::string_view distantMeshPattern = getDistantMeshPattern(esmVersion);
+    const std::string_view distantMeshPattern = getDistantMeshPattern(gameFormat);
     for (int l = lod; l >= 0; --l)
     {
         std::stringstream patern;

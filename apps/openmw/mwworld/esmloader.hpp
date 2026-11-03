@@ -16,6 +16,7 @@ namespace ESM
 {
     class ReadersCache;
     struct Dialogue;
+    enum class GameFormat;
 }
 
 namespace MWWorld
@@ -26,7 +27,7 @@ namespace MWWorld
     struct EsmLoader : public ContentLoader
     {
         explicit EsmLoader(MWWorld::ESMStore& store, ESM::ReadersCache& readers, ToUTF8::Utf8Encoder* encoder,
-            std::vector<int>& esmVersions);
+            std::vector<ESM::GameFormat>& gameFormats);
 
         std::optional<int> getMasterFileFormat() const { return mMasterFileFormat; }
 
@@ -38,7 +39,7 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* mEncoder;
         ESM::Dialogue* mDialogue;
         std::optional<int> mMasterFileFormat;
-        std::vector<int>& mESMVersions;
+        std::vector<ESM::GameFormat>& mGameFormats;
         std::map<std::string, int> mNameToIndex;
     };
 

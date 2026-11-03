@@ -33,6 +33,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/gameformat.hpp>
 
 #include "cellgrid.hpp"
 #include "vertex.hpp"
@@ -99,6 +100,8 @@ namespace ESM4
 
             void load(ESM4::Reader& reader);
         };
+
+        ESM::GameFormat mGameFormat = ESM::GameFormat::Unknown; // assumed per-file from context clues
 
         std::string mEditorId;
 

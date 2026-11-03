@@ -37,11 +37,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
-
-    std::uint32_t esmVer = reader.esmVersion();
-    mIsTES4 = (esmVer == ESM::VER_080 || esmVer == ESM::VER_100) && !reader.hasFormVersion();
-    mIsFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
-    // mIsTES5 = esmVer == ESM::VER_094 || esmVer == ESM::VER_170; // WARN: FO3 is also VER_094
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
@@ -117,8 +113,6 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 switch (subHdr.dataSize)
                 {
                     case 20: // FO4
-                        mIsFO4 = true;
-                        [[fallthrough]];
                     case 16: // TES4
                     case 24: // FO3/FNV, TES5
                         reader.get(&mBaseConfig, subHdr.dataSize);
@@ -155,7 +149,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM::fourCC("WNAM"):
             {
                 // FIXME: should be read into mWornArmor for FO4
-                if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
+                if (mGameFormat == ESM::GameFormat::TES5)
                     reader.getFormId(mWornArmor);
                 else
                     reader.get(mFootWeight);

@@ -208,6 +208,16 @@ namespace ESM4
             mHeader.load(*this);
             mCtx.fileRead += mCtx.recordHeader.record.dataSize;
 
+            // check for the presence of a header form version
+            if (hasFormVersion())
+                mHeaderFormVersion = static_cast<std::uint16_t>(formVersion());
+
+            // assign the file a probable game format
+            mGameFormat = ESM::getGameFormat(esmVersion(), mHeaderFormVersion, mHeader.mMaster);
+            if (mGameFormat == ESM::GameFormat::Unknown)
+                Log(Debug::Error) << "Unrecognized format in " << filename << ": ESM version " << esmVersionF()
+                                  << ", form version "
+                                  << (mHeaderFormVersion ? std::to_string(*mHeaderFormVersion) : "none");
             buildLStringIndex(); // for localised strings in Skyrim
         }
         else

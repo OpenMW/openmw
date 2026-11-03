@@ -233,8 +233,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
 {
     // mFormId = reader.hdr().record.getFormId();
     // mFlags  = reader.hdr().record.flags;
-    std::uint32_t esmVer = reader.esmVersion();
-    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
@@ -250,7 +249,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             case ESM::fourCC("NVPP"):
             {
                 // FIXME: FO4 updates the format
-                if (reader.hasFormVersion() && (esmVer == ESM::VER_095 || esmVer == ESM::VER_100))
+                if (mGameFormat == ESM::GameFormat::FO4)
                 {
                     reader.skipSubRecordData();
                     break;
@@ -341,7 +340,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             {
                 // Can only read TES4 navmesh data
                 // Note FO4 FIXME above
-                if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV || esmVer == ESM::VER_100)
+                if (mGameFormat != ESM::GameFormat::TES4)
                 {
                     reader.skipSubRecordData();
                     break;

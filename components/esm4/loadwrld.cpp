@@ -45,10 +45,7 @@ void ESM4::World::load(ESM4::Reader& reader)
     // corrupted by the use of ignore flag (TODO: should check to verify).
     reader.setCurrWorld(mId); // save for CELL later
 
-    std::uint32_t esmVer = reader.esmVersion();
-    // bool isTES4 = (esmVer == ESM::VER_080 || esmVer == ESM::VER_100);
-    // bool isFONV = (esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134);
-    bool isTES5 = (esmVer == ESM::VER_094 || esmVer == ESM::VER_170); // WARN: FO3 is also VER_094
+    mGameFormat = reader.gameFormat();
     bool usingDefaultLevels = true;
 
     while (reader.getSubRecordHeader())
@@ -174,7 +171,7 @@ void ESM4::World::load(ESM4::Reader& reader)
 
         if (usingDefaultLevels)
         {
-            if (isTES5)
+            if (mGameFormat == ESM::GameFormat::TES5)
             {
                 mLandLevel = -2700.f;
                 mWaterLevel = -14000.f;
@@ -187,7 +184,7 @@ void ESM4::World::load(ESM4::Reader& reader)
         }
 
         // TES4 doesn't define PNAM. Exact parent worldspace behavior needs research
-        if (!reader.hasFormVersion())
+        if (mGameFormat == ESM::GameFormat::TES4)
             mParentUseFlags = 0xFFFF;
     }
 }

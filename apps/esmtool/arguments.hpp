@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <components/esm/format.hpp>
+#include <components/esm/gameformat.hpp>
 
 namespace EsmTool
 {
@@ -23,6 +24,8 @@ namespace EsmTool
 
         std::vector<std::string> types;
         std::string name;
+
+        ESM::GameFormat gameFormat = ESM::GameFormat::Unknown;
     };
 }
 

@@ -15,6 +15,7 @@ namespace VFS
 namespace ESM
 {
     class RefId;
+    enum class GameFormat;
 }
 
 namespace Misc
@@ -57,8 +58,8 @@ namespace Misc
         /// marker objects that have a hardcoded function in the game logic, should be hidden from the player
         bool isHiddenMarker(const ESM::RefId& id);
 
-        VFS::Path::Normalized getLODMeshName(
-            int esmVersion, VFS::Path::NormalizedView resPath, const VFS::Manager& vfs, unsigned char lod = 0);
+        VFS::Path::Normalized getLODMeshName(ESM::GameFormat gameFormat, VFS::Path::NormalizedView resPath,
+            const VFS::Manager& vfs, unsigned char lod = 0);
     }
 }
 

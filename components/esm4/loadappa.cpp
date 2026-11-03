@@ -35,6 +35,7 @@ void ESM4::Apparatus::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
@@ -48,7 +49,7 @@ void ESM4::Apparatus::load(ESM4::Reader& reader)
                 reader.getLocalizedString(mFullName);
                 break;
             case ESM::fourCC("DATA"):
-                if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
+                if (mGameFormat == ESM::GameFormat::TES5)
                 {
                     reader.get(mData.value);
                     reader.get(mData.weight);

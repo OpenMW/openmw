@@ -33,6 +33,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/exteriorcelllocation.hpp>
+#include <components/esm/gameformat.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/misc/constants.hpp>
@@ -67,6 +68,7 @@ namespace ESM4
 
         ESM::RefId mId; // from the header
         std::uint32_t mFlags = 0; // from the header, see enum type RecordFlag for details
+        ESM::GameFormat mGameFormat = ESM::GameFormat::Unknown; // assumed per-file from context clues
 
         ESM::RefId mParent; // world formId (for grouping cells), from the loading sequence
 

@@ -193,8 +193,8 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
+    mGameFormat = reader.gameFormat();
 
-    std::uint32_t esmVer = reader.esmVersion();
     // std::cout << "NavMesh 0x" << std::hex << this << std::endl; // FIXME
 
 // FIXME: debugging only
@@ -213,7 +213,7 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
             {
                 // See FIXME in ESM4::Navigation::load.
                 // FO4 updates the format
-                if (reader.hasFormVersion() && (esmVer == ESM::VER_095 || esmVer == ESM::VER_100))
+                if (mGameFormat == ESM::GameFormat::FO4)
                 {
                     reader.skipSubRecordData();
                     break;

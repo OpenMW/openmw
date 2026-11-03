@@ -83,6 +83,15 @@ Allowed options)");
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default");
 
+        addOption("game-format,g", bpo::value<ESM::GameFormat>(&info.gameFormat),
+            "Override for auto-detected game format:\n"
+            "\n\tTES3 - Elder Scrolls III: Morrowind\n"
+            "\n\tTES4 - Elder Scrolls IV: Oblivion\n"
+            "\n\tFO3 - Fallout 3\n"
+            "\n\tFONV - Fallout: New Vegas\n"
+            "\n\tTES5 - Elder Scrolls V: Skyrim\n"
+            "\n\tFO4 - Fallout 4");
+
         std::string finalText
             = "\nIf no option is given, the default action is to parse all records in the archive\nand display "
               "diagnostic information.";
@@ -456,11 +465,21 @@ namespace
         switch (format)
         {
             case ESM::Format::Tes3:
+                if (info.gameFormat != ESM::GameFormat::TES3 && info.gameFormat != ESM::GameFormat::Unknown)
+                {
+                    std::cout << "Overriding game format is not supported for TES3\n";
+                    return -1;
+                }
                 return loadTes3(info, std::move(stream), data);
             case ESM::Format::Tes4:
                 if (data != nullptr)
                 {
                     std::cout << "Collecting data from esm file is not supported for TES4\n";
+                    return -1;
+                }
+                if (info.gameFormat == ESM::GameFormat::TES3)
+                {
+                    std::cout << "Overriding game format to TES3 is not supported for TES4\n";
                     return -1;
                 }
                 return loadTes4(info, std::move(stream));

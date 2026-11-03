@@ -33,18 +33,21 @@ namespace MWRender
         const ESM4::Npc* traits = MWClass::ESM4Npc::getTraitsRecord(mPtr);
         if (traits == nullptr)
             return;
-        if (traits->mIsTES4)
-            updatePartsTES4(*traits);
-        else if (traits->mIsFONV)
+        switch (traits->mGameFormat)
         {
-            // Not implemented yet
-        }
-        else
-        {
-            // There is no easy way to distinguish TES5 and FO3.
-            // In case of FO3 the function shouldn't crash the game and will
-            // only lead to the NPC not being rendered.
-            updatePartsTES5(*traits);
+            case ESM::GameFormat::TES4:
+                updatePartsTES4(*traits);
+                break;
+            case ESM::GameFormat::FO3:
+            case ESM::GameFormat::FONV:
+                // Not implemented yet
+                break;
+            case ESM::GameFormat::TES5:
+            case ESM::GameFormat::FO4:
+                updatePartsTES5(*traits);
+                break;
+            default:
+                break; // Skip
         }
     }
 

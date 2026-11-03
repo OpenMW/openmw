@@ -4,6 +4,7 @@
 #include <fstream>
 
 #include <components/esm/format.hpp>
+#include <components/esm/gameformat.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/esm4/reader.hpp>
@@ -18,13 +19,13 @@ namespace MWWorld
 {
 
     EsmLoader::EsmLoader(MWWorld::ESMStore& store, ESM::ReadersCache& readers, ToUTF8::Utf8Encoder* encoder,
-        std::vector<int>& esmVersions)
+        std::vector<ESM::GameFormat>& gameFormats)
         : mReaders(readers)
         , mStore(store)
         , mEncoder(encoder)
         , mDialogue(nullptr) // A content file containing INFO records without a DIAL record appends them to the
                              // previous file's dialogue
-        , mESMVersions(esmVersions)
+        , mGameFormats(gameFormats)
     {
     }
 
@@ -54,7 +55,7 @@ namespace MWWorld
                 + ", but it is not available or has been loaded in the wrong order. "
                   "Please run the launcher to fix this issue.");
 
-                mESMVersions[index] = reader->getVer();
+                mGameFormats[index] = ESM::getGameFormat(reader->getVer(), std::nullopt);
                 mStore.load(*reader, listener, mDialogue);
 
                 if (!mMasterFileFormat.has_value()
@@ -70,6 +71,15 @@ namespace MWWorld
                     mEncoder != nullptr ? &mEncoder->getStatelessEncoder() : nullptr);
                 reader.setModIndex(index);
                 reader.updateModIndices(mNameToIndex);
+
+                // Collect previously-loaded masters' game formats to help detect this one
+                std::vector<ESM::GameFormat> masterFormats;
+                for (const ESM::MasterData& master : reader.getGameFiles())
+                    masterFormats.push_back(mGameFormats[mNameToIndex.at(Misc::StringUtils::lowerCase(master.name))]);
+
+                reader.setGameFormat(ESM::getGameFormat(
+                    reader.esmVersion(), reader.headerFormVersion(), reader.getGameFiles(), masterFormats));
+                mGameFormats[index] = reader.gameFormat();
                 mStore.loadESM4(reader, listener);
                 break;
             }

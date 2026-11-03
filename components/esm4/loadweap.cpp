@@ -31,12 +31,13 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 void ESM4::Weapon::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
-    std::uint32_t esmVer = reader.esmVersion();
-    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
@@ -51,22 +52,7 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("DATA"):
             {
-                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
-                if (subHdr.dataSize == 10) // FO3 has 15 bytes even though VER_094
-                {
-                    reader.get(mData.value);
-                    reader.get(mData.weight);
-                    reader.get(mData.damage);
-                }
-                else if (isFONV || subHdr.dataSize == 15)
-                {
-                    reader.get(mData.value);
-                    reader.get(mData.health);
-                    reader.get(mData.weight);
-                    reader.get(mData.damage);
-                    reader.get(mData.clipSize);
-                }
-                else
+                if (mGameFormat == ESM::GameFormat::TES4 && subHdr.dataSize == 30)
                 {
                     reader.get(mData.type);
                     reader.get(mData.speed);
@@ -76,6 +62,27 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                     reader.get(mData.health);
                     reader.get(mData.weight);
                     reader.get(mData.damage);
+                }
+                else if ((mGameFormat == ESM::GameFormat::FO3 || mGameFormat == ESM::GameFormat::FONV)
+                    && subHdr.dataSize == 15)
+                {
+                    reader.get(mData.value);
+                    reader.get(mData.health);
+                    reader.get(mData.weight);
+                    reader.get(mData.damage);
+                    reader.get(mData.clipSize);
+                }
+                else if (mGameFormat == ESM::GameFormat::TES5 && subHdr.dataSize == 10)
+                {
+                    reader.get(mData.value);
+                    reader.get(mData.weight);
+                    reader.get(mData.damage);
+                }
+                else
+                {
+                    Log(Debug::Warning) << "ESM4::WEAP::load - Invalid DATA, game format: " << mGameFormat
+                                        << ", size: " << subHdr.dataSize;
+                    reader.skipSubRecordData();
                 }
                 break;
             }

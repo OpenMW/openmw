@@ -228,7 +228,7 @@ namespace MWWorld
         const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         mContentFiles = contentFiles;
-        mESMVersions.resize(mContentFiles.size(), -1);
+        mGameFormats.resize(mContentFiles.size(), ESM::GameFormat::Unknown);
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
         loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder, listener);
@@ -532,9 +532,9 @@ namespace MWWorld
         return *mPlayer;
     }
 
-    const std::vector<int>& World::getESMVersions() const
+    const std::vector<ESM::GameFormat>& World::getGameFormats() const
     {
-        return mESMVersions;
+        return mGameFormats;
     }
 
     LocalScripts& World::getLocalScripts()
@@ -2788,7 +2788,7 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         GameContentLoader gameContentLoader;
-        EsmLoader esmLoader(mStore, mReaders, encoder, mESMVersions);
+        EsmLoader esmLoader(mStore, mReaders, encoder, mGameFormats);
 
         gameContentLoader.addLoader(".esm", esmLoader);
         gameContentLoader.addLoader(".esp", esmLoader);

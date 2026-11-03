@@ -31,12 +31,13 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 void ESM4::ArmorAddon::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
-
-    std::uint32_t esmVer = reader.esmVersion();
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
@@ -69,11 +70,14 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
                 reader.getFormId(mRacePrimary);
                 break;
             case ESM::fourCC("MODL"):
-                if ((esmVer == ESM::VER_094 || esmVer == ESM::VER_170) && subHdr.dataSize == 4) // TES5
+                if (mGameFormat == ESM::GameFormat::TES5 && subHdr.dataSize == 4)
                     reader.getFormId(mRaces.emplace_back());
                 else
+                {
+                    Log(Debug::Warning) << "ESM4::ARMA::load - Invalid MODL, game format: " << mGameFormat
+                                        << ", size: " << subHdr.dataSize;
                     reader.skipSubRecordData(); // FIXME: this should be mModelMale for FO3/FONV
-
+                }
                 break;
             case ESM::fourCC("BODT"): // body template
                 reader.get(mBodyTemplate.bodyPart);

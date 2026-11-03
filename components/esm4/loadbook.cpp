@@ -35,7 +35,7 @@ void ESM4::Book::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
-    // std::uint32_t esmVer = reader.esmVersion(); // currently unused
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
