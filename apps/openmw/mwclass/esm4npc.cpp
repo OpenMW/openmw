@@ -111,17 +111,17 @@ namespace MWClass
             data->mRace = store->get<ESM4::Race>().find(data->mTraits->mRace);
             switch (data->mTraits->mGameFormat)
             {
-                case (ESM::GameFormat::TES4):
+                case ESM::GameFormat::TES4:
                     data->mIsFemale = data->mTraits->mBaseConfig.tes4.flags & ESM4::Npc::TES4_Female;
                     break;
-                case (ESM::GameFormat::FO3):
-                case (ESM::GameFormat::FONV):
+                case ESM::GameFormat::FO3:
+                case ESM::GameFormat::FONV:
                     data->mIsFemale = data->mTraits->mBaseConfig.fo3.flags & ESM4::Npc::FO3_Female;
                     break;
-                case (ESM::GameFormat::TES5):
+                case ESM::GameFormat::TES5:
                     data->mIsFemale = data->mTraits->mBaseConfig.tes5.flags & ESM4::Npc::TES5_Female;
                     break;
-                case (ESM::GameFormat::FO4):
+                case ESM::GameFormat::FO4:
                     data->mIsFemale = data->mTraits->mBaseConfig.fo4.flags
                         & ESM4::Npc::TES5_Female; // FO4 flags are the same as TES5
                     break;
