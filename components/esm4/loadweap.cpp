@@ -53,13 +53,13 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("DATA"):
             {
-                if (isTES5 || subHdr.dataSize == 10)
+                if (isTES5)
                 {
                     reader.get(mData.value);
                     reader.get(mData.weight);
                     reader.get(mData.damage);
                 }
-                else if (isFO3 || isFONV || subHdr.dataSize == 15)
+                else if (isFO3 || isFONV)
                 {
                     reader.get(mData.value);
                     reader.get(mData.health);
@@ -67,7 +67,7 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                     reader.get(mData.damage);
                     reader.get(mData.clipSize);
                 }
-                else if (isTES4 || subHdr.dataSize == 30)
+                else if (isTES4)
                 {
                     reader.get(mData.type);
                     reader.get(mData.speed);
