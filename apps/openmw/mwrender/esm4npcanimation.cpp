@@ -79,7 +79,7 @@ namespace MWRender
         for (std::size_t i = 0; i < bodyParts.size(); ++i)
         {
             // FO3 and FONV's body part 3 is upper body texture
-            if (i == 3 && (traits.mIsFO3 || traits.mIsFONV))
+            if (i == 3 && (traits.mGameFormat == ESM::GameFormat::FO3 || traits.mGameFormat == ESM::GameFormat::FONV))
                 continue;
             insertPart(bodyParts[i].mesh);
         }
