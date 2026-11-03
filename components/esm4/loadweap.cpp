@@ -31,6 +31,8 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 void ESM4::Weapon::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
@@ -50,34 +52,37 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("DATA"):
             {
-                switch (mGameFormat)
+                if (mGameFormat == ESM::GameFormat::TES4 && subHdr.dataSize == 30)
                 {
-                    case ESM::GameFormat::TES5:
-                        reader.get(mData.value);
-                        reader.get(mData.weight);
-                        reader.get(mData.damage);
-                        break;
-                    case ESM::GameFormat::FO3:
-                    case ESM::GameFormat::FONV:
-                        reader.get(mData.value);
-                        reader.get(mData.health);
-                        reader.get(mData.weight);
-                        reader.get(mData.damage);
-                        reader.get(mData.clipSize);
-                        break;
-                    case ESM::GameFormat::TES4:
-                        reader.get(mData.type);
-                        reader.get(mData.speed);
-                        reader.get(mData.reach);
-                        reader.get(mData.flags);
-                        reader.get(mData.value);
-                        reader.get(mData.health);
-                        reader.get(mData.weight);
-                        reader.get(mData.damage);
-                        break;
-                    default: // FO4 doesn't have this subrecord, so nothing should reach here
-                        reader.skipSubRecordData();
-                        break;
+                    reader.get(mData.type);
+                    reader.get(mData.speed);
+                    reader.get(mData.reach);
+                    reader.get(mData.flags);
+                    reader.get(mData.value);
+                    reader.get(mData.health);
+                    reader.get(mData.weight);
+                    reader.get(mData.damage);
+                }
+                else if ((mGameFormat == ESM::GameFormat::FO3 || mGameFormat == ESM::GameFormat::FONV)
+                    && subHdr.dataSize == 15)
+                {
+                    reader.get(mData.value);
+                    reader.get(mData.health);
+                    reader.get(mData.weight);
+                    reader.get(mData.damage);
+                    reader.get(mData.clipSize);
+                }
+                else if (mGameFormat == ESM::GameFormat::TES5 && subHdr.dataSize == 10)
+                {
+                    reader.get(mData.value);
+                    reader.get(mData.weight);
+                    reader.get(mData.damage);
+                }
+                else
+                {
+                    Log(Debug::Warning) << "ESM4::WEAP::load - Invalid DATA, game format: " << mGameFormat
+                                        << ", size: " << subHdr.dataSize;
+                    reader.skipSubRecordData();
                 }
                 break;
             }
