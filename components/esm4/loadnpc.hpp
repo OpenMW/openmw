@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 
+#include <components/esm/common.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
 #include <components/esm/path.hpp>
@@ -176,12 +177,7 @@ namespace ESM4
 
         ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
-
-        bool mIsTES4 = false;
-        bool mIsFO3 = false;
-        bool mIsFONV = false;
-        bool mIsTES5 = false;
-        bool mIsFO4 = false;
+        ESM::GameFormat mGameFormat = ESM::GameFormat::Unknown; // assumed per-file from context clues
 
         std::string mEditorId;
         std::string mFullName;

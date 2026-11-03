@@ -37,13 +37,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
-
-    const ESM::GameFormat format = reader.gameFormat();
-    mIsTES4 = format == ESM::GameFormat::TES4;
-    mIsFO3 = format == ESM::GameFormat::FO3;
-    mIsFONV = format == ESM::GameFormat::FONV;
-    mIsTES5 = format == ESM::GameFormat::TES5;
-    mIsFO4 = format == ESM::GameFormat::FO4;
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
@@ -155,7 +149,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM::fourCC("WNAM"):
             {
                 // FIXME: should be read into mWornArmor for FO4
-                if (format == ESM::GameFormat::TES5)
+                if (mGameFormat == ESM::GameFormat::TES5)
                     reader.getFormId(mWornArmor);
                 else
                     reader.get(mFootWeight);

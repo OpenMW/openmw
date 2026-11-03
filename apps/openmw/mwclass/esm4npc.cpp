@@ -36,22 +36,25 @@ namespace MWClass
     {
         for (const auto* rec : recs)
         {
-            if (rec->mIsTES4)
-                return rec;
-            else if (rec->mIsFO3 || rec->mIsFONV)
+            switch (rec->mGameFormat)
             {
-                if (!(rec->mBaseConfig.fo3.templateFlags & flag))
+                case ESM::GameFormat::TES4:
                     return rec;
-            }
-            else if (rec->mIsFO4)
-            {
-                if (!(rec->mBaseConfig.fo4.templateFlags & flag))
-                    return rec;
-            }
-            else if (rec->mIsTES5)
-            {
-                if (!(rec->mBaseConfig.tes5.templateFlags & flag))
-                    return rec;
+                case ESM::GameFormat::FO3:
+                case ESM::GameFormat::FONV:
+                    if (!(rec->mBaseConfig.fo3.templateFlags & flag))
+                        return rec;
+                    break;
+                case ESM::GameFormat::TES5:
+                    if (!(rec->mBaseConfig.tes5.templateFlags & flag))
+                        return rec;
+                    break;
+                case ESM::GameFormat::FO4:
+                    if (!(rec->mBaseConfig.fo4.templateFlags & flag))
+                        return rec;
+                    break;
+                default:
+                    break; // Skip
             }
         }
         return nullptr;
@@ -106,17 +109,26 @@ namespace MWClass
         if (data->mTraits != nullptr)
         {
             data->mRace = store->get<ESM4::Race>().find(data->mTraits->mRace);
-            if (data->mTraits->mIsTES4)
-                data->mIsFemale = data->mTraits->mBaseConfig.tes4.flags & ESM4::Npc::TES4_Female;
-            else if (data->mTraits->mIsFO3 || data->mTraits->mIsFONV)
-                data->mIsFemale = data->mTraits->mBaseConfig.fo3.flags & ESM4::Npc::FO3_Female;
-            else if (data->mTraits->mIsTES5)
-                data->mIsFemale = data->mTraits->mBaseConfig.tes5.flags & ESM4::Npc::TES5_Female;
-            else if (data->mTraits->mIsFO4)
-                data->mIsFemale
-                    = data->mTraits->mBaseConfig.fo4.flags & ESM4::Npc::TES5_Female; // FO4 flags are the same as TES5
-            else
-                data->mIsFemale = false; // TODO: Starfield, FO76
+            switch (data->mTraits->mGameFormat)
+            {
+                case (ESM::GameFormat::TES4):
+                    data->mIsFemale = data->mTraits->mBaseConfig.tes4.flags & ESM4::Npc::TES4_Female;
+                    break;
+                case (ESM::GameFormat::FO3):
+                case (ESM::GameFormat::FONV):
+                    data->mIsFemale = data->mTraits->mBaseConfig.fo3.flags & ESM4::Npc::FO3_Female;
+                    break;
+                case (ESM::GameFormat::TES5):
+                    data->mIsFemale = data->mTraits->mBaseConfig.tes5.flags & ESM4::Npc::TES5_Female;
+                    break;
+                case (ESM::GameFormat::FO4):
+                    data->mIsFemale = data->mTraits->mBaseConfig.fo4.flags
+                        & ESM4::Npc::TES5_Female; // FO4 flags are the same as TES5
+                    break;
+                default:
+                    data->mIsFemale = false; // TODO: Starfield, FO76
+                    break;
+            }
         }
 
         if (auto inv = chooseTemplate(npcRecs, ESM4::Npc::Template_UseInventory))
@@ -126,7 +138,7 @@ namespace MWClass
                 if (auto* armor
                     = ESM4Impl::resolveLevelled<ESM4::LevelledItem, ESM4::Armor>(ESM::FormId::fromUint32(item.item)))
                     data->mEquippedArmor.push_back(armor);
-                else if (data->mTraits != nullptr && data->mTraits->mIsTES4)
+                else if (data->mTraits != nullptr && data->mTraits->mGameFormat == ESM::GameFormat::TES4)
                 {
                     const auto* clothing = ESM4Impl::resolveLevelled<ESM4::LevelledItem, ESM4::Clothing>(
                         ESM::FormId::fromUint32(item.item));
@@ -182,7 +194,7 @@ namespace MWClass
         const ESM4NpcCustomData& data = getCustomData(ptr);
         if (data.mTraits == nullptr)
             return {};
-        if (data.mTraits->mIsTES4)
+        if (data.mTraits->mGameFormat == ESM::GameFormat::TES4)
             return data.mTraits->mModel.getNormalized();
         return data.mIsFemale ? data.mRace->mModelFemale.getNormalized() : data.mRace->mModelMale.getNormalized();
     }
