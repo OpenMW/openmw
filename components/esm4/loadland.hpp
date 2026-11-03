@@ -30,9 +30,9 @@
 #include <cstdint>
 #include <vector>
 
-#include <components/esm/common.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/gameformat.hpp>
 #include <components/vfs/pathutil.hpp>
 
 namespace ESM4

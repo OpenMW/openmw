@@ -36,6 +36,7 @@
 #include "loadtes4.hpp"
 
 #include <components/esm/formid.hpp>
+#include <components/esm/gameformat.hpp>
 #include <components/esm/path.hpp>
 #include <components/files/istreamptr.hpp>
 

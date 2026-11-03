@@ -1,4 +1,4 @@
-#include <components/esm/common.hpp>
+#include <components/esm/gameformat.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/testing/util.hpp>
 

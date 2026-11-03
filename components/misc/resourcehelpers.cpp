@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string_view>
 
-#include <components/esm/common.hpp>
+#include <components/esm/gameformat.hpp>
 #include <components/esm/refid.hpp>
 
 #include <components/misc/pathhelpers.hpp>

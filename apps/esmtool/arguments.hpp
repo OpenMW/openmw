@@ -5,8 +5,8 @@
 #include <optional>
 #include <vector>
 
-#include <components/esm/common.hpp>
 #include <components/esm/format.hpp>
+#include <components/esm/gameformat.hpp>
 
 namespace EsmTool
 {

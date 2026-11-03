@@ -3,8 +3,8 @@
 
 #include <fstream>
 
-#include <components/esm/common.hpp>
 #include <components/esm/format.hpp>
+#include <components/esm/gameformat.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/esm4/reader.hpp>
