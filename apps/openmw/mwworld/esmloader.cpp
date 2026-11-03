@@ -55,7 +55,7 @@ namespace MWWorld
                 + ", but it is not available or has been loaded in the wrong order. "
                   "Please run the launcher to fix this issue.");
 
-                mGameFormats[index] = ESM::getGameFormat(reader->getVer(), std::nullopt, {});
+                mGameFormats[index] = ESM::getGameFormat(reader->getVer(), std::nullopt);
                 mStore.load(*reader, listener, mDialogue);
 
                 if (!mMasterFileFormat.has_value()

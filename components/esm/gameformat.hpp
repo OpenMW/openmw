@@ -10,7 +10,6 @@
 #include <string>
 #include <string_view>
 #include <utility>
-#include <vector>
 
 #include <components/esm/common.hpp> // ESMVersions, MasterData
 #include <components/misc/strings/algorithm.hpp>
@@ -58,7 +57,7 @@ namespace ESM
 
     // The game format associated with a list of masters.
     inline std::optional<GameFormat> getGameFormatFromMasters(
-        const std::vector<MasterData>& masters, std::span<const GameFormat> masterFormats = {})
+        std::span<const MasterData> masters, std::span<const GameFormat> masterFormats = {})
     {
         static constexpr std::pair<std::string_view, GameFormat> ambiguousMainFiles[] = {
             { "Fallout3.esm", GameFormat::FO3 },
@@ -81,7 +80,7 @@ namespace ESM
     // The game format for a content file. Games weren't meant to coexist, so it's our best educated guess.
     // ESM version -> previous-masters' game format -> matching master names -> header form version
     inline GameFormat getGameFormat(std::uint32_t version, std::optional<std::uint16_t> headerFormVersion,
-        const std::vector<MasterData>& masters, std::span<const GameFormat> masterFormats = {})
+        std::span<const MasterData> masters = {}, std::span<const GameFormat> masterFormats = {})
     {
         switch (version)
         {

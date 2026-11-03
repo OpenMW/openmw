@@ -22,12 +22,12 @@ namespace
     // Header values are from vanilla masters and mods
     TEST(EsmGameFormat, shouldDetectUnambiguousVersions)
     {
-        EXPECT_EQ(ESM::getGameFormat(ESM::VER_130, std::nullopt, {}), GameFormat::TES3);
-        EXPECT_EQ(ESM::getGameFormat(ESM::VER_080, std::nullopt, {}), GameFormat::TES4);
-        EXPECT_EQ(ESM::getGameFormat(ESM::VER_100, std::nullopt, {}), GameFormat::TES4);
-        EXPECT_EQ(ESM::getGameFormat(ESM::VER_134, 2, {}), GameFormat::FONV);
+        EXPECT_EQ(ESM::getGameFormat(ESM::VER_130, std::nullopt), GameFormat::TES3);
+        EXPECT_EQ(ESM::getGameFormat(ESM::VER_080, std::nullopt), GameFormat::TES4);
+        EXPECT_EQ(ESM::getGameFormat(ESM::VER_100, std::nullopt), GameFormat::TES4);
+        EXPECT_EQ(ESM::getGameFormat(ESM::VER_134, 2), GameFormat::FONV);
         EXPECT_EQ(ESM::getGameFormat(ESM::VER_171, 44, masters({ "Skyrim.esm" })), GameFormat::TES5);
-        EXPECT_EQ(ESM::getGameFormat(ESM::VER_100, 131, {}), GameFormat::FO4);
+        EXPECT_EQ(ESM::getGameFormat(ESM::VER_100, 131), GameFormat::FO4);
         EXPECT_EQ(ESM::getGameFormat(ESM::VER_095, 131, masters({ "Fallout4.esm" })), GameFormat::FO4);
     }
 
@@ -39,8 +39,8 @@ namespace
 
     TEST(EsmGameFormat, shouldUseFormVersionForMasterlessVersion094)
     {
-        EXPECT_EQ(ESM::getGameFormat(ESM::VER_094, 2, {}), GameFormat::FO3); // Fallout3.esm
-        EXPECT_EQ(ESM::getGameFormat(ESM::VER_094, 40, {}), GameFormat::TES5); // Skyrim.esm
+        EXPECT_EQ(ESM::getGameFormat(ESM::VER_094, 2), GameFormat::FO3); // Fallout3.esm
+        EXPECT_EQ(ESM::getGameFormat(ESM::VER_094, 40), GameFormat::TES5); // Skyrim.esm
     }
 
     TEST(EsmGameFormat, shouldUseMasterNamesForVersion094)
