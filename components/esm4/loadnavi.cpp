@@ -233,7 +233,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
 {
     // mFormId = reader.hdr().record.getFormId();
     // mFlags  = reader.hdr().record.flags;
-    const ESM::GameFormat format = reader.gameFormat();
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
@@ -249,7 +249,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             case ESM::fourCC("NVPP"):
             {
                 // FIXME: FO4 updates the format
-                if (format == ESM::GameFormat::FO4)
+                if (mGameFormat == ESM::GameFormat::FO4)
                 {
                     reader.skipSubRecordData();
                     break;
@@ -340,7 +340,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             {
                 // Can only read TES4 navmesh data
                 // Note FO4 FIXME above
-                if (format != ESM::GameFormat::TES4)
+                if (mGameFormat != ESM::GameFormat::TES4)
                 {
                     reader.skipSubRecordData();
                     break;

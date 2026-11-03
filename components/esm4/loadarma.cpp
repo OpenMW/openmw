@@ -35,6 +35,7 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
@@ -67,7 +68,7 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
                 reader.getFormId(mRacePrimary);
                 break;
             case ESM::fourCC("MODL"):
-                if (reader.gameFormat() == ESM::GameFormat::TES5 && subHdr.dataSize == 4)
+                if (mGameFormat == ESM::GameFormat::TES5)
                     reader.getFormId(mRaces.emplace_back());
                 else
                     reader.skipSubRecordData(); // FIXME: this should be mModelMale for FO3/FONV

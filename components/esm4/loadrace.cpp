@@ -49,10 +49,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
-    const ESM::GameFormat format = reader.gameFormat();
-    const bool isTES4 = format == ESM::GameFormat::TES4;
-    const bool isFONV = format == ESM::GameFormat::FONV;
-    const bool isFO3 = format == ESM::GameFormat::FO3;
+    mGameFormat = reader.gameFormat();
 
     bool isMale = false;
     int currPart = -1; // 0 = head, 1 = body, 2 = egt, 3 = hkx
@@ -287,17 +284,20 @@ void ESM4::Race::load(ESM4::Reader& reader)
             {
                 currPart = 0; // head part
 
-                if (isFO3 || isFONV)
+                switch (mGameFormat)
                 {
-                    mHeadParts.resize(8);
-                    mHeadPartsFemale.resize(8);
-                }
-                else if (isTES4)
-                    mHeadParts.resize(9); // assumed based on Construction Set
-                else // Optimized for TES5
-                {
-                    mHeadPartIdsMale.resize(5);
-                    mHeadPartIdsFemale.resize(5);
+                    case ESM::GameFormat::FO3:
+                    case ESM::GameFormat::FONV:
+                        mHeadParts.resize(8);
+                        mHeadPartsFemale.resize(8);
+                        break;
+                    case ESM::GameFormat::TES4:
+                        mHeadParts.resize(9); // assumed based on Construction Set
+                        break;
+                    default: // Optimized for TES5
+                        mHeadPartIdsMale.resize(5);
+                        mHeadPartIdsFemale.resize(5);
+                        break;
                 }
 
                 currentIndex.reset();
@@ -330,7 +330,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 }
                 else if (currPart == 0) // head part
                 {
-                    if (isMale || isTES4)
+                    if (isMale || mGameFormat == ESM::GameFormat::TES4)
                         reader.getZString(at(mHeadParts, *currentIndex, "head parts", reader).mesh);
                     else
                         // TODO: check TES4
@@ -371,7 +371,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 }
                 else if (currPart == 0) // head part
                 {
-                    if (isMale || isTES4)
+                    if (isMale || mGameFormat == ESM::GameFormat::TES4)
                         reader.getZString(at(mHeadParts, *currentIndex, "head parts", reader).texture);
                     else
                         // TODO: check TES4
@@ -392,28 +392,26 @@ void ESM4::Race::load(ESM4::Reader& reader)
             //
             case ESM::fourCC("NAM1"): // start marker body data /* 4 */
             {
-
-                if (isFO3 || isFONV)
+                switch (mGameFormat)
                 {
-                    currPart = 1; // body part
-
-                    mBodyPartsMale.resize(4);
-                    mBodyPartsFemale.resize(4);
+                    case ESM::GameFormat::FO3:
+                    case ESM::GameFormat::FONV:
+                        currPart = 1; // body part
+                        mBodyPartsMale.resize(4);
+                        mBodyPartsFemale.resize(4);
+                        currentIndex.reset();
+                        break;
+                    case ESM::GameFormat::TES4:
+                        currPart = 1; // body part
+                        mBodyPartsMale.resize(5); // 0 = upper body, 1 = legs, 2 = hands, 3 = feet, 4 = tail
+                        mBodyPartsFemale.resize(5); // 0 = upper body, 1 = legs, 2 = hands, 3 = feet, 4 = tail
+                        currentIndex = 4; // FIXME: argonian tail mesh without preceeding INDX
+                        break;
+                    default: // TES5
+                        currPart = 2; // for TES5 NAM1 indicates the start of EGT model
+                        currentIndex.reset();
+                        break;
                 }
-                else if (isTES4)
-                {
-                    currPart = 1; // body part
-
-                    mBodyPartsMale.resize(5); // 0 = upper body, 1 = legs, 2 = hands, 3 = feet, 4 = tail
-                    mBodyPartsFemale.resize(5); // 0 = upper body, 1 = legs, 2 = hands, 3 = feet, 4 = tail
-                }
-                else // TES5
-                    currPart = 2; // for TES5 NAM1 indicates the start of EGT model
-
-                if (isTES4)
-                    currentIndex = 4; // FIXME: argonian tail mesh without preceeding INDX
-                else
-                    currentIndex.reset();
 
                 break;
             }
@@ -450,7 +448,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("FGGS"):
             {
-                if (isMale || isTES4)
+                if (isMale || mGameFormat == ESM::GameFormat::TES4)
                 {
                     mSymShapeModeCoefficients.resize(50);
                     for (std::size_t i = 0; i < 50; ++i)
@@ -467,7 +465,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("FGGA"):
             {
-                if (isMale || isTES4)
+                if (isMale || mGameFormat == ESM::GameFormat::TES4)
                 {
                     mAsymShapeModeCoefficients.resize(30);
                     for (std::size_t i = 0; i < 30; ++i)
@@ -484,7 +482,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("FGTS"):
             {
-                if (isMale || isTES4)
+                if (isMale || mGameFormat == ESM::GameFormat::TES4)
                 {
                     mSymTextureModeCoefficients.resize(50);
                     for (std::size_t i = 0; i < 50; ++i)

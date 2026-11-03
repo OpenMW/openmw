@@ -35,6 +35,7 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
@@ -61,8 +62,7 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("IDLA"):
             {
-                const ESM::GameFormat format = reader.gameFormat();
-                if (format == ESM::GameFormat::FO3 || format == ESM::GameFormat::FONV) // 4 or 8 bytes
+                if (mGameFormat == ESM::GameFormat::FO3 || mGameFormat == ESM::GameFormat::FONV) // 4 or 8 bytes
                 {
                     reader.skipSubRecordData();
                     break;

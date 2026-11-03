@@ -45,10 +45,7 @@ void ESM4::World::load(ESM4::Reader& reader)
     // corrupted by the use of ignore flag (TODO: should check to verify).
     reader.setCurrWorld(mId); // save for CELL later
 
-    const ESM::GameFormat format = reader.gameFormat();
-    // bool isTES4 = format == ESM::GameFormat::TES4;
-    // bool isFONV = format == ESM::GameFormat::FONV;
-    const bool isTES5 = format == ESM::GameFormat::TES5;
+    mGameFormat = reader.gameFormat();
     bool usingDefaultLevels = true;
 
     while (reader.getSubRecordHeader())
@@ -174,7 +171,7 @@ void ESM4::World::load(ESM4::Reader& reader)
 
         if (usingDefaultLevels)
         {
-            if (isTES5)
+            if (mGameFormat == ESM::GameFormat::TES5)
             {
                 mLandLevel = -2700.f;
                 mWaterLevel = -14000.f;
@@ -187,7 +184,7 @@ void ESM4::World::load(ESM4::Reader& reader)
         }
 
         // TES4 doesn't define PNAM. Exact parent worldspace behavior needs research
-        if (format == ESM::GameFormat::TES4)
+        if (mGameFormat == ESM::GameFormat::TES4)
             mParentUseFlags = 0xFFFF;
     }
 }

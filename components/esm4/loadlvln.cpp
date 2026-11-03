@@ -35,7 +35,7 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
-    // const ESM::GameFormat format = reader.gameFormat(); // currently unused
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
