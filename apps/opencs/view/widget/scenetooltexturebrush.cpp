@@ -165,10 +165,12 @@ void CSVWidget::TextureBrushWindow::setBrushTexture(ESM::RefId brushTexture)
 
     const int row = landtexturesCollection.searchId(brushTexture);
 
-    if (row != -1 && !landtexturesCollection.getRecord(row).isDeleted())
+    const CSMWorld::Record<ESM::LandTexture>* record = row != -1 ? &landtexturesCollection.getRecord(row) : nullptr;
+
+    if (record != nullptr && !record->isDeleted())
     {
         // Ensure the texture is defined by the current plugin
-        if (!landtexturesCollection.getRecord(row).isModified())
+        if (!record->isModified())
         {
             CSMWorld::CommandMacro macro(undoStack);
             macro.push(new CSMWorld::TouchCommand(ltexTable, brushTexture.getRefIdString()));

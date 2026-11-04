@@ -24,7 +24,7 @@ void CSVWidget::SceneToolRun::adjustToolTips()
         toolTip += "<p>No debug profile selected (function disabled)";
     else
     {
-        toolTip += "<p>Debug profile: " + QString::fromUtf8(mSelected->c_str());
+        toolTip += "<p>Debug profile: " + QString::fromStdString(*mSelected);
         toolTip += "<p>(right click to switch to a different profile)";
     }
 
@@ -42,7 +42,7 @@ void CSVWidget::SceneToolRun::updatePanel()
     rows.reserve(mProfiles.size());
 
     for (const std::string& profile : mProfiles)
-        rows.push_back(QStringList{ QString::fromUtf8(profile.c_str()) });
+        rows.push_back(QStringList{ QString::fromStdString(profile) });
 
     mPanel->setRows(rows);
 }
