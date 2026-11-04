@@ -63,8 +63,8 @@ ToggleWeapon_description: "Gå in i eller lämna vapenposition."
 ToggleSpell_name: "Redo magi"
 ToggleSpell_description: "Gå in i eller lämna magiposition."
 
-Inventory_name: "Lager"
-Inventory_description: "Öppna lagret."
+Inventory_name: "Inventariet"
+Inventory_description: "Öppna inventariet."
 
 Journal_name: "Dagbok"
 Journal_description: "Öppna dagboken."
