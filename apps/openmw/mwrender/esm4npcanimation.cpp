@@ -3,6 +3,7 @@
 #include <components/esm4/loadarma.hpp>
 #include <components/esm4/loadarmo.hpp>
 #include <components/esm4/loadclot.hpp>
+#include <components/esm4/loadcrea.hpp>
 #include <components/esm4/loadhair.hpp>
 #include <components/esm4/loadhdpt.hpp>
 #include <components/esm4/loadnpc.hpp>
@@ -18,6 +19,44 @@
 
 namespace MWRender
 {
+    std::unordered_set<VFS::Path::Normalized, VFS::Path::Hash, std::equal_to<>> getESM4ActorModels(
+        const MWWorld::ESMStore& store)
+    {
+        std::unordered_set<VFS::Path::Normalized, VFS::Path::Hash, std::equal_to<>> modelPaths{};
+        const auto getMeshPath
+            = [](const auto& path) { return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(path)); };
+
+        const auto addModel = [&](const ESM::Path& model) {
+            if (!model.empty())
+                modelPaths.insert(getMeshPath(model.getNormalized()));
+        };
+        const auto addParts = [&](const std::vector<ESM4::Race::BodyPart>& parts) {
+            for (const ESM4::Race::BodyPart& part : parts)
+                if (!part.mesh.empty())
+                    modelPaths.insert(getMeshPath(part.mesh));
+        };
+
+        for (const ESM4::Npc& npc : store.get<ESM4::Npc>())
+            addModel(npc.mModel);
+        for (const ESM4::Creature& creature : store.get<ESM4::Creature>())
+            addModel(creature.mModel);
+        for (const ESM4::Race& race : store.get<ESM4::Race>())
+        {
+            addModel(race.mModelMale);
+            addModel(race.mModelFemale);
+            addParts(race.mHeadParts);
+            addParts(race.mHeadPartsFemale);
+            addParts(race.mBodyPartsMale);
+            addParts(race.mBodyPartsFemale);
+        }
+        for (const ESM4::Hair& hair : store.get<ESM4::Hair>())
+            addModel(hair.mModel);
+        for (const ESM4::HeadPart& headPart : store.get<ESM4::HeadPart>())
+            addModel(headPart.mModel);
+
+        return modelPaths;
+    }
+
     ESM4NpcAnimation::ESM4NpcAnimation(
         const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
         : Animation(ptr, std::move(parentNode), resourceSystem)
