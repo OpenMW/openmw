@@ -35,6 +35,7 @@ void ESM4::Activator::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
@@ -66,12 +67,23 @@ void ESM4::Activator::load(ESM4::Reader& reader)
                 reader.getFormId(mRadioTemplate);
                 break; // FONV
             case ESM::fourCC("RNAM"):
-                if (reader.gameFormat() == ESM::GameFormat::FO3 || reader.gameFormat() == ESM::GameFormat::FONV)
-                    reader.getFormId(mRadioStation); // Radio station
-                else if (reader.gameFormat() == ESM::GameFormat::TES5)
-                    reader.getLocalizedString(mActivationPrompt); // Activation text override
-                else
-                    reader.skipSubRecordData();
+                switch (mGameFormat)
+                {
+                    case ESM::GameFormat::FO3:
+                    case ESM::GameFormat::FONV:
+                    {
+                        reader.getFormId(mRadioStation); // Radio station
+                        break;
+                    }
+                    case ESM::GameFormat::TES5:
+                    {
+                        reader.getLocalizedString(mActivationPrompt); // Activation text override
+                        break;
+                    }
+                    default:
+                        reader.skipSubRecordData();
+                        break;
+                }
                 break;
             case ESM::fourCC("XATO"):
                 reader.getZString(mActivationPrompt);

@@ -32,6 +32,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/gameformat.hpp>
 #include <components/esm/path.hpp>
 
 namespace ESM4
@@ -43,6 +44,7 @@ namespace ESM4
     {
         ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
+        ESM::GameFormat mGameFormat = ESM::GameFormat::Unknown; // assumed per-file from context clues
 
         std::string mEditorId;
         std::string mFullName;

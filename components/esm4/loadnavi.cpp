@@ -269,26 +269,29 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("NVMI"): // FO3+
             {
-                // std::cout << "\nNVMI start" << std::endl;
-                if (mGameFormat == ESM::GameFormat::FO3 || mGameFormat == ESM::GameFormat::FONV)
+                switch (mGameFormat)
                 {
-                    NavMeshInfo nvmi;
-                    nvmi.loadFO3(reader);
-                    mNavMeshInfo.push_back(std::move(nvmi));
-                    break;
+                    case ESM::GameFormat::FO3:
+                    case ESM::GameFormat::FONV:
+                    {
+                        NavMeshInfo nvmi;
+                        nvmi.loadFO3(reader);
+                        mNavMeshInfo.push_back(std::move(nvmi));
+                        break;
+                    }
+                    case ESM::GameFormat::TES5:
+                    case ESM::GameFormat::FO4:
+                    {
+                        NavMeshInfo nvmi;
+                        nvmi.loadTES5(reader);
+                        mNavMeshInfo.push_back(std::move(nvmi));
+                        break;
+                    }
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
-                else if (mGameFormat == ESM::GameFormat::TES5 || mGameFormat == ESM::GameFormat::FO4)
-                {
-                    NavMeshInfo nvmi;
-                    nvmi.loadTES5(reader);
-                    mNavMeshInfo.push_back(std::move(nvmi));
-                    break;
-                }
-                else
-                {
-                    reader.skipSubRecordData();
-                    break;
-                }
+                break;
             }
             case ESM::fourCC("NVSI"): // TES5 deleted navmeshes, from Dawnguard onwards
             case ESM::fourCC("NVCI"): // FO3 and FONV navmesh connections
