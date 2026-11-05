@@ -433,7 +433,7 @@ namespace MWWorld
     }
 
     template <typename X, typename R>
-    static void loadImpl(const R& ref, const MWWorld::ESMStore& esmStore, auto& list)
+    static void loadImpl(const R& ref, const MWWorld::ESMStore& esmStore, auto& list, MWWorld::CellStore& cellStore)
     {
         const MWWorld::Store<X>& store = esmStore.get<X>();
         const X* ptr = store.search(ref.mBaseObj);
@@ -446,19 +446,23 @@ namespace MWWorld
         if (!isEnabled(ref, esmStore))
             liveCellRef.mData.disable();
         list.push_back(std::move(liveCellRef));
+        // Register at load so refs disabled here (enable-parent ESM4 REFRs) stay resolvable by FormId —
+        // scene insertion skips disabled objects. Idempotent; dereg is destruction-bound.
+        if (!list.back().isDeleted())
+            MWBase::Environment::get().getWorldModel()->registerPtr(MWWorld::Ptr(&list.back(), &cellStore));
     }
 
     template <typename X>
-    void CellRefList<X>::load(const ESM4::Reference& ref, const MWWorld::ESMStore& esmStore)
+    void CellRefList<X>::load(const ESM4::Reference& ref, const MWWorld::ESMStore& esmStore, CellStore& cellStore)
     {
         if constexpr (ESM::isESM4Rec(X::sRecordId) && !isESM4ActorRec(X::sRecordId))
-            loadImpl<X>(ref, esmStore, mList);
+            loadImpl<X>(ref, esmStore, mList, cellStore);
     }
     template <typename X>
-    void CellRefList<X>::load(const ESM4::ActorCharacter& ref, const MWWorld::ESMStore& esmStore)
+    void CellRefList<X>::load(const ESM4::ActorCharacter& ref, const MWWorld::ESMStore& esmStore, CellStore& cellStore)
     {
         if constexpr (isESM4ActorRec(X::sRecordId))
-            loadImpl<X>(ref, esmStore, mList);
+            loadImpl<X>(ref, esmStore, mList, cellStore);
     }
 
     template <typename X>
@@ -929,8 +933,8 @@ namespace MWWorld
 
         ESM::RecNameInts foundType = static_cast<ESM::RecNameInts>(store.find(ref.mBaseObj));
 
-        Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &store, foundType](auto& x) {
-            recNameSwitcher(x, foundType, [&ref, &store](auto& storeIn) { storeIn.load(ref, store); });
+        Misc::tupleForEach(this->mCellStoreImp->mRefLists, [this, &ref, &store, foundType](auto& x) {
+            recNameSwitcher(x, foundType, [this, &ref, &store](auto& storeIn) { storeIn.load(ref, store, *this); });
         });
     }
 
@@ -939,8 +943,8 @@ namespace MWWorld
         const MWWorld::ESMStore& store = mStore;
         ESM::RecNameInts foundType = static_cast<ESM::RecNameInts>(store.find(ref.mBaseObj));
 
-        Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &store, foundType](auto& x) {
-            recNameSwitcher(x, foundType, [&ref, &store](auto& storeIn) { storeIn.load(ref, store); });
+        Misc::tupleForEach(this->mCellStoreImp->mRefLists, [this, &ref, &store, foundType](auto& x) {
+            recNameSwitcher(x, foundType, [this, &ref, &store](auto& storeIn) { storeIn.load(ref, store, *this); });
         });
     }
 

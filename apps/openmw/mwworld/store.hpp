@@ -517,7 +517,7 @@ namespace MWWorld
     public:
         void preprocessReferences(const Store<ESM4::Cell>& cells)
         {
-            for (auto& [_, ref] : this->mStatic)
+            for (auto& [formId, ref] : this->mStatic)
             {
                 const ESM4::Cell* cell = cells.find(ref.mParent);
                 if (cell->isExterior() && (cell->mFlags & ESM4::Rec_Persistent))
