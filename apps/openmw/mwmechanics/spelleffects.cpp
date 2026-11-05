@@ -618,6 +618,15 @@ namespace MWMechanics
                 if (!target.getClass().isNpc())
                     return ESM::ActiveEffect::Flag_Invalid;
             }
+            else if (effect.mEffectId == ESM::MagicEffect::Soultrap)
+            {
+                if (target.getClass().isNpc() || target.get<ESM::Creature>()->mBase->mData.mSoul <= 0)
+                {
+                    if (caster == getPlayer())
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");
+                    return ESM::ActiveEffect::Flag_Invalid;
+                }
+            }
             else if (effect.mEffectId == ESM::MagicEffect::Sound)
             {
                 if (target == getPlayer())
@@ -1346,11 +1355,6 @@ namespace MWMechanics
 
                 if (!spellParams.hasFlag(ESM::ActiveSpells::Flag_Lua))
                     playEffects(target, *magicEffect, (isTemporary || (isEquipment && playNonLooping)));
-
-                if (effect.mEffectId == ESM::MagicEffect::Soultrap && !target.getClass().isNpc()
-                    && target.getType() == ESM::Creature::sRecordId
-                    && target.get<ESM::Creature>()->mBase->mData.mSoul == 0 && caster == getPlayer())
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");
             }
             float magnitude = roll(effect);
             // Note that there's an early out for Flag_Applied AppliedOnce effects so we don't have to exclude them here
