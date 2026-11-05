@@ -44,37 +44,23 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
     reader.get(version);
     reader.get(crc);
 
-    // Exterior navmeshes have worldspace and grid; interiors have null worldspace and a cell
-    reader.getFormId(worldSpaceId);
-    if (worldSpaceId.mIndex != 0)
-    {
-        //   ^
-        // Y |                   X Y Index
-        //     |                 0,0 0
-        //   1 |23               0,1 1
-        //   0 |01               1,0 2
-        //     +---              1,1 3
-        //      01 ->
-        //         X
-        //
-        // e.g. Dagonfel X:13,14,15,16 Y:43,44,45,46 (Morrowind X:7 Y:22)
-        //
-        // Skywind:   -4,-3 -2,-1 0,1 2,3 4,5 6,7
-        // Morrowind: -2    -1    0   1   2   3
-        //
-        // Formula seems to be floor(Skywind coord / 2) <cmath>
-        //
-        Grid grid;
-        reader.get(grid.y); // NOTE: reverse order
-        reader.get(grid.x);
-        cellGrid = grid;
-    }
-    else
-    {
-        ESM::FormId cellId;
-        reader.getFormId(cellId);
-        cellGrid = cellId;
-    }
+    readPathingCell(reader, worldSpaceId, cellGrid);
+    // Exterior grid:
+    //   ^
+    // Y |                   X Y Index
+    //     |                 0,0 0
+    //   1 |23               0,1 1
+    //   0 |01               1,0 2
+    //     +---              1,1 3
+    //      01 ->
+    //         X
+    //
+    // e.g. Dagonfel X:13,14,15,16 Y:43,44,45,46 (Morrowind X:7 Y:22)
+    //
+    // Skywind:   -4,-3 -2,-1 0,1 2,3 4,5 6,7
+    // Morrowind: -2    -1    0   1   2   3
+    //
+    // Formula seems to be floor(Skywind coord / 2) <cmath>
 
     reader.get(count); // numVerticies
     if (count)

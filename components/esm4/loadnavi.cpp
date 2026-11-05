@@ -26,13 +26,12 @@
 */
 #include "loadnavi.hpp"
 
-#include <iostream> // for the debugging blocks
 #include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
 
-void ESM4::Navigation::IslandInfo::load(ESM4::Reader& reader)
+void ESM4::Navigation::IslandInfo::loadBounds(ESM4::Reader& reader)
 {
     reader.get(minX);
     reader.get(minY);
@@ -40,6 +39,11 @@ void ESM4::Navigation::IslandInfo::load(ESM4::Reader& reader)
     reader.get(maxX);
     reader.get(maxY);
     reader.get(maxZ);
+}
+
+void ESM4::Navigation::IslandInfo::load(ESM4::Reader& reader)
+{
+    loadBounds(reader);
 
     std::uint32_t count;
     reader.get(count); // countTriangle;
@@ -86,12 +90,7 @@ void ESM4::Navigation::NavMeshInfo::loadFO3(ESM4::Reader& reader)
     if (flags & FLG_Island)
     {
         IslandInfo island;
-        reader.get(island.minX);
-        reader.get(island.minY);
-        reader.get(island.minZ);
-        reader.get(island.maxX);
-        reader.get(island.maxY);
-        reader.get(island.maxZ);
+        island.loadBounds(reader);
 
         std::uint16_t vertexCount;
         std::uint16_t triangleCount;
@@ -177,22 +176,7 @@ void ESM4::Navigation::NavMeshInfo::loadTES5(ESM4::Reader& reader)
     //   std::cerr << "nvmi no island but has 0x20 flag" << std::endl;
 
     reader.get(crc);
-
-    // Exterior navmeshes have worldspace and grid; interiors have null worldspace and a cell
-    reader.getFormId(worldSpaceId);
-    if (worldSpaceId.mIndex != 0)
-    {
-        Grid grid;
-        reader.get(grid.y); // NOTE: reverse order
-        reader.get(grid.x);
-        cellGrid = grid;
-    }
-    else
-    {
-        ESM::FormId cellId;
-        reader.getFormId(cellId);
-        cellGrid = cellId;
-    }
+    readPathingCell(reader, worldSpaceId, cellGrid);
 }
 
 // NVPP is a matrix of preferred paths between N "node" navmeshes
@@ -273,20 +257,12 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                 {
                     case ESM::GameFormat::FO3:
                     case ESM::GameFormat::FONV:
-                    {
-                        NavMeshInfo nvmi;
-                        nvmi.loadFO3(reader);
-                        mNavMeshInfo.push_back(std::move(nvmi));
+                        mNavMeshInfo.emplace_back().loadFO3(reader);
                         break;
-                    }
                     case ESM::GameFormat::TES5:
                     case ESM::GameFormat::FO4:
-                    {
-                        NavMeshInfo nvmi;
-                        nvmi.loadTES5(reader);
-                        mNavMeshInfo.push_back(std::move(nvmi));
+                        mNavMeshInfo.emplace_back().loadTES5(reader);
                         break;
-                    }
                     default:
                         reader.skipSubRecordData();
                         break;

@@ -71,6 +71,7 @@ namespace ESM4
             std::vector<Triangle> triangles;
             std::vector<Vertex> verticies;
 
+            void loadBounds(ESM4::Reader& reader);
             void load(ESM4::Reader& reader); // TES5 and FO4
         };
 
