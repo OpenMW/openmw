@@ -77,9 +77,9 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
                 break;
             }
             case ESM::fourCC("LLCT"):
-            case ESM::fourCC("OBND"): // FO3/FONV
-            case ESM::fourCC("COED"): // FO3/FONV
-            case ESM::fourCC("LVLG"): // FO3/FONV
+            case ESM::fourCC("OBND"): // FO3/FNV
+            case ESM::fourCC("COED"): // FO3/FNV
+            case ESM::fourCC("LVLG"): // FO3/FNV
             case ESM::fourCC("LLKC"): // FO4
             case ESM::fourCC("LVLM"): // FO4
             case ESM::fourCC("LVSG"): // FO4

@@ -23,7 +23,7 @@
   from Tes4Mod:Mod_File_Format and Tes5Mod:File_Formats but also refined by
   trial & error.  See http://en.uesp.net/wiki for details.
 
-  Also see https://tes5edit.github.io/fopdoc/ for FO3/FONV specific details.
+  Also see https://tes5edit.github.io/fopdoc/ for FO3/FNV specific details.
 
 */
 #ifndef ESM4_SCRIPT_H
@@ -47,7 +47,7 @@ namespace ESM4
         EMO_Sad = 4,
         EMO_Happy = 5,
         EMO_Surprise = 6,
-        EMO_Pained = 7 // FO3/FONV
+        EMO_Pained = 7 // FO3/FNV
     };
 
     enum ConditionTypeAndFlag
@@ -326,7 +326,7 @@ namespace ESM4
         std::int32_t emoValue;
         std::uint32_t unknown1;
         std::uint32_t responseNo; // 1 byte + padding
-        // below FO3/FONV
+        // below FO3/FNV
         ESM::FormId32 sound; // when 20 bytes usually 0 but there are exceptions (FO3 INFO FormId = 0x0002241f)
         std::uint32_t flags; // 1 byte + padding (0x01 = use emotion anim)
     };
@@ -339,7 +339,7 @@ namespace ESM4
         std::uint32_t param1; // FIXME: if formid needs modindex adjustment or not?
         std::uint32_t param2;
         std::uint32_t runOn; // 0 subject, 1 target, 2 reference, 3 combat target, 4 linked reference
-        // below FO3/FONV/TES5
+        // below FO3/FNV/TES5
         ESM::FormId32 reference;
     };
 

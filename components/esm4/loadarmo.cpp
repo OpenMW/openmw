@@ -54,7 +54,7 @@ void ESM4::Armor::load(ESM4::Reader& reader)
                     case 14: // TES4
                         reader.get(mData);
                         break;
-                    case 12: // FO3, FONV, FO4
+                    case 12: // FO3, FNV, FO4
                         reader.get(mData.value);
                         reader.get(mData.health);
                         reader.get(mData.weight);
@@ -213,8 +213,8 @@ void ESM4::Armor::load(ESM4::Reader& reader)
             case ESM::fourCC("MOSD"): // FO3
             case ESM::fourCC("MODS"): // FO3
             case ESM::fourCC("MO3S"): // FO3
-            case ESM::fourCC("BNAM"): // FONV
-            case ESM::fourCC("SNAM"): // FONV
+            case ESM::fourCC("BNAM"): // FNV
+            case ESM::fourCC("SNAM"): // FNV
             case ESM::fourCC("DAMC"): // Destructible
             case ESM::fourCC("DEST"):
             case ESM::fourCC("DMDC"):

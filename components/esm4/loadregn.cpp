@@ -82,7 +82,7 @@ void ESM4::Region::load(ESM4::Reader& reader)
                 break;
             }
             // FO3 only 2: DemoMegatonSound and DC01 (both 0 RDMD)
-            // FONV none
+            // FNV none
             case ESM::fourCC("RDMD"): // music type; 0 default, 1 public, 2 dungeon
             {
 #if 0
@@ -94,7 +94,7 @@ void ESM4::Region::load(ESM4::Reader& reader)
 #endif
                 break;
             }
-            case ESM::fourCC("RDMO"): // not seen in FO3/FONV?
+            case ESM::fourCC("RDMO"): // not seen in FO3/FNV?
             {
                 // std::cout << "REGN " << ESM::printName(subHdr.typeId) << " skipping..."
                 // << subHdr.dataSize << std::endl;
@@ -118,9 +118,9 @@ void ESM4::Region::load(ESM4::Reader& reader)
             case ESM::fourCC("RDSA"):
             case ESM::fourCC("RDWT"): // formId
             case ESM::fourCC("RDOT"): // formId
-            case ESM::fourCC("RDID"): // FONV
-            case ESM::fourCC("RDSB"): // FONV
-            case ESM::fourCC("RDSI"): // FONV
+            case ESM::fourCC("RDID"): // FNV
+            case ESM::fourCC("RDSB"): // FNV
+            case ESM::fourCC("RDSI"): // FNV
             case ESM::fourCC("NVMI"): // TES5
             case ESM::fourCC("ANAM"): // FO4
             case ESM::fourCC("RLDM"): // FO4

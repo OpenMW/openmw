@@ -50,7 +50,7 @@ void ESM4::Quest::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("ICON"):
                 reader.getZString(mFileName);
-                break; // TES4 (none in FO3/FONV)
+                break; // TES4 (none in FO3/FNV)
             case ESM::fourCC("DATA"):
             {
                 if (subHdr.dataSize == 2) // TES4
@@ -81,7 +81,7 @@ void ESM4::Quest::load(ESM4::Reader& reader)
                 else if (subHdr.dataSize == 28)
                 {
                     TargetCondition cond;
-                    reader.get(cond); // FO3/FONV
+                    reader.get(cond); // FO3/FNV
                     if (cond.reference)
                         reader.adjustFormId(cond.reference);
                     mTargetConditions.push_back(cond);

@@ -46,14 +46,14 @@ namespace ESM4
 
         std::string mEditorId;
         std::vector<ESM::FormId> mQuests;
-        std::vector<ESM::FormId> mQuestsRemoved; // FONV only?
+        std::vector<ESM::FormId> mQuestsRemoved; // FNV only?
         std::string mTopicName;
 
         std::string mTextDumb; // FIXME: temp name
 
         bool mDoAllBeforeRepeat; // TES5 only
         std::uint8_t mDialType; // DialType
-        std::uint8_t mDialFlags; // FO3/FONV: 0x1 rumours, 0x2 top-level
+        std::uint8_t mDialFlags; // FO3/FNV: 0x1 rumours, 0x2 top-level
 
         float mPriority;
 

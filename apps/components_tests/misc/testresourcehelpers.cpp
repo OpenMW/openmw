@@ -172,7 +172,7 @@ namespace Misc::ResourceHelpers
         {
             EXPECT_EQ(getLODMeshName(ESM::GameFormat::TES3, mPath, *mVFS), "meshes/foo_dist.nif");
             EXPECT_EQ(getLODMeshName(ESM::GameFormat::TES4, mPath, *mVFS), "meshes/foo_far.nif");
-            EXPECT_EQ(getLODMeshName(ESM::GameFormat::FONV, mPath, *mVFS), "meshes/foo_lod.nif");
+            EXPECT_EQ(getLODMeshName(ESM::GameFormat::FNV, mPath, *mVFS), "meshes/foo_lod.nif");
             EXPECT_EQ(getLODMeshName(ESM::GameFormat::FO4, mPath, *mVFS), "meshes/foo_lod.nif");
         }
 

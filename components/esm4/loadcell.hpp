@@ -88,13 +88,13 @@ namespace ESM4
         std::vector<ESM::FormId> mRegions;
         Lighting mLighting;
 
-        ESM::FormId mLightingTemplate; // FO3/FONV
-        std::uint32_t mLightingTemplateFlags = 0; // FO3/FONV
+        ESM::FormId mLightingTemplate; // FO3/FNV
+        std::uint32_t mLightingTemplateFlags = 0; // FO3/FNV
 
-        ESM::FormId mMusic; // FO3/FONV
-        ESM::FormId mAcousticSpace; // FO3/FONV
+        ESM::FormId mMusic; // FO3/FNV
+        ESM::FormId mAcousticSpace; // FO3/FNV
         // TES4: 0 = default, 1 = public, 2 = dungeon
-        // FO3/FONV have more types (not sure how they are used, however)
+        // FO3/FNV have more types (not sure how they are used, however)
         std::uint8_t mMusicType = 0;
 
         CellGroup* mCellGroup = nullptr;

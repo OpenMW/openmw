@@ -62,7 +62,7 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("IDLA"):
             {
-                if (mGameFormat == ESM::GameFormat::FO3 || mGameFormat == ESM::GameFormat::FONV) // 4 or 8 bytes
+                if (mGameFormat == ESM::GameFormat::FO3 || mGameFormat == ESM::GameFormat::FNV) // 4 or 8 bytes
                 {
                     reader.skipSubRecordData();
                     break;

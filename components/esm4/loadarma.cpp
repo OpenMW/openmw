@@ -76,7 +76,7 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
                 {
                     Log(Debug::Warning) << "ESM4::ARMA::load - Invalid MODL, game format: " << mGameFormat
                                         << ", size: " << subHdr.dataSize;
-                    reader.skipSubRecordData(); // FIXME: this should be mModelMale for FO3/FONV
+                    reader.skipSubRecordData(); // FIXME: this should be mModelMale for FO3/FNV
                 }
                 break;
             case ESM::fourCC("BODT"): // body template

@@ -65,12 +65,12 @@ void ESM4::Activator::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("INAM"):
                 reader.getFormId(mRadioTemplate);
-                break; // FONV
+                break; // FNV
             case ESM::fourCC("RNAM"):
                 switch (mGameFormat)
                 {
                     case ESM::GameFormat::FO3:
-                    case ESM::GameFormat::FONV:
+                    case ESM::GameFormat::FNV:
                     {
                         reader.getFormId(mRadioStation); // Radio station
                         break;
@@ -87,7 +87,7 @@ void ESM4::Activator::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("XATO"):
                 reader.getZString(mActivationPrompt);
-                break; // FONV
+                break; // FNV
             case ESM::fourCC("ATTX"): // FO4 activation text override
                 reader.getLocalizedString(mActivationPrompt);
                 break;

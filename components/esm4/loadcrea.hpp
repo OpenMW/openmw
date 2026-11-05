@@ -139,8 +139,8 @@ namespace ESM4
 
         std::vector<InventoryItem> mInventory;
 
-        ESM::FormId mBaseTemplate; // FO3/FONV
-        std::vector<ESM::FormId> mBodyParts; // FO3/FONV
+        ESM::FormId mBaseTemplate; // FO3/FNV
+        std::vector<ESM::FormId> mBodyParts; // FO3/FNV
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;

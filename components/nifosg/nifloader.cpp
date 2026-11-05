@@ -1734,7 +1734,7 @@ namespace NifOsg
 
                 drawable = rig;
 
-                // FO3 and FONV body parts 100-299 are caps where a limb cuts off.
+                // FO3 and FNV body parts 100-299 are caps where a limb cuts off.
                 // TODO: Later games have different ids.
                 // TODO: Handle actual dismemberment.
                 if (skin->mRecordType == Nif::RC_BSDismemberSkinInstance

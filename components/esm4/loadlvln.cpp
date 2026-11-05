@@ -72,7 +72,7 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
                     else
                         throw std::runtime_error("ESM4::LVLN::load - " + mEditorId + " LVLO size error");
                 }
-                //              else if (format == ESM::GameFormat::FO3 || format == ESM::GameFormat::FONV
+                //              else if (format == ESM::GameFormat::FO3 || format == ESM::GameFormat::FNV
                 //              || format == ESM::GameFormat::TES5)
                 //              {
                 //                  std::uint32_t level;

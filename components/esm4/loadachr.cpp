@@ -115,7 +115,7 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
             case ESM::fourCC("XIBS"): // FO3
             case ESM::fourCC("SCHR"): // FO3
             case ESM::fourCC("TNAM"): // FO3
-            case ESM::fourCC("XATO"): // FONV
+            case ESM::fourCC("XATO"): // FNV
             case ESM::fourCC("MNAM"): // FO4
             case ESM::fourCC("XATP"): // FO4
             case ESM::fourCC("XEMI"): // FO4

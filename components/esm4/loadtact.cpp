@@ -58,7 +58,7 @@ void ESM4::TalkingActivator::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("INAM"):
                 reader.getFormId(mRadioTemplate);
-                break; // FONV
+                break; // FNV
             case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;

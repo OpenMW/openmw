@@ -19,7 +19,7 @@ namespace MWRender
     private:
         void insertPart(std::string_view model);
 
-        // Works for FO3/FONV/TES5
+        // Works for FO3/FNV/TES5
         void insertHeadParts(const std::vector<ESM::FormId>& partIds, std::set<uint32_t>& usedHeadPartTypes);
 
         void updateParts();

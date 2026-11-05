@@ -37,7 +37,7 @@ namespace MWRender
         {
             case ESM::GameFormat::TES4:
             case ESM::GameFormat::FO3:
-            case ESM::GameFormat::FONV:
+            case ESM::GameFormat::FNV:
                 updatePartsTES4(*traits);
                 break;
             case ESM::GameFormat::TES5:
@@ -78,8 +78,8 @@ namespace MWRender
         const std::vector<ESM4::Race::BodyPart>& bodyParts = isFemale ? race->mBodyPartsFemale : race->mBodyPartsMale;
         for (std::size_t i = 0; i < bodyParts.size(); ++i)
         {
-            // FO3 and FONV's 4th body part is the upper body texture
-            if (i == 3 && (traits.mGameFormat == ESM::GameFormat::FO3 || traits.mGameFormat == ESM::GameFormat::FONV))
+            // FO3 and FNV's 4th body part is the upper body texture
+            if (i == 3 && (traits.mGameFormat == ESM::GameFormat::FO3 || traits.mGameFormat == ESM::GameFormat::FNV))
                 continue;
             insertPart(bodyParts[i].mesh);
         }

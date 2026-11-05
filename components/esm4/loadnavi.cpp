@@ -256,7 +256,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                 switch (mGameFormat)
                 {
                     case ESM::GameFormat::FO3:
-                    case ESM::GameFormat::FONV:
+                    case ESM::GameFormat::FNV:
                         mNavMeshInfo.emplace_back().loadFO3(reader);
                         break;
                     case ESM::GameFormat::TES5:
@@ -270,7 +270,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                 break;
             }
             case ESM::fourCC("NVSI"): // TES5 deleted navmeshes, from Dawnguard onwards
-            case ESM::fourCC("NVCI"): // FO3 and FONV navmesh connections
+            case ESM::fourCC("NVCI"): // FO3 and FNV navmesh connections
             {
                 reader.skipSubRecordData(); // FIXME: not decoded yet
                 break;

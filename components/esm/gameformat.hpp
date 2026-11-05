@@ -16,7 +16,7 @@ namespace ESM
         TES3,
         TES4,
         FO3,
-        FONV,
+        FNV,
         TES5,
         FO4,
     };

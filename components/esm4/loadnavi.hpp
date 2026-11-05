@@ -77,7 +77,7 @@ namespace ESM4
 
         enum Flags // NVMI flags
         {
-            FLG_InitiallyDisabled = 0x00000010, // FO3 and FONV
+            FLG_InitiallyDisabled = 0x00000010, // FO3 and FNV
             FLG_Island = 0x00000020,
             FLG_Modified = 0x00000000, // Unused?
             FLG_Unmodified = 0x00000040 // TES5 and FO4
@@ -100,7 +100,7 @@ namespace ESM4
             ESM::FormId worldSpaceId;
             CellGrid cellGrid;
 
-            void loadFO3(ESM4::Reader& reader); // FO3 and FONV
+            void loadFO3(ESM4::Reader& reader); // FO3 and FNV
             void loadTES5(ESM4::Reader& reader); // TES5 and FO4
         };
 

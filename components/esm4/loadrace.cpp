@@ -129,7 +129,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 }
                 std::cout << ss.str() << std::endl;
 #else
-                if (subHdr.dataSize == 36) // TES4/FO3/FONV
+                if (subHdr.dataSize == 36) // TES4/FO3/FNV
                 {
                     std::uint8_t skill;
                     std::uint8_t bonus;
@@ -287,7 +287,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 switch (mGameFormat)
                 {
                     case ESM::GameFormat::FO3:
-                    case ESM::GameFormat::FONV:
+                    case ESM::GameFormat::FNV:
                         mHeadParts.resize(8);
                         mHeadPartsFemale.resize(8);
                         break;
@@ -395,7 +395,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 switch (mGameFormat)
                 {
                     case ESM::GameFormat::FO3:
-                    case ESM::GameFormat::FONV:
+                    case ESM::GameFormat::FNV:
                         currPart = 1; // body part
                         mBodyPartsMale.resize(4);
                         mBodyPartsFemale.resize(4);

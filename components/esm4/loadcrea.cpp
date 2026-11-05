@@ -85,7 +85,7 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                     reader.get(mAIData); // 12 bytes
                 break;
             case ESM::fourCC("ACBS"):
-                // if (format == ESM::GameFormat::FO3 || format == ESM::GameFormat::FONV)
+                // if (format == ESM::GameFormat::FO3 || format == ESM::GameFormat::FNV)
                 if (subHdr.dataSize == 24)
                     reader.get(mBaseConfig);
                 else
@@ -154,7 +154,7 @@ void ESM4::Creature::load(ESM4::Reader& reader)
             case ESM::fourCC("TPLT"):
                 reader.getFormId(mBaseTemplate);
                 break; // FO3
-            case ESM::fourCC("PNAM"): // FO3/FONV/TES5
+            case ESM::fourCC("PNAM"): // FO3/FNV/TES5
                 reader.getFormId(mBodyParts.emplace_back());
                 break;
             case ESM::fourCC("MODT"):

@@ -41,7 +41,7 @@ namespace MWClass
                 case ESM::GameFormat::TES4:
                     return rec;
                 case ESM::GameFormat::FO3:
-                case ESM::GameFormat::FONV:
+                case ESM::GameFormat::FNV:
                     if (!(rec->mBaseConfig.fo3.templateFlags & flag))
                         return rec;
                     break;
@@ -115,7 +115,7 @@ namespace MWClass
                     data->mIsFemale = data->mTraits->mBaseConfig.tes4.flags & ESM4::Npc::TES4_Female;
                     break;
                 case ESM::GameFormat::FO3:
-                case ESM::GameFormat::FONV:
+                case ESM::GameFormat::FNV:
                     data->mIsFemale = data->mTraits->mBaseConfig.fo3.flags & ESM4::Npc::FO3_Female;
                     break;
                 case ESM::GameFormat::TES5:
@@ -198,7 +198,7 @@ namespace MWClass
         {
             case ESM::GameFormat::TES4:
             case ESM::GameFormat::FO3:
-            case ESM::GameFormat::FONV:
+            case ESM::GameFormat::FNV:
                 return data.mTraits->mModel.getNormalized(); // Skeleton in the NPC record
             default: // TES5, FO4: Skeleton in the race record
                 return data.mIsFemale ? data.mRace->mModelFemale.getNormalized()

@@ -23,7 +23,7 @@
   from Tes4Mod:Mod_File_Format and Tes5Mod:File_Formats but also refined by
   trial & error.  See http://en.uesp.net/wiki for details.
 
-  Also see https://tes5edit.github.io/fopdoc/ for FO3/FONV specific details.
+  Also see https://tes5edit.github.io/fopdoc/ for FO3/FNV specific details.
 
 */
 #include "loadmusc.hpp"
@@ -49,7 +49,7 @@ void ESM4::Music::load(ESM4::Reader& reader)
             case ESM::fourCC("FNAM"):
                 reader.getZString(mMusicFile);
                 break;
-            case ESM::fourCC("ANAM"): // FONV float (attenuation in db? loop if positive?)
+            case ESM::fourCC("ANAM"): // FNV float (attenuation in db? loop if positive?)
             case ESM::fourCC("WNAM"): // TES5
             case ESM::fourCC("PNAM"): // TES5
             case ESM::fourCC("TNAM"): // TES5
