@@ -199,11 +199,11 @@ namespace MWClass
             case ESM::GameFormat::TES4:
             case ESM::GameFormat::FO3:
             case ESM::GameFormat::FONV:
-                return data.mTraits->mModel.getNormalized(); // Skeleton kept in the NPC record
-            default:
-                break;
+                return data.mTraits->mModel.getNormalized(); // Skeleton in the NPC record
+            default: // TES5, FO4: Skeleton in the race record
+                return data.mIsFemale ? data.mRace->mModelFemale.getNormalized()
+                                      : data.mRace->mModelMale.getNormalized();
         }
-        return data.mIsFemale ? data.mRace->mModelFemale.getNormalized() : data.mRace->mModelMale.getNormalized();
     }
 
     std::string_view ESM4Npc::getName(const MWWorld::ConstPtr& ptr) const

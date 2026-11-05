@@ -78,7 +78,7 @@ namespace MWRender
         const std::vector<ESM4::Race::BodyPart>& bodyParts = isFemale ? race->mBodyPartsFemale : race->mBodyPartsMale;
         for (std::size_t i = 0; i < bodyParts.size(); ++i)
         {
-            // FO3 and FONV's body part 3 is upper body texture
+            // FO3 and FONV's 4th body part is the upper body texture
             if (i == 3 && (traits.mGameFormat == ESM::GameFormat::FO3 || traits.mGameFormat == ESM::GameFormat::FONV))
                 continue;
             insertPart(bodyParts[i].mesh);
