@@ -422,10 +422,17 @@ namespace ESM
 
     std::string_view ESMReader::getStringView(std::size_t size)
     {
+        if (size == 0)
+            return string_view{};
+
         if (mBuffer.size() <= size)
+        {
+            if (static_cast<size_t>(mCtx.leftSub) < size)
+                fail("String size is bigger than the subrecord");
             // Add some extra padding to reduce the chance of having to resize
             // again later.
-            mBuffer.resize(3 * size);
+            mBuffer.resize(std::min(static_cast<size_t>(mCtx.leftFile), size * 3));
+        }
 
         // And make sure the string is zero terminated
         mBuffer[size] = 0;
