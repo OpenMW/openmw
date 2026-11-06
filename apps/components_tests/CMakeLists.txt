@@ -75,6 +75,7 @@ file(GLOB UNITTEST_SRC_FILES
     fx/technique.cpp
 
     esm3/readerscache.cpp
+    esm3/testesmreader.cpp
     esm3/testsaveload.cpp
     esm3/testesmwriter.cpp
     esm3/testinfoorder.cpp
