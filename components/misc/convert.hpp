@@ -4,6 +4,8 @@
 #include <components/esm/position.hpp>
 #include <components/esm3/loadpgrd.hpp>
 
+#include <components/misc/float16.hpp>
+
 #include <LinearMath/btQuaternion.h>
 #include <LinearMath/btTransform.h>
 #include <LinearMath/btVector3.h>
@@ -22,6 +24,9 @@
 
 #include <type_traits>
 
+#include <bit>
+#include <cstdint>
+
 namespace Misc::Convert
 {
     inline osg::Vec3f makeOsgVec3f(const float* values)
@@ -32,6 +37,37 @@ namespace Misc::Convert
     inline osg::Vec3f makeOsgVec3f(const ESM::Pathgrid::Point& value)
     {
         return osg::Vec3f(static_cast<float>(value.mX), static_cast<float>(value.mY), static_cast<float>(value.mZ));
+    }
+
+    // Vertices and UV sets may be half-precision.
+    // OSG doesn't have a way to pass half-precision data at the moment.
+    inline float halfToFloat(const Misc::float16_t value)
+    {
+        uint32_t bits = static_cast<uint32_t>(value & 0x8000) << 16;
+
+        const uint32_t exp16 = (value & 0x7c00) >> 10;
+        uint32_t frac16 = value & 0x3ff;
+        if (exp16)
+            bits |= (exp16 + 0x70) << 23;
+        else if (frac16)
+        {
+            uint8_t offset = 0;
+            do
+            {
+                ++offset;
+                frac16 <<= 1;
+            } while ((frac16 & 0x400) != 0x400);
+            frac16 &= 0x3ff;
+            bits |= (0x71 - offset) << 23;
+        }
+        bits |= frac16 << 13;
+
+        return std::bit_cast<float>(bits);
+    }
+
+    inline osg::Vec3f makeOsgVec3f(const Misc::float16_t* values)
+    {
+        return osg::Vec3f(halfToFloat(values[0]), halfToFloat(values[1]), halfToFloat(values[2]));
     }
 
     inline btVector3 toBullet(const osg::Vec3f& vec)

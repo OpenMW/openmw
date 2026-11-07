@@ -30,48 +30,12 @@ namespace
     void bsVertDataToBtTriangleMesh(
         btTriangleMesh& mesh, const std::vector<Nif::BSVertexData>& data, bool fullPrecision, int numTriangles)
     {
-        // Vertices and UV sets may be half-precision.
-        // OSG doesn't have a way to pass half-precision data at the moment.
-        constexpr auto halfToFloat = [](uint16_t value) {
-            uint32_t bits = static_cast<uint32_t>(value & 0x8000) << 16;
-
-            const uint32_t exp16 = (value & 0x7c00) >> 10;
-            uint32_t frac16 = value & 0x3ff;
-            if (exp16)
-                bits |= (exp16 + 0x70) << 23;
-            else if (frac16)
-            {
-                uint8_t offset = 0;
-                do
-                {
-                    ++offset;
-                    frac16 <<= 1;
-                } while ((frac16 & 0x400) != 0x400);
-                frac16 &= 0x3ff;
-                bits |= (0x71 - offset) << 23;
-            }
-            bits |= frac16 << 13;
-
-            float result;
-            std::memcpy(&result, &bits, sizeof(float));
-            return result;
-        };
-
         // FIXME: copying vertices/indices individually is unreasonable
         mesh.preallocateVertices(static_cast<int>(data.size()));
-        for (const auto& vertData : data)
+        for (const auto& elem : data)
         {
-            osg::Vec3f vertex;
-            if (fullPrecision)
-                vertex = { vertData.mVertex.x(), vertData.mVertex.y(), vertData.mVertex.z() };
-            else
-            {
-                vertex = {
-                    halfToFloat(vertData.mHalfVertex[0]),
-                    halfToFloat(vertData.mHalfVertex[1]),
-                    halfToFloat(vertData.mHalfVertex[2]),
-                };
-            }
+            osg::Vec3f vertex = fullPrecision ? Misc::Convert::makeOsgVec3f(elem.mVertex.ptr())
+                                              : Misc::Convert::makeOsgVec3f(elem.mHalfVertex.data());
             mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
         }
         mesh.preallocateIndices(static_cast<int>(numTriangles) * 3);
@@ -690,8 +654,10 @@ namespace Nif
 
         // This makes a perhaps dangerous assumption that NiSkinPartition will never have more than 65536 triangles.
         auto mesh = std::make_unique<btTriangleMesh>();
-        bool fullPrecision = mVertDesc.mFlags & mVertDesc.Full_Precision;
-        bsVertDataToBtTriangleMesh(*mesh, mVertData, fullPrecision, numTriangles);
+        const bool fullPrecision = mVertDesc.mFlags & mVertDesc.Full_Precision;
+        const bool hasVertices = mVertDesc.mFlags & BSVertexDesc::VertexAttribute::Vertex;
+        if (hasVertices)
+            bsVertDataToBtTriangleMesh(*mesh, mVertData, fullPrecision, numTriangles);
 
         for (const auto triangles : triangleLists)
             trianglesToBtTriangleMesh(*mesh, *triangles);
