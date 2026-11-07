@@ -11,12 +11,15 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/strings/conversion.hpp>
 #include <components/misc/thread.hpp>
+#include <components/sqlite3/error.hpp>
 
 #include <DetourNavMesh.h>
 
 #include <osg/io_utils>
 
 #include <boost/geometry.hpp>
+
+#include <sqlite3.h>
 
 #include <algorithm>
 #include <format>
@@ -926,24 +929,26 @@ namespace DetourNavigator
             {
                 f(job);
             }
-            catch (const std::exception& e)
+            catch (const Sqlite3::Error& e)
             {
                 Log(Debug::Error) << "DbWorker exception while processing job " << job->mId << ": " << e.what();
                 if (mWriteToDb)
                 {
                     const std::string_view message(e.what());
-                    if (message.find("database or disk is full") != std::string_view::npos)
+                    if (e.getPrimaryCode() == SQLITE_FULL)
                     {
                         mWriteToDb = false;
                         Log(Debug::Warning)
                             << "Writes to navmeshdb are disabled because file size limit is reached or disk is full";
                     }
-                    else if (message.find("database is locked") != std::string_view::npos)
+                    else if (e.getPrimaryCode() == SQLITE_BUSY)
                     {
                         mWriteToDb = false;
                         Log(Debug::Warning)
                             << "Writes to navmeshdb are disabled to avoid concurrent writes from multiple processes";
                     }
+                    // The error code can't tell a duplicate tiles.tile_id from a duplicate shapes.shape_id,
+                    // so check the message
                     else if (message.find("UNIQUE constraint failed: tiles.tile_id") != std::string_view::npos)
                     {
                         Log(Debug::Warning) << "Found duplicate navmeshdb tile_id, please report the "
@@ -962,6 +967,10 @@ namespace DetourNavigator
                         }
                     }
                 }
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Error) << "DbWorker exception while processing job " << job->mId << ": " << e.what();
             }
         };
 
