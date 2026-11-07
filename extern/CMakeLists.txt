@@ -129,8 +129,8 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
     # OSGoS branch 3.6
     include(FetchContent)
     FetchContent_Declare(osg
-        URL https://github.com/OpenMW/osg/archive/9b384d5439977784e5cd250ff8ff7966928ddd27.zip
-        URL_HASH SHA512=3d3db3b735658bfe743b82aa2fc1892bc5eb6a7da324ee55f7d0f980472fdcc76c80c4afd2e3361e84e933d088baf12a14c9d48fb21708f42f4d11ba2a82a171
+        URL https://github.com/OpenMW/osg/archive/e568aace1e62de021df9955c62429cbe55516fd3.zip
+        URL_HASH SHA512=d34ec0d4e09287d288f9b8d524604f44eecdcf41dc254ccf7566dfc8d387285c413864f72d0cadd722e0c251b5712691ccd84a1f5b74b632785380c14c059942
         SOURCE_DIR fetched/osg
     )
     FetchContent_MakeAvailable(osg)
