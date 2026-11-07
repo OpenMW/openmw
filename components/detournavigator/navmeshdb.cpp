@@ -166,6 +166,41 @@ namespace DetourNavigator
         return stream << "unknown shape type (" << static_cast<std::underlying_type_t<ShapeType>>(value) << ")";
     }
 
+    std::string getNavMeshDbErrorAdvice(const Sqlite3::Error& error, std::string_view path)
+    {
+        switch (error.getPrimaryCode())
+        {
+            case SQLITE_CORRUPT:
+            case SQLITE_NOTADB:
+                return std::format(
+                    "The navmesh database file \"{}\" is damaged or is not a navmesh database. Please close OpenMW "
+                    "and delete it. The file will be recreated automatically the next time OpenMW starts.",
+                    path);
+            case SQLITE_CANTOPEN:
+            case SQLITE_PERM:
+            case SQLITE_READONLY:
+            case SQLITE_IOERR:
+                return std::format(
+                    "The navmesh database file \"{}\" cannot be read or written. Check that its folder exists, that "
+                    "you have permission to write to it, and that the disk is working.",
+                    path);
+            case SQLITE_FULL:
+                return std::format(
+                    "The navmesh database file \"{}\" has reached its size limit or the disk is full. Free up some "
+                    "disk space or increase the \"max navmeshdb file size\" setting.",
+                    path);
+            case SQLITE_BUSY:
+            case SQLITE_LOCKED:
+                return std::format(
+                    "The navmesh database file \"{}\" is in use by another process, such as another running OpenMW or "
+                    "openmw-navmeshtool. Close it and start OpenMW again.",
+                    path);
+            default:
+                break;
+        }
+        return {};
+    }
+
     NavMeshDb::NavMeshDb(std::string_view path, std::uint64_t maxFileSize)
         : mDb(Sqlite3::makeDb(path, schema))
         , mGetMaxTileId(*mDb, DbQueries::GetMaxTileId{})
