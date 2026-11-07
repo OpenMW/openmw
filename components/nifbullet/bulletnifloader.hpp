@@ -24,6 +24,7 @@ namespace Nif
     struct NiAVObject;
     struct NiNode;
     struct NiGeometry;
+    struct BSTriShape;
     struct Parent;
 }
 
@@ -62,6 +63,7 @@ namespace NifBullet
         void handleRoot(Nif::FileView nif, const Nif::NiAVObject& node, HandleNodeArgs args);
         void handleNode(const Nif::NiAVObject& node, const Nif::Parent* parent, HandleNodeArgs args);
         void handleGeometry(const Nif::NiGeometry& nifNode, const Nif::Parent* parent, HandleNodeArgs args);
+        void handleBSGeometry(const Nif::BSTriShape& nifNode, const Nif::Parent* parent, HandleNodeArgs args);
 
         std::unique_ptr<btCompoundShape, Resource::DeleteCollisionShape> mCompoundShape;
         std::unique_ptr<btCompoundShape, Resource::DeleteCollisionShape> mAvoidCompoundShape;

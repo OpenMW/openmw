@@ -27,6 +27,56 @@ namespace
         mesh.preallocateIndices(static_cast<int>(data.mNumTriangles) * 3);
     }
 
+    void bsVertDataToBtTriangleMesh(
+        btTriangleMesh& mesh, const std::vector<Nif::BSVertexData>& data, bool fullPrecision, int numTriangles)
+    {
+        // Vertices and UV sets may be half-precision.
+        // OSG doesn't have a way to pass half-precision data at the moment.
+        constexpr auto halfToFloat = [](uint16_t value) {
+            uint32_t bits = static_cast<uint32_t>(value & 0x8000) << 16;
+
+            const uint32_t exp16 = (value & 0x7c00) >> 10;
+            uint32_t frac16 = value & 0x3ff;
+            if (exp16)
+                bits |= (exp16 + 0x70) << 23;
+            else if (frac16)
+            {
+                uint8_t offset = 0;
+                do
+                {
+                    ++offset;
+                    frac16 <<= 1;
+                } while ((frac16 & 0x400) != 0x400);
+                frac16 &= 0x3ff;
+                bits |= (0x71 - offset) << 23;
+            }
+            bits |= frac16 << 13;
+
+            float result;
+            std::memcpy(&result, &bits, sizeof(float));
+            return result;
+        };
+
+        // FIXME: copying vertices/indices individually is unreasonable
+        mesh.preallocateVertices(static_cast<int>(data.size()));
+        for (const auto& vertData : data)
+        {
+            osg::Vec3f vertex;
+            if (fullPrecision)
+                vertex = { vertData.mVertex.x(), vertData.mVertex.y(), vertData.mVertex.z() };
+            else
+            {
+                vertex = {
+                    halfToFloat(vertData.mHalfVertex[0]),
+                    halfToFloat(vertData.mHalfVertex[1]),
+                    halfToFloat(vertData.mHalfVertex[2]),
+                };
+            }
+            mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
+        }
+        mesh.preallocateIndices(static_cast<int>(numTriangles) * 3);
+    }
+
     void trianglesToBtTriangleMesh(btTriangleMesh& mesh, const std::vector<unsigned short>& triangles)
     {
         for (std::size_t i = 0; i < triangles.size(); i += 3)
@@ -610,6 +660,49 @@ namespace Nif
         mAlphaProperty.post(nif);
         if (!mSkin.empty())
             nif.setUseSkinning(true);
+    }
+
+    std::unique_ptr<btCollisionShape> BSTriShape::getCollisionShape() const
+    {
+        std::vector<const std::vector<unsigned short>*> triangleLists;
+        int numTriangles = 0;
+
+        // Skinned SSE
+        if (!mSkin.empty() && (mSkin->mRecordType == RC_NiSkinInstance || mSkin->mRecordType == RC_BSDismemberSkinInstance))
+        {
+            const auto* partitions = static_cast<const NiSkinInstance*>(mSkin.getPtr())->getPartitions();
+            if (partitions && !partitions->mVertexData.empty())
+            {
+                triangleLists.reserve(partitions->mPartitions.size());
+                for (auto& partition : partitions->mPartitions)
+                {
+                    triangleLists.push_back(&partition.mTrueTriangles);
+                    numTriangles += static_cast<int>(partition.mTrueTriangles.size());
+                }
+            }
+        }
+        // FO4 and unskinned SSE
+        if (!mTriangles.empty())
+        {
+            triangleLists.push_back(&mTriangles);
+            numTriangles = static_cast<int>(mTriangles.size());
+        }
+
+        // This makes a perhaps dangerous assumption that NiSkinPartition will never have more than 65536 triangles.
+        auto mesh = std::make_unique<btTriangleMesh>();
+        bool fullPrecision = mVertDesc.mFlags & mVertDesc.Full_Precision;
+        bsVertDataToBtTriangleMesh(*mesh, mVertData, fullPrecision, numTriangles);
+
+        for (const auto triangles : triangleLists)
+            trianglesToBtTriangleMesh(*mesh, *triangles);
+
+        if (mesh->getNumTriangles() == 0)
+            return nullptr;
+
+        auto shape = std::make_unique<Resource::TriangleMeshShape>(mesh.get(), true);
+        std::ignore = mesh.release();
+
+        return shape;
     }
 
     void BSDynamicTriShape::read(NIFStream* nif)

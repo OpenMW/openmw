@@ -406,6 +406,9 @@ namespace Nif
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
+
+        std::unique_ptr<btCollisionShape> getCollisionShape() const;
+
     };
 
     struct BSDynamicTriShape : BSTriShape

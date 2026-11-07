@@ -15,6 +15,7 @@
 #include <components/nif/nifstream.hpp>
 #include <components/nif/node.hpp>
 #include <components/nif/parent.hpp>
+#include <components/nifosg/nifloader.cpp>
 
 namespace
 {
@@ -238,9 +239,14 @@ namespace NifBullet
 
         if (args.mGenerateCollision)
         {
-            auto geometry = dynamic_cast<const Nif::NiGeometry*>(&node);
-            if (geometry)
-                handleGeometry(*geometry, parent, args);
+            if (isTypeBSGeometry(node.mRecordType))
+                handleBSGeometry(static_cast<const Nif::BSTriShape&>(node), parent, args);
+            else
+            {
+                auto geometry = dynamic_cast<const Nif::NiGeometry*>(&node);
+                if (geometry)
+                    handleGeometry(*geometry, parent, args);
+            }
         }
 
         // For NiNodes, loop through children
@@ -313,6 +319,64 @@ namespace NifBullet
 
             if (args.mAnimated)
                 mShape->mAnimatedShapes.emplace(niGeometry.mRecordIndex, mCompoundShape->getNumChildShapes());
+            mCompoundShape->addChildShape(trans, childShape.get());
+        }
+        else
+        {
+            if (!mAvoidCompoundShape)
+                mAvoidCompoundShape.reset(new btCompoundShape);
+            mAvoidCompoundShape->addChildShape(trans, childShape.get());
+        }
+
+        std::ignore = childShape.release();
+    }
+
+    void BulletNifLoader::handleBSGeometry(
+        const Nif::BSTriShape& bsGeometry, const Nif::Parent* nodeParent, HandleNodeArgs args)
+    {
+        // This flag comes from BSXFlags
+        if (args.mHasMarkers && Misc::StringUtils::ciStartsWith(bsGeometry.mName, "EditorMarker"))
+            return;
+
+        if (!bsGeometry.mSkin.empty())
+            args.mAnimated = false;
+
+        std::unique_ptr<btCollisionShape> childShape = bsGeometry.getCollisionShape();
+        if (childShape == nullptr)
+            return;
+
+        osg::Matrixf transform = bsGeometry.mTransform.toMatrix();
+        for (const Nif::Parent* parent = nodeParent; parent != nullptr; parent = parent->mParent)
+            transform *= parent->mNiNode.mTransform.toMatrix();
+
+        if (childShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE)
+        {
+            auto scaledShape = std::make_unique<Resource::ScaledTriangleMeshShape>(
+                static_cast<btBvhTriangleMeshShape*>(childShape.get()), Misc::Convert::toBullet(transform.getScale()));
+            std::ignore = childShape.release();
+
+            childShape = std::move(scaledShape);
+        }
+        else
+        {
+            childShape->setLocalScaling(Misc::Convert::toBullet(transform.getScale()));
+        }
+
+        transform.orthoNormalize(transform);
+
+        btTransform trans;
+        trans.setOrigin(Misc::Convert::toBullet(transform.getTrans()));
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                trans.getBasis()[i][j] = transform(j, i);
+
+        if (!args.mAvoid)
+        {
+            if (!mCompoundShape)
+                mCompoundShape.reset(new btCompoundShape);
+
+            if (args.mAnimated)
+                mShape->mAnimatedShapes.emplace(bsGeometry.mRecordIndex, mCompoundShape->getNumChildShapes());
             mCompoundShape->addChildShape(trans, childShape.get());
         }
         else
