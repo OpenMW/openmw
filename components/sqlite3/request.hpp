@@ -291,10 +291,15 @@ namespace Sqlite3
                 getRow(db, *statement.mHandle, *out++);
             return out;
         }
+        catch (const Error& e)
+        {
+            throw Error(e.getCode(),
+                "Failed to perform request \"" + std::string(statement.mQuery.text()) + "\": " + std::string(e.what()));
+        }
         catch (const std::exception& e)
         {
             throw std::runtime_error(
-                "Failed perform request \"" + std::string(statement.mQuery.text()) + "\": " + std::string(e.what()));
+                "Failed to perform request \"" + std::string(statement.mQuery.text()) + "\": " + std::string(e.what()));
         }
     }
 
@@ -308,6 +313,12 @@ namespace Sqlite3
             if (executeStep(db, statement))
                 throw std::logic_error("Execute cannot return rows");
             return sqlite3_changes(&db);
+        }
+        catch (const Error& e)
+        {
+            throw Error(e.getCode(),
+                "Failed to execute statement \"" + std::string(statement.mQuery.text())
+                    + "\": " + std::string(e.what()));
         }
         catch (const std::exception& e)
         {
