@@ -1,4 +1,5 @@
 #include "transaction.hpp"
+#include "error.hpp"
 
 #include <components/debug/debuglog.hpp>
 
@@ -43,7 +44,7 @@ namespace Sqlite3
         if (const int ec = sqlite3_exec(&db, getBeginStatement(mode), nullptr, nullptr, nullptr); ec != SQLITE_OK)
         {
             (void)mDb.release();
-            throw std::runtime_error(
+            throw Error(sqlite3_extended_errcode(&db),
                 "Failed to start transaction: " + std::string(sqlite3_errmsg(&db)) + " (" + std::to_string(ec) + ")");
         }
     }
@@ -51,8 +52,9 @@ namespace Sqlite3
     void Transaction::commit()
     {
         if (const int ec = sqlite3_exec(mDb.get(), "COMMIT", nullptr, nullptr, nullptr); ec != SQLITE_OK)
-            throw std::runtime_error("Failed to commit transaction: " + std::string(sqlite3_errmsg(mDb.get())) + " ("
-                + std::to_string(ec) + ")");
+            throw Error(sqlite3_extended_errcode(mDb.get()),
+                "Failed to commit transaction: " + std::string(sqlite3_errmsg(mDb.get())) + " (" + std::to_string(ec)
+                    + ")");
         (void)mDb.release();
     }
 }
