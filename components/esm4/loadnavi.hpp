@@ -48,7 +48,7 @@ namespace ESM4
 #pragma pack(push, 1)
         struct DoorRef
         {
-            std::uint32_t unknown;
+            std::uint32_t crc; // CRC hash of "PathingDoor"
             ESM::FormId32 formId;
         };
 
@@ -71,14 +71,16 @@ namespace ESM4
             std::vector<Triangle> triangles;
             std::vector<Vertex> verticies;
 
-            void load(ESM4::Reader& reader);
+            void loadBounds(ESM4::Reader& reader);
+            void load(ESM4::Reader& reader); // TES5 and FO4
         };
 
-        enum Flags // NVMI island flags (not certain)
+        enum Flags // NVMI flags
         {
+            FLG_InitiallyDisabled = 0x00000010, // FO3 and FNV
             FLG_Island = 0x00000020,
-            FLG_Modified = 0x00000000, // not island
-            FLG_Unmodified = 0x00000040 // not island
+            FLG_Modified = 0x00000000, // Unused?
+            FLG_Unmodified = 0x00000040 // TES5 and FO4
         };
 
         struct NavMeshInfo
@@ -89,16 +91,17 @@ namespace ESM4
             float x;
             float y;
             float z;
-            std::uint32_t flagPrefMerges;
+            float preferredPercent; // percent of triangles flagged "preferred"
             std::vector<ESM::FormId> formIdMerged;
             std::vector<ESM::FormId> formIdPrefMerged;
             std::vector<DoorRef> linkedDoors;
             std::vector<IslandInfo> islandInfo;
-            std::uint32_t locationMarker;
+            std::uint32_t crc; // CRC hash of "PathingCell"
             ESM::FormId worldSpaceId;
             CellGrid cellGrid;
 
-            void load(ESM4::Reader& reader);
+            void loadFO3(ESM4::Reader& reader); // FO3 and FNV
+            void loadTES5(ESM4::Reader& reader); // TES5 and FO4
         };
 
         ESM::GameFormat mGameFormat = ESM::GameFormat::Unknown; // assumed per-file from context clues
@@ -107,9 +110,9 @@ namespace ESM4
 
         std::vector<NavMeshInfo> mNavMeshInfo;
 
-        std::vector<std::pair<std::uint32_t, std::vector<ESM::FormId>>> mPreferredPaths;
+        std::vector<std::vector<ESM::FormId>> mPreferredPaths; // N x N navmesh paths between nodes
 
-        std::map<ESM::FormId, std::uint32_t> mPathIndexMap;
+        std::map<ESM::FormId, std::uint32_t> mPathIndexMap; // node -> row and column in mPreferredPaths
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;

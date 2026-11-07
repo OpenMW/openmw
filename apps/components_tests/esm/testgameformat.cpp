@@ -25,7 +25,7 @@ namespace
         EXPECT_EQ(ESM::getGameFormat(ESM::VER_130, std::nullopt), GameFormat::TES3);
         EXPECT_EQ(ESM::getGameFormat(ESM::VER_080, std::nullopt), GameFormat::TES4);
         EXPECT_EQ(ESM::getGameFormat(ESM::VER_100, std::nullopt), GameFormat::TES4);
-        EXPECT_EQ(ESM::getGameFormat(ESM::VER_134, 2), GameFormat::FONV);
+        EXPECT_EQ(ESM::getGameFormat(ESM::VER_134, 2), GameFormat::FNV);
         EXPECT_EQ(ESM::getGameFormat(ESM::VER_171, 44, masters({ "Skyrim.esm" })), GameFormat::TES5);
         EXPECT_EQ(ESM::getGameFormat(ESM::VER_100, 131), GameFormat::FO4);
         EXPECT_EQ(ESM::getGameFormat(ESM::VER_095, 131, masters({ "Fallout4.esm" })), GameFormat::FO4);
@@ -87,7 +87,7 @@ namespace
     TEST(EsmGameFormat, shouldFailToReadUnknownName)
     {
         GameFormat format = GameFormat::TES5;
-        std::istringstream stream("FNV");
+        std::istringstream stream("FONV");
         EXPECT_FALSE(stream >> format);
         EXPECT_EQ(format, GameFormat::TES5);
     }
@@ -95,8 +95,8 @@ namespace
     TEST(EsmGameFormat, shouldWriteName)
     {
         std::ostringstream stream;
-        stream << GameFormat::FONV << ' ' << GameFormat::Unknown;
-        EXPECT_EQ(stream.str(), "FONV Unknown");
+        stream << GameFormat::FNV << ' ' << GameFormat::Unknown;
+        EXPECT_EQ(stream.str(), "FNV Unknown");
     }
 
     TEST(EsmGameFormat, getGameFormatFromMastersShouldReturnNulloptWithNoValidMaster)

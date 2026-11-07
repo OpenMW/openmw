@@ -38,7 +38,7 @@ namespace ESM4
         DTYP_Detection = 4,
         DTYP_Service = 5,
         DTYP_Miscellaneous = 6,
-        // below FO3/FONV
+        // below FO3/FNV
         DTYP_Radio = 7
     };
 }

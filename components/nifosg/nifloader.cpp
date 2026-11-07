@@ -1,5 +1,6 @@
 #include "nifloader.hpp"
 
+#include <algorithm>
 #include <mutex>
 #include <string_view>
 
@@ -1732,6 +1733,18 @@ namespace NifOsg
                     rig->setRootBone(rootBone->mName);
 
                 drawable = rig;
+
+                // FO3 and FNV body parts 100-299 are dismemberment caps.
+                if (skin->mRecordType == Nif::RC_BSDismemberSkinInstance
+                    && mBethVersion <= Nif::NIFFile::BethVersion::BETHVER_FO3)
+                {
+                    const auto& parts = static_cast<const Nif::BSDismemberSkinInstance*>(skin)->mParts;
+                    const bool isCap = !parts.empty() && std::all_of(parts.begin(), parts.end(), [](const auto& part) {
+                        return part.mType >= 100 && part.mType < 300;
+                    });
+                    if (isCap) // TODO: Handle actual dismemberment.
+                        drawable->setNodeMask(Loader::getHiddenNodeMask());
+                }
             }
 
             for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
@@ -1897,6 +1910,20 @@ namespace NifOsg
                     rig->setRootBone(rootBone->mName);
 
                 drawable = rig;
+
+                // FO4 subsegment user slots 100-102 are dismemberment caps.
+                if (nifNode->mRecordType == Nif::RC_BSSubIndexTriShape
+                    && mBethVersion == Nif::NIFFile::BethVersion::BETHVER_FO4)
+                {
+                    const Nif::BSSubIndexTriShape& bsSubTriShape
+                        = static_cast<const Nif::BSSubIndexTriShape&>(*nifNode);
+                    const auto& records = bsSubTriShape.mSegmentation.mSubSegmentData.mDataRecords;
+                    const bool isCap = std::any_of(records.begin(), records.end(),
+                        [](const auto& r) { return r.mUserSlotID >= 100 && r.mUserSlotID <= 102; });
+
+                    if (isCap) // TODO: Handle actual dismemberment.
+                        drawable->setNodeMask(Loader::getHiddenNodeMask());
+                }
             }
 
             std::vector<const Nif::NiProperty*> drawableProps;

@@ -193,6 +193,7 @@ void ESM4::Armor::load(ESM4::Reader& reader)
             case ESM::fourCC("MO3T"):
             case ESM::fourCC("MO4T"):
             case ESM::fourCC("MO4S"):
+            case ESM::fourCC("MODC"): // FO4 color remapping index
             case ESM::fourCC("OBND"):
             case ESM::fourCC("RNAM"): // race formid
             case ESM::fourCC("KSIZ"):
@@ -212,8 +213,8 @@ void ESM4::Armor::load(ESM4::Reader& reader)
             case ESM::fourCC("MOSD"): // FO3
             case ESM::fourCC("MODS"): // FO3
             case ESM::fourCC("MO3S"): // FO3
-            case ESM::fourCC("BNAM"): // FONV
-            case ESM::fourCC("SNAM"): // FONV
+            case ESM::fourCC("BNAM"): // FNV
+            case ESM::fourCC("SNAM"): // FNV
             case ESM::fourCC("DAMC"): // Destructible
             case ESM::fourCC("DEST"):
             case ESM::fourCC("DMDC"):

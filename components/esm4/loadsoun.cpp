@@ -64,7 +64,7 @@ void ESM4::Sound::load(ESM4::Reader& reader)
             case ESM::fourCC("ANAM"): // FO3
             case ESM::fourCC("GNAM"): // FO3
             case ESM::fourCC("HNAM"): // FO3
-            case ESM::fourCC("RNAM"): // FONV
+            case ESM::fourCC("RNAM"): // FNV
             case ESM::fourCC("REPT"): // FO4
                 reader.skipSubRecordData();
                 break;

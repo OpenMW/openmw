@@ -59,7 +59,7 @@ namespace ESM4
             std::uint32_t health;
             float weight;
             std::uint16_t damage;
-            std::uint8_t clipSize; // FO3/FONV only
+            std::uint8_t clipSize; // FO3/FNV only
 
             Data()
                 : type(0)

@@ -94,7 +94,7 @@ void ESM4::Container::load(ESM4::Reader& reader)
             case ESM::fourCC("KSIZ"):
             case ESM::fourCC("KWDA"):
             case ESM::fourCC("ONAM"):
-            case ESM::fourCC("RNAM"): // FONV
+            case ESM::fourCC("RNAM"): // FNV
             case ESM::fourCC("TNAM"):
             case ESM::fourCC("FTYP"): // FO4
             case ESM::fourCC("NTRM"): // FO4

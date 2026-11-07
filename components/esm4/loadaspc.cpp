@@ -63,7 +63,7 @@ void ESM4::AcousticSpace::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("WNAM"):
             {
-                // usually 0 for FONV (maybe # of close Actors for Walla to trigger) (4 bytes)
+                // usually 0 for FNV (maybe # of close Actors for Walla to trigger) (4 bytes)
                 // Weather attenuation in FO4 (2 bytes)
                 reader.skipSubRecordData();
                 break;

@@ -53,14 +53,14 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
                 break; // FormId quest id
             case ESM::fourCC("SNDD"):
                 reader.getFormId(mSound);
-                break; // FO3 (not used in FONV?)
+                break; // FO3 (not used in FNV?)
             case ESM::fourCC("TRDT"):
             {
                 if (subHdr.dataSize == 16) // TES4
                     reader.get(&mResponseData, 16);
                 else if (subHdr.dataSize == 20) // FO3
                     reader.get(&mResponseData, 20);
-                else // FO3/FONV
+                else // FO3/FNV
                 {
                     reader.get(mResponseData);
                     if (mResponseData.sound)
@@ -86,7 +86,7 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
                     reader.get(&mTargetCondition, 20);
                 else if (subHdr.dataSize == 28)
                 {
-                    reader.get(mTargetCondition); // FO3/FONV
+                    reader.get(mTargetCondition); // FO3/FNV
                     if (mTargetCondition.reference)
                         reader.adjustFormId(mTargetCondition.reference);
                 }
@@ -154,7 +154,7 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM::fourCC("NEXT"): // FO3/FONV marker for next script header
+            case ESM::fourCC("NEXT"): // FO3/FNV marker for next script header
             {
                 ignore = true;
 
@@ -162,7 +162,7 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("DATA"): // always 3 for TES4 ?
             {
-                if (subHdr.dataSize == 4) // FO3/FONV
+                if (subHdr.dataSize == 4) // FO3/FNV
                 {
                     reader.get(mDialType);
                     reader.get(mNextSpeaker);
@@ -182,8 +182,8 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
             case ESM::fourCC("ANAM"): // FO3 speaker formid
             case ESM::fourCC("DNAM"): // FO3 speech challenge
             case ESM::fourCC("KNAM"): // FO3 formid
-            case ESM::fourCC("LNAM"): // FONV
-            case ESM::fourCC("TCFU"): // FONV
+            case ESM::fourCC("LNAM"): // FNV
+            case ESM::fourCC("TCFU"): // FNV
             case ESM::fourCC("TIFC"): // TES5
             case ESM::fourCC("TWAT"): // TES5
             case ESM::fourCC("CIS1"): // TES5

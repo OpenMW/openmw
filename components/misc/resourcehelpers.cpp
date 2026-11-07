@@ -288,7 +288,7 @@ namespace
             case ESM::GameFormat::TES4:
                 return far;
             case ESM::GameFormat::FO3:
-            case ESM::GameFormat::FONV:
+            case ESM::GameFormat::FNV:
             case ESM::GameFormat::TES5:
             case ESM::GameFormat::FO4:
                 return lod;

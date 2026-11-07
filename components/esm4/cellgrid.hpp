@@ -34,7 +34,12 @@
 
 namespace ESM4
 {
+    class Reader;
+
     using CellGrid = std::variant<ESM::FormId, Grid>;
+
+    // TES5 and FO4 navmesh location: exteriors have worldspace and grid, interiors have null worldspace and a cell
+    void readPathingCell(Reader& reader, ESM::FormId& worldSpaceId, CellGrid& cellGrid);
 }
 
 #endif // OPENMW_COMPONENTS_ESM4_CELLGRID_H

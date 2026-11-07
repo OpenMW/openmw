@@ -137,7 +137,7 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
             case ESM::fourCC("ONAM"):
                 reader.getLocalizedString(mShortName);
                 break;
-            case ESM::fourCC("QNAM"): // FONV
+            case ESM::fourCC("QNAM"): // FNV
                 reader.getLocalizedString(mAbbrev);
                 break;
             case ESM::fourCC("RCIL"):

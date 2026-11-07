@@ -36,11 +36,9 @@ namespace MWRender
         switch (traits->mGameFormat)
         {
             case ESM::GameFormat::TES4:
-                updatePartsTES4(*traits);
-                break;
             case ESM::GameFormat::FO3:
-            case ESM::GameFormat::FONV:
-                // Not implemented yet
+            case ESM::GameFormat::FNV:
+                updatePartsTES4(*traits);
                 break;
             case ESM::GameFormat::TES5:
             case ESM::GameFormat::FO4:
@@ -77,9 +75,18 @@ namespace MWRender
 
         // TODO: Body and head parts are placed incorrectly, need to attach to bones
 
-        for (const ESM4::Race::BodyPart& bodyPart : (isFemale ? race->mBodyPartsFemale : race->mBodyPartsMale))
-            insertPart(bodyPart.mesh);
-        for (const ESM4::Race::BodyPart& bodyPart : race->mHeadParts)
+        const std::vector<ESM4::Race::BodyPart>& bodyParts = isFemale ? race->mBodyPartsFemale : race->mBodyPartsMale;
+        for (std::size_t i = 0; i < bodyParts.size(); ++i)
+        {
+            // FO3 and FNV's 4th body part is the upper body texture
+            if (i == 3 && (traits.mGameFormat == ESM::GameFormat::FO3 || traits.mGameFormat == ESM::GameFormat::FNV))
+                continue;
+            insertPart(bodyParts[i].mesh);
+        }
+
+        // Oblivion genders share head parts, but later games have female-specific
+        const bool femaleHead = isFemale && !race->mHeadPartsFemale.empty();
+        for (const ESM4::Race::BodyPart& bodyPart : (femaleHead ? race->mHeadPartsFemale : race->mHeadParts))
             insertPart(bodyPart.mesh);
         if (!traits.mHair.isZeroOrUnset())
         {

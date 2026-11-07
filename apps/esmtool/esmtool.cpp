@@ -88,7 +88,7 @@ Allowed options)");
             "\n\tTES3 - Elder Scrolls III: Morrowind\n"
             "\n\tTES4 - Elder Scrolls IV: Oblivion\n"
             "\n\tFO3 - Fallout 3\n"
-            "\n\tFONV - Fallout: New Vegas\n"
+            "\n\tFNV - Fallout: New Vegas\n"
             "\n\tTES5 - Elder Scrolls V: Skyrim\n"
             "\n\tFO4 - Fallout 4");
 

@@ -35,6 +35,7 @@ void ESM4::Activator::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
+    mGameFormat = reader.gameFormat();
 
     while (reader.getSubRecordHeader())
     {
@@ -64,13 +65,32 @@ void ESM4::Activator::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("INAM"):
                 reader.getFormId(mRadioTemplate);
-                break; // FONV
+                break; // FNV
             case ESM::fourCC("RNAM"):
-                reader.getFormId(mRadioStation);
+                switch (mGameFormat)
+                {
+                    case ESM::GameFormat::FO3:
+                    case ESM::GameFormat::FNV:
+                    {
+                        reader.getFormId(mRadioStation); // Radio station
+                        break;
+                    }
+                    case ESM::GameFormat::TES5:
+                    {
+                        reader.getLocalizedString(mActivationPrompt); // Activation text override
+                        break;
+                    }
+                    default:
+                        reader.skipSubRecordData();
+                        break;
+                }
                 break;
             case ESM::fourCC("XATO"):
                 reader.getZString(mActivationPrompt);
-                break; // FONV
+                break; // FNV
+            case ESM::fourCC("ATTX"): // FO4 activation text override
+                reader.getLocalizedString(mActivationPrompt);
+                break;
             case ESM::fourCC("MODT"): // Model data
             case ESM::fourCC("MODC"):
             case ESM::fourCC("MODS"):
@@ -97,7 +117,6 @@ void ESM4::Activator::load(ESM4::Reader& reader)
             case ESM::fourCC("CIS2"):
             case ESM::fourCC("CITC"):
             case ESM::fourCC("NVNM"):
-            case ESM::fourCC("ATTX"): // FO4
             case ESM::fourCC("FTYP"): // FO4
             case ESM::fourCC("NTRM"): // FO4
             case ESM::fourCC("PTRN"): // FO4

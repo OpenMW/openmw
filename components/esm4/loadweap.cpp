@@ -63,7 +63,7 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                     reader.get(mData.weight);
                     reader.get(mData.damage);
                 }
-                else if ((mGameFormat == ESM::GameFormat::FO3 || mGameFormat == ESM::GameFormat::FONV)
+                else if ((mGameFormat == ESM::GameFormat::FO3 || mGameFormat == ESM::GameFormat::FNV)
                     && subHdr.dataSize == 15)
                 {
                     reader.get(mData.value);
@@ -169,28 +169,28 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM::fourCC("DSTA"):
             case ESM::fourCC("DSTD"):
             case ESM::fourCC("DSTF"): // Destructible end
-            case ESM::fourCC("VATS"): // FONV
-            case ESM::fourCC("VANM"): // FONV
-            case ESM::fourCC("MWD1"): // FONV
-            case ESM::fourCC("MWD2"): // FONV
-            case ESM::fourCC("MWD3"): // FONV
-            case ESM::fourCC("MWD4"): // FONV
-            case ESM::fourCC("MWD5"): // FONV
-            case ESM::fourCC("MWD6"): // FONV
-            case ESM::fourCC("MWD7"): // FONV
-            case ESM::fourCC("WMI1"): // FONV
-            case ESM::fourCC("WMI2"): // FONV
-            case ESM::fourCC("WMI3"): // FONV
-            case ESM::fourCC("WMS1"): // FONV
-            case ESM::fourCC("WMS2"): // FONV
-            case ESM::fourCC("WNM1"): // FONV
-            case ESM::fourCC("WNM2"): // FONV
-            case ESM::fourCC("WNM3"): // FONV
-            case ESM::fourCC("WNM4"): // FONV
-            case ESM::fourCC("WNM5"): // FONV
-            case ESM::fourCC("WNM6"): // FONV
-            case ESM::fourCC("WNM7"): // FONV
-            case ESM::fourCC("EFSD"): // FONV DeadMoney
+            case ESM::fourCC("VATS"): // FNV
+            case ESM::fourCC("VANM"): // FNV
+            case ESM::fourCC("MWD1"): // FNV
+            case ESM::fourCC("MWD2"): // FNV
+            case ESM::fourCC("MWD3"): // FNV
+            case ESM::fourCC("MWD4"): // FNV
+            case ESM::fourCC("MWD5"): // FNV
+            case ESM::fourCC("MWD6"): // FNV
+            case ESM::fourCC("MWD7"): // FNV
+            case ESM::fourCC("WMI1"): // FNV
+            case ESM::fourCC("WMI2"): // FNV
+            case ESM::fourCC("WMI3"): // FNV
+            case ESM::fourCC("WMS1"): // FNV
+            case ESM::fourCC("WMS2"): // FNV
+            case ESM::fourCC("WNM1"): // FNV
+            case ESM::fourCC("WNM2"): // FNV
+            case ESM::fourCC("WNM3"): // FNV
+            case ESM::fourCC("WNM4"): // FNV
+            case ESM::fourCC("WNM5"): // FNV
+            case ESM::fourCC("WNM6"): // FNV
+            case ESM::fourCC("WNM7"): // FNV
+            case ESM::fourCC("EFSD"): // FNV DeadMoney
             case ESM::fourCC("APPR"): // FO4
             case ESM::fourCC("DAMA"): // FO4
             case ESM::fourCC("FLTR"): // FO4

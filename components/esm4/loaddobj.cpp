@@ -23,7 +23,7 @@
   from Tes4Mod:Mod_File_Format and Tes5Mod:File_Formats but also refined by
   trial & error.  See http://en.uesp.net/wiki for details.
 
-  Also see https://tes5edit.github.io/fopdoc/ for FO3/FONV specific details.
+  Also see https://tes5edit.github.io/fopdoc/ for FO3/FNV specific details.
 
 */
 #include "loaddobj.hpp"
@@ -69,8 +69,8 @@ void ESM4::DefaultObj::load(ESM4::Reader& reader)
                 reader.getFormId(mData.eatPackageDefaultFood);
                 reader.getFormId(mData.everyActorAbility);
                 reader.getFormId(mData.drugWearsOffImageSpace);
-                // below FONV only
-                if (subHdr.dataSize == 136) // FONV 136/4 = 34 formid
+                // below FNV only
+                if (subHdr.dataSize == 136) // FNV 136/4 = 34 formid
                 {
                     reader.getFormId(mData.doctorsBag);
                     reader.getFormId(mData.missFortuneNPC);

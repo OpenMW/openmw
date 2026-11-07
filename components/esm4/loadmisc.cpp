@@ -79,7 +79,7 @@ void ESM4::MiscItem::load(ESM4::Reader& reader)
             case ESM::fourCC("KWDA"):
             case ESM::fourCC("OBND"):
             case ESM::fourCC("VMAD"):
-            case ESM::fourCC("RNAM"): // FONV
+            case ESM::fourCC("RNAM"): // FNV
             case ESM::fourCC("DAMC"): // Destructible
             case ESM::fourCC("DEST"):
             case ESM::fourCC("DMDC"):

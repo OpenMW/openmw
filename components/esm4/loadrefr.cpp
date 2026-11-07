@@ -227,7 +227,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("CNAM"):
                 reader.getFormId(mAudioLocation);
-                break; // FONV
+                break; // FNV
             case ESM::fourCC("XRDO"): // FO3
             {
                 // FIXME: completely different meaning in FO4
@@ -334,17 +334,17 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             case ESM::fourCC("XCLP"): // FO3
             case ESM::fourCC("SCDA"): // FO3
             case ESM::fourCC("RCLR"): // FO3
-            case ESM::fourCC("BNAM"): // FONV
-            case ESM::fourCC("MMRK"): // FONV
-            case ESM::fourCC("MNAM"): // FONV
-            case ESM::fourCC("NNAM"): // FONV
-            case ESM::fourCC("XATO"): // FONV
-            case ESM::fourCC("SCRV"): // FONV
-            case ESM::fourCC("SCVR"): // FONV
-            case ESM::fourCC("SLSD"): // FONV
-            case ESM::fourCC("XSRF"): // FONV
-            case ESM::fourCC("XSRD"): // FONV
-            case ESM::fourCC("WMI1"): // FONV
+            case ESM::fourCC("BNAM"): // FNV
+            case ESM::fourCC("MMRK"): // FNV
+            case ESM::fourCC("MNAM"): // FNV
+            case ESM::fourCC("NNAM"): // FNV
+            case ESM::fourCC("XATO"): // FNV
+            case ESM::fourCC("SCRV"): // FNV
+            case ESM::fourCC("SCVR"): // FNV
+            case ESM::fourCC("SLSD"): // FNV
+            case ESM::fourCC("XSRF"): // FNV
+            case ESM::fourCC("XSRD"): // FNV
+            case ESM::fourCC("WMI1"): // FNV
             case ESM::fourCC("XLRL"): // Unofficial Skyrim Patch
             case ESM::fourCC("XASP"): // FO4
             case ESM::fourCC("XATP"): // FO4

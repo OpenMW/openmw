@@ -214,7 +214,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 // std::cout << "fg race " << mEditorId << " " << mFgRace << std::endl; // FIXME
                 break;
             }
-            case ESM::fourCC("PNAM"): // FO3/FONV/TES5
+            case ESM::fourCC("PNAM"): // FO3/FNV/TES5
                 reader.getFormId(mHeadParts.emplace_back());
                 break;
             case ESM::fourCC("HCLF"): // TES5 hair colour

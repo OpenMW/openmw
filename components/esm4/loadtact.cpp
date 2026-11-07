@@ -58,7 +58,7 @@ void ESM4::TalkingActivator::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("INAM"):
                 reader.getFormId(mRadioTemplate);
-                break; // FONV
+                break; // FNV
             case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
@@ -79,6 +79,8 @@ void ESM4::TalkingActivator::load(ESM4::Reader& reader)
             case ESM::fourCC("MODF"): // Model data end
             case ESM::fourCC("OBND"):
             case ESM::fourCC("VMAD"):
+            case ESM::fourCC("KSIZ"):
+            case ESM::fourCC("KWDA"):
                 reader.skipSubRecordData();
                 break;
             default:

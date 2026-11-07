@@ -17,7 +17,7 @@ namespace ESM
             { "TES3", GameFormat::TES3 },
             { "TES4", GameFormat::TES4 },
             { "FO3", GameFormat::FO3 },
-            { "FONV", GameFormat::FONV },
+            { "FNV", GameFormat::FNV },
             { "TES5", GameFormat::TES5 },
             { "FO4", GameFormat::FO4 },
         };
@@ -82,7 +82,7 @@ namespace ESM
             case VER_132:
             case VER_133:
             case VER_134:
-                return GameFormat::FONV;
+                return GameFormat::FNV;
             case VER_170:
             case VER_171:
                 return GameFormat::TES5;

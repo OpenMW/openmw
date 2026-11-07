@@ -23,7 +23,7 @@
   from Tes4Mod:Mod_File_Format and Tes5Mod:File_Formats but also refined by
   trial & error.  See http://en.uesp.net/wiki for details.
 
-  Also see https://tes5edit.github.io/fopdoc/ for FO3/FONV specific details.
+  Also see https://tes5edit.github.io/fopdoc/ for FO3/FNV specific details.
 
 */
 #ifndef ESM4_IMOD_H

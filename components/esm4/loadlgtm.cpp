@@ -23,7 +23,7 @@
   from Tes4Mod:Mod_File_Format and Tes5Mod:File_Formats but also refined by
   trial & error.  See http://en.uesp.net/wiki for details.
 
-  Also see https://tes5edit.github.io/fopdoc/ for FO3/FONV specific details.
+  Also see https://tes5edit.github.io/fopdoc/ for FO3/FNV specific details.
 
 */
 #include "loadlgtm.hpp"
@@ -50,7 +50,7 @@ void ESM4::LightingTemplate::load(ESM4::Reader& reader)
             case ESM::fourCC("DATA"):
                 if (subHdr.dataSize == 36) // TES4
                     reader.get(&mLighting, 36);
-                if (subHdr.dataSize == 40) // FO3/FONV
+                if (subHdr.dataSize == 40) // FO3/FNV
                     reader.get(mLighting);
                 else if (subHdr.dataSize == 92) // TES5
                 {
@@ -61,6 +61,7 @@ void ESM4::LightingTemplate::load(ESM4::Reader& reader)
                     reader.skipSubRecordData(); // throw?
                 break;
             case ESM::fourCC("DALC"): // TES5
+            case ESM::fourCC("WGDR"): // FO4 god rays (GDRY FormId)
                 reader.skipSubRecordData();
                 break;
             default:

@@ -117,7 +117,7 @@ namespace ESM4
                                          // gift filter
             Template_UseAIPackage = 0x0020, // only the basic Packages listed on the AI Packages tab;
                                             // rest of tab controlled by Def Pack List
-            Template_UseModel = 0x0040, // FO3, FONV; probably not used in TES5+
+            Template_UseModel = 0x0040, // FO3, FNV; probably not used in TES5+
             Template_UseBaseData = 0x0080, // including name and short name, and flags for Essential, Protected,
                                            // Respawn, Summonable, Simple Actor, and Doesn't affect stealth meter
             Template_UseInventory = 0x0100, // Inventory tab, including all outfits and geared-up item,
@@ -181,17 +181,17 @@ namespace ESM4
 
         std::string mEditorId;
         std::string mFullName;
-        ESM::Path mModel; // skeleton model (can be a marker in FO3/FONV)
+        ESM::Path mModel; // skeleton model (can be a marker in FO3/FNV)
 
         ESM::FormId mRace;
         ESM::FormId mClass;
         ESM::FormId mHair; // not for TES5, see mHeadParts
         ESM::FormId mEyes;
 
-        std::vector<ESM::FormId> mHeadParts; // FO3/FONV/TES5
+        std::vector<ESM::FormId> mHeadParts; // FO3/FNV/TES5
 
         float mHairLength;
-        HairColour mHairColour; // TES4/FO3/FONV
+        HairColour mHairColour; // TES4/FO3/FNV
         ESM::FormId mHairColourId; // TES5
         ESM::FormId mBeardColourId; // FO4
 
@@ -215,7 +215,7 @@ namespace ESM4
 
         std::vector<InventoryItem> mInventory;
 
-        ESM::FormId mBaseTemplate; // FO3/FONV/TES5
+        ESM::FormId mBaseTemplate; // FO3/FNV/TES5
         ESM::FormId mWornArmor; // TES5 only?
 
         ESM::FormId mDefaultOutfit; // TES5 OTFT

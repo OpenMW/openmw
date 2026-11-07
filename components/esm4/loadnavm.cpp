@@ -41,59 +41,26 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
 
     std::uint32_t count;
 
-    reader.get(unknownNVER);
-    reader.get(unknownLCTN);
-    reader.getFormId(worldSpaceId);
-    // FLG_Tamriel    = 0x0000003c, // grid info follows, possibly Tamriel?
-    // FLG_Morrowind  = 0x01380000, // grid info follows, probably Skywind
-    // FIXME: this check doesn't work because `getFormId` adjusts content file index
-    if (worldSpaceId == ESM::FormId{ 0x3c, 0 } || worldSpaceId == ESM::FormId{ 380000, 1 })
-    {
-        //   ^
-        // Y |                   X Y Index
-        //     |                 0,0 0
-        //   1 |23               0,1 1
-        //   0 |01               1,0 2
-        //     +---              1,1 3
-        //      01 ->
-        //         X
-        //
-        // e.g. Dagonfel X:13,14,15,16 Y:43,44,45,46 (Morrowind X:7 Y:22)
-        //
-        // Skywind:   -4,-3 -2,-1 0,1 2,3 4,5 6,7
-        // Morrowind: -2    -1    0   1   2   3
-        //
-        // Formula seems to be floor(Skywind coord / 2) <cmath>
-        //
-        Grid grid;
-        reader.get(grid.y); // NOTE: reverse order
-        reader.get(grid.x);
-        cellGrid = grid;
-// FIXME: debugging only
-#if 0
-        std::string padding;
-        padding.insert(0, reader.stackSize()*2, ' ');
-        if (worldSpaceId == ESM4::FLG_Morrowind)
-            std::cout << padding << "NVNM MW: X " << std::dec << cellGrid.grid.x << ", Y " << cellGrid.grid.y << std::endl;
-        else
-            std::cout << padding << "NVNM SR: X " << std::dec << cellGrid.grid.x << ", Y " << cellGrid.grid.y << std::endl;
-#endif
-    }
-    else
-    {
-        ESM::FormId cellId;
-        reader.getFormId(cellId);
-        cellGrid = cellId;
+    reader.get(version);
+    reader.get(crc);
 
-#if 0
-        std::string padding; // FIXME
-        padding.insert(0, reader.stackSize()*2, ' ');
-        if (worldSpaceId == 0) // interior
-            std::cout << padding << "NVNM Interior: cellId " << std::hex << cellGrid.cellId << std::endl;
-        else
-            std::cout << padding << "NVNM FormID: cellId " << std::hex << cellGrid.cellId << std::endl;
-#endif
-    }
+    readPathingCell(reader, worldSpaceId, cellGrid);
+    // Exterior grid:
+    //   ^
+    // Y |                   X Y Index
+    //     |                 0,0 0
+    //   1 |23               0,1 1
+    //   0 |01               1,0 2
+    //     +---              1,1 3
+    //      01 ->
+    //         X
+    //
+    // e.g. Dagonfel X:13,14,15,16 Y:43,44,45,46 (Morrowind X:7 Y:22)
+    //
+    // Skywind:   -4,-3 -2,-1 0,1 2,3 4,5 6,7
+    // Morrowind: -2    -1    0   1   2   3
+    //
+    // Formula seems to be floor(Skywind coord / 2) <cmath>
 
     reader.get(count); // numVerticies
     if (count)
@@ -211,7 +178,6 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
         {
             case ESM::fourCC("NVNM"):
             {
-                // See FIXME in ESM4::Navigation::load.
                 // FO4 updates the format
                 if (mGameFormat == ESM::GameFormat::FO4)
                 {

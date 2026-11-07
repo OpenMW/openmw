@@ -64,9 +64,9 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
                         mDoAllBeforeRepeat = true;
                 }
 
-                reader.get(mDialType); // TES4/FO3/FONV/TES5
+                reader.get(mDialType); // TES4/FO3/FNV/TES5
 
-                if (subHdr.dataSize >= 2) // FO3/FONV/TES5
+                if (subHdr.dataSize >= 2) // FO3/FNV/TES5
                     reader.get(mDialFlags);
 
                 if (subHdr.dataSize >= 3) // TES5
@@ -76,13 +76,13 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("PNAM"):
                 reader.get(mPriority);
-                break; // FO3/FONV
+                break; // FO3/FNV
             case ESM::fourCC("TDUM"):
                 reader.getZString(mTextDumb);
-                break; // FONV
+                break; // FNV
             case ESM::fourCC("SCRI"):
-            case ESM::fourCC("INFC"): // FONV info connection
-            case ESM::fourCC("INFX"): // FONV info index
+            case ESM::fourCC("INFC"): // FNV info connection
+            case ESM::fourCC("INFX"): // FNV info index
             case ESM::fourCC("QNAM"): // TES5
             case ESM::fourCC("BNAM"): // TES5
             case ESM::fourCC("SNAM"): // TES5

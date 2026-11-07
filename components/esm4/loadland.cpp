@@ -56,7 +56,7 @@ namespace
                     = VFS::Path::NormalizedView("textures/landscape/ground/commonwealthdefault01_n.dds");
                 break;
             case ESM::GameFormat::FO3:
-            case ESM::GameFormat::FONV:
+            case ESM::GameFormat::FNV:
                 land.mDefaultDiffuseMap = VFS::Path::NormalizedView("textures/landscape/dirtwasteland01.dds");
                 land.mDefaultNormalMap = VFS::Path::NormalizedView("textures/landscape/dirtwasteland01_n.dds");
                 break;
