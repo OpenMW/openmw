@@ -10,7 +10,7 @@ namespace ESM
     struct CreatureLevListState final : public ObjectState
     {
         ESM::RefNum mSpawnedActor; // actor id in older saves
-        bool mSpawn;
+        bool mSpawn = false;
 
         void load(ESMReader& esm) override;
         void save(ESMWriter& esm, bool inInventory = false) const override;

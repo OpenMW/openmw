@@ -17,7 +17,7 @@ namespace ESM
     {
         RefId mId;
         bool mIsInterior;
-        float mWaterLevel;
+        float mWaterLevel = 0;
 
         int32_t mHasFogOfWar; // Do we have fog of war state (0 or 1)? (see fogstate.hpp)
 
