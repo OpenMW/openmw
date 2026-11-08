@@ -10,6 +10,7 @@
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <format>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -293,13 +294,13 @@ namespace Sqlite3
         }
         catch (const Error& e)
         {
-            throw Error(e.getCode(),
-                "Failed to perform request \"" + std::string(statement.mQuery.text()) + "\": " + std::string(e.what()));
+            throw Error(
+                e.getCode(), std::format("Failed to perform request \"{}\": {}", statement.mQuery.text(), e.what()));
         }
         catch (const std::exception& e)
         {
             throw std::runtime_error(
-                "Failed to perform request \"" + std::string(statement.mQuery.text()) + "\": " + std::string(e.what()));
+                std::format("Failed to perform request \"{}\": {}", statement.mQuery.text(), e.what()));
         }
     }
 
@@ -316,14 +317,13 @@ namespace Sqlite3
         }
         catch (const Error& e)
         {
-            throw Error(e.getCode(),
-                "Failed to execute statement \"" + std::string(statement.mQuery.text())
-                    + "\": " + std::string(e.what()));
+            throw Error(
+                e.getCode(), std::format("Failed to execute statement \"{}\": {}", statement.mQuery.text(), e.what()));
         }
         catch (const std::exception& e)
         {
-            throw std::runtime_error("Failed to execute statement \"" + std::string(statement.mQuery.text())
-                + "\": " + std::string(e.what()));
+            throw std::runtime_error(
+                std::format("Failed to execute statement \"{}\": {}", statement.mQuery.text(), e.what()));
         }
     }
 }

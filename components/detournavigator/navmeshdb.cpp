@@ -174,7 +174,8 @@ namespace DetourNavigator
             case SQLITE_NOTADB:
                 return std::format(
                     "The navmesh database file \"{}\" is damaged or is not a navmesh database. Please close OpenMW "
-                    "and delete it. The file will be recreated automatically the next time OpenMW starts.",
+                    "and delete it. The file will be recreated automatically the next time OpenMW starts or if you "
+                    "rerun openmw-navmeshtool.",
                     path);
             case SQLITE_CANTOPEN:
             case SQLITE_PERM:

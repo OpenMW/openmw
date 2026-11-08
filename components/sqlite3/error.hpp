@@ -17,6 +17,8 @@ namespace Sqlite3
 
         int getCode() const noexcept { return mCode; }
 
+        // The primary result code is the least significant 8 bits of the extended result code:
+        // https://www.sqlite.org/rescode.html#primary_result_codes_versus_extended_result_codes
         int getPrimaryCode() const noexcept { return mCode & 0xff; }
 
     private:
