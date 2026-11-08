@@ -1,11 +1,14 @@
 #include "generate.hpp"
 
 #include <components/detournavigator/navmeshdb.hpp>
+#include <components/sqlite3/error.hpp>
 
 #include <DetourAlloc.h>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <sqlite3.h>
 
 #include <limits>
 #include <random>
@@ -175,5 +178,40 @@ namespace
                 insertTile(TileId{ i }, TileVersion{ 1 });
         };
         EXPECT_THROW(f(), std::runtime_error);
+    }
+
+    TEST_F(DetourNavigatorNavMeshDbTest, on_inserted_duplicate_tile_id_should_throw_error_with_primary_key_code)
+    {
+        const TileId tileId{ 53 };
+        const TileVersion version{ 1 };
+        const Tile tile = insertTile(tileId, version);
+
+        try
+        {
+            mDb.insertTile(tileId, tile.mWorldspace, tile.mTilePosition, version, generateData(), generateData());
+            FAIL() << "Sqlite3::Error is not thrown";
+        }
+        catch (const Sqlite3::Error& e)
+        {
+            EXPECT_EQ(e.getCode(), SQLITE_CONSTRAINT_PRIMARYKEY);
+        }
+    }
+
+    TEST(DetourNavigatorNavMeshDbErrorAdviceTest, should_mention_path_for_corrupt_database)
+    {
+        const Sqlite3::Error error(SQLITE_CORRUPT, "message");
+        EXPECT_THAT(getNavMeshDbErrorAdvice(error, "/path/to/navmesh.db"), HasSubstr("/path/to/navmesh.db"));
+    }
+
+    TEST(DetourNavigatorNavMeshDbErrorAdviceTest, should_mention_path_for_corrupt_index)
+    {
+        const Sqlite3::Error error(SQLITE_CORRUPT_INDEX, "message");
+        EXPECT_THAT(getNavMeshDbErrorAdvice(error, "/path/to/navmesh.db"), HasSubstr("/path/to/navmesh.db"));
+    }
+
+    TEST(DetourNavigatorNavMeshDbErrorAdviceTest, should_return_empty_string_for_unhandled_code)
+    {
+        const Sqlite3::Error error(SQLITE_CONSTRAINT, "message");
+        EXPECT_THAT(getNavMeshDbErrorAdvice(error, "/path/to/navmesh.db"), IsEmpty());
     }
 }

@@ -56,6 +56,7 @@ file(GLOB UNITTEST_SRC_FILES
     shader/shadermanager.cpp
 
     sqlite3/db.cpp
+    sqlite3/error.cpp
     sqlite3/request.cpp
     sqlite3/statement.cpp
     sqlite3/transaction.cpp
