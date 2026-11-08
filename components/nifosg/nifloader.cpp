@@ -1772,23 +1772,17 @@ namespace NifOsg
             const Nif::BSVertexDesc* vertDesc = &bsTriShape->mVertDesc;
             std::vector<const std::vector<unsigned short>*> triangleLists;
 
+            const Nif::NiSkinPartition* partitions = nullptr;
+            if (!bsTriShape->mSkin.empty()
+                && (bsTriShape->mSkin->mRecordType == Nif::RC_NiSkinInstance
+                    || bsTriShape->mSkin->mRecordType == Nif::RC_BSDismemberSkinInstance))
+                partitions = static_cast<const Nif::NiSkinInstance*>(bsTriShape->mSkin.getPtr())->getPartitions();
+
             // Skinned SSE
-            if (bsTriShape->mVertData.empty())
+            if (partitions != nullptr && !partitions->mVertexData.empty())
             {
-                if (bsTriShape->mSkin.empty()
-                    || (bsTriShape->mSkin->mRecordType != Nif::RC_NiSkinInstance
-                        && bsTriShape->mSkin->mRecordType != Nif::RC_BSDismemberSkinInstance))
-                    return;
-
-                const Nif::NiSkinPartition* partitions
-                    = static_cast<const Nif::NiSkinInstance*>(bsTriShape->mSkin.getPtr())->getPartitions();
-                if (partitions == nullptr)
-                    return;
-
                 vertData = &partitions->mVertexData;
                 vertDesc = &partitions->mVertexDesc;
-                if (vertData->empty())
-                    return;
 
                 triangleLists.reserve(partitions->mPartitions.size());
                 for (const auto& partition : partitions->mPartitions)
