@@ -75,7 +75,7 @@ namespace Sqlite3
     {
         const int index = sqlite3_bind_parameter_index(&stmt, name);
         if (index == 0)
-            throw std::logic_error("Parameter \"" + std::string(name) + "\" is not found");
+            throw std::logic_error(std::format("Parameter \"{}\" is not found", name));
         bindParameter(db, stmt, index, value);
     }
 
@@ -94,15 +94,16 @@ namespace Sqlite3
             case SQLITE_NULL:
                 return "SQLITE_NULL";
         }
-        return "unsupported(" + std::to_string(value) + ")";
+        return std::format("unsupported({})", value);
     }
 
     template <class T>
     inline auto copyColumn(sqlite3& /*db*/, sqlite3_stmt& /*statement*/, int index, int type, T*& value)
     {
         if (type != SQLITE_NULL)
-            throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-                + " that does not match expected output type: SQLITE_NULL");
+            throw std::logic_error(
+                std::format("Type of column {} is {} that does not match expected output type: SQLITE_NULL", index,
+                    sqliteTypeToString(type)));
         value = nullptr;
     }
 
@@ -118,8 +119,9 @@ namespace Sqlite3
                 value = std::decay_t<T>{};
                 return;
         }
-        throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-            + " that does not match expected output type: SQLITE_INTEGER or SQLITE_NULL");
+        throw std::logic_error(std::format(
+            "Type of column {} is {} that does not match expected output type: SQLITE_INTEGER or SQLITE_NULL", index,
+            sqliteTypeToString(type)));
     }
 
     template <std::floating_point T>
@@ -134,8 +136,9 @@ namespace Sqlite3
                 value = std::decay_t<T>{};
                 return;
         }
-        throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-            + " that does not match expected output type: SQLITE_FLOAT or SQLITE_NULL");
+        throw std::logic_error(
+            std::format("Type of column {} is {} that does not match expected output type: SQLITE_FLOAT or SQLITE_NULL",
+                index, sqliteTypeToString(type)));
     }
 
     template <StrongTypedef T>
@@ -147,8 +150,9 @@ namespace Sqlite3
     inline void copyColumn(sqlite3& db, sqlite3_stmt& statement, int index, int type, std::string& value)
     {
         if (type != SQLITE_TEXT)
-            throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-                + " that does not match expected output type: SQLITE_TEXT");
+            throw std::logic_error(
+                std::format("Type of column {} is {} that does not match expected output type: SQLITE_TEXT", index,
+                    sqliteTypeToString(type)));
         const unsigned char* const text = sqlite3_column_text(&statement, index);
         if (text == nullptr)
         {
@@ -174,8 +178,9 @@ namespace Sqlite3
     inline void copyColumn(sqlite3& db, sqlite3_stmt& statement, int index, int type, std::vector<std::byte>& value)
     {
         if (type != SQLITE_BLOB)
-            throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-                + " that does not match expected output type: SQLITE_BLOB");
+            throw std::logic_error(
+                std::format("Type of column {} is {} that does not match expected output type: SQLITE_BLOB", index,
+                    sqliteTypeToString(type)));
         const void* const blob = sqlite3_column_blob(&statement, index);
         if (blob == nullptr)
         {
@@ -205,8 +210,7 @@ namespace Sqlite3
         {
             const int column = index - 1;
             if (const int number = sqlite3_column_count(&statement); column >= number)
-                throw std::out_of_range(
-                    "Column number is out of range: " + std::to_string(column) + " >= " + std::to_string(number));
+                throw std::out_of_range(std::format("Column number is out of range: {} >= {}", column, number));
             const int type = sqlite3_column_type(&statement, column);
             switch (type)
             {
@@ -218,8 +222,8 @@ namespace Sqlite3
                     copyColumn(db, statement, column, type, std::get<index - 1>(row));
                     break;
                 default:
-                    throw std::runtime_error("Column " + std::to_string(column)
-                        + " has unnsupported column type: " + sqliteTypeToString(type));
+                    throw std::runtime_error(
+                        std::format("Column {} has unnsupported column type: {}", column, sqliteTypeToString(type)));
             }
             getColumnsImpl<index - 1>(db, statement, row);
         }

@@ -26,8 +26,8 @@ namespace Sqlite3
                 case TransactionMode::Exclusive:
                     return "BEGIN EXCLUSIVE";
             }
-            throw std::logic_error("Invalid transaction mode: "
-                + std::to_string(static_cast<std::underlying_type_t<TransactionMode>>(mode)));
+            throw std::logic_error(std::format(
+                "Invalid transaction mode: {}", static_cast<std::underlying_type_t<TransactionMode>>(mode)));
         }
     }
 

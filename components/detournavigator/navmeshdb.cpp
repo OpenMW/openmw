@@ -150,7 +150,7 @@ namespace DetourNavigator
         {
             const auto query = std::format("pragma max_page_count = {};", value);
             if (const int ec = sqlite3_exec(&db, query.c_str(), nullptr, nullptr, nullptr); ec != SQLITE_OK)
-                throw std::runtime_error("Failed set max page count: " + std::string(sqlite3_errmsg(&db)));
+                throw std::runtime_error(std::format("Failed set max page count: {}", sqlite3_errmsg(&db)));
         }
     }
 
