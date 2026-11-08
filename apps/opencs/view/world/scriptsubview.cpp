@@ -29,19 +29,8 @@
 #include "recordbuttonbar.hpp"
 #include "scriptedit.hpp"
 #include "scripterrortable.hpp"
+#include "scripttext.hpp"
 #include "tablebottombox.hpp"
-
-namespace
-{
-    QString toEditorText(QString text)
-    {
-        // Original scripts may have \r\n endings, while ScriptEdit stores \n.
-        // So we should convert a ESM script to ScriptEdit format before working with its text.
-        text.replace(QLatin1String("\r\n"), QLatin1String("\n"));
-        text.replace(QLatin1Char('\r'), QLatin1Char('\n'));
-        return text;
-    }
-}
 
 void CSVWorld::ScriptSubView::addButtonBar()
 {
@@ -287,7 +276,9 @@ void CSVWorld::ScriptSubView::textChanged()
 
     // If the text itself did not change, it means that its formatting changed instead (a highlighting, in our case).
     // So there is no real edit command, and nothing to recompile.
-    if (toEditorText(mModel->data(index).toString()) == source)
+    QString modelText = mModel->data(index).toString();
+    toEditorText(modelText);
+    if (modelText == source)
         return;
 
     mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mModel, index, source));
@@ -320,7 +311,8 @@ void CSVWorld::ScriptSubView::dataChanged(const QModelIndex& topLeft, const QMod
 
         if (mColumn >= topLeft.column() && mColumn <= bottomRight.column())
         {
-            const QString modelText = toEditorText(mModel->data(index).toString());
+            QString modelText = mModel->data(index).toString();
+            toEditorText(modelText);
             const QString editorText = mEditor->toPlainText();
 
             // Check if model has a new text which does not exist in the script editor yet.

@@ -1,6 +1,7 @@
 file(GLOB OPENCS_TESTS_SRC_FILES
     main.cpp
     model/world/testinfocollection.cpp
+    model/world/testscripttext.cpp
     model/world/testuniversalid.cpp
 )
 
