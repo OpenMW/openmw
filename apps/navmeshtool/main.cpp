@@ -26,6 +26,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/settings/values.hpp>
+#include <components/sqlite3/error.hpp>
 #include <components/toutf8/toutf8.hpp>
 #include <components/version/version.hpp>
 #include <components/vfs/manager.hpp>
@@ -132,6 +133,20 @@ namespace NavMeshTool
             return result;
         }
 
+        DetourNavigator::NavMeshDb openNavMeshDb(const std::string& path, std::uint64_t maxFileSize)
+        {
+            try
+            {
+                return DetourNavigator::NavMeshDb(path, maxFileSize);
+            }
+            catch (const Sqlite3::Error& e)
+            {
+                if (const std::string advice = DetourNavigator::getNavMeshDbErrorAdvice(e, path); !advice.empty())
+                    Log(Debug::Error) << advice;
+                throw;
+            }
+        }
+
         int runNavMeshTool(int argc, char* argv[])
         {
             Platform::init();
@@ -213,7 +228,7 @@ namespace NavMeshTool
 
             Log(Debug::Info) << "Using navmeshdb at " << dbPath;
 
-            DetourNavigator::NavMeshDb db(dbPath, maxDbFileSize);
+            DetourNavigator::NavMeshDb db = openNavMeshDb(dbPath, maxDbFileSize);
 
             ESM::ReadersCache readers;
             EsmLoader::Query query;
