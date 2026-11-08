@@ -1800,8 +1800,12 @@ namespace NifOsg
 
             osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
             for (const auto* triangles : triangleLists)
+            {
+                if (triangles->empty())
+                    continue;
                 geometry->addPrimitiveSet(new osg::DrawElementsUShort(
                     osg::PrimitiveSet::TRIANGLES, static_cast<unsigned>(triangles->size()), triangles->data()));
+            }
 
             osg::ref_ptr<osg::Drawable> drawable = geometry;
 
