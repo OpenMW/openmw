@@ -11,6 +11,7 @@
 
 #include <cstddef>
 #include <format>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -152,6 +153,47 @@ namespace DetourNavigator
             if (const int ec = sqlite3_exec(&db, query.c_str(), nullptr, nullptr, nullptr); ec != SQLITE_OK)
                 throw std::runtime_error(std::format("Failed set max page count: {}", sqlite3_errmsg(&db)));
         }
+
+        struct SetJournalModeToWal
+        {
+            static std::string_view text() noexcept { return "pragma journal_mode = WAL;"; }
+            static void bind(sqlite3&, sqlite3_stmt&) {}
+        };
+
+        std::string setJournalModeToWal(sqlite3& db)
+        {
+            Sqlite3::Statement<SetJournalModeToWal> statement(db);
+            std::string value;
+            request(db, statement, &value, 1);
+            return value;
+        }
+
+        void useWriteAheadLog(sqlite3& db)
+        {
+            std::string journalMode;
+            try
+            {
+                journalMode = setJournalModeToWal(db);
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Warning) << "Failed to set navmeshdb journal mode to WAL: " << e.what();
+                return;
+            }
+            if (journalMode != "wal")
+            {
+                Log(Debug::Warning) << "Navmeshdb journal mode remains \"" << journalMode << "\"";
+                return;
+            }
+            Log(Debug::Info) << "Navmeshdb journal mode is set to WAL";
+            // NORMAL can corrupt the database on power loss in rollback journal modes, so it goes only with WAL.
+            if (sqlite3_exec(&db, "pragma synchronous = NORMAL;", nullptr, nullptr, nullptr) != SQLITE_OK)
+            {
+                Log(Debug::Warning) << "Failed to set navmeshdb synchronous to NORMAL: " << sqlite3_errmsg(&db);
+                return;
+            }
+            Log(Debug::Info) << "Navmeshdb synchronous is set to NORMAL";
+        }
     }
 
     std::ostream& operator<<(std::ostream& stream, ShapeType value)
@@ -221,6 +263,7 @@ namespace DetourNavigator
         if (dbPageSize == 0)
             throw std::runtime_error("NavMeshDb page size is zero");
         setMaxPageCount(*mDb, maxFileSize / dbPageSize + static_cast<std::uint64_t>((maxFileSize % dbPageSize) != 0));
+        useWriteAheadLog(*mDb);
     }
 
     Sqlite3::Transaction NavMeshDb::startTransaction(Sqlite3::TransactionMode mode)

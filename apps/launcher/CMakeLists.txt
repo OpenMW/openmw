@@ -82,7 +82,7 @@ endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(openmw-launcher PRIVATE --coverage)
-    target_link_libraries(openmw-launcher gcov)
+    target_link_libraries(openmw-launcher PRIVATE gcov)
 endif()
 
 if(USE_QT)
