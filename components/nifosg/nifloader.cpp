@@ -1888,8 +1888,13 @@ namespace NifOsg
                     for (std::size_t i = 0; i < vertices.size(); ++i)
                     {
                         const Nif::BSVertexData& vert = (*vertData)[i];
-                        for (int j = 0; j < 4; j++)
-                            influences[i].emplace_back(vert.mBoneIndices[j], Misc::halfToFloat(vert.mBoneWeights[j]));
+                        for (int j = 0; j < 4; ++j)
+                        {
+                            const float weight = Misc::halfToFloat(vert.mBoneWeights[j]);
+                            if (weight == 0.f)
+                                continue;
+                            influences[i].emplace_back(vert.mBoneIndices[j], weight);
+                        }
                     }
                     rig->setBoneInfo(std::move(boneInfo));
                     rig->setInfluences(influences);
