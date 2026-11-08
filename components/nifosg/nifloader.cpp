@@ -1767,13 +1767,40 @@ namespace NifOsg
             assert(Nif::isTypeBSGeometry(nifNode->mRecordType));
 
             auto bsTriShape = static_cast<const Nif::BSTriShape*>(nifNode);
-            const std::vector<unsigned short>& triangles = bsTriShape->mTriangles;
-            if (triangles.empty())
-                return;
+            const std::vector<Nif::BSVertexData>* vertData = &bsTriShape->mVertData;
+            const Nif::BSVertexDesc* vertDesc = &bsTriShape->mVertDesc;
+            std::vector<const std::vector<unsigned short>*> triangleLists;
+
+            // Skinned SSE
+            if (bsTriShape->mVertData.empty())
+            {
+                if (bsTriShape->mSkin.empty()
+                    || (bsTriShape->mSkin->mRecordType != Nif::RC_NiSkinInstance
+                        && bsTriShape->mSkin->mRecordType != Nif::RC_BSDismemberSkinInstance))
+                    return;
+
+                const Nif::NiSkinPartition* partitions
+                    = static_cast<const Nif::NiSkinInstance*>(bsTriShape->mSkin.getPtr())->getPartitions();
+                if (partitions == nullptr)
+                    return;
+
+                vertData = &partitions->mVertexData;
+                vertDesc = &partitions->mVertexDesc;
+                if (vertData->empty())
+                    return;
+
+                triangleLists.reserve(partitions->mPartitions.size());
+                for (const auto& partition : partitions->mPartitions)
+                    triangleLists.push_back(&partition.mTrueTriangles);
+            }
+            // FO4 and unskinned SSE
+            else
+                triangleLists.push_back(&bsTriShape->mTriangles);
 
             osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
-            geometry->addPrimitiveSet(new osg::DrawElementsUShort(
-                osg::PrimitiveSet::TRIANGLES, static_cast<unsigned>(triangles.size()), triangles.data()));
+            for (const auto* triangles : triangleLists)
+                geometry->addPrimitiveSet(new osg::DrawElementsUShort(
+                    osg::PrimitiveSet::TRIANGLES, static_cast<unsigned>(triangles->size()), triangles->data()));
 
             osg::ref_ptr<osg::Drawable> drawable = geometry;
 
@@ -1782,17 +1809,17 @@ namespace NifOsg
             // unorm8
             auto normbyteToFloat = [](uint8_t value) { return value / 255.f * 2.f - 1.f; };
 
-            const bool fullPrec = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Full_Precision;
-            const bool hasVertices = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Vertex;
-            const bool hasNormals = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Normals;
-            const bool hasColors = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Vertex_Colors;
-            const bool hasUV = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::UVs;
+            const bool fullPrec = vertDesc->mFlags & Nif::BSVertexDesc::VertexAttribute::Full_Precision;
+            const bool hasVertices = vertDesc->mFlags & Nif::BSVertexDesc::VertexAttribute::Vertex;
+            const bool hasNormals = vertDesc->mFlags & Nif::BSVertexDesc::VertexAttribute::Normals;
+            const bool hasColors = vertDesc->mFlags & Nif::BSVertexDesc::VertexAttribute::Vertex_Colors;
+            const bool hasUV = vertDesc->mFlags & Nif::BSVertexDesc::VertexAttribute::UVs;
 
             std::vector<osg::Vec3f> vertices;
             std::vector<osg::Vec3f> normals;
             std::vector<osg::Vec4ub> colors;
             std::vector<osg::Vec2f> uvlist;
-            for (auto& elem : bsTriShape->mVertData)
+            for (auto& elem : *vertData)
             {
                 if (hasVertices)
                 {
@@ -1811,8 +1838,18 @@ namespace NifOsg
                         Misc::Convert::halfToFloat(elem.mUV[0]), Misc::Convert::halfToFloat(elem.mUV[1]));
             }
 
+            if (vertices.empty() && nifNode->mRecordType == Nif::RC_BSDynamicTriShape)
+            {
+                const auto& dynamic = static_cast<const Nif::BSDynamicTriShape*>(bsTriShape)->mDynamicData;
+                if (dynamic.size() == vertData->size())
+                    for (const osg::Vec4f& dyn : dynamic)
+                        vertices.emplace_back(dyn.x(), dyn.y(), dyn.z());
+            }
+
             if (!vertices.empty())
                 geometry->setVertexArray(new osg::Vec3Array(static_cast<unsigned>(vertices.size()), vertices.data()));
+            else
+                return;
             if (!normals.empty())
                 geometry->setNormalArray(new osg::Vec3Array(static_cast<unsigned>(normals.size()), normals.data()),
                     osg::Array::BIND_PER_VERTEX);
@@ -1823,40 +1860,77 @@ namespace NifOsg
                 geometry->setTexCoordArray(0, new osg::Vec2Array(static_cast<unsigned>(uvlist.size()), uvlist.data()),
                     osg::Array::BIND_PER_VERTEX);
 
-            // This is the skinning data Fallout 4 provides
-            // TODO: support Skyrim SE skinning data
-            if (!bsTriShape->mSkin.empty() && bsTriShape->mSkin->mRecordType == Nif::RC_BSSkinInstance
-                && bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Skinned)
+            if (!bsTriShape->mSkin.empty()
+                && (bsTriShape->mSkin->mRecordType == Nif::RC_NiSkinInstance // SSE
+                    || bsTriShape->mSkin->mRecordType == Nif::RC_BSDismemberSkinInstance // SSE
+                    || bsTriShape->mSkin->mRecordType == Nif::RC_BSSkinInstance) // FO4
+                && vertDesc->mFlags & Nif::BSVertexDesc::VertexAttribute::Skinned)
             {
                 osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
                 rig->setSourceGeometry(std::move(geometry));
-
-                const Nif::BSSkinInstance* skin = static_cast<const Nif::BSSkinInstance*>(bsTriShape->mSkin.getPtr());
-                const Nif::BSSkinBoneData* data = skin->mData.getPtr();
-                const Nif::NiAVObjectList& bones = skin->mBones;
-
-                std::vector<SceneUtil::RigGeometry::BoneInfo> boneInfo;
-                std::vector<SceneUtil::RigGeometry::BoneWeights> influences;
-                boneInfo.resize(bones.size());
-                influences.resize(vertices.size());
-                for (std::size_t i = 0; i < bones.size(); ++i)
+                
+                if (bsTriShape->mSkin->mRecordType != Nif::RC_BSSkinInstance) // SSE
                 {
-                    boneInfo[i].mName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
-                    boneInfo[i].mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
-                    boneInfo[i].mBoundSphere = data->mBones[i].mBoundSphere;
-                }
+                    const Nif::NiSkinInstance* skin
+                        = static_cast<const Nif::NiSkinInstance*>(bsTriShape->mSkin.getPtr());
+                    const Nif::NiSkinData* data = skin->mData.getPtr();
+                    const Nif::NiAVObjectList& bones = skin->mBones;
 
-                for (size_t i = 0; i < vertices.size(); i++)
-                {
-                    const Nif::BSVertexData& vertData = bsTriShape->mVertData[i];
-                    for (int j = 0; j < 4; j++)
-                        influences[i].emplace_back(
-                            vertData.mBoneIndices[j], Misc::Convert::halfToFloat(vertData.mBoneWeights[j]));
+                    std::vector<SceneUtil::RigGeometry::BoneInfo> boneInfo;
+                    std::vector<SceneUtil::RigGeometry::BoneWeights> influences;
+                    boneInfo.resize(bones.size());
+                    influences.resize(vertices.size());
+                    for (std::size_t i = 0; i < bones.size(); ++i)
+                    {
+                        boneInfo[i].mName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
+                        boneInfo[i].mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
+                        boneInfo[i].mBoundSphere = data->mBones[i].mBoundSphere;
+                    }
+
+                    for (size_t i = 0; i < vertices.size(); i++)
+                    {
+                        const Nif::BSVertexData& vert = (*vertData)[i];
+                        for (int j = 0; j < 4; j++)
+                            influences[i].emplace_back(
+                                vert.mBoneIndices[j], Misc::Convert::halfToFloat(vert.mBoneWeights[j]));
+                    }
+                    rig->setBoneInfo(std::move(boneInfo));
+                    rig->setInfluences(influences);
+                    if (const Nif::NiAVObject* rootBone = skin->mRoot.getPtr())
+                        rig->setRootBone(rootBone->mName);
+
+                    rig->setTransform(data->mTransform.toMatrix());
                 }
-                rig->setBoneInfo(std::move(boneInfo));
-                rig->setInfluences(influences);
-                if (const Nif::NiAVObject* rootBone = skin->mRoot.getPtr())
-                    rig->setRootBone(rootBone->mName);
+                else // FO4
+                {
+                    const Nif::BSSkinInstance* skin
+                        = static_cast<const Nif::BSSkinInstance*>(bsTriShape->mSkin.getPtr());
+                    const Nif::BSSkinBoneData* data = skin->mData.getPtr();
+                    const Nif::NiAVObjectList& bones = skin->mBones;
+
+                    std::vector<SceneUtil::RigGeometry::BoneInfo> boneInfo;
+                    std::vector<SceneUtil::RigGeometry::BoneWeights> influences;
+                    boneInfo.resize(bones.size());
+                    influences.resize(vertices.size());
+                    for (std::size_t i = 0; i < bones.size(); ++i)
+                    {
+                        boneInfo[i].mName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
+                        boneInfo[i].mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
+                        boneInfo[i].mBoundSphere = data->mBones[i].mBoundSphere;
+                    }
+
+                    for (size_t i = 0; i < vertices.size(); i++)
+                    {
+                        const Nif::BSVertexData& vert = (*vertData)[i];
+                        for (int j = 0; j < 4; j++)
+                            influences[i].emplace_back(
+                                vert.mBoneIndices[j], Misc::Convert::halfToFloat(vert.mBoneWeights[j]));
+                    }
+                    rig->setBoneInfo(std::move(boneInfo));
+                    rig->setInfluences(influences);
+                    if (const Nif::NiAVObject* rootBone = skin->mRoot.getPtr())
+                        rig->setRootBone(rootBone->mName);
+                }
 
                 drawable = rig;
 
