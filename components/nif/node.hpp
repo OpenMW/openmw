@@ -408,7 +408,6 @@ namespace Nif
         void post(Reader& nif) override;
 
         std::unique_ptr<btCollisionShape> getCollisionShape() const;
-
     };
 
     struct BSDynamicTriShape : BSTriShape
@@ -569,5 +568,6 @@ namespace Nif
         }
         return false;
     }
+
 }
 #endif

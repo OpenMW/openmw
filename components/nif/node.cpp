@@ -38,7 +38,7 @@ namespace
                                               : Misc::Convert::makeOsgVec3f(elem.mHalfVertex.data());
             mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
         }
-        mesh.preallocateIndices(static_cast<int>(numIndices));
+        mesh.preallocateIndices(numIndices);
     }
 
     void trianglesToBtTriangleMesh(btTriangleMesh& mesh, const std::vector<unsigned short>& triangles)
@@ -628,53 +628,46 @@ namespace Nif
 
     std::unique_ptr<btCollisionShape> BSTriShape::getCollisionShape() const
     {
-        const bool hasVertices = mVertDesc.mFlags & BSVertexDesc::VertexAttribute::Vertex;
-        if (!hasVertices)
-            return nullptr;
-
+        const std::vector<BSVertexData>* vertData = &mVertData;
+        const BSVertexDesc* vertDesc = &mVertDesc;
         std::vector<const std::vector<unsigned short>*> triangleLists;
-        auto mesh = std::make_unique<btTriangleMesh>();
-        int numIndices = 0;
 
         // Skinned SSE
         if (mVertData.empty())
         {
-            if (!mSkin.empty()
-                && (mSkin->mRecordType == RC_NiSkinInstance || mSkin->mRecordType == RC_BSDismemberSkinInstance))
-            {
-                const auto* partitions = static_cast<const NiSkinInstance*>(mSkin.getPtr())->getPartitions();
-                if (partitions)
-                {
-                    triangleLists.reserve(partitions->mPartitions.size());
-                    for (auto& partition : partitions->mPartitions)
-                    {
-                        triangleLists.push_back(&partition.mTrueTriangles);
-                        numIndices += static_cast<int>(partition.mTrueTriangles.size());
-                    }
-                    if (!partitions->mVertexData.empty())
-                    {
-                        // This makes a perhaps dangerous assumption that NiSkinPartition will never have more than
-                        // 65536 triangles.
-                        const bool fullPrecision
-                            = partitions->mVertexDesc.mFlags & partitions->mVertexDesc.Full_Precision;
-                        bsVertDataToBtTriangleMesh(*mesh, partitions->mVertexData, fullPrecision, numIndices);
-                    }
-                }
-            }
+            if (mSkin.empty()
+                || (mSkin->mRecordType != RC_NiSkinInstance && mSkin->mRecordType != RC_BSDismemberSkinInstance))
+                return nullptr;
+
+            const NiSkinPartition* partitions = static_cast<const NiSkinInstance*>(mSkin.getPtr())->getPartitions();
+            if (partitions == nullptr)
+                return nullptr;
+
+            vertData = &partitions->mVertexData;
+            vertDesc = &partitions->mVertexDesc;
+            if (vertData->empty())
+                return nullptr;
+
+            triangleLists.reserve(partitions->mPartitions.size());
+            for (const auto& partition : partitions->mPartitions)
+                triangleLists.push_back(&partition.mTrueTriangles);
         }
         // FO4 and unskinned SSE
         else
-        {
-            if (!mTriangles.empty())
-            {
-                triangleLists.push_back(&mTriangles);
-                numIndices = static_cast<int>(mTriangles.size());
-            }
-            const bool fullPrecision = mVertDesc.mFlags & mVertDesc.Full_Precision;
-            bsVertDataToBtTriangleMesh(*mesh, mVertData, fullPrecision, numIndices);
-        }
+            triangleLists.push_back(&mTriangles);
 
-        for (const auto triangles : triangleLists)
+        if (!(vertDesc->mFlags & BSVertexDesc::VertexAttribute::Vertex))
+            return nullptr;
+
+        std::size_t numIndices = 0;
+        for (const auto* triangles : triangleLists)
+            numIndices += triangles->size();
+
+        auto mesh = std::make_unique<btTriangleMesh>();
+        const bool fullPrecision = vertDesc->mFlags & BSVertexDesc::VertexAttribute::Full_Precision;
+        bsVertDataToBtTriangleMesh(*mesh, *vertData, fullPrecision, static_cast<int>(numIndices));
+
+        for (const auto* triangles : triangleLists)
             trianglesToBtTriangleMesh(*mesh, *triangles);
 
         if (mesh->getNumTriangles() == 0)
