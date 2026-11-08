@@ -161,33 +161,6 @@ namespace
         }
     }
 
-    bool isTypeNiGeometry(int type)
-    {
-        switch (type)
-        {
-            case Nif::RC_NiTriShape:
-            case Nif::RC_NiTriStrips:
-            case Nif::RC_NiLines:
-            case Nif::RC_BSLODTriShape:
-            case Nif::RC_BSSegmentedTriShape:
-                return true;
-        }
-        return false;
-    }
-
-    bool isTypeBSGeometry(int type)
-    {
-        switch (type)
-        {
-            case Nif::RC_BSTriShape:
-            case Nif::RC_BSDynamicTriShape:
-            case Nif::RC_BSMeshLODTriShape:
-            case Nif::RC_BSSubIndexTriShape:
-                return true;
-        }
-        return false;
-    }
-
     // Collect all properties affecting the given drawable that should be handled on drawable basis rather than on the
     // node hierarchy above it.
     void collectDrawableProperties(
@@ -545,9 +518,9 @@ namespace NifOsg
 
             // NiAlphaProperty is handled as a drawable property
             Nif::BSShaderPropertyPtr shaderprop = nullptr;
-            if (isTypeNiGeometry(nifNode->mRecordType))
+            if (Nif::isTypeNiGeometry(nifNode->mRecordType))
                 shaderprop = static_cast<const Nif::NiGeometry*>(nifNode)->mShaderProperty;
-            else if (isTypeBSGeometry(nifNode->mRecordType))
+            else if (Nif::isTypeBSGeometry(nifNode->mRecordType))
                 shaderprop = static_cast<const Nif::BSTriShape*>(nifNode)->mShaderProperty;
 
             if (!shaderprop.empty())
@@ -858,8 +831,8 @@ namespace NifOsg
             if (nifNode->mRecordType == Nif::RC_NiParticles)
                 handleParticleSystem(nifNode, parent, node, composite, args.mAnimFlags);
 
-            const bool isNiGeometry = isTypeNiGeometry(nifNode->mRecordType);
-            const bool isBSGeometry = isTypeBSGeometry(nifNode->mRecordType);
+            const bool isNiGeometry = Nif::isTypeNiGeometry(nifNode->mRecordType);
+            const bool isBSGeometry = Nif::isTypeBSGeometry(nifNode->mRecordType);
             const bool isGeometry = isNiGeometry || isBSGeometry;
 
             if (isGeometry && !args.mSkipMeshes)
@@ -1696,7 +1669,7 @@ namespace NifOsg
             SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
             int animflags)
         {
-            assert(isTypeNiGeometry(nifNode->mRecordType));
+            assert(Nif::isTypeNiGeometry(nifNode->mRecordType));
 
             osg::ref_ptr<osg::Geometry> geom(new osg::Geometry);
             handleNiGeometryData(nifNode, parent, geom, parentNode, composite, boundTextures, animflags);
@@ -1791,7 +1764,7 @@ namespace NifOsg
             SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
             int animflags)
         {
-            assert(isTypeBSGeometry(nifNode->mRecordType));
+            assert(Nif::isTypeBSGeometry(nifNode->mRecordType));
 
             auto bsTriShape = static_cast<const Nif::BSTriShape*>(nifNode);
             const std::vector<unsigned short>& triangles = bsTriShape->mTriangles;

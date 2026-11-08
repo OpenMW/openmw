@@ -15,7 +15,6 @@
 #include <components/nif/nifstream.hpp>
 #include <components/nif/node.hpp>
 #include <components/nif/parent.hpp>
-#include <components/nifosg/nifloader.cpp>
 
 namespace
 {
@@ -261,30 +260,34 @@ namespace NifBullet
     }
 
     void BulletNifLoader::handleGeometry(
-        const Nif::NiAVObject& niAVObject, const Nif::Parent* nodeParent, HandleNodeArgs args)
+        const Nif::NiAVObject& geometry, const Nif::Parent* nodeParent, HandleNodeArgs args)
     {
         // This flag comes from BSXFlags
-        if (args.mHasMarkers && Misc::StringUtils::ciStartsWith(niAVObject.mName, "EditorMarker"))
+        if (args.mHasMarkers && Misc::StringUtils::ciStartsWith(geometry.mName, "EditorMarker"))
             return;
 
         // This flag comes from Morrowind
-        if (args.mHasTriMarkers && Misc::StringUtils::ciStartsWith(niAVObject.mName, "Tri EditorMarker"))
+        if (args.mHasTriMarkers && Misc::StringUtils::ciStartsWith(geometry.mName, "Tri EditorMarker"))
             return;
 
-        if (isTypeBSGeometry(niAVObject.mRecordType))
-            handleGeometryShape(static_cast<const Nif::BSTriShape&>(niAVObject), nodeParent, args);
-        else if (auto geometry = dynamic_cast<const Nif::NiGeometry*>(&niAVObject))
-            handleGeometryShape(*geometry, nodeParent, args);
-    }
+        std::unique_ptr<btCollisionShape> childShape;
+        if (Nif::isTypeNiGeometry(geometry.mRecordType))
+        {
+            const Nif::NiGeometry& niGeometry = static_cast<const Nif::NiGeometry&>(geometry);
+            if (!niGeometry.mSkin.empty())
+                args.mAnimated = false;
+            childShape = niGeometry.getCollisionShape();
+        }
+        else if (Nif::isTypeBSGeometry(geometry.mRecordType))
+        {
+            const Nif::BSTriShape& bsTriShape = static_cast<const Nif::BSTriShape&>(geometry);
+            if (!bsTriShape.mSkin.empty())
+                args.mAnimated = false;
+            childShape = bsTriShape.getCollisionShape();
+        }
+        else
+            return;
 
-    template <class Geometry>
-    void BulletNifLoader::handleGeometryShape(
-        const Geometry& geometry, const Nif::Parent* nodeParent, HandleNodeArgs args)
-    {
-        if (!geometry.mSkin.empty())
-            args.mAnimated = false;
-
-        std::unique_ptr<btCollisionShape> childShape = geometry.getCollisionShape();
         if (childShape == nullptr)
             return;
 

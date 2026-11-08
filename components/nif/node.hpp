@@ -543,5 +543,31 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    constexpr bool isTypeNiGeometry(int type)
+    {
+        switch (type)
+        {
+            case RC_NiTriShape:
+            case RC_NiTriStrips:
+            case RC_NiLines:
+            case RC_BSLODTriShape:
+            case RC_BSSegmentedTriShape:
+                return true;
+        }
+        return false;
+    }
+
+    constexpr bool isTypeBSGeometry(int type)
+    {
+        switch (type)
+        {
+            case RC_BSTriShape:
+            case RC_BSDynamicTriShape:
+            case RC_BSMeshLODTriShape:
+            case RC_BSSubIndexTriShape:
+                return true;
+        }
+        return false;
+    }
 }
 #endif
