@@ -662,6 +662,8 @@ namespace Nif
         std::size_t numIndices = 0;
         for (const auto* triangles : triangleLists)
             numIndices += triangles->size();
+        if (numIndices < 3)
+            return nullptr;
 
         auto mesh = std::make_unique<btTriangleMesh>();
         const bool fullPrecision = vertDesc->mFlags & BSVertexDesc::VertexAttribute::Full_Precision;
