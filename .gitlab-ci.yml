@@ -128,7 +128,7 @@ Almalinux_Generic:
     CCACHE_SIZE: 1G
   before_script:
     - dnf install -y epel-release
-    - dnf install -y git binutils gcc-toolset-13 ccache cmake unzip pkg-config p7zip p7zip-plugins pipx mesa-libGL-devel libxkbcommon-devel mesa-libEGL-devel fontconfig
+    - dnf install -y git binutils gcc-toolset-13 ccache cmake unzip pkg-config p7zip p7zip-plugins python3-pip mesa-libGL-devel libxkbcommon-devel mesa-libEGL-devel fontconfig
     - source /opt/rh/gcc-toolset-13/enable
     - ./CI/linux/before_install_for_vcpkg.sh
   script:
