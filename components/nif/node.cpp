@@ -34,8 +34,8 @@ namespace
         mesh.preallocateVertices(static_cast<int>(data.size()));
         for (const auto& elem : data)
         {
-            osg::Vec3f vertex = fullPrecision ? Misc::Convert::makeOsgVec3f(elem.mVertex.ptr())
-                                              : Misc::Convert::makeOsgVec3f(elem.mHalfVertex.data());
+            const osg::Vec3f vertex = fullPrecision ? Misc::Convert::makeOsgVec3f(elem.mVertex.ptr())
+                                                    : Misc::Convert::makeOsgVec3f(elem.mHalfVertex.data());
             mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
         }
         mesh.preallocateIndices(numIndices);

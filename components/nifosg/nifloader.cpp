@@ -1767,7 +1767,7 @@ namespace NifOsg
         {
             assert(Nif::isTypeBSGeometry(nifNode->mRecordType));
 
-            auto bsTriShape = static_cast<const Nif::BSTriShape*>(nifNode);
+            const auto* bsTriShape = static_cast<const Nif::BSTriShape*>(nifNode);
             const std::vector<Nif::BSVertexData>* vertData = &bsTriShape->mVertData;
             const Nif::BSVertexDesc* vertDesc = &bsTriShape->mVertDesc;
             std::vector<const std::vector<unsigned short>*> triangleLists;
@@ -1820,7 +1820,7 @@ namespace NifOsg
             std::vector<osg::Vec3f> normals;
             std::vector<osg::Vec4ub> colors;
             std::vector<osg::Vec2f> uvlist;
-            for (auto& elem : *vertData)
+            for (const auto& elem : *vertData)
             {
                 if (hasVertices)
                 {
@@ -1868,15 +1868,15 @@ namespace NifOsg
                 osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
                 rig->setSourceGeometry(std::move(geometry));
 
-                auto handleRigBones = [&](const auto* skin, const auto* data) {
-                    const Nif::NiAVObjectList& bones = skin->mBones;
+                auto handleRigBones = [&](const auto& skin, const auto& data) {
+                    const Nif::NiAVObjectList& bones = skin.mBones;
                     std::vector<SceneUtil::RigGeometry::BoneInfo> boneInfo(bones.size());
                     std::vector<SceneUtil::RigGeometry::BoneWeights> influences(vertices.size());
                     for (std::size_t i = 0; i < bones.size(); ++i)
                     {
                         boneInfo[i].mName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
-                        boneInfo[i].mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
-                        boneInfo[i].mBoundSphere = data->mBones[i].mBoundSphere;
+                        boneInfo[i].mInvBindMatrix = data.mBones[i].mTransform.toMatrix();
+                        boneInfo[i].mBoundSphere = data.mBones[i].mBoundSphere;
                     }
 
                     for (std::size_t i = 0; i < vertices.size(); ++i)
@@ -1892,23 +1892,23 @@ namespace NifOsg
                     }
                     rig->setBoneInfo(std::move(boneInfo));
                     rig->setInfluences(influences);
-                    if (const Nif::NiAVObject* rootBone = skin->mRoot.getPtr())
+                    if (const Nif::NiAVObject* rootBone = skin.mRoot.getPtr())
                         rig->setRootBone(rootBone->mName);
                 };
 
                 if (bsTriShape->mSkin->mRecordType != Nif::RC_BSSkinInstance) // SSE
                 {
-                    const Nif::NiSkinInstance* skin
-                        = static_cast<const Nif::NiSkinInstance*>(bsTriShape->mSkin.getPtr());
-                    const Nif::NiSkinData* data = skin->mData.getPtr();
+                    const Nif::NiSkinInstance& skin
+                        = static_cast<const Nif::NiSkinInstance&>(*bsTriShape->mSkin.getPtr());
+                    const Nif::NiSkinData& data = *skin.mData.getPtr();
                     handleRigBones(skin, data);
-                    rig->setTransform(data->mTransform.toMatrix());
+                    rig->setTransform(data.mTransform.toMatrix());
                 }
                 else // FO4
                 {
-                    const Nif::BSSkinInstance* skin
-                        = static_cast<const Nif::BSSkinInstance*>(bsTriShape->mSkin.getPtr());
-                    const Nif::BSSkinBoneData* data = skin->mData.getPtr();
+                    const Nif::BSSkinInstance& skin
+                        = static_cast<const Nif::BSSkinInstance&>(*bsTriShape->mSkin.getPtr());
+                    const Nif::BSSkinBoneData& data = *skin.mData.getPtr();
                     handleRigBones(skin, data);
                 }
 
