@@ -3,6 +3,7 @@
 
 #include <sqlite3.h>
 
+#include <format>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -20,8 +21,7 @@ namespace Sqlite3
         if (const int ec = sqlite3_prepare_v2(&db, query.data(), static_cast<int>(query.size()), &stmt, nullptr);
             ec != SQLITE_OK)
             throw Error(sqlite3_extended_errcode(&db),
-                "Failed to prepare statement for query \"" + std::string(query)
-                    + "\": " + std::string(sqlite3_errmsg(&db)));
+                std::format("Failed to prepare statement for query \"{}\": {}", query, sqlite3_errmsg(&db)));
         return StatementHandle(stmt);
     }
 }

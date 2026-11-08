@@ -5,6 +5,7 @@
 
 #include <sqlite3.h>
 
+#include <format>
 #include <stdexcept>
 #include <string>
 
@@ -45,7 +46,7 @@ namespace Sqlite3
         {
             (void)mDb.release();
             throw Error(sqlite3_extended_errcode(&db),
-                "Failed to start transaction: " + std::string(sqlite3_errmsg(&db)) + " (" + std::to_string(ec) + ")");
+                std::format("Failed to start transaction: {} ({})", sqlite3_errmsg(&db), ec));
         }
     }
 
@@ -53,8 +54,7 @@ namespace Sqlite3
     {
         if (const int ec = sqlite3_exec(mDb.get(), "COMMIT", nullptr, nullptr, nullptr); ec != SQLITE_OK)
             throw Error(sqlite3_extended_errcode(mDb.get()),
-                "Failed to commit transaction: " + std::string(sqlite3_errmsg(mDb.get())) + " (" + std::to_string(ec)
-                    + ")");
+                std::format("Failed to commit transaction: {} ({})", sqlite3_errmsg(mDb.get()), ec));
         (void)mDb.release();
     }
 }
