@@ -1806,6 +1806,8 @@ namespace NifOsg
                 geometry->addPrimitiveSet(new osg::DrawElementsUShort(
                     osg::PrimitiveSet::TRIANGLES, static_cast<unsigned>(triangles->size()), triangles->data()));
             }
+            if (geometry->getNumPrimitiveSets() == 0)
+                return;
 
             osg::ref_ptr<osg::Drawable> drawable = geometry;
 
