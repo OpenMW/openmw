@@ -1,14 +1,21 @@
 #include "generate.hpp"
 
 #include <components/detournavigator/navmeshdb.hpp>
+#include <components/files/conversion.hpp>
+#include <components/sqlite3/db.hpp>
+#include <components/testing/util.hpp>
 
 #include <DetourAlloc.h>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <sqlite3.h>
+
+#include <filesystem>
 #include <limits>
 #include <random>
+#include <string>
 
 namespace
 {
@@ -175,5 +182,61 @@ namespace
                 insertTile(TileId{ i }, TileVersion{ 1 });
         };
         EXPECT_THROW(f(), std::runtime_error);
+    }
+
+    struct DetourNavigatorNavMeshDbFileTest : Test
+    {
+        const std::string mPath = Files::pathToUnicodeString(TestingOpenMW::currentTestDirPath() / "navmesh.db");
+        const ESM::RefId mWorldspace = ESM::RefId::stringRefId("sys::default");
+        const TilePosition mTilePosition{ 3, 4 };
+        const std::vector<std::byte> mInput{ std::byte{ 1 }, std::byte{ 2 } };
+        const std::vector<std::byte> mData{ std::byte{ 3 }, std::byte{ 4 } };
+
+        NavMeshDb makeNavMeshDb() const { return NavMeshDb(mPath, std::numeric_limits<std::uint64_t>::max()); }
+    };
+
+    std::string getJournalMode(sqlite3& db)
+    {
+        std::string mode;
+        const auto read = [](void* into, int, char** values, char**) {
+            if (values[0] != nullptr)
+                *static_cast<std::string*>(into) = values[0];
+            return 0;
+        };
+        EXPECT_EQ(sqlite3_exec(&db, "pragma journal_mode;", read, &mode, nullptr), SQLITE_OK) << sqlite3_errmsg(&db);
+        return mode;
+    }
+
+    TEST_F(DetourNavigatorNavMeshDbFileTest, should_commit_into_write_ahead_log)
+    {
+        {
+            NavMeshDb db = makeNavMeshDb();
+            ASSERT_EQ(db.insertTile(TileId{ 1 }, mWorldspace, mTilePosition, TileVersion{ 1 }, mInput, mData), 1);
+            EXPECT_GT(std::filesystem::file_size(mPath + "-wal"), 0);
+            const Sqlite3::Db other = Sqlite3::makeDb(mPath, "");
+            EXPECT_EQ(getJournalMode(*other), "wal");
+        }
+        NavMeshDb db = makeNavMeshDb();
+        const auto tile = db.getTileData(mWorldspace, mTilePosition, mInput);
+        ASSERT_TRUE(tile.has_value());
+        EXPECT_EQ(tile->mTileId, TileId{ 1 });
+        EXPECT_EQ(tile->mData, mData);
+    }
+
+    TEST_F(DetourNavigatorNavMeshDbFileTest, should_keep_rollback_journal_while_another_connection_reads)
+    {
+        makeNavMeshDb();
+        const Sqlite3::Db reader = Sqlite3::makeDb(mPath, "pragma journal_mode = DELETE;");
+        ASSERT_EQ(getJournalMode(*reader), "delete");
+        ASSERT_EQ(
+            sqlite3_exec(reader.get(), "begin; select count(*) from tiles;", nullptr, nullptr, nullptr), SQLITE_OK);
+
+        NavMeshDb db = makeNavMeshDb();
+        EXPECT_EQ(getJournalMode(*reader), "delete");
+        EXPECT_EQ(db.getMaxTileId(), TileId{ 0 });
+
+        ASSERT_EQ(sqlite3_exec(reader.get(), "rollback;", nullptr, nullptr, nullptr), SQLITE_OK);
+        EXPECT_EQ(db.insertTile(TileId{ 1 }, mWorldspace, mTilePosition, TileVersion{ 1 }, mInput, mData), 1);
+        EXPECT_EQ(getJournalMode(*reader), "delete");
     }
 }
