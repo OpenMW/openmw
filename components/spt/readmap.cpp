@@ -15,10 +15,15 @@ namespace Spt
         {
             uint32_t n;
             stream.read(n);
-            std::vector<SPTCompositeMapData::Quad> quads(n);
-            for (auto& quad : quads)
+            std::vector<SPTCompositeMapData::Quad> quads;
+            quads.reserve(n);
+            for (uint32_t i = 0; i < n; ++i)
+            {
+                SPTCompositeMapData::Quad quad;
                 for (auto& corner : quad.mCorners)
                     stream.read(corner);
+                quads.push_back(quad);
+            }
             return quads;
         }
     }

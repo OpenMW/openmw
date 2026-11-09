@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-only
 #include "file.hpp"
 
 #include <format>
@@ -7,87 +8,90 @@
 
 namespace Spt
 {
-    void readTreeProperties(SPTHeader& header, SPTStream& stream)
+    namespace
     {
-        while (true)
+        void readTreeProperties(SPTHeader& header, SPTStream& stream)
         {
-            int32_t section = stream.readSection();
-            switch (section)
+            while (true)
             {
-                case 2000:
-                    header.mTextureMap = stream.readIntString();
-                    break;
-                case 2001:
-                    stream.read(header.mLodFarDistance);
-                    break;
-                case 2002:
-                    stream.read(header.mUnknown2002);
-                    break;
-                case 2003:
-                    stream.read(header.mLodNearDistance);
-                    break;
-                case 2005:
-                    stream.read(header.mSeed);
-                    break;
-                case 2006:
-                    stream.read(header.mSize);
-                    break;
-                case 2007:
-                    stream.read(header.mSizeVariance);
-                    break;
-                case 1014:
-                    stream.read(header.mNumLevels);
-                    break;
-                case 1015:
-                    break;
-                case 1016:
+                int32_t section = stream.readSection();
+                switch (section)
                 {
-                    SPTLevelData level;
-                    level.read(stream);
-                    header.mLevelData.push_back(std::move(level));
-                    break;
+                    case 2000:
+                        header.mTextureMap = stream.readIntString();
+                        break;
+                    case 2001:
+                        stream.read(header.mLodFarDistance);
+                        break;
+                    case 2002:
+                        stream.read(header.mUnknown2002);
+                        break;
+                    case 2003:
+                        stream.read(header.mLodNearDistance);
+                        break;
+                    case 2005:
+                        stream.read(header.mSeed);
+                        break;
+                    case 2006:
+                        stream.read(header.mSize);
+                        break;
+                    case 2007:
+                        stream.read(header.mSizeVariance);
+                        break;
+                    case 1014:
+                        stream.read(header.mNumLevels);
+                        break;
+                    case 1015:
+                        break;
+                    case 1016:
+                    {
+                        SPTLevelData level;
+                        level.read(stream);
+                        header.mLevelData.push_back(std::move(level));
+                        break;
+                    }
+                    case 1003:
+                        return;
+                    default:
+                        throw std::runtime_error(std::format("Unknown section {} in tree properties block", section));
                 }
-                case 1003:
-                    return;
-                default:
-                    throw std::runtime_error(std::format("Unknown section {} in tree properties block", section));
             }
         }
-    }
 
-    void discardSections(SPTStream& stream, int32_t endSection)
-    {
-        while (true)
+        void discardSections(SPTStream& stream, int32_t endSection)
         {
-            int32_t section = stream.readSection();
-            if (section == endSection)
-                return;
-            switch (section)
+            while (true)
             {
-                case 5000:
-                    stream.skip(12);
-                    break;
-                case 5001:
-                    stream.skip(12);
-                    break;
-                case 5002:
-                    stream.skip(12);
-                    break;
-                case 5003:
-                    stream.skip(12);
-                    break;
-                case 5004:
-                    stream.skip(12);
-                    break;
-                case 5005:
-                    stream.skip(4);
-                    break;
-                case 5006:
-                    stream.skip(1);
-                    break;
-                default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in discarded block ending at {}", section, endSection));
+                int32_t section = stream.readSection();
+                if (section == endSection)
+                    return;
+                switch (section)
+                {
+                    case 5000:
+                        stream.skip(12);
+                        break;
+                    case 5001:
+                        stream.skip(12);
+                        break;
+                    case 5002:
+                        stream.skip(12);
+                        break;
+                    case 5003:
+                        stream.skip(12);
+                        break;
+                    case 5004:
+                        stream.skip(12);
+                        break;
+                    case 5005:
+                        stream.skip(4);
+                        break;
+                    case 5006:
+                        stream.skip(1);
+                        break;
+                    default:
+                        throw std::runtime_error(
+                            std::format("Unknown section {} in discarded block ending at {}", section, endSection));
+                }
             }
         }
     }
@@ -125,17 +129,9 @@ namespace Spt
         auto file = std::make_shared<SPTFile>();
         SPTStream stream(std::move(inputStream));
 
-        while (true)
+        while (!stream.eof())
         {
-            int32_t section;
-            try
-            {
-                section = stream.readSection();
-            }
-            catch (const SPTEOFError&)
-            {
-                break;
-            }
+            const int32_t section = stream.readSection();
             switch (section)
             {
                 case 1000:

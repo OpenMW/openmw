@@ -3,23 +3,19 @@
 #define OPENMW_COMPONENTS_SPT_STREAM_HPP
 
 #include <cstdint>
-#include <stdexcept>
+#include <istream>
 #include <string>
 
 #include <components/files/binarystream.hpp>
 
 namespace Spt
 {
-    struct SPTEOFError : std::runtime_error
-    {
-        SPTEOFError();
-    };
-
     class SPTStream : public Files::BinaryStream
     {
     public:
         using Files::BinaryStream::BinaryStream;
 
+        bool eof() { return mStream->peek() == std::char_traits<char>::eof(); }
         int32_t readSection();
         std::string readIntString() { return readSizedString(4096); }
     };

@@ -34,6 +34,8 @@ namespace Spt
         {
             ControlPoint cp;
             ss >> cp.mPosX >> cp.mPosY >> cp.mTanX >> cp.mTanY >> cp.mTanLen;
+            if (!ss)
+                throw std::runtime_error("Invalid curve data: truncated control points");
             curve.mPoints.push_back(std::move(cp));
         }
 
@@ -55,8 +57,7 @@ namespace Spt
     }
 
     // Control points are a piecewise 2D cubic Bezier (posX,posY + tangent dir*len).
-    // Query is by X (progress): solve bezierX(s)=t, return bezierY(s). The old code
-    // used only the Y tangent (Hermite-in-X), which flattened curves toward linear.
+    // Query is by X (progress): solve bezierX(s)=t, return bezierY(s).
     float Curve::evaluate(float t) const
     {
         if (mPoints.empty())
@@ -94,66 +95,69 @@ namespace Spt
         return remap(cubicBezier(p0y, p1y, p2y, p3y, s));
     }
 
-    void readBezierSection(SPTLevelData& level, SPTStream& stream, int32_t section)
+    namespace
     {
-        switch (section)
+        void readBezierSection(SPTLevelData& level, SPTStream& stream, int32_t section)
         {
-            case 6000:
-                level.mDisturbance = parseCurve(stream);
-                return;
-            case 6001:
-                level.mGravity = parseCurve(stream);
-                return;
-            case 6002:
-                level.mFlexibility = parseCurve(stream);
-                return;
-            case 6003:
-                level.mFlexibilityProfile = parseCurve(stream);
-                return;
-            case 6004:
-                level.mLength = parseCurve(stream);
-                return;
-            case 6005:
-                level.mRadius = parseCurve(stream);
-                return;
-            case 6006:
-                level.mRadiusProfile = parseCurve(stream);
-                return;
-            case 6007:
-                level.mStartAngle = parseCurve(stream);
-                return;
-            case 6017:
-                level.mGravityProfile = parseCurve(stream);
-                return;
-            case 6008:
-                stream.read(level.mSegmentsCrossSection);
-                return;
-            case 6009:
-                stream.read(level.mSegmentsLength);
-                return;
-            case 6010:
-                stream.read(level.mGenerationFirst);
-                return;
-            case 6011:
-                stream.read(level.mGenerationLast);
-                return;
-            case 6012:
-                stream.read(level.mGenerationFrequency);
-                return;
-            case 6013:
-                stream.read(level.mTextureTilingU);
-                return;
-            case 6014:
-                stream.read(level.mTextureTilingV);
-                return;
-            case 6015:
-                stream.read(level.mTextureTilingUAbs);
-                return;
-            case 6016:
-                stream.read(level.mTextureTilingVAbs);
-                return;
-            default:
-                throw std::runtime_error(std::format("Unknown bezier section {} in SPT file", section));
+            switch (section)
+            {
+                case 6000:
+                    level.mDisturbance = parseCurve(stream);
+                    return;
+                case 6001:
+                    level.mGravity = parseCurve(stream);
+                    return;
+                case 6002:
+                    level.mFlexibility = parseCurve(stream);
+                    return;
+                case 6003:
+                    level.mFlexibilityProfile = parseCurve(stream);
+                    return;
+                case 6004:
+                    level.mLength = parseCurve(stream);
+                    return;
+                case 6005:
+                    level.mRadius = parseCurve(stream);
+                    return;
+                case 6006:
+                    level.mRadiusProfile = parseCurve(stream);
+                    return;
+                case 6007:
+                    level.mStartAngle = parseCurve(stream);
+                    return;
+                case 6017:
+                    level.mGravityProfile = parseCurve(stream);
+                    return;
+                case 6008:
+                    stream.read(level.mSegmentsCrossSection);
+                    return;
+                case 6009:
+                    stream.read(level.mSegmentsLength);
+                    return;
+                case 6010:
+                    stream.read(level.mGenerationFirst);
+                    return;
+                case 6011:
+                    stream.read(level.mGenerationLast);
+                    return;
+                case 6012:
+                    stream.read(level.mGenerationFrequency);
+                    return;
+                case 6013:
+                    stream.read(level.mTextureTilingU);
+                    return;
+                case 6014:
+                    stream.read(level.mTextureTilingV);
+                    return;
+                case 6015:
+                    stream.read(level.mTextureTilingUAbs);
+                    return;
+                case 6016:
+                    stream.read(level.mTextureTilingVAbs);
+                    return;
+                default:
+                    throw std::runtime_error(std::format("Unknown bezier section {} in SPT file", section));
+            }
         }
     }
 

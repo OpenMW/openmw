@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-only
 #include "stats.hpp"
 
 #include <algorithm>
@@ -89,6 +90,7 @@ namespace Resource
                 "Nif",
                 "Keyframe",
                 "BSShader Material",
+                "SPT",
                 "Groundcover Chunk",
                 "Object Chunk",
                 "Terrain Chunk",
