@@ -2,13 +2,14 @@
 
 . ./CI/linux/deps_versions.sh
 
-pipx install aqtinstall
+python3 -m venv ~/.local/aqtinstall
+~/.local/aqtinstall/bin/pip install aqtinstall
 
 mkdir -p deps
 cd deps
 
 if [[ ! -d ./Qt/$QT_VER ]]; then
-    ~/.local/bin/aqt install-qt linux desktop $QT_VER gcc_64 -m all -O ./Qt
+    ~/.local/aqtinstall/bin/aqt install-qt linux desktop $QT_VER gcc_64 -m all -O ./Qt
 fi
 
 VCPKG_TRIPLET='x64-linux-dynamic'
