@@ -16,12 +16,12 @@ namespace ESM
     struct CellState
     {
         RefId mId;
-        bool mIsInterior;
-        float mWaterLevel;
+        bool mIsInterior = false;
+        float mWaterLevel = 0;
 
-        int32_t mHasFogOfWar; // Do we have fog of war state (0 or 1)? (see fogstate.hpp)
+        int32_t mHasFogOfWar = 0; // Do we have fog of war state (0 or 1)? (see fogstate.hpp)
 
-        TimeStamp mLastRespawn;
+        TimeStamp mLastRespawn{};
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;

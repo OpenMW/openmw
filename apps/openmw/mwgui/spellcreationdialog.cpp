@@ -718,6 +718,7 @@ namespace MWGui
         mSpell.mData.mCost = int(y);
         mSpell.mData.mType = ESM::Spell::ST_Spell;
         mSpell.mData.mFlags = 0;
+        mSpell.mRecordFlags = 0;
 
         mMagickaCost->setCaption(MyGUI::utility::toString(int(y)));
 
