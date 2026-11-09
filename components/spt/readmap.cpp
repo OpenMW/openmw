@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-only
 #include "file.hpp"
 
 #include <format>
@@ -12,7 +13,7 @@ namespace Spt
     {
         std::vector<SPTCompositeMapData::Quad> readQuads(SPTStream& stream)
         {
-            int32_t n;
+            uint32_t n;
             stream.read(n);
             std::vector<SPTCompositeMapData::Quad> quads(n);
             for (auto& quad : quads)

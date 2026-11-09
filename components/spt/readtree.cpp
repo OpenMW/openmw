@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-only
 #include "file.hpp"
 
 #include <algorithm>
@@ -22,7 +23,7 @@ namespace Spt
         Curve curve;
         ss >> curve.mMin >> curve.mMax >> curve.mVariance;
 
-        char brace;
+        char brace{};
         ss >> brace;
         if (brace != '{')
             throw std::runtime_error("Invalid curve data: missing opening brace");

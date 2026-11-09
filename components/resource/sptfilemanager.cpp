@@ -1,7 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
 #include "sptfilemanager.hpp"
 
 #include <memory>
-#include <osg/Object>
 
 #include <components/vfs/manager.hpp>
 

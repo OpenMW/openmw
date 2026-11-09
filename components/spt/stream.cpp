@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-only
 #include "stream.hpp"
 
 #include <cstdint>
@@ -29,7 +30,7 @@ namespace Spt
 
     std::string SPTStream::readIntString()
     {
-        int32_t length;
+        uint32_t length;
         read(length);
         if (length > 4096)
             throw std::runtime_error("SPT intstring too long: " + std::to_string(length));
