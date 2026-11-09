@@ -49,7 +49,7 @@ void CSVTools::RichTextDelegate::paint(
     QVariant value = index.data(Qt::DisplayRole);
     if (value.isValid() && !value.isNull())
     {
-        document.setHtml(Qt::convertFromPlainText(value.toString()));
+        document.setHtml(value.toString());
         painter->translate(option.rect.topLeft());
         document.drawContents(painter);
         painter->translate(-option.rect.topLeft());
