@@ -49,6 +49,16 @@ namespace Nif::Testing
         value.mRecordType = RC_NiTriStrips;
     }
 
+    inline void init(BSTriShape& value)
+    {
+        init(static_cast<NiAVObject&>(value));
+        value.mRecordType = RC_BSTriShape;
+        value.mSkin = RecordPtrT<Record>(nullptr);
+        value.mShaderProperty = BSShaderPropertyPtr(nullptr);
+        value.mAlphaProperty = NiAlphaPropertyPtr(nullptr);
+        value.mVertDesc = BSVertexDesc{};
+    }
+
     inline void init(NiSkinInstance& value)
     {
         value.mData = NiSkinDataPtr(nullptr);
