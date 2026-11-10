@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-3.0-only
 #ifndef OPENMW_COMPONENTS_BGSM_STREAM_HPP
 #define OPENMW_COMPONENTS_BGSM_STREAM_HPP
 
