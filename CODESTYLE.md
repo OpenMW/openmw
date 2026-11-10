@@ -25,7 +25,7 @@ Two points to note:
 - **Precedence**: these files win if it so happens that the guide deviates from them.
 - **Editor setup**: readers are expected to enable their editor's support for these files. This includes VS Code, CLion, Visual Studio and Qt Creator, all of which support `.editorconfig` and `.clang-format`, natively or via a plugin. VS Code and CLion ship their own clang-format, so users need to point the editor at the clang-format 14 binary installed below; in VS Code that's the `C_Cpp.clang_format_path` setting.
 
-The first step in addressing the formatting issues would be installing clang-format 14. This requires `pipx`:
+The first step in addressing the formatting issues would be installing clang-format 14. The simplest way to do so is with `pipx`:
 
 ```shell
 # macOS
@@ -57,6 +57,8 @@ sudo apt install clang-format-14
 ```
 
 Note that the binary is then called `clang-format-14` rather than `clang-format`. Newer Debian releases no longer ship clang-format 14, so use `pipx` there.
+
+clang-format 14 is also included in the [LLVM 14.0.6 release](https://github.com/llvm/llvm-project/releases/tag/llvmorg-14.0.6), which provides an installer for Windows. Make sure to use exactly this version, since other LLVM versions come with a clang-format that formats some code differently from CI. Bear in mind that the full LLVM installation takes several hundred megabytes and may conflict with another LLVM version installed on the same system, which is why `pipx` is the recommended way.
 
 With clang-format installed, checking a file without changing anything is done by the following command:
 
