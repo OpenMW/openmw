@@ -101,7 +101,7 @@ Additional CI checks available are:
 - `CI/check_file_names.sh`: checks whether the file names contain only lowercase letters and digits, and fails if any don't, and
 - `CI/check_cmake_format.sh`: ensures there are no tabs in CMake files.
 
-One item all three CI checks skip is the `extern/` directory, which holds third-party libraries that OpenMW keeps its own copy of, because they were abandoned upstream, never packaged properly, or needed patching. Among those are `sol3`, `oics`, `osgQt`, `osg-ffmpeg-videoplayer`, `smhasher` and `Base64`. The directory is still checked by clang-tidy, but with a relaxed configuration (`extern/.clang-tidy`) that disables two of its checks.
+One item all three CI checks skip is the `extern/` directory, which holds third-party libraries that OpenMW keeps its own copy of, because they were abandoned upstream, never packaged properly, or needed patching. The directory is still checked by clang-tidy, but with a relaxed configuration (`extern/.clang-tidy`) that disables two of its checks.
 
 In case any of these files have to be edited, keep the existing style and do not reformat them; the code follows its original authors' style, and small diffs make it easier to pull in upstream changes later. Should any problems occur with these, report them upstream where possible (see [CONTRIBUTING.md](./CONTRIBUTING.md#code-review)).
 
