@@ -344,7 +344,7 @@ if (count < 0)
     Log(Debug::Warning) << "Negative count " << count << ", ignoring it";
 ```
 
-- Strings are formatted with `std::format`, or with `Misc::StringUtils::format` from `components/misc/strings/format.hpp`. `std::string_view` is commonly used for passing strings.
+- Strings are formatted with `std::format`. `std::string_view` is commonly used for passing strings.
 
 ## Comments
 
