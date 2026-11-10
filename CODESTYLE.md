@@ -260,7 +260,8 @@ namespace MWMechanics
 }
 ```
 
-- Global variables are not used. Macros are written in all caps and are reserved for include guards and conditional compilation.
+- Global variables are not used.
+- Macros should generally be avoided in favour of templates, `constexpr` variables and inline functions. Besides include guards and conditional compilation, they are acceptable where they are notably simpler than the equivalent template code. Macros are written in all caps.
 - Acronyms are written as ordinary words, e.g. `Npc` rather than `NPC`. Established exceptions are the `ESM`, `ESM4` and `VFS` namespaces (and classes such as `ESMReader`), as well as names that mirror types from Bethesda's file formats, such as `BSKeyframeController` in `components/nif/`. Cryptic abbreviations should be avoided.
 
 ## Includes
