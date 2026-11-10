@@ -215,7 +215,7 @@ namespace SomeSpace
 - Namespaces use CamelCase, which is checked by clang-tidy. Namespaces in `apps/openmw` start with `MW`, those in OpenMW-CS start with `CSM` (model) or `CSV` (view), other applications use their own name as the namespace (e.g. `Launcher`, `Wizard`, `EsmTool`), and namespaces in `components/` use plain names without a prefix.
 - Classes use CamelCase, while functions, local variables and parameters use camelBack, i.e. they start with a lowercase letter. The naming of local variables and parameters is checked by clang-tidy.
 - Enum types and concepts use CamelCase, which is also checked by clang-tidy.
-- New enumerations are declared as `enum class` with CamelCase enumerators, rather than as a plain `enum` with `TypePrefix_Name` enumerators. The latter remain in existing code but should not be copied. clang-tidy checks the name of the enum type, not its enumerators.
+- New enumerations are declared as `enum class` with CamelCase enumerators, rather than as a plain `enum` with `TypePrefix_Name` enumerators. The latter remain in existing code but should not be copied. An exception is made for bit flags combined with `|` and `&`, for which a plain `enum` is acceptable, since an `enum class` would need a `static_cast` for every such operation. clang-tidy checks the name of the enum type, not its enumerators.
 
 ```cpp
 // New code
@@ -226,7 +226,7 @@ enum class GetNextRefMode
     LoadOnlyNotMoved,
 };
 
-// Existing code only
+// Bit flags
 enum Flag
 {
     Flag_ForceRun = 1,
