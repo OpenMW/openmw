@@ -44,7 +44,6 @@ Merge request guidelines
 * When pulling changes from master, prefer rebase over merge. Consider using a merge if there are conflicts or for long-running MRs.
 * Don't rebase without a good reason. Some good reasons include cleaning up the commit history, resolving merge conflicts, and pulling in related changes or build pipeline changes.
 * Review threads should be resolved by the thread author so that they can confirm that their concerns have been adequately dealt with. This rule does not apply to threads consisting solely of [suggested code changes](https://docs.gitlab.com/user/project/merge_requests/reviews/suggestions/)—if applied, they can be left as resolved.
-* If your merge request changes the Lua API, bump `OPENMW_LUA_API_REVISION` in `CMakeLists.txt`.
 
 Guidelines for original engine "fixes"
 =================================
@@ -119,6 +118,8 @@ To be able to merge MRs, commit privileges are required. If you do not have the 
 
 In general case, you should not merge MRs prematurely even if you are sure they just work or if they receive a senior member's approval.
 The rule of thumb is to give at least 24 hours to a couple days of a window for reviews to come through. For more technically involved MRs, 24 hours might not be enough.
+
+If an MR changes the Lua API, whoever merges it also bumps `OPENMW_LUA_API_REVISION` in `CMakeLists.txt`. MR authors don't need to do this, as bumping it during review leads to repeated rebasing.
 
 Dealing with regressions
 ========================
