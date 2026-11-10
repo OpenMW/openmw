@@ -288,6 +288,18 @@ namespace CSMWorld
 
         RecordBase& getRecord(const LocalIndex& index);
 
+        template <typename RecordT>
+        const Record<RecordT>& getRecord(int index, UniversalId::Type type) const
+        {
+            return static_cast<const Record<RecordT>&>(getRecord(LocalIndex(index, type)));
+        }
+
+        template <typename RecordT>
+        Record<RecordT>& getRecord(int index, UniversalId::Type type)
+        {
+            return static_cast<Record<RecordT>&>(getRecord(LocalIndex(index, type)));
+        }
+
         unsigned int getRecordFlags(const ESM::RefId& id) const;
 
         void appendRecord(UniversalId::Type type, const ESM::RefId& id, bool base);

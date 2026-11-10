@@ -50,7 +50,7 @@ bool CSMWorld::RefIdColumn::isUserEditable() const
 
 const CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdapter(UniversalId::Type type) const
 {
-    std::map<UniversalId::Type, RefIdAdapter*>::const_iterator iter = mAdapters.find(type);
+    const auto iter = mAdapters.find(type);
 
     if (iter == mAdapters.end())
         throw std::logic_error("unsupported type in RefIdCollection");
@@ -60,11 +60,14 @@ const CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdapter(UniversalId
 
 CSMWorld::RefIdCollection::RefIdCollection(const IdCollection<ESM::MagicEffect>& magicEffects)
 {
+    using enum Columns::ColumnId;
+    using enum ColumnBase::Display;
+    using enum ColumnBase::Flags;
+
     BaseColumns baseColumns;
 
-    mColumns.emplace_back(
+    baseColumns.mId = addColumn(
         Columns::ColumnId_Id, ColumnBase::Display_Id, ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false);
-    baseColumns.mId = &mColumns.back();
     mColumns.emplace_back(Columns::ColumnId_Modification, ColumnBase::Display_RecordState,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, true, false);
     baseColumns.mModified = &mColumns.back();
@@ -79,8 +82,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const IdCollection<ESM::MagicEffect>&
 
     mColumns.emplace_back(Columns::ColumnId_Persistent, ColumnBase::Display_Boolean);
     modelColumns.mPersistence = &mColumns.back();
-    mColumns.emplace_back(Columns::ColumnId_Model, ColumnBase::Display_Mesh);
-    modelColumns.mModel = &mColumns.back();
+    modelColumns.mModel = addColumn(Columns::ColumnId_Model, ColumnBase::Display_Mesh);
 
     NameColumns nameColumns(modelColumns);
 
@@ -107,7 +109,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const IdCollection<ESM::MagicEffect>&
     ingredientEffectsMap.insert(
         std::make_pair(UniversalId::Type_Ingredient, new IngredEffectRefIdAdapter(magicEffects)));
     mNestedAdapters.emplace_back(&mColumns.back(), ingredientEffectsMap);
-    mColumns.back().addColumn(new NestedChildColumn(Columns::ColumnId_EffectId, ColumnBase::Display_IngredEffectId));
+    mColumns.back().addColumn<NestedChildColumn>(Columns::ColumnId_EffectId, ColumnBase::Display_IngredEffectId);
     mColumns.back().addColumn(new NestedChildColumn(Columns::ColumnId_Skill, ColumnBase::Display_EffectSkill));
     mColumns.back().addColumn(new NestedChildColumn(Columns::ColumnId_Attribute, ColumnBase::Display_EffectAttribute));
 
@@ -164,9 +166,9 @@ CSMWorld::RefIdCollection::RefIdCollection(const IdCollection<ESM::MagicEffect>&
     inventoryMap.insert(std::make_pair(
         UniversalId::Type_Creature, new NestedInventoryRefIdAdapter<ESM::Creature>(UniversalId::Type_Creature)));
     mNestedAdapters.emplace_back(&mColumns.back(), inventoryMap);
-    mColumns.back().addColumn(
-        new RefIdColumn(Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_Referenceable));
-    mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_ItemCount, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn<RefIdColumn>(
+        Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_Referenceable);
+    mColumns.back().addColumn<RefIdColumn>(Columns::ColumnId_ItemCount, CSMWorld::ColumnBase::Display_Integer);
 
     // Nested table
     mColumns.emplace_back(Columns::ColumnId_SpellList, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue);
@@ -251,21 +253,13 @@ CSMWorld::RefIdCollection::RefIdCollection(const IdCollection<ESM::MagicEffect>&
         actorsColumns.mServices.insert(std::make_pair(&mColumns.back(), sServiceTable[i].mFlag));
     }
 
-    mColumns.emplace_back(Columns::ColumnId_AutoCalc, ColumnBase::Display_Boolean,
-        ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh);
-    const RefIdColumn* autoCalc = &mColumns.back();
+    const auto* autoCalc
+        = addColumn(ColumnId_AutoCalc, Display_Boolean, Flag_Table | Flag_Dialogue | Flag_Dialogue_Refresh);
 
-    mColumns.emplace_back(Columns::ColumnId_ApparatusType, ColumnBase::Display_ApparatusType);
-    const RefIdColumn* apparatusType = &mColumns.back();
-
-    mColumns.emplace_back(Columns::ColumnId_ArmorType, ColumnBase::Display_ArmorType);
-    const RefIdColumn* armorType = &mColumns.back();
-
-    mColumns.emplace_back(Columns::ColumnId_Health, ColumnBase::Display_Integer);
-    const RefIdColumn* health = &mColumns.back();
-
-    mColumns.emplace_back(Columns::ColumnId_ArmorValue, ColumnBase::Display_Integer);
-    const RefIdColumn* armor = &mColumns.back();
+    const auto* apparatusType = addColumn(ColumnId_ApparatusType, Display_ApparatusType);
+    const auto* armorType = addColumn(ColumnId_ArmorType, Display_ArmorType);
+    const auto* health = addColumn(ColumnId_Health, Display_Integer);
+    const auto* armor = addColumn(ColumnId_ArmorValue, Display_Integer);
 
     mColumns.emplace_back(Columns::ColumnId_BookType, ColumnBase::Display_BookType);
     const RefIdColumn* bookType = &mColumns.back();
@@ -631,15 +625,12 @@ CSMWorld::RefIdCollection::RefIdCollection(const IdCollection<ESM::MagicEffect>&
 
 CSMWorld::RefIdCollection::~RefIdCollection()
 {
-    for (std::map<UniversalId::Type, RefIdAdapter*>::iterator iter(mAdapters.begin()); iter != mAdapters.end(); ++iter)
+    for (auto iter(mAdapters.begin()); iter != mAdapters.end(); ++iter)
         delete iter->second;
 
-    for (std::vector<std::pair<const ColumnBase*, std::map<UniversalId::Type, NestedRefIdAdapterBase*>>>::iterator iter(
-             mNestedAdapters.begin());
-         iter != mNestedAdapters.end(); ++iter)
+    for (auto iter(mNestedAdapters.begin()); iter != mNestedAdapters.end(); ++iter)
     {
-        for (std::map<UniversalId::Type, NestedRefIdAdapterBase*>::iterator it((iter->second).begin());
-             it != (iter->second).end(); ++it)
+        for (auto it((iter->second).begin()); it != (iter->second).end(); ++it)
             delete it->second;
     }
 }
@@ -855,13 +846,11 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::RefIdCollection::nestedTable(int row
 const CSMWorld::NestedRefIdAdapterBase& CSMWorld::RefIdCollection::getNestedAdapter(
     const CSMWorld::ColumnBase& column, UniversalId::Type type) const
 {
-    for (std::vector<std::pair<const ColumnBase*, std::map<UniversalId::Type, NestedRefIdAdapterBase*>>>::const_iterator
-             iter(mNestedAdapters.begin());
-         iter != mNestedAdapters.end(); ++iter)
+    for (auto iter(mNestedAdapters.begin()); iter != mNestedAdapters.end(); ++iter)
     {
         if ((iter->first) == &column)
         {
-            std::map<UniversalId::Type, NestedRefIdAdapterBase*>::const_iterator it = (iter->second).find(type);
+            const auto it = (iter->second).find(type);
 
             if (it == (iter->second).end())
                 throw std::runtime_error("No such type in the nestedadapters");

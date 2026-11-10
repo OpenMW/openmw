@@ -959,14 +959,7 @@ void CSVWorld::DialogueSubView::viewRecord()
 
 void CSVWorld::DialogueSubView::switchToRow(int row)
 {
-    int idColumn = getTable().findColumnIndex(CSMWorld::Columns::ColumnId_Id);
-    std::string id = getTable().data(getTable().index(row, idColumn)).toString().toUtf8().constData();
-
-    int typeColumn = getTable().findColumnIndex(CSMWorld::Columns::ColumnId_RecordType);
-    CSMWorld::UniversalId::Type type
-        = static_cast<CSMWorld::UniversalId::Type>(getTable().data(getTable().index(row, typeColumn)).toInt());
-
-    setUniversalId(CSMWorld::UniversalId(type, id));
+    setUniversalId(getTable().getUniversalId(row));
     updateCurrentId();
 
     getEditWidget().remake(row);
