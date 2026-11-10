@@ -171,7 +171,6 @@ while (var != 0) var--;
 ```
 
 - Function bodies are placed in the `.cpp` file, with the exception of one-line getters and setters. Templates, as well as `constexpr` and `inline` functions, must be defined in the header, since the compiler needs the full definition wherever they are used.
-- Class members are ordered with the `public` section first, followed by `protected` and then `private`.
 
 ```cpp
 // somefile.hpp
