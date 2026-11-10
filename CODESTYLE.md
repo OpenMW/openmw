@@ -348,24 +348,8 @@ if (count < 0)
 
 ## Comments
 
-- Documentation comments use the Doxygen `///` style rather than `/** */`.
-- Classes and public functions should be documented where their purpose is not obvious; trivial functions such as getters and setters may be left undocumented. Doxygen commands such as `\brief`, `\param`, `\return` and `\note` are used for this; the `@brief` form also appears in the code and works the same way.
-
-```cpp
-/// \brief Keeps track of the player's bounty.
-///
-/// The bounty is reset when the player pays the fine or serves time in jail.
-class Bounty
-{
-public:
-    /// Adds to the current bounty.
-    /// \param amount Gold to add; must not be negative.
-    /// \return The bounty after the change.
-    int add(int amount);
-};
-```
-
-- The full list of Doxygen commands is available in the [Doxygen manual](https://www.doxygen.nl/manual/commands.html).
+- Classes and functions are documented where their purpose is not obvious; trivial ones such as getters and setters are left undocumented. Doxygen commands such as `\brief` and `\param` are not required.
+- Documentation comments use the `///` style rather than `/** */`.
 
 ## Tests
 
