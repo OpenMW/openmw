@@ -247,6 +247,8 @@ namespace Spt
         float mLengthDistance{};
         float mLengthDistanceVariance{};
         float mLengthExponent{};
+
+        bool readField(SPTStream& stream, int32_t section);
     };
 
     struct SPTFlaresData
@@ -280,6 +282,225 @@ namespace Spt
         uint8_t mUnknown20003{};
         uint8_t mUnknown20004{};
         std::array<osg::Vec2f, 4> mTexCoords;
+
+        void read(SPTStream& stream);
+    };
+
+    // SpeedTree 4.1+ blocks. Version 4.1/4.2 files carry them after 22000;
+    // Oblivion's older runtime stops before them. Names follow the 4.2 editor UI.
+
+    struct SPTLightSeamEntry
+    {
+        float mUnknown23002{};
+        float mUnknown23003{};
+    };
+
+    struct SPTLightSeamData
+    {
+        std::vector<SPTLightSeamEntry> mEntries;
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTLeafPlacementData
+    {
+        float mUnknown24002{};
+        int32_t mUnknown24003{};
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTSupplementalFrondData
+    {
+        float mGenerationDistance{};
+        int32_t mUnknown25003{};
+        int32_t mAboveCondition{};
+        int32_t mBelowCondition{};
+        int32_t mLengthSegmentOverride{};
+        int8_t mLengthSegmentOverrideEnabled{};
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTSupplementalBranchLevel
+    {
+        float mUnknown26004{};
+        float mUnknown26005{};
+        float mUnknown26006{};
+        float mUnknown26007{};
+        int32_t mGenerationDepth{};
+        int8_t mForkEnabled{};
+        float mForkBias{};
+        float mForkAngle{};
+        int32_t mForkLimit{};
+        Curve mUnknown26013;
+        Curve mUnknown26014;
+        float mRoughnessVertFrequency{};
+        float mRoughnessHorizFrequency{};
+        float mUnknown26017{};
+        Curve mUnknown26018;
+        Curve mUnknown26019;
+        Curve mUnknown26020;
+        float mRoughnessGnarl{};
+        Curve mUnknown26022;
+        int8_t mRoughnessGnarlUnison{};
+
+        bool readField(SPTStream& stream, int32_t section);
+    };
+
+    struct SPTSupplementalBranchData
+    {
+        std::vector<SPTSupplementalBranchLevel> mLevels;
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTFloorData
+    {
+        int8_t mEnabled{};
+        float mValue{};
+        int32_t mLevel{};
+        float mExponent{};
+        float mBias{};
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTLeafSmoothingData
+    {
+        int8_t mEnabled{};
+        float mAmount{};
+        int32_t mDimmingDepth{};
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTStandardShaderData
+    {
+        float mBranchLightScalar{};
+        float mFrondLightScalar{};
+        float mLeafLightScalar{};
+        float mGlobalLightScalar{};
+        float mAmbientLightScalar{};
+        float mBillboardDarkSide{};
+        float mBillboardAmbient{};
+        float mBillboardBrightSide{};
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTRootData
+    {
+        int32_t mUnknown40002{};
+        float mUnknown40003{};
+        float mUnknown40004{};
+        float mGenerationFrequency{};
+        SPTLevelData mLevel;
+        SPTTrunkTilingEntry mTrunkTiling;
+        SPTFlaresEntry mFlares;
+        SPTLightSeamEntry mLightSeam;
+        SPTSupplementalBranchLevel mSupplemental;
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTTexCoordControls
+    {
+        float mSTiling{};
+        float mTTiling{};
+        int8_t mSTilingAbsolute{};
+        int8_t mTTilingAbsolute{};
+        int8_t mRandomTOffset{};
+        float mTwist{};
+        float mSOffset{};
+        float mTOffset{};
+        int8_t mClampS{};
+        int8_t mClampT{};
+        float mClampSLeft{};
+        float mClampSRight{};
+        float mClampTBottom{};
+        float mClampTTop{};
+        int8_t mSynchToDiffuse{};
+    };
+
+    struct SPTTexCoordData
+    {
+        std::vector<SPTTexCoordControls> mLayers;
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTTextureMap
+    {
+        // Diffuse, detail, normal, height, specular, user 1, user 2
+        std::array<std::string, 7> mLayers;
+    };
+
+    struct SPTMapBank
+    {
+        SPTTextureMap mBranchMap;
+        std::vector<SPTTextureMap> mLeafMaps;
+        std::vector<SPTTextureMap> mFrondMaps;
+        // The composite and the separate billboard map, not yet known which is which
+        SPTTextureMap mUnknown60005;
+        SPTTextureMap mUnknown60009;
+        std::string mSelfShadowMap;
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTLeafMeshVertex
+    {
+        osg::Vec3f mPosition;
+        osg::Vec3f mNormal;
+        osg::Vec3f mBinormal;
+        osg::Vec3f mTangent;
+        osg::Vec2f mTexCoord;
+    };
+
+    struct SPTLeafMesh
+    {
+        std::string mName;
+        std::vector<SPTLeafMeshVertex> mVertices;
+        std::vector<int32_t> mIndices;
+    };
+
+    struct SPTMeshInfo
+    {
+        std::vector<SPTLeafMesh> mMeshes;
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTLeafMeshEntry
+    {
+        int8_t mUnknown72001{};
+        int32_t mUnknown72002{};
+        int32_t mUnknown72003{};
+        float mUnknown72005{};
+        float mUnknown72006{};
+    };
+
+    struct SPTLeafMeshData
+    {
+        std::vector<SPTLeafMeshEntry> mEntries;
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTCollisionExtraData
+    {
+        std::vector<osg::Vec3f> mObjects;
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTLodFadeData
+    {
+        float mBranchFadeDistance{};
+        float mFrondFadeDistance{};
+        int8_t mFadeExtrudedFronds{};
+        float mBillboardTransition{};
 
         void read(SPTStream& stream);
     };
@@ -319,6 +540,23 @@ namespace Spt
         float mLeafRockAngleScalar{};
         float mLeafRustleAngleScalar{};
         uint8_t mBranchWeightingFlexibility{};
+
+        SPTLightSeamData mLightSeam;
+        SPTLeafPlacementData mLeafPlacement;
+        SPTSupplementalFrondData mSupplementalFrond;
+        SPTSupplementalBranchData mSupplementalBranch;
+        SPTFloorData mFloor;
+        SPTLeafSmoothingData mLeafSmoothing;
+        int32_t mClusterFirstVisibleLevel{};
+        SPTStandardShaderData mStandardShader;
+        SPTRootData mRoots;
+        SPTTexCoordData mTexCoords;
+        SPTMapBank mMapBank;
+        SPTMeshInfo mMeshInfo;
+        SPTLeafMeshData mLeafMeshes;
+        SPTCollisionExtraData mCollisionExtra;
+        float mOrientationAngle{};
+        SPTLodFadeData mLodFade;
 
         SPTFile() = default;
     };

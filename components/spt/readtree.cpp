@@ -381,4 +381,137 @@ namespace Spt
             }
         }
     }
+
+    bool SPTSupplementalBranchLevel::readField(SPTStream& stream, int32_t section)
+    {
+        switch (section)
+        {
+            case 26004:
+                stream.read(mUnknown26004);
+                return true;
+            case 26005:
+                stream.read(mUnknown26005);
+                return true;
+            case 26006:
+                stream.read(mUnknown26006);
+                return true;
+            case 26007:
+                stream.read(mUnknown26007);
+                return true;
+            case 26008:
+                stream.read(mGenerationDepth);
+                return true;
+            case 26009:
+                stream.read(mForkEnabled);
+                return true;
+            case 26010:
+                stream.read(mForkBias);
+                return true;
+            case 26011:
+                stream.read(mForkAngle);
+                return true;
+            case 26012:
+                stream.read(mForkLimit);
+                return true;
+            case 26013:
+                mUnknown26013 = parseCurve(stream);
+                return true;
+            case 26014:
+                mUnknown26014 = parseCurve(stream);
+                return true;
+            case 26015:
+                stream.read(mRoughnessVertFrequency);
+                return true;
+            case 26016:
+                stream.read(mRoughnessHorizFrequency);
+                return true;
+            case 26017:
+                stream.read(mUnknown26017);
+                return true;
+            case 26018:
+                mUnknown26018 = parseCurve(stream);
+                return true;
+            case 26019:
+                mUnknown26019 = parseCurve(stream);
+                return true;
+            case 26020:
+                mUnknown26020 = parseCurve(stream);
+                return true;
+            case 26021:
+                stream.read(mRoughnessGnarl);
+                return true;
+            case 26022:
+                mUnknown26022 = parseCurve(stream);
+                return true;
+            case 26023:
+                stream.read(mRoughnessGnarlUnison);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    void SPTSupplementalBranchData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 26001)
+                return;
+            if (section != 26002)
+                throw std::runtime_error(std::format("Expected section 26002, got {}", section));
+            SPTSupplementalBranchLevel level;
+            while ((section = stream.readSection()) != 26003)
+                if (!level.readField(stream, section))
+                    throw std::runtime_error(std::format("Unknown section {} in supplemental branch block", section));
+            mLevels.push_back(std::move(level));
+        }
+    }
+
+    void SPTRootData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            switch (section)
+            {
+                case 40001:
+                    return;
+                case 40002:
+                    stream.read(mUnknown40002);
+                    break;
+                case 40003:
+                    stream.read(mUnknown40003);
+                    break;
+                case 40004:
+                    stream.read(mUnknown40004);
+                    break;
+                case 40005:
+                    stream.read(mGenerationFrequency);
+                    break;
+                case 40006:
+                    stream.expectSection(1016);
+                    mLevel.read(stream);
+                    break;
+                case 40007:
+                    // The roots reuse the trunk tiling, flare, light seam and supplemental branch fields
+                    while ((section = stream.readSection()) != 40008)
+                    {
+                        if (section == 15002)
+                            stream.read(mTrunkTiling.mRandomVOffset);
+                        else if (section == 15003)
+                            stream.read(mTrunkTiling.mTwist);
+                        else if (section == 23002)
+                            stream.read(mLightSeam.mUnknown23002);
+                        else if (section == 23003)
+                            stream.read(mLightSeam.mUnknown23003);
+                        else if (!mFlares.readField(stream, section) && !mSupplemental.readField(stream, section))
+                            throw std::runtime_error(std::format("Unknown section {} in root support block", section));
+                    }
+                    break;
+                default:
+                    throw std::runtime_error(std::format("Unknown section {} in root support block", section));
+            }
+        }
+    }
 }

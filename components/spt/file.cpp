@@ -187,10 +187,62 @@ namespace Spt
                 case 22000:
                     stream.read(file->mBranchWeightingFlexibility);
                     break;
+                case 23000:
+                    file->mLightSeam.read(stream);
+                    break;
+                case 24000:
+                    file->mLeafPlacement.read(stream);
+                    break;
+                case 25000:
+                    file->mSupplementalFrond.read(stream);
+                    break;
+                case 26000:
+                    file->mSupplementalBranch.read(stream);
+                    break;
+                case 27000:
+                    file->mFloor.read(stream);
+                    break;
+                case 28000:
+                    file->mLeafSmoothing.read(stream);
+                    break;
+                case 29000:
+                    stream.expectSection(29002);
+                    stream.read(file->mClusterFirstVisibleLevel);
+                    stream.expectSection(29001);
+                    break;
+                case 30000:
+                    file->mStandardShader.read(stream);
+                    break;
+                case 40000:
+                    file->mRoots.read(stream);
+                    break;
+                case 50000:
+                    file->mTexCoords.read(stream);
+                    break;
+                case 60000:
+                    file->mMapBank.read(stream);
+                    break;
+                case 71000:
+                    file->mMeshInfo.read(stream);
+                    break;
+                case 72000:
+                    file->mLeafMeshes.read(stream);
+                    break;
+                case 73000:
+                    file->mCollisionExtra.read(stream);
+                    break;
+                case 74000:
+                    stream.expectSection(74002);
+                    stream.read(file->mOrientationAngle);
+                    stream.expectSection(74001);
+                    break;
+                case 75000:
+                    file->mLodFade.read(stream);
+                    break;
                 default:
                     if (section < 22000)
                         throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
-                    // SpeedTree 4.1+ appends blocks from 25000 up that run to EOF; we don't read them yet
+                    // Newer than anything 4.2 writes, and nothing we read can follow it
                     Log(Debug::Verbose) << "Ignoring SPT sections from " << section << " onwards in " << name;
                     return file;
             }

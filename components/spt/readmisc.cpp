@@ -50,6 +50,48 @@ namespace Spt
         }
     }
 
+    bool SPTFlaresEntry::readField(SPTStream& stream, int32_t section)
+    {
+        switch (section)
+        {
+            case 16002:
+                stream.read(mSegmentsPack);
+                return true;
+            case 16003:
+                stream.read(mFlaresNumber);
+                return true;
+            case 16004:
+                stream.read(mFlaresBalance);
+                return true;
+            case 16005:
+                stream.read(mRadialInfluence);
+                return true;
+            case 16006:
+                stream.read(mRadialInfluenceVariance);
+                return true;
+            case 16007:
+                stream.read(mRadialExponent);
+                return true;
+            case 16008:
+                stream.read(mRadialDistance);
+                return true;
+            case 16009:
+                stream.read(mRadialDistanceVariance);
+                return true;
+            case 16010:
+                stream.read(mLengthDistance);
+                return true;
+            case 16011:
+                stream.read(mLengthDistanceVariance);
+                return true;
+            case 16012:
+                stream.read(mLengthExponent);
+                return true;
+            default:
+                return false;
+        }
+    }
+
     void SPTFlaresData::read(SPTStream& stream)
     {
         SPTFlaresEntry entry;
@@ -59,46 +101,12 @@ namespace Spt
             int32_t section = stream.readSection();
             if (section == 16001)
                 return;
-
-            switch (section)
+            if (!entry.readField(stream, section))
+                throw std::runtime_error(std::format("Unknown section {} in flares block", section));
+            if (section == 16012)
             {
-                case 16002:
-                    stream.read(entry.mSegmentsPack);
-                    break;
-                case 16003:
-                    stream.read(entry.mFlaresNumber);
-                    break;
-                case 16004:
-                    stream.read(entry.mFlaresBalance);
-                    break;
-                case 16005:
-                    stream.read(entry.mRadialInfluence);
-                    break;
-                case 16006:
-                    stream.read(entry.mRadialInfluenceVariance);
-                    break;
-                case 16007:
-                    stream.read(entry.mRadialExponent);
-                    break;
-                case 16008:
-                    stream.read(entry.mRadialDistance);
-                    break;
-                case 16009:
-                    stream.read(entry.mRadialDistanceVariance);
-                    break;
-                case 16010:
-                    stream.read(entry.mLengthDistance);
-                    break;
-                case 16011:
-                    stream.read(entry.mLengthDistanceVariance);
-                    break;
-                case 16012:
-                    stream.read(entry.mLengthExponent);
-                    mEntries.push_back(std::move(entry));
-                    entry = {};
-                    break;
-                default:
-                    throw std::runtime_error(std::format("Unknown section {} in flares block", section));
+                mEntries.push_back(std::move(entry));
+                entry = {};
             }
         }
     }
