@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <osg/Vec2f>
@@ -35,8 +36,6 @@ namespace Spt
 
         float evaluate(float t) const;
     };
-
-    Curve parseCurve(SPTStream& stream);
 
     struct SPTLevelData
     {
@@ -270,7 +269,7 @@ namespace Spt
 
     struct SPTShadowRelatedData
     {
-        int32_t mUnknown19002{};
+        std::string mUnknown19002;
 
         void read(SPTStream& stream);
     };
@@ -326,7 +325,7 @@ namespace Spt
 
     using SPTFilePtr = std::shared_ptr<const Spt::SPTFile>;
 
-    SPTFilePtr parse(Files::IStreamPtr&& stream);
+    SPTFilePtr parse(Files::IStreamPtr&& stream, std::string_view name);
 }
 
 #endif

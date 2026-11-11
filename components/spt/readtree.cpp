@@ -10,43 +10,47 @@
 
 namespace Spt
 {
-    Curve parseCurve(SPTStream& stream)
-    {
-        std::string raw = stream.readIntString();
-        std::istringstream ss(raw);
-        std::string magic;
-        ss >> magic;
-        if (magic != "BezierSpline")
-            throw std::runtime_error("Invalid curve data: missing BezierSpline header");
-
-        Curve curve;
-        ss >> curve.mMin >> curve.mMax >> curve.mVariance;
-
-        char brace{};
-        ss >> brace;
-        if (brace != '{')
-            throw std::runtime_error("Invalid curve data: missing opening brace");
-
-        int32_t numPoints{};
-        ss >> numPoints;
-        for (int32_t i = 0; i < numPoints; ++i)
-        {
-            ControlPoint cp;
-            ss >> cp.mPosX >> cp.mPosY >> cp.mTanX >> cp.mTanY >> cp.mTanLen;
-            if (!ss)
-                throw std::runtime_error("Invalid curve data: truncated control points");
-            curve.mPoints.push_back(std::move(cp));
-        }
-
-        ss >> brace;
-        if (brace != '}')
-            throw std::runtime_error("Invalid curve data: missing closing brace");
-
-        return curve;
-    }
-
     namespace
     {
+        Curve parseCurve(SPTStream& stream)
+        {
+            std::string raw = stream.readIntString();
+            std::istringstream ss(raw);
+            std::string magic;
+            ss >> magic;
+            if (magic != "BezierSpline")
+                throw std::runtime_error("Invalid curve data: missing BezierSpline header");
+
+            Curve curve;
+            ss >> curve.mMin >> curve.mMax >> curve.mVariance;
+            if (!ss)
+                throw std::runtime_error("Invalid curve data: truncated range");
+
+            char brace{};
+            ss >> brace;
+            if (brace != '{')
+                throw std::runtime_error("Invalid curve data: missing opening brace");
+
+            int32_t numPoints{};
+            ss >> numPoints;
+            if (!ss)
+                throw std::runtime_error("Invalid curve data: missing control point count");
+            for (int32_t i = 0; i < numPoints; ++i)
+            {
+                ControlPoint cp;
+                ss >> cp.mPosX >> cp.mPosY >> cp.mTanX >> cp.mTanY >> cp.mTanLen;
+                if (!ss)
+                    throw std::runtime_error("Invalid curve data: truncated control points");
+                curve.mPoints.push_back(std::move(cp));
+            }
+
+            ss >> brace;
+            if (brace != '}')
+                throw std::runtime_error("Invalid curve data: missing closing brace");
+
+            return curve;
+        }
+
         // Cubic Bezier scalar at parameter s in [0,1].
         float cubicBezier(float a, float b, float c, float d, float s)
         {
@@ -171,41 +175,44 @@ namespace Spt
         }
     }
 
-    void readLeafTextureMap(SPTLeafTextureMap& tex, SPTStream& stream)
+    namespace
     {
-        while (true)
+        void readLeafTextureMap(SPTLeafTextureMap& tex, SPTStream& stream)
         {
-            int32_t section = stream.readSection();
-            if (section == 1008)
-                return;
-            switch (section)
+            while (true)
             {
-                case 4000:
-                    stream.read(tex.mMakeBlossom);
-                    break;
-                case 4001:
-                    stream.read(tex.mColor);
-                    break;
-                case 4002:
-                    stream.read(tex.mOrientationVariance);
-                    break;
-                case 4003:
-                    tex.mFilename = stream.readIntString();
-                    break;
-                case 4004:
-                    stream.read(tex.mOrigin);
-                    break;
-                case 4005:
-                    stream.read(tex.mSize);
-                    break;
-                case 4006:
-                    stream.read(tex.mUnknown4006);
-                    break;
-                case 4007:
-                    stream.read(tex.mUnknown4007);
-                    break;
-                default:
-                    throw std::runtime_error(std::format("Unknown section {} in leaf texture map block", section));
+                int32_t section = stream.readSection();
+                if (section == 1008)
+                    return;
+                switch (section)
+                {
+                    case 4000:
+                        stream.read(tex.mMakeBlossom);
+                        break;
+                    case 4001:
+                        stream.read(tex.mColor);
+                        break;
+                    case 4002:
+                        stream.read(tex.mOrientationVariance);
+                        break;
+                    case 4003:
+                        tex.mFilename = stream.readIntString();
+                        break;
+                    case 4004:
+                        stream.read(tex.mOrigin);
+                        break;
+                    case 4005:
+                        stream.read(tex.mSize);
+                        break;
+                    case 4006:
+                        stream.read(tex.mUnknown4006);
+                        break;
+                    case 4007:
+                        stream.read(tex.mUnknown4007);
+                        break;
+                    default:
+                        throw std::runtime_error(std::format("Unknown section {} in leaf texture map block", section));
+                }
             }
         }
     }

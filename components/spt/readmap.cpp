@@ -15,7 +15,6 @@ namespace Spt
             uint32_t n;
             stream.read(n);
             std::vector<SPTCompositeMapData::Quad> quads;
-            quads.reserve(n);
             for (uint32_t i = 0; i < n; ++i)
             {
                 SPTCompositeMapData::Quad quad;

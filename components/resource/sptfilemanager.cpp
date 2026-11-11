@@ -19,7 +19,7 @@ namespace Resource
         if (Spt::SPTFilePtr cached = mCache->getRefFromObjectCache(name))
             return cached;
 
-        Spt::SPTFilePtr file = Spt::parse(mVFS->get(name));
+        Spt::SPTFilePtr file = Spt::parse(mVFS->get(name), name.value());
         mCache->addEntryToObjectCache(name.value(), file);
         return file;
     }

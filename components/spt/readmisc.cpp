@@ -140,7 +140,7 @@ namespace Spt
             switch (section)
             {
                 case 19002:
-                    stream.read(mUnknown19002);
+                    mUnknown19002 = stream.readIntString();
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown section {} in shadow related block", section));

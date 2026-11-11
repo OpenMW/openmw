@@ -167,9 +167,9 @@ bool readFile(
             case FileClass::SPT:
             {
                 if (vfs != nullptr)
-                    Spt::parse(vfs->get(VFS::Path::Normalized(pathStr)));
+                    Spt::parse(vfs->get(VFS::Path::Normalized(pathStr)), pathStr);
                 else
-                    Spt::parse(Files::openConstrainedFileStream(fullPath));
+                    Spt::parse(Files::openConstrainedFileStream(fullPath), pathStr);
                 break;
             }
             default:

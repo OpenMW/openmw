@@ -3,6 +3,8 @@
 #include <format>
 #include <stdexcept>
 
+#include <components/debug/debuglog.hpp>
+
 #include "stream.hpp"
 
 namespace Spt
@@ -123,19 +125,20 @@ namespace Spt
         }
     }
 
-    SPTFilePtr parse(Files::IStreamPtr&& inputStream)
+    SPTFilePtr parse(Files::IStreamPtr&& inputStream, std::string_view name)
     {
         auto file = std::make_shared<SPTFile>();
         SPTStream stream(std::move(inputStream));
+
+        if (stream.eof() || stream.readSection() != 1000)
+            throw std::runtime_error("Not an SPT file: missing header");
+        file->mHeader.read(stream);
 
         while (!stream.eof())
         {
             const int32_t section = stream.readSection();
             switch (section)
             {
-                case 1000:
-                    file->mHeader.read(stream);
-                    break;
                 case 8000:
                     file->mLighting.read(stream);
                     break;
@@ -185,7 +188,11 @@ namespace Spt
                     stream.read(file->mBranchWeightingFlexibility);
                     break;
                 default:
-                    throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
+                    if (section < 22000)
+                        throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
+                    // SpeedTree 4.1+ appends blocks from 25000 up that run to EOF; we don't read them yet
+                    Log(Debug::Verbose) << "Ignoring SPT sections from " << section << " onwards in " << name;
+                    return file;
             }
         }
         return file;
