@@ -161,6 +161,9 @@ namespace Spt
         std::vector<Quad> mLeafQuads;
         std::vector<Quad> mBillboardQuads;
         std::vector<Quad> mFrondQuads;
+        std::string mUnknown10005;
+        uint8_t mUnknown10006{};
+        uint8_t mUnknown10007{};
 
         void read(SPTStream& stream);
     };
@@ -269,9 +272,9 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
-    struct SPTShadowRelatedData
+    struct SPTUserData
     {
-        std::string mUnknown19002;
+        std::string mText;
 
         void read(SPTStream& stream);
     };
@@ -282,6 +285,27 @@ namespace Spt
         uint8_t mUnknown20003{};
         uint8_t mUnknown20004{};
         std::array<osg::Vec2f, 4> mTexCoords;
+
+        void read(SPTStream& stream);
+    };
+
+    // Precomputed leaf cards per leaf LOD, written by the runtime library right after the header
+    struct SPTLeafLodCard
+    {
+        int32_t mUnknown7006{};
+        uint8_t mUnknown7007{};
+        uint8_t mUnknown7008{};
+        osg::Vec3f mUnknown7010;
+        uint8_t mUnknown7011{};
+        uint8_t mUnknown7012{};
+        int32_t mUnknown7013{};
+        osg::Vec3f mUnknown7015;
+        float mUnknown7016{};
+    };
+
+    struct SPTLeafLodData
+    {
+        std::vector<std::vector<SPTLeafLodCard>> mLods;
 
         void read(SPTStream& stream);
     };
@@ -313,7 +337,7 @@ namespace Spt
     struct SPTSupplementalFrondData
     {
         float mGenerationDistance{};
-        int32_t mUnknown25003{};
+        int32_t mGenerationDepth{};
         int32_t mAboveCondition{};
         int32_t mBelowCondition{};
         int32_t mLengthSegmentOverride{};
@@ -324,10 +348,10 @@ namespace Spt
 
     struct SPTSupplementalBranchLevel
     {
-        float mUnknown26004{};
-        float mUnknown26005{};
-        float mUnknown26006{};
-        float mUnknown26007{};
+        float mRoughnessAmount{};
+        float mSegmentsLengthKeep{};
+        float mSegmentsCrossSectionKeep{};
+        float mGenerationDistance{};
         int32_t mGenerationDepth{};
         int8_t mForkEnabled{};
         float mForkBias{};
@@ -337,7 +361,7 @@ namespace Spt
         Curve mUnknown26014;
         float mRoughnessVertFrequency{};
         float mRoughnessHorizFrequency{};
-        float mUnknown26017{};
+        float mRoughnessAmountVariance{};
         Curve mUnknown26018;
         Curve mUnknown26019;
         Curve mUnknown26020;
@@ -391,9 +415,9 @@ namespace Spt
 
     struct SPTRootData
     {
-        int32_t mUnknown40002{};
-        float mUnknown40003{};
-        float mUnknown40004{};
+        int32_t mRootLevel{};
+        float mGenerationFirst{};
+        float mGenerationLast{};
         float mGenerationFrequency{};
         SPTLevelData mLevel;
         SPTTrunkTilingEntry mTrunkTiling;
@@ -516,6 +540,7 @@ namespace Spt
         int32_t mSeed{};
         int32_t mNumLevels{};
         int8_t mUnknown2002{};
+        int32_t mUnknown2004{};
 
         std::vector<SPTLevelData> mLevelData;
         SPTLeafData mLeafData;
@@ -526,6 +551,7 @@ namespace Spt
     struct SPTFile
     {
         SPTHeader mHeader;
+        SPTLeafLodData mLeafLods;
         SPTLightingData mLighting;
         SPTLodData mLod;
         SPTWindData mWind;
@@ -535,7 +561,7 @@ namespace Spt
         SPTTrunkTilingData mTrunkTiling;
         SPTFlaresData mFlares;
         SPTShadowData mShadow;
-        SPTShadowRelatedData mShadowRelated;
+        SPTUserData mUserData;
         SPTGlobalCompositeMapData mCompositeMapGlobal;
         float mLeafRockAngleScalar{};
         float mLeafRustleAngleScalar{};

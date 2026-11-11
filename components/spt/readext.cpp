@@ -36,6 +36,44 @@ namespace Spt
         }
     }
 
+    void SPTLeafLodData::read(SPTStream& stream)
+    {
+        uint32_t numLods;
+        stream.read(numLods);
+        for (uint32_t i = 0; i < numLods; ++i)
+        {
+            std::vector<SPTLeafLodCard>& cards = mLods.emplace_back();
+            stream.expectSection(7002);
+            int32_t section;
+            while ((section = stream.readSection()) != 7003)
+            {
+                if (section != 7004)
+                    throw std::runtime_error(std::format("Expected section 7004, got {}", section));
+                SPTLeafLodCard& card = cards.emplace_back();
+                stream.expectSection(7006);
+                stream.read(card.mUnknown7006);
+                stream.expectSection(7007);
+                stream.read(card.mUnknown7007);
+                stream.expectSection(7008);
+                stream.read(card.mUnknown7008);
+                stream.expectSection(7010);
+                stream.read(card.mUnknown7010);
+                stream.expectSection(7011);
+                stream.read(card.mUnknown7011);
+                stream.expectSection(7012);
+                stream.read(card.mUnknown7012);
+                stream.expectSection(7013);
+                stream.read(card.mUnknown7013);
+                stream.expectSection(7015);
+                stream.read(card.mUnknown7015);
+                stream.expectSection(7016);
+                stream.read(card.mUnknown7016);
+                stream.expectSection(7005);
+            }
+        }
+        stream.expectSection(7001);
+    }
+
     void SPTLightSeamData::read(SPTStream& stream)
     {
         while (true)
@@ -75,7 +113,7 @@ namespace Spt
                     stream.read(mGenerationDistance);
                     break;
                 case 25003:
-                    stream.read(mUnknown25003);
+                    stream.read(mGenerationDepth);
                     break;
                 case 25004:
                     stream.read(mAboveCondition);

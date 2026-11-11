@@ -30,6 +30,9 @@ namespace Spt
                     case 2003:
                         stream.read(header.mLodNearDistance);
                         break;
+                    case 2004:
+                        stream.read(header.mUnknown2004);
+                        break;
                     case 2005:
                         stream.read(header.mSeed);
                         break;
@@ -139,6 +142,9 @@ namespace Spt
             const int32_t section = stream.readSection();
             switch (section)
             {
+                case 7000:
+                    file->mLeafLods.read(stream);
+                    break;
                 case 8000:
                     file->mLighting.read(stream);
                     break;
@@ -173,7 +179,7 @@ namespace Spt
                     file->mShadow.read(stream);
                     break;
                 case 19000:
-                    file->mShadowRelated.read(stream);
+                    file->mUserData.read(stream);
                     break;
                 case 20000:
                     file->mCompositeMapGlobal.read(stream);

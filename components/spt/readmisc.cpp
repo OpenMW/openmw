@@ -138,7 +138,7 @@ namespace Spt
         }
     }
 
-    void SPTShadowRelatedData::read(SPTStream& stream)
+    void SPTUserData::read(SPTStream& stream)
     {
         while (true)
         {
@@ -148,10 +148,10 @@ namespace Spt
             switch (section)
             {
                 case 19002:
-                    mUnknown19002 = stream.readIntString();
+                    mText = stream.readIntString();
                     break;
                 default:
-                    throw std::runtime_error(std::format("Unknown section {} in shadow related block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in user data block", section));
             }
         }
     }

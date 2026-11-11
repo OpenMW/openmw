@@ -387,16 +387,16 @@ namespace Spt
         switch (section)
         {
             case 26004:
-                stream.read(mUnknown26004);
+                stream.read(mRoughnessAmount);
                 return true;
             case 26005:
-                stream.read(mUnknown26005);
+                stream.read(mSegmentsLengthKeep);
                 return true;
             case 26006:
-                stream.read(mUnknown26006);
+                stream.read(mSegmentsCrossSectionKeep);
                 return true;
             case 26007:
-                stream.read(mUnknown26007);
+                stream.read(mGenerationDistance);
                 return true;
             case 26008:
                 stream.read(mGenerationDepth);
@@ -426,7 +426,7 @@ namespace Spt
                 stream.read(mRoughnessHorizFrequency);
                 return true;
             case 26017:
-                stream.read(mUnknown26017);
+                stream.read(mRoughnessAmountVariance);
                 return true;
             case 26018:
                 mUnknown26018 = parseCurve(stream);
@@ -478,13 +478,13 @@ namespace Spt
                 case 40001:
                     return;
                 case 40002:
-                    stream.read(mUnknown40002);
+                    stream.read(mRootLevel);
                     break;
                 case 40003:
-                    stream.read(mUnknown40003);
+                    stream.read(mGenerationFirst);
                     break;
                 case 40004:
-                    stream.read(mUnknown40004);
+                    stream.read(mGenerationLast);
                     break;
                 case 40005:
                     stream.read(mGenerationFrequency);

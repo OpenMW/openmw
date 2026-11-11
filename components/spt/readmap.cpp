@@ -44,6 +44,15 @@ namespace Spt
                 case 10004:
                     mFrondQuads = readQuads(stream);
                     break;
+                case 10005:
+                    mUnknown10005 = stream.readIntString();
+                    break;
+                case 10006:
+                    stream.read(mUnknown10006);
+                    break;
+                case 10007:
+                    stream.read(mUnknown10007);
+                    break;
                 default:
                     throw std::runtime_error(std::format("Unknown section {} in composite map block", section));
             }
