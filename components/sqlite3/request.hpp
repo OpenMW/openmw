@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SQLITE3_REQUEST_H
 #define OPENMW_COMPONENTS_SQLITE3_REQUEST_H
 
+#include "error.hpp"
 #include "statement.hpp"
 #include "types.hpp"
 
@@ -9,6 +10,7 @@
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <format>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -29,43 +31,43 @@ namespace Sqlite3
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, int value)
     {
         if (const int ec = sqlite3_bind_int(&stmt, index, value); ec != SQLITE_OK)
-            throw std::runtime_error(
-                "Failed to bind int to parameter " + std::to_string(index) + ": " + std::string(sqlite3_errmsg(&db)));
+            throw Error(sqlite3_extended_errcode(&db),
+                std::format("Failed to bind int to parameter {}: {}", index, sqlite3_errmsg(&db)));
     }
 
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, std::int64_t value)
     {
         if (const int ec = sqlite3_bind_int64(&stmt, index, value); ec != SQLITE_OK)
-            throw std::runtime_error(
-                "Failed to bind int64 to parameter " + std::to_string(index) + ": " + std::string(sqlite3_errmsg(&db)));
+            throw Error(sqlite3_extended_errcode(&db),
+                std::format("Failed to bind int64 to parameter {}: {}", index, sqlite3_errmsg(&db)));
     }
 
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, double value)
     {
         if (const int ec = sqlite3_bind_double(&stmt, index, value); ec != SQLITE_OK)
-            throw std::runtime_error("Failed to bind double to parameter " + std::to_string(index) + ": "
-                + std::string(sqlite3_errmsg(&db)));
+            throw Error(sqlite3_extended_errcode(&db),
+                std::format("Failed to bind double to parameter {}: {}", index, sqlite3_errmsg(&db)));
     }
 
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, std::string_view value)
     {
         if (sqlite3_bind_text(&stmt, index, value.data(), static_cast<int>(value.size()), SQLITE_STATIC) != SQLITE_OK)
-            throw std::runtime_error(
-                "Failed to bind text to parameter " + std::to_string(index) + ": " + std::string(sqlite3_errmsg(&db)));
+            throw Error(sqlite3_extended_errcode(&db),
+                std::format("Failed to bind text to parameter {}: {}", index, sqlite3_errmsg(&db)));
     }
 
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, const std::vector<std::byte>& value)
     {
         if (sqlite3_bind_blob(&stmt, index, value.data(), static_cast<int>(value.size()), SQLITE_STATIC) != SQLITE_OK)
-            throw std::runtime_error(
-                "Failed to bind blob to parameter " + std::to_string(index) + ": " + std::string(sqlite3_errmsg(&db)));
+            throw Error(sqlite3_extended_errcode(&db),
+                std::format("Failed to bind blob to parameter {}: {}", index, sqlite3_errmsg(&db)));
     }
 
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, const ConstBlob& value)
     {
         if (sqlite3_bind_blob(&stmt, index, value.mData, value.mSize, SQLITE_STATIC) != SQLITE_OK)
-            throw std::runtime_error(
-                "Failed to bind blob to parameter " + std::to_string(index) + ": " + std::string(sqlite3_errmsg(&db)));
+            throw Error(sqlite3_extended_errcode(&db),
+                std::format("Failed to bind blob to parameter {}: {}", index, sqlite3_errmsg(&db)));
     }
 
     template <typename T>
@@ -73,7 +75,7 @@ namespace Sqlite3
     {
         const int index = sqlite3_bind_parameter_index(&stmt, name);
         if (index == 0)
-            throw std::logic_error("Parameter \"" + std::string(name) + "\" is not found");
+            throw std::logic_error(std::format("Parameter \"{}\" is not found", name));
         bindParameter(db, stmt, index, value);
     }
 
@@ -92,15 +94,16 @@ namespace Sqlite3
             case SQLITE_NULL:
                 return "SQLITE_NULL";
         }
-        return "unsupported(" + std::to_string(value) + ")";
+        return std::format("unsupported({})", value);
     }
 
     template <class T>
     inline auto copyColumn(sqlite3& /*db*/, sqlite3_stmt& /*statement*/, int index, int type, T*& value)
     {
         if (type != SQLITE_NULL)
-            throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-                + " that does not match expected output type: SQLITE_NULL");
+            throw std::logic_error(
+                std::format("Type of column {} is {} that does not match expected output type: SQLITE_NULL", index,
+                    sqliteTypeToString(type)));
         value = nullptr;
     }
 
@@ -116,8 +119,9 @@ namespace Sqlite3
                 value = std::decay_t<T>{};
                 return;
         }
-        throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-            + " that does not match expected output type: SQLITE_INTEGER or SQLITE_NULL");
+        throw std::logic_error(std::format(
+            "Type of column {} is {} that does not match expected output type: SQLITE_INTEGER or SQLITE_NULL", index,
+            sqliteTypeToString(type)));
     }
 
     template <std::floating_point T>
@@ -132,8 +136,9 @@ namespace Sqlite3
                 value = std::decay_t<T>{};
                 return;
         }
-        throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-            + " that does not match expected output type: SQLITE_FLOAT or SQLITE_NULL");
+        throw std::logic_error(
+            std::format("Type of column {} is {} that does not match expected output type: SQLITE_FLOAT or SQLITE_NULL",
+                index, sqliteTypeToString(type)));
     }
 
     template <StrongTypedef T>
@@ -145,14 +150,15 @@ namespace Sqlite3
     inline void copyColumn(sqlite3& db, sqlite3_stmt& statement, int index, int type, std::string& value)
     {
         if (type != SQLITE_TEXT)
-            throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-                + " that does not match expected output type: SQLITE_TEXT");
+            throw std::logic_error(
+                std::format("Type of column {} is {} that does not match expected output type: SQLITE_TEXT", index,
+                    sqliteTypeToString(type)));
         const unsigned char* const text = sqlite3_column_text(&statement, index);
         if (text == nullptr)
         {
             if (const int ec = sqlite3_errcode(&db); ec != SQLITE_OK)
-                throw std::runtime_error(
-                    "Failed to read text from column " + std::to_string(index) + ": " + sqlite3_errmsg(&db));
+                throw Error(sqlite3_extended_errcode(&db),
+                    std::format("Failed to read text from column {}: {}", index, sqlite3_errmsg(&db)));
             value.clear();
             return;
         }
@@ -160,8 +166,8 @@ namespace Sqlite3
         if (size <= 0)
         {
             if (const int ec = sqlite3_errcode(&db); ec != SQLITE_OK)
-                throw std::runtime_error(
-                    "Failed to get column bytes " + std::to_string(index) + ": " + sqlite3_errmsg(&db));
+                throw Error(sqlite3_extended_errcode(&db),
+                    std::format("Failed to get column bytes {}: {}", index, sqlite3_errmsg(&db)));
             value.clear();
             return;
         }
@@ -172,14 +178,15 @@ namespace Sqlite3
     inline void copyColumn(sqlite3& db, sqlite3_stmt& statement, int index, int type, std::vector<std::byte>& value)
     {
         if (type != SQLITE_BLOB)
-            throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-                + " that does not match expected output type: SQLITE_BLOB");
+            throw std::logic_error(
+                std::format("Type of column {} is {} that does not match expected output type: SQLITE_BLOB", index,
+                    sqliteTypeToString(type)));
         const void* const blob = sqlite3_column_blob(&statement, index);
         if (blob == nullptr)
         {
             if (const int ec = sqlite3_errcode(&db); ec != SQLITE_OK)
-                throw std::runtime_error(
-                    "Failed to read blob from column " + std::to_string(index) + ": " + sqlite3_errmsg(&db));
+                throw Error(sqlite3_extended_errcode(&db),
+                    std::format("Failed to read blob from column {}: {}", index, sqlite3_errmsg(&db)));
             value.clear();
             return;
         }
@@ -187,8 +194,8 @@ namespace Sqlite3
         if (size <= 0)
         {
             if (const int ec = sqlite3_errcode(&db); ec != SQLITE_OK)
-                throw std::runtime_error(
-                    "Failed to get column bytes " + std::to_string(index) + ": " + sqlite3_errmsg(&db));
+                throw Error(sqlite3_extended_errcode(&db),
+                    std::format("Failed to get column bytes {}: {}", index, sqlite3_errmsg(&db)));
             value.clear();
             return;
         }
@@ -203,8 +210,7 @@ namespace Sqlite3
         {
             const int column = index - 1;
             if (const int number = sqlite3_column_count(&statement); column >= number)
-                throw std::out_of_range(
-                    "Column number is out of range: " + std::to_string(column) + " >= " + std::to_string(number));
+                throw std::out_of_range(std::format("Column number is out of range: {} >= {}", column, number));
             const int type = sqlite3_column_type(&statement, column);
             switch (type)
             {
@@ -216,8 +222,8 @@ namespace Sqlite3
                     copyColumn(db, statement, column, type, std::get<index - 1>(row));
                     break;
                 default:
-                    throw std::runtime_error("Column " + std::to_string(column)
-                        + " has unnsupported column type: " + sqliteTypeToString(type));
+                    throw std::runtime_error(
+                        std::format("Column {} has unnsupported column type: {}", column, sqliteTypeToString(type)));
             }
             getColumnsImpl<index - 1>(db, statement, row);
         }
@@ -274,7 +280,8 @@ namespace Sqlite3
             case SQLITE_DONE:
                 return false;
         }
-        throw std::runtime_error("Failed to execute statement step: " + std::string(sqlite3_errmsg(&db)));
+        throw Error(
+            sqlite3_extended_errcode(&db), std::format("Failed to execute statement step: {}", sqlite3_errmsg(&db)));
     }
 
     template <class T, class I, class... Args>
@@ -288,10 +295,15 @@ namespace Sqlite3
                 getRow(db, *statement.mHandle, *out++);
             return out;
         }
+        catch (const Error& e)
+        {
+            throw Error(
+                e.getCode(), std::format("Failed to perform request \"{}\": {}", statement.mQuery.text(), e.what()));
+        }
         catch (const std::exception& e)
         {
             throw std::runtime_error(
-                "Failed perform request \"" + std::string(statement.mQuery.text()) + "\": " + std::string(e.what()));
+                std::format("Failed to perform request \"{}\": {}", statement.mQuery.text(), e.what()));
         }
     }
 
@@ -306,10 +318,15 @@ namespace Sqlite3
                 throw std::logic_error("Execute cannot return rows");
             return sqlite3_changes(&db);
         }
+        catch (const Error& e)
+        {
+            throw Error(
+                e.getCode(), std::format("Failed to execute statement \"{}\": {}", statement.mQuery.text(), e.what()));
+        }
         catch (const std::exception& e)
         {
-            throw std::runtime_error("Failed to execute statement \"" + std::string(statement.mQuery.text())
-                + "\": " + std::string(e.what()));
+            throw std::runtime_error(
+                std::format("Failed to execute statement \"{}\": {}", statement.mQuery.text(), e.what()));
         }
     }
 }

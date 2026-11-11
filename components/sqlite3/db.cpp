@@ -1,7 +1,9 @@
 #include "db.hpp"
+#include "error.hpp"
 
 #include <sqlite3.h>
 
+#include <format>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -22,13 +24,15 @@ namespace Sqlite3
         const int flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX;
         if (const int ec = sqlite3_open_v2(std::string(path).c_str(), &handle, flags, nullptr); ec != SQLITE_OK)
         {
+            const int code = sqlite3_extended_errcode(handle);
             const std::string message(sqlite3_errmsg(handle));
             sqlite3_close(handle);
-            throw std::runtime_error("Failed to open database: " + message);
+            throw Error(code, std::format("Failed to open database: {}", message));
         }
         Db result(handle);
         if (const int ec = sqlite3_exec(result.get(), schema, nullptr, nullptr, nullptr); ec != SQLITE_OK)
-            throw std::runtime_error("Failed create database schema: " + std::string(sqlite3_errmsg(handle)));
+            throw Error(sqlite3_extended_errcode(handle),
+                std::format("Failed to create database schema: {}", sqlite3_errmsg(handle)));
         return result;
     }
 }

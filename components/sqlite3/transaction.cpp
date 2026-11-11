@@ -1,9 +1,11 @@
 #include "transaction.hpp"
+#include "error.hpp"
 
 #include <components/debug/debuglog.hpp>
 
 #include <sqlite3.h>
 
+#include <format>
 #include <stdexcept>
 #include <string>
 
@@ -24,8 +26,8 @@ namespace Sqlite3
                 case TransactionMode::Exclusive:
                     return "BEGIN EXCLUSIVE";
             }
-            throw std::logic_error("Invalid transaction mode: "
-                + std::to_string(static_cast<std::underlying_type_t<TransactionMode>>(mode)));
+            throw std::logic_error(std::format(
+                "Invalid transaction mode: {}", static_cast<std::underlying_type_t<TransactionMode>>(mode)));
         }
     }
 
@@ -43,16 +45,16 @@ namespace Sqlite3
         if (const int ec = sqlite3_exec(&db, getBeginStatement(mode), nullptr, nullptr, nullptr); ec != SQLITE_OK)
         {
             (void)mDb.release();
-            throw std::runtime_error(
-                "Failed to start transaction: " + std::string(sqlite3_errmsg(&db)) + " (" + std::to_string(ec) + ")");
+            throw Error(sqlite3_extended_errcode(&db),
+                std::format("Failed to start transaction: {} ({})", sqlite3_errmsg(&db), ec));
         }
     }
 
     void Transaction::commit()
     {
         if (const int ec = sqlite3_exec(mDb.get(), "COMMIT", nullptr, nullptr, nullptr); ec != SQLITE_OK)
-            throw std::runtime_error("Failed to commit transaction: " + std::string(sqlite3_errmsg(mDb.get())) + " ("
-                + std::to_string(ec) + ")");
+            throw Error(sqlite3_extended_errcode(mDb.get()),
+                std::format("Failed to commit transaction: {} ({})", sqlite3_errmsg(mDb.get()), ec));
         (void)mDb.release();
     }
 }

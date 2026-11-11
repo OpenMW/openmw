@@ -7,6 +7,7 @@
 #include <components/esm/refid.hpp>
 #include <components/misc/strongtypedef.hpp>
 #include <components/sqlite3/db.hpp>
+#include <components/sqlite3/error.hpp>
 #include <components/sqlite3/statement.hpp>
 #include <components/sqlite3/transaction.hpp>
 #include <components/sqlite3/types.hpp>
@@ -14,6 +15,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -47,6 +49,8 @@ namespace DetourNavigator
     };
 
     std::ostream& operator<<(std::ostream& stream, ShapeType value);
+
+    std::string getNavMeshDbErrorAdvice(const Sqlite3::Error& error, std::string_view path);
 
     namespace DbQueries
     {

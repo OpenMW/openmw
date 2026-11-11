@@ -151,7 +151,7 @@ namespace DetourNavigator
         {
             const auto query = std::format("pragma max_page_count = {};", value);
             if (const int ec = sqlite3_exec(&db, query.c_str(), nullptr, nullptr, nullptr); ec != SQLITE_OK)
-                throw std::runtime_error("Failed set max page count: " + std::string(sqlite3_errmsg(&db)));
+                throw std::runtime_error(std::format("Failed set max page count: {}", sqlite3_errmsg(&db)));
         }
 
         struct SetJournalModeToWal
@@ -206,6 +206,42 @@ namespace DetourNavigator
                 return stream << "avoid";
         }
         return stream << "unknown shape type (" << static_cast<std::underlying_type_t<ShapeType>>(value) << ")";
+    }
+
+    std::string getNavMeshDbErrorAdvice(const Sqlite3::Error& error, std::string_view path)
+    {
+        switch (error.getPrimaryCode())
+        {
+            case SQLITE_CORRUPT:
+            case SQLITE_NOTADB:
+                return std::format(
+                    "The navmesh database file \"{0}\" is damaged or is not a navmesh database. Please close OpenMW "
+                    "and delete it, along with \"{0}-wal\" and \"{0}-shm\" if they exist. The file will be recreated "
+                    "automatically the next time OpenMW starts or if you rerun openmw-navmeshtool.",
+                    path);
+            case SQLITE_CANTOPEN:
+            case SQLITE_PERM:
+            case SQLITE_READONLY:
+            case SQLITE_IOERR:
+                return std::format(
+                    "The navmesh database file \"{}\" cannot be read or written. Check that its folder exists, that "
+                    "you have permission to write to it, and that the disk is working.",
+                    path);
+            case SQLITE_FULL:
+                return std::format(
+                    "The navmesh database file \"{}\" has reached its size limit or the disk is full. Free up some "
+                    "disk space or increase the \"max navmeshdb file size\" setting.",
+                    path);
+            case SQLITE_BUSY:
+            case SQLITE_LOCKED:
+                return std::format(
+                    "The navmesh database file \"{}\" is in use by another process, such as another running OpenMW or "
+                    "openmw-navmeshtool. Close it and start OpenMW again.",
+                    path);
+            default:
+                break;
+        }
+        return {};
     }
 
     NavMeshDb::NavMeshDb(std::string_view path, std::uint64_t maxFileSize)
