@@ -323,6 +323,7 @@ Clang_Format:
     - CI/check_cmake_format.sh
     - CI/check_file_names.sh
     - CI/check_clang_format.sh
+  timeout: 15m
 
 Lupdate:
   extends: .Ubuntu_Image
@@ -337,6 +338,7 @@ Lupdate:
     - CI/install_debian_deps.sh openmw-qt-translations
   script:
     - CI/check_qt_translations.sh
+  timeout: 15m
 
 Teal:
   stage: checks
@@ -350,6 +352,7 @@ Teal:
     when: always
     paths:
       - teal_declarations
+  timeout: 15m
 
 Ubuntu_GCC_Debug:
   extends: .Ubuntu
