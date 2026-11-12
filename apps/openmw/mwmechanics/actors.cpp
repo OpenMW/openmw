@@ -698,7 +698,7 @@ namespace MWMechanics
                         mechanicsManager->startCombat(actor1, actor2, &allies2);
                         // Also have actor1's allies start combat
                         for (const MWWorld::Ptr& ally1 : allies1)
-                            if (ally1 != player)
+                            if (ally1 != player && isActive(ally1))
                                 mechanicsManager->startCombat(ally1, actor2, &allies2);
                         return;
                     }
@@ -984,6 +984,11 @@ namespace MWMechanics
         if (it == mIndex.end())
             return false;
         return it->second->getCharacterController().isSneaking();
+    }
+
+    bool Actors::isActive(const MWWorld::Ptr& ptr) const
+    {
+        return mIndex.contains(ptr.mRef);
     }
 
     static void updateDrowning(const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer)
