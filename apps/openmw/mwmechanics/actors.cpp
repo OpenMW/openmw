@@ -2151,6 +2151,22 @@ namespace MWMechanics
         return false;
     }
 
+    // The target of a living actor's first Follow or Escort package, unless a Travel or Activate package precedes it
+    static MWWorld::Ptr getSideWithTarget(const MWWorld::Ptr& actor)
+    {
+        const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+        if (stats.isDead())
+            return {};
+        for (const auto& package : stats.getAiSequence())
+        {
+            if (package->sideWithTarget())
+                return package->getTarget();
+            if (package->getTypeId() > AiPackageTypeId::Wander && package->getTypeId() <= AiPackageTypeId::Activate)
+                break;
+        }
+        return {};
+    }
+
     std::vector<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actorPtr, bool excludeInfighting) const
     {
         std::vector<MWWorld::Ptr> list;
@@ -2199,12 +2215,39 @@ namespace MWMechanics
                     {
                         list.push_back(iteratedActor);
                     }
+                    else
+                    {
+                        // Inactive actors aren't in mActors. An inactive one following this actor is found by going up
+                        // the chain of inactive targets from here
+                        MWWorld::Ptr follower = package->getTarget();
+                        std::vector<MWWorld::Ptr> visited;
+                        while (!follower.isEmpty() && !isActive(follower)
+                            && std::find(visited.begin(), visited.end(), follower) == visited.end())
+                        {
+                            const MWWorld::Ptr target = getSideWithTarget(follower);
+                            if (target == actorPtr)
+                            {
+                                list.push_back(follower);
+                                break;
+                            }
+                            visited.push_back(follower);
+                            follower = target;
+                        }
+                    }
                     break;
                 }
                 else if (package->getTypeId() > AiPackageTypeId::Wander
                     && package->getTypeId() <= AiPackageTypeId::Activate) // Don't count "fake" package types
                     break;
             }
+        }
+
+        // An inactive actor isn't in mActors, but still sides with its own Follow or Escort target
+        if (!actorPtr.isEmpty() && !isActive(actorPtr))
+        {
+            const MWWorld::Ptr target = getSideWithTarget(actorPtr);
+            if (!target.isEmpty())
+                list.push_back(target);
         }
         return list;
     }
