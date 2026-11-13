@@ -31,6 +31,8 @@ variables:
   CACHE_COMPRESSION_LEVEL: "fast"
   FF_TIMESTAMPS: "true"
   OPENMW_DEBUGINFOD: OFF
+  UV_PYTHON: "3.14"
+  UV_PYTHON_PREFERENCE: only-managed
 
 .Ubuntu_Image:
   tags:
@@ -191,20 +193,15 @@ Almalinux_Generic_Integration_Tests:
   extends: .base_Generic_Integration_Tests
   image: almalinux:9
   before_script:
-    - dnf install -y python3-pip xorg-x11-server-Xvfb alsa-utils git-lfs openal-soft
-    - pip3 install --user numpy matplotlib termtables click
-  variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    - dnf install -y xorg-x11-server-Xvfb alsa-utils git-lfs openal-soft
+    - CI/install_uv.sh
 
 Arch_Linux_Generic_Integration_Tests:
   extends: .base_Generic_Integration_Tests
   image: archlinux
   before_script:
-    - pacman --noconfirm -Syu python python-pip python-numpy python-matplotlib python-click xorg-server-xvfb alsa-utils git-lfs openal
-    - python -m venv --system-site-packages testvenv
-    - export PATH="$(pwd)/testvenv/bin:$PATH"
-    - hash -r
-    - pip install termtables
+    - pacman --noconfirm -Syu xorg-server-xvfb alsa-utils git-lfs openal
+    - CI/install_uv.sh
 
 PushToCoverityBranch:
   tags:
@@ -620,16 +617,14 @@ Ubuntu_Clang_tests_Debug:
   extends: .Ubuntu_Image
   stage: test
   variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     EXAMPLE_SUITE_REVISION: a1ba6fc9d7315c2158ef4c60349fc4e71b7ca343
     ENABLE_DEBUG_ARCHIVES: 1
   cache:
     paths:
-      - .cache/pip
       - apt-cache/
   before_script:
     - CI/install_debian_deps.sh $OPENMW_DEPS
-    - pip3 install --user --break-system-packages numpy matplotlib termtables click
+    - CI/install_uv.sh
   script:
     - CI/run_integration_tests.sh
   after_script:
