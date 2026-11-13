@@ -200,7 +200,7 @@ Arch_Linux_Generic_Integration_Tests:
   extends: .base_Generic_Integration_Tests
   image: archlinux
   before_script:
-    - pacman --noconfirm -Sy python python-pip python-numpy python-matplotlib python-click xorg-server-xvfb alsa-utils git-lfs openal
+    - pacman --noconfirm -Syu python python-pip python-numpy python-matplotlib python-click xorg-server-xvfb alsa-utils git-lfs openal
     - python -m venv --system-site-packages testvenv
     - export PATH="$(pwd)/testvenv/bin:$PATH"
     - hash -r
