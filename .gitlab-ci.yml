@@ -47,13 +47,10 @@ Ubuntu_GCC_preprocess:
     key: Ubuntu_GCC_preprocess.ubuntu_24.04.v2
     paths:
       - apt-cache/
-      - .cache/pip/
   stage: build
-  variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   before_script:
     - CI/install_debian_deps.sh openmw-deps openmw-deps-dynamic gcc_preprocess
-    - pip3 install --user --break-system-packages click termtables
+    - CI/install_uv.sh
   script:
     - CI/ubuntu_gcc_preprocess.sh
   rules:

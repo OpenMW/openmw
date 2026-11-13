@@ -21,10 +21,7 @@ declare -rA GROUPED_DEPS=(
     curl
     gcc
     git
-    libclang-dev
     ninja-build
-    python3-clang
-    python3-pip
     unzip
   "
 
