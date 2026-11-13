@@ -133,8 +133,9 @@ namespace Spt
         auto file = std::make_shared<SPTFile>();
         SPTStream stream(std::move(inputStream));
 
-        if (stream.eof() || stream.readSection() != 1000)
-            throw std::runtime_error("Not an SPT file: missing header");
+        if (stream.eof())
+            throw std::runtime_error("Not an SPT file: empty");
+        stream.expectSection(1000);
         file->mHeader.read(stream);
 
         while (!stream.eof())

@@ -19,17 +19,17 @@ namespace Spt
             std::string magic;
             ss >> magic;
             if (magic != "BezierSpline")
-                throw std::runtime_error("Invalid curve data: missing BezierSpline header");
+                throw std::runtime_error(std::format("Invalid curve data: expected BezierSpline, got '{}'", magic));
 
             Curve curve;
             ss >> curve.mMin >> curve.mMax >> curve.mVariance;
             if (!ss)
                 throw std::runtime_error("Invalid curve data: truncated range");
 
-            char brace{};
-            ss >> brace;
-            if (brace != '{')
-                throw std::runtime_error("Invalid curve data: missing opening brace");
+            char openBrace{};
+            ss >> openBrace;
+            if (openBrace != '{')
+                throw std::runtime_error(std::format("Invalid curve data: expected '{{', got '{}'", openBrace));
 
             int32_t numPoints{};
             ss >> numPoints;
@@ -40,13 +40,15 @@ namespace Spt
                 ControlPoint cp;
                 ss >> cp.mPosX >> cp.mPosY >> cp.mTanX >> cp.mTanY >> cp.mTanLen;
                 if (!ss)
-                    throw std::runtime_error("Invalid curve data: truncated control points");
+                    throw std::runtime_error(
+                        std::format("Invalid curve data: truncated at control point {} of {}", i, numPoints));
                 curve.mPoints.push_back(std::move(cp));
             }
 
-            ss >> brace;
-            if (brace != '}')
-                throw std::runtime_error("Invalid curve data: missing closing brace");
+            char closeBrace{};
+            ss >> closeBrace;
+            if (closeBrace != '}')
+                throw std::runtime_error(std::format("Invalid curve data: expected '}}', got '{}'", closeBrace));
 
             return curve;
         }

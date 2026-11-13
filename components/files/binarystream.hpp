@@ -1,11 +1,12 @@
 #ifndef OPENMW_COMPONENTS_FILES_BINARYSTREAM_HPP
 #define OPENMW_COMPONENTS_FILES_BINARYSTREAM_HPP
 
-#include <array>
+#include <cerrno>
 #include <cstddef>
 #include <cstdint>
 #include <format>
 #include <istream>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <system_error>
@@ -17,25 +18,6 @@
 
 namespace Files
 {
-    template <std::size_t numInstances, typename T>
-    inline void readBufferOfType(IStreamPtr& stream, T* dest)
-    {
-        static_assert(std::is_arithmetic_v<T>, "Buffer element type is not arithmetic");
-        stream->read(reinterpret_cast<char*>(dest), numInstances * sizeof(T));
-        if (stream->fail())
-            throw std::runtime_error(std::format("Failed to read typed ({}) buffer of {} instances: {}",
-                typeid(T).name(), numInstances, std::generic_category().message(errno)));
-        if constexpr (Misc::IS_BIG_ENDIAN)
-            for (std::size_t i = 0; i < numInstances; i++)
-                Misc::swapEndiannessInplace(dest[i]);
-    }
-
-    template <std::size_t numInstances, typename T>
-    inline void readBufferOfType(IStreamPtr& stream, T (&dest)[numInstances])
-    {
-        readBufferOfType<numInstances>(stream, static_cast<T*>(dest));
-    }
-
     // Reads little-endian values from a binary file
     class BinaryStream
     {
@@ -52,16 +34,23 @@ namespace Files
         void read(T& data)
         {
             if constexpr (std::is_arithmetic_v<T>)
-                readBufferOfType<1>(mStream, &data);
+                readArray(std::span(&data, 1));
             else
-                readBufferOfType(mStream, data._v);
+                readArray(std::span(data._v));
         }
 
-        /// Read multiple instances of type into an array
-        template <class T, std::size_t size>
-        void readArray(std::array<T, size>& arr)
+        /// Read numbers into any contiguous storage
+        template <class T, std::size_t extent>
+        void readArray(std::span<T, extent> dest)
         {
-            readBufferOfType<size>(mStream, arr.data());
+            static_assert(std::is_arithmetic_v<T>, "Buffer element type is not arithmetic");
+            mStream->read(reinterpret_cast<char*>(dest.data()), dest.size_bytes());
+            if (mStream->fail())
+                throw std::runtime_error(std::format("Failed to read typed ({}) buffer of {} instances: {}",
+                    typeid(T).name(), dest.size(), std::generic_category().message(errno)));
+            if constexpr (Misc::IS_BIG_ENDIAN)
+                for (T& value : dest)
+                    Misc::swapEndiannessInplace(value);
         }
 
         /// Read a u32 length and that many bytes, refusing lengths above maxLength
