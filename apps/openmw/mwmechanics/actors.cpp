@@ -415,6 +415,8 @@ namespace MWMechanics
         // unless a Travel or Activate package precedes it
         MWWorld::Ptr getSideWithTarget(const MWWorld::Ptr& actor)
         {
+            if (actor.getRefData().getCustomData() == nullptr)
+                return {};
             const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
             if (stats.isDead())
                 return {};
