@@ -1,6 +1,7 @@
 #include "file.hpp"
 
 #include <array>
+#include <span>
 #include <stdexcept>
 
 #include "stream.hpp"
@@ -13,7 +14,7 @@ namespace Bgsm
         BGSMStream stream(std::move(inputStream));
 
         std::array<char, 4> signature;
-        stream.readArray(signature);
+        stream.readArray(std::span(signature));
         std::string shaderType(signature.data(), 4);
         if (shaderType == "BGEM")
         {

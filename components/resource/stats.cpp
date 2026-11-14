@@ -89,6 +89,7 @@ namespace Resource
                 "Nif",
                 "Keyframe",
                 "BSShader Material",
+                "SPT",
                 "Groundcover Chunk",
                 "Object Chunk",
                 "Terrain Chunk",

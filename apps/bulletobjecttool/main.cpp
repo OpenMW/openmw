@@ -19,6 +19,7 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/niffilemanager.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/resource/sptfilemanager.hpp>
 #include <components/settings/settings.hpp>
 #include <components/toutf8/toutf8.hpp>
 #include <components/version/version.hpp>
@@ -175,7 +176,9 @@ namespace
         Resource::ImageManager imageManager(&vfs, expiryDelay);
         Resource::NifFileManager nifFileManager(&vfs, &encoder.getStatelessEncoder());
         Resource::BgsmFileManager bgsmFileManager(&vfs, expiryDelay);
-        Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager, &bgsmFileManager, expiryDelay);
+        Resource::SptFileManager sptFileManager(&vfs, expiryDelay);
+        Resource::SceneManager sceneManager(
+            &vfs, &imageManager, &nifFileManager, &bgsmFileManager, &sptFileManager, expiryDelay);
         Resource::BulletShapeManager bulletShapeManager(&vfs, &sceneManager, &nifFileManager, expiryDelay);
 
         Resource::forEachBulletObject(

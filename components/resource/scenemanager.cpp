@@ -32,6 +32,8 @@
 
 #include <components/nif/niffile.hpp>
 
+#include <components/sptosg/sptloader.hpp>
+
 #include <components/misc/algorithm.hpp>
 #include <components/misc/osguservalues.hpp>
 #include <components/misc/pathhelpers.hpp>
@@ -63,6 +65,7 @@
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
 #include "objectcache.hpp"
+#include "sptfilemanager.hpp"
 
 namespace
 {
@@ -489,13 +492,15 @@ namespace Resource
     };
 
     SceneManager::SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
-        Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* bgsmFileManager, double expiryDelay)
+        Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* bgsmFileManager,
+        Resource::SptFileManager* sptFileManager, double expiryDelay)
         : NodeResourceManager<std::string>(vfs, expiryDelay)
         , mShaderManager(new Shader::ShaderManager)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
         , mBgsmFileManager(bgsmFileManager)
+        , mSptFileManager(sptFileManager)
         , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
         , mMagFilter(osg::Texture::LINEAR)
         , mMaxAnisotropy(1.f)
@@ -833,16 +838,13 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> load(VFS::Path::NormalizedView normalizedFilename, const VFS::Manager* vfs,
         Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager,
-        Resource::BgsmFileManager* materialMgr)
+        Resource::BgsmFileManager* materialMgr, Resource::SptFileManager* sptFileManager)
     {
         const std::string_view ext = Misc::getFileExtension(normalizedFilename.value());
         if (ext == "nif")
             return NifOsg::Loader::load(*nifFileManager->get(normalizedFilename), imageManager, materialMgr);
         else if (ext == "spt")
-        {
-            Log(Debug::Warning) << "Ignoring SpeedTree data file " << normalizedFilename;
-            return new osg::Node();
-        }
+            return SptOsg::Loader::load(*sptFileManager->get(normalizedFilename));
         else
             return loadNonNif(normalizedFilename, *vfs->get(normalizedFilename), imageManager);
     }
@@ -969,7 +971,7 @@ namespace Resource
             {
                 path.changeExtension(meshType);
                 if (mVFS->exists(path))
-                    return load(path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager);
+                    return load(path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager, mSptFileManager);
             }
         }
         catch (const std::exception& e)
@@ -1007,7 +1009,7 @@ namespace Resource
             osg::ref_ptr<osg::Node> loaded;
             try
             {
-                loaded = load(path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager);
+                loaded = load(path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager, mSptFileManager);
             }
             catch (const std::exception& e)
             {

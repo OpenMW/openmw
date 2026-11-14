@@ -27,6 +27,7 @@ namespace Resource
     class ImageManager;
     class BgsmFileManager;
     class NifFileManager;
+    class SptFileManager;
     class KeyframeManager;
     class BaseResourceManager;
     class AnimBlendRulesManager;
@@ -45,6 +46,7 @@ namespace Resource
         ImageManager* getImageManager();
         BgsmFileManager* getBgsmFileManager();
         NifFileManager* getNifFileManager();
+        SptFileManager* getSptFileManager();
         KeyframeManager* getKeyframeManager();
         AnimBlendRulesManager* getAnimBlendRulesManager();
 
@@ -80,6 +82,7 @@ namespace Resource
         std::unique_ptr<ImageManager> mImageManager;
         std::unique_ptr<BgsmFileManager> mBgsmFileManager;
         std::unique_ptr<NifFileManager> mNifFileManager;
+        std::unique_ptr<SptFileManager> mSptFileManager;
         std::unique_ptr<KeyframeManager> mKeyframeManager;
         std::unique_ptr<AnimBlendRulesManager> mAnimBlendRulesManager;
 

@@ -5,6 +5,7 @@
 #include <components/esm4/loadstat.hpp>
 #include <components/esm4/loadtree.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwbase/environment.hpp"
 
@@ -133,6 +134,20 @@ namespace MWClass
         ESM4Tree()
             : MWWorld::RegisteredClass<ESM4Tree, ESM4Base<ESM4::Tree>>(ESM4::Tree::sRecordId)
         {
+        }
+
+        VFS::Path::Normalized getCorrectedModel(const MWWorld::ConstPtr& ptr) const override
+        {
+            VFS::Path::NormalizedView model = getModel(ptr);
+            if (model.empty())
+                return {};
+            static constexpr VFS::Path::ExtensionView spt("spt");
+            if (model.extension() == spt)
+            {
+                static constexpr VFS::Path::NormalizedView prefix("trees");
+                return prefix / VFS::Path::Normalized(model);
+            }
+            return MWWorld::Class::getCorrectedModel(ptr);
         }
     };
 

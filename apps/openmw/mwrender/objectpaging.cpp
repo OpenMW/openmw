@@ -698,7 +698,15 @@ namespace MWRender
             VFS::Path::Normalized model = getModel(type, ref.mRefId, store);
             if (model.empty())
                 continue;
-            model = Misc::ResourceHelpers::correctMeshPath(model);
+            static constexpr VFS::Path::ExtensionView spt("spt");
+            // only tes4, fo3 and fnv use esm4 and speedtree
+            if (type == ESM::REC_TREE4 && model.extension() == spt)
+            {
+                static constexpr VFS::Path::NormalizedView prefix("trees");
+                model = prefix / model;
+            }
+            else
+                model = Misc::ResourceHelpers::correctMeshPath(model);
 
             if (activeGrid && type != ESM::REC_STAT && type != ESM::REC_STAT4)
             {
