@@ -410,6 +410,23 @@ namespace MWMechanics
             controls.mPitchChange = rotationX;
             controls.mYawChange = rotationZ;
         }
+
+        // The target of a living actor's first Follow or Escort package,
+        // unless a Travel or Activate package precedes it
+        MWWorld::Ptr getSideWithTarget(const MWWorld::Ptr& actor)
+        {
+            const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+            if (stats.isDead())
+                return {};
+            for (const auto& package : stats.getAiSequence())
+            {
+                if (package->sideWithTarget())
+                    return package->getTarget();
+                if (package->getTypeId() > AiPackageTypeId::Wander && package->getTypeId() <= AiPackageTypeId::Activate)
+                    break;
+            }
+            return {};
+        }
     }
 
     void Actors::updateActor(const MWWorld::Ptr& ptr, float duration) const
@@ -2149,22 +2166,6 @@ namespace MWMechanics
         }
 
         return false;
-    }
-
-    // The target of a living actor's first Follow or Escort package, unless a Travel or Activate package precedes it
-    static MWWorld::Ptr getSideWithTarget(const MWWorld::Ptr& actor)
-    {
-        const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-        if (stats.isDead())
-            return {};
-        for (const auto& package : stats.getAiSequence())
-        {
-            if (package->sideWithTarget())
-                return package->getTarget();
-            if (package->getTypeId() > AiPackageTypeId::Wander && package->getTypeId() <= AiPackageTypeId::Activate)
-                break;
-        }
-        return {};
     }
 
     std::vector<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actorPtr, bool excludeInfighting) const
