@@ -110,6 +110,9 @@ namespace MWMechanics
         bool isRunning(const MWWorld::Ptr& ptr) const;
         bool isSneaking(const MWWorld::Ptr& ptr) const;
 
+        bool isActive(const MWWorld::Ptr& ptr) const;
+        ///< Whether the actor is registered, i.e. enabled and in an active cell
+
         void forceStateUpdate(const MWWorld::Ptr& ptr) const;
 
         bool playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode, uint32_t number,

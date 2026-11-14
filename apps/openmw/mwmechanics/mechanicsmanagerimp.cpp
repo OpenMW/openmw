@@ -1547,7 +1547,7 @@ namespace MWMechanics
                     // Force friendly actors into combat to prevent infighting between followers
                     for (const auto& follower : cachedAllies.getActorsSidingWith(target))
                     {
-                        if (follower != attacker && follower != player)
+                        if (follower != attacker && follower != player && mActors.isActive(follower))
                             startCombat(follower, attacker, &attackerAllies);
                     }
                 }
