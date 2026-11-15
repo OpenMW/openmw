@@ -1,6 +1,6 @@
-#!/usr/bin/env -S uv run --script
+#!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.14"
+# requires-python = ">=3.9"
 # dependencies = [
 #     "click",
 #     "libclang",

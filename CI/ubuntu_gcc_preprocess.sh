@@ -39,7 +39,7 @@ cmake --build . --parallel
 
 cd ..
 
-scripts/preprocessed_file_size_stats.py --remove_prefix "${SRC}/" build > "${VERSION:?}.json"
+uv run --script scripts/preprocessed_file_size_stats.py --remove_prefix "${SRC}/" build > "${VERSION:?}.json"
 ls -al "${VERSION:?}.json"
 
 if [[ "${GENERATE_ONLY}" ]]; then
@@ -73,4 +73,4 @@ mv CI/ubuntu_gcc_preprocess.bak.sh CI/ubuntu_gcc_preprocess.sh
 env GENERATE_ONLY=1 CI/ubuntu_gcc_preprocess.sh
 git checkout --force "${VERSION:?}"
 
-scripts/preprocessed_file_size_stats_diff.py "${BASE_VERSION:?}.json" "${VERSION:?}.json"
+uv run --script scripts/preprocessed_file_size_stats_diff.py "${BASE_VERSION:?}.json" "${VERSION:?}.json"

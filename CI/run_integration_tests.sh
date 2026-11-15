@@ -13,7 +13,7 @@ if [[ ! -d example-suite ]]; then
 fi
 
 xvfb-run --auto-servernum --server-args='-screen 0 640x480x24x60' \
-    scripts/integration_tests.py \
+    uv run --script scripts/integration_tests.py \
         --verbose \
         --omw ${OPENMW_BINARY:-build/install/bin/openmw} \
         --workdir integration_tests_output \
@@ -26,5 +26,5 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24x60' \
         scripts/data/integration_tests
 
 ls integration_tests_output/*.osg_stats.log | while read v; do
-    scripts/osg_stats.py --stats '.*' --regexp_match < "${v}"
+    uv run --script scripts/osg_stats.py --stats '.*' --regexp_match < "${v}"
 done
