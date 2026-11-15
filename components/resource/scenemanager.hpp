@@ -2,9 +2,11 @@
 #define OPENMW_COMPONENTS_RESOURCE_SCENEMANAGER_H
 
 #include <array>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_set>
 
 #include <osg/Texture>
 #include <osg/ref_ptr>
@@ -12,6 +14,7 @@
 #include "resourcemanager.hpp"
 
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/vfs/pathutil.hpp>
 #include <filesystem>
 
 namespace VFS
@@ -56,6 +59,8 @@ namespace Resource
     class SceneManager : public NodeResourceManager<std::string>
     {
     public:
+        using BlacklistModelSet = std::unordered_set<VFS::Path::Normalized, VFS::Path::Hash, std::equal_to<>>;
+
         explicit SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
             Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* bgsmFileManager,
             Resource::SptFileManager* sptFileManager, double expiryDelay);
@@ -190,6 +195,8 @@ namespace Resource
 
         void setWeatherParticleOcclusion(bool value) { mWeatherParticleOcclusion = value; }
 
+        void setOptimizerBlacklist(BlacklistModelSet blacklist) { mOptimizerBlacklist = std::move(blacklist); }
+
     private:
         osg::ref_ptr<Shader::ShaderVisitor> createShaderVisitor(const std::string& shaderPrefix = "objects");
         osg::ref_ptr<osg::Node> loadErrorMarker();
@@ -217,6 +224,8 @@ namespace Resource
         osg::Texture::FilterMode mMinFilter;
         osg::Texture::FilterMode mMagFilter;
         float mMaxAnisotropy;
+
+        BlacklistModelSet mOptimizerBlacklist;
 
         unsigned int mParticleSystemMask;
         bool mSupportsClusteredLighting = false;

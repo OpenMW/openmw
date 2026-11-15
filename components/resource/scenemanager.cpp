@@ -41,7 +41,6 @@
 #include <components/misc/strings/conversion.hpp>
 
 #include <components/vfs/manager.hpp>
-#include <components/vfs/pathutil.hpp>
 
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/controller.hpp>
@@ -838,11 +837,15 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> load(VFS::Path::NormalizedView normalizedFilename, const VFS::Manager* vfs,
         Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager,
-        Resource::BgsmFileManager* materialMgr, Resource::SptFileManager* sptFileManager)
+        Resource::BgsmFileManager* materialMgr, Resource::SptFileManager* sptFileManager, unsigned int& nifVersion)
     {
         const std::string_view ext = Misc::getFileExtension(normalizedFilename.value());
         if (ext == "nif")
-            return NifOsg::Loader::load(*nifFileManager->get(normalizedFilename), imageManager, materialMgr);
+        {
+            const Nif::NIFFilePtr file = nifFileManager->get(normalizedFilename);
+            nifVersion = file->mVersion;
+            return NifOsg::Loader::load(*file, imageManager, materialMgr);
+        }
         else if (ext == "spt")
             return SptOsg::Loader::load(*sptFileManager->get(normalizedFilename));
         else
@@ -891,14 +894,18 @@ namespace Resource
         }
     };
 
-    static bool canOptimize(std::string_view filename)
+    static bool canOptimize(
+        std::string_view filename, unsigned int nifVersion, const SceneManager::BlacklistModelSet& blacklist)
     {
+        if (blacklist.contains(filename))
+            return false;
+
         const std::string_view::size_type slashpos = filename.find_last_of('/');
         if (slashpos != std::string_view::npos && slashpos + 1 < filename.size())
         {
             const std::string_view basename = filename.substr(slashpos + 1);
-            // xmesh.nif can not be optimized because there are keyframes added in post
-            if (!basename.empty() && basename[0] == 'x')
+            // TES3 only: xmesh.nif can not be optimized because there are keyframes added in post
+            if (nifVersion <= Nif::NIFFile::NIFVersion::VER_MW && !basename.empty() && basename[0] == 'x')
                 return false;
 
             // NPC skeleton files can not be optimized because of keyframes added in post
@@ -971,7 +978,11 @@ namespace Resource
             {
                 path.changeExtension(meshType);
                 if (mVFS->exists(path))
-                    return load(path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager, mSptFileManager);
+                {
+                    unsigned int nifVersion = 0;
+                    return load(
+                        path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager, mSptFileManager, nifVersion);
+                }
             }
         }
         catch (const std::exception& e)
@@ -1007,9 +1018,11 @@ namespace Resource
         else
         {
             osg::ref_ptr<osg::Node> loaded;
+            unsigned int nifVersion = 0;
             try
             {
-                loaded = load(path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager, mSptFileManager);
+                loaded
+                    = load(path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager, mSptFileManager, nifVersion);
             }
             catch (const std::exception& e)
             {
@@ -1027,7 +1040,7 @@ namespace Resource
             osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor());
             loaded->accept(*shaderVisitor);
 
-            if (canOptimize(path.value()))
+            if (canOptimize(path.value(), nifVersion, mOptimizerBlacklist))
             {
                 SceneUtil::Optimizer optimizer;
                 optimizer.setSharedStateManager(mSharedStateManager, &mSharedStateMutex);
