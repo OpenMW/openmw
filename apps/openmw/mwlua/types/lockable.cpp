@@ -22,8 +22,6 @@ namespace MWLua
             return MWBase::Environment::get().getESMStore()->get<ESM::Miscellaneous>().find(key);
         };
         lockable["lock"] = [](const GObject& object, sol::optional<int> lockLevel) {
-            object.ptr().getCellRef().setLocked(true);
-
             int level = 1;
 
             if (lockLevel)
@@ -33,14 +31,12 @@ namespace MWLua
             else if (object.ptr().getCellRef().getLockLevel() > 0)
                 level = object.ptr().getCellRef().getLockLevel();
 
-            object.ptr().getCellRef().setLockLevel(level);
+            object.ptr().getCellRef().lock(level);
         };
         lockable["unlock"] = [](const GObject& object) {
             if (!object.ptr().getCellRef().isLocked())
                 return;
-            object.ptr().getCellRef().setLocked(false);
-
-            object.ptr().getCellRef().setLockLevel(-object.ptr().getCellRef().getLockLevel());
+            object.ptr().getCellRef().unlock();
         };
         lockable["setTrapSpell"] = [](const GObject& object, const sol::object& spellOrId) {
             if (spellOrId == sol::nil)
