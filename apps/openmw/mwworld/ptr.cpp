@@ -11,6 +11,8 @@ namespace MWWorld
         , mPtr(ptr)
         , mLastUpdate(MWBase::Environment::get().getWorldModel()->getPtrRegistryRevision())
     {
+        if (!mId.isSet())
+            mPtr = {};
     }
 
     std::string SafePtr::toString() const
