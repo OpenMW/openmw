@@ -10,7 +10,7 @@
 
 namespace
 {
-    constexpr int ZeroLock = std::numeric_limits<int>::max();
+    constexpr int32_t ZeroLock = std::numeric_limits<int32_t>::max();
 }
 
 namespace ESM
@@ -232,7 +232,7 @@ namespace ESM
         {
             if (mIsLocked)
             {
-                int lockLevel = mLockLevel;
+                int32_t lockLevel = mLockLevel;
                 if (lockLevel == 0)
                     lockLevel = ZeroLock;
                 esm.writeHNT("FLTV", lockLevel);
