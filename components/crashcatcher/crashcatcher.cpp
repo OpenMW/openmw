@@ -198,7 +198,8 @@ namespace
                 nullptr,
                 "Fatal Error",
                 "OpenMW has encountered a fatal error.\n"
-                "Allow debugger to connect to debuginfod server to generate a more detailed crash log?\n"
+                "A crash log will be generated.\n"
+                "Allow debugger to connect to debuginfod server to include extra detail?\n"
                 "It may take several minutes longer to generate the crash log.",
                 buttons.size(),
                 buttons.data(),
