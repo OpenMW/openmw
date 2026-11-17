@@ -540,6 +540,11 @@ if [ -n "$USE_CCACHE" ]; then
 	fi
 fi
 
+if [ -n "$CI" ] && [ -n "$NINJA" ]; then
+	# linking openmw and openmw-tests in parallel takes ~45 minutes each on CI runners, one at a time takes a few minutes
+	add_cmake_opts "-DCMAKE_JOB_POOLS=link=1 -DCMAKE_JOB_POOL_LINK=link"
+fi
+
 # turn on LTO by default
 add_cmake_opts "-DOPENMW_LTO_BUILD=True"
 
