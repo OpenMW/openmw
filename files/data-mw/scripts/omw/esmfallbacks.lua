@@ -254,6 +254,7 @@ local function generateDefaultWeathers()
         local windSpeed = getFloat(('Weather_%s_Wind_Speed'):format(recordId))
         local fStromWindSpeed = getFloat('fStromWindSpeed')
         local rainEntranceSpeed = getFloat(('Weather_%s_Rain_Entrance_Speed'):format(recordId))
+        local cloudsMaximumPercent = getFloat(('Weather_%s_Clouds_Maximum_Percent'):format(recordId))
         local weather = {
             scriptId = index - 1,
             name = recordId,
@@ -279,7 +280,7 @@ local function generateDefaultWeathers()
             rainThreshold = getFloat(('Weather_%s_Rain_Threshold'):format(recordId)),
             rainMinHeight = getFloat(('Weather_%s_Rain_Height_Min'):format(recordId)),
             rainMaxHeight = getFloat(('Weather_%s_Rain_Height_Max'):format(recordId)),
-            cloudsMaximumPercent = getFloat(('Weather_%s_Clouds_Maximum_Percent'):format(recordId)),
+            cloudsMaximumPercent = cloudsMaximumPercent > 0 and cloudsMaximumPercent or nil,
             isStorm = windSpeed > fStromWindSpeed,
             cloudTexture = getString(('Weather_%s_Cloud_Texture'):format(recordId)),
             distantLandFogFactor = dlFactor,
