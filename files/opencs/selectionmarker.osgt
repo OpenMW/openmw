@@ -100,7 +100,7 @@ osg::Group {
                           AttributeList 1 {
                             SceneUtil::Material {
                               UniqueID 17 
-                              Ambient 0.8 0.123281 0.11568 1 
+                              Ambient 0 0 0 1 
                               Diffuse 0 0 0 1 
                               Specular 0 0 0 1 
                               Emission 0.8 0.123281 0.11568 1 
@@ -1151,7 +1151,7 @@ osg::Group {
                           AttributeList 1 {
                             SceneUtil::Material {
                               UniqueID 30 
-                              Ambient 0.0512699 0.38982 0.8 1 
+                              Ambient 0 0 0 1 
                               Diffuse 0 0 0 1 
                               Specular 0 0 0 1 
                               Emission 0.0512699 0.38982 0.8 1 
@@ -2202,7 +2202,7 @@ osg::Group {
                           AttributeList 1 {
                             SceneUtil::Material {
                               UniqueID 43 
-                              Ambient 0.190456 0.8 0.229407 1 
+                              Ambient 0 0 0 1 
                               Diffuse 0 0 0 1 
                               Specular 0 0 0 1 
                               Emission 0.190456 0.8 0.229407 1 
@@ -3474,7 +3474,7 @@ osg::Group {
                           AttributeList 3 {
                             SceneUtil::Material {
                               UniqueID 63 
-                              Ambient 0.05127 0.38982 0.8 1 
+                              Ambient 0 0 0 1 
                               Diffuse 0 0 0 1 
                               Specular 0 0 0 1 
                               Emission 0.05127 0.38982 0.8 1 
@@ -3646,7 +3646,7 @@ osg::Group {
                           AttributeList 3 {
                             SceneUtil::Material {
                               UniqueID 78 
-                              Ambient 0.190456 0.8 0.229407 1 
+                              Ambient 0 0 0 1 
                               Diffuse 0 0 0 1 
                               Specular 0 0 0 1 
                               Emission 0.190456 0.8 0.229407 1 
@@ -4253,7 +4253,7 @@ osg::Group {
                           AttributeList 3 {
                             SceneUtil::Material {
                               UniqueID 105 
-                              Ambient 0.8 0.123281 0.11568 1 
+                              Ambient 0 0 0 1 
                               Diffuse 0 0 0 1 
                               Specular 0 0 0 1 
                               Emission 0.8 0.123281 0.11568 1 
