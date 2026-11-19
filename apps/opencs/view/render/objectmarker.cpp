@@ -107,17 +107,6 @@ namespace CSVRender
 
         mBaseNode->accept(matMapper);
 
-        for (const auto& [name, node] : mMarkerNodes)
-        {
-            osg::StateSet* state = node->getStateSet();
-            SceneUtil::Material* mat
-                = static_cast<SceneUtil::Material*>(state->getAttribute(osg::StateAttribute::MATERIAL));
-            osg::Vec4f emis = mat->getEmission();
-            mat->setEmission(emis / 4);
-            mat->updateStateSet(state);
-            mOriginalColors.emplace(name, emis);
-        }
-
         SceneUtil::NodeMap sceneNodes;
         SceneUtil::NodeMapVisitor nodeMapper(sceneNodes);
         mBaseNode->accept(nodeMapper);
@@ -258,7 +247,10 @@ namespace CSVRender
             return;
 
         for (const auto& [nodeName, mat] : mLastHighlightedNodes)
-            mat->setEmission(mat->getEmission() / 4);
+        {
+            mat->setEmissiveMultiplier(1.f);
+            mat->updateStateSet(mMarkerNodes.at(nodeName)->getStateSet());
+        }
 
         mLastHighlightedNodes.clear();
         mLastHitNode.clear();
@@ -300,7 +292,7 @@ namespace CSVRender
             osg::StateAttribute* matAttr = state->getAttribute(osg::StateAttribute::MATERIAL);
 
             SceneUtil::Material* mat = static_cast<SceneUtil::Material*>(matAttr);
-            mat->setEmission(mOriginalColors[materialNodeName]);
+            mat->setEmissiveMultiplier(1.75f);
             mat->updateStateSet(state);
 
             mLastHighlightedNodes.emplace(std::make_pair(matNode->getName(), mat));

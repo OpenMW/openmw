@@ -35,7 +35,6 @@ namespace CSVRender
         NodeMap mMarkerNodes;
         osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
         osg::ref_ptr<osg::PositionAttitudeTransform> mRootNode;
-        std::unordered_map<std::string, osg::Vec4f> mOriginalColors;
         std::vector<std::string> mSelectionHistory;
         std::string mLastHitNode;
         std::unordered_map<std::string, SceneUtil::Material*> mLastHighlightedNodes;
