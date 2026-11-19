@@ -184,7 +184,7 @@ namespace MWWorld
         /// Validate entries in store after setup
         void validate();
 
-        void countAllCellRefsAndMarkKeys(ESM::ReadersCache& readers);
+        void countAllCellRefsAndMarkKeys(ESM::ReadersCache& readers, Loading::Listener* listener);
 
         template <class T>
         void removeMissingObjects(Store<T>& store);
@@ -294,7 +294,7 @@ namespace MWWorld
         // This method must be called once, after loading all master/plugin files. This can only be done
         //  from the outside, so it must be public.
         void setUp();
-        void validateRecords(ESM::ReadersCache& readers);
+        void validateRecords(ESM::ReadersCache& readers, Loading::Listener* listener);
 
         size_t countSavedGameRecords() const;
 

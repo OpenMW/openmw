@@ -238,8 +238,14 @@ namespace MWWorld
 
         fillGlobalVariables();
 
+        if (listener != nullptr)
+        {
+            listener->setLabel("#{OMWEngine:InitializingData}");
+            listener->setProgressRange(1);
+        }
+
         mStore.setUp();
-        mStore.validateRecords(mReaders);
+        mStore.validateRecords(mReaders, listener);
         mStore.movePlayerRecord();
 
         mResourceSystem->getSceneManager()->setOptimizerBlacklist(MWRender::getESM4ActorModels(mStore));
