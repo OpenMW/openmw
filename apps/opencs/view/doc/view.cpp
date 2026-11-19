@@ -807,8 +807,7 @@ void CSVDoc::View::infoAbout()
                               .c_str();
 #endif
 
-    // Get the compilation year
-    const auto copyrightInfo = tr("Copyright © 2008-%1 OpenMW Team").arg(QString::fromLatin1(__DATE__).right(4));
+    const auto copyrightInfo = tr("Copyright © 2008-%1 OpenMW Team").arg(Version::getCopyrightYear());
 
     QString aboutText = QString(
         "<p style=\"white-space: pre-wrap;\">"
