@@ -206,7 +206,8 @@ void CSVWorld::DialogueDelegateDispatcher::setEditorData(QWidget* editor, const 
     }
     else
     {
-        display = mTable->getColumnDisplay(index.column());
+        display = static_cast<CSMWorld::ColumnBase::Display>(
+            mTable->headerData(index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
     }
 
     QLabel* label = qobject_cast<QLabel*>(editor);
