@@ -269,15 +269,14 @@ bool CSVRender::Cell::referenceDataChanged(const QModelIndex& topLeft, const QMo
 
     for (int i = topLeft.row(); i <= bottomRight.row(); ++i)
     {
-        auto cell
-            = ESM::RefId::stringRefId(references.data(references.index(i, cellColumn)).toString().toUtf8().constData());
+        auto cell = ESM::RefId::stringRefId(references.getData(i, cellColumn).toString().toUtf8().constData());
 
         if (cell == mId)
         {
-            std::string id = Misc::StringUtils::lowerCase(
-                references.data(references.index(i, idColumn)).toString().toUtf8().constData());
+            std::string id
+                = Misc::StringUtils::lowerCase(references.getData(i, idColumn).toString().toUtf8().constData());
 
-            int state = references.data(references.index(i, stateColumn)).toInt();
+            int state = references.getData(i, stateColumn).toInt();
 
             ids.insert(std::make_pair(id, state == CSMWorld::RecordBase::State_Deleted));
         }
@@ -339,7 +338,7 @@ bool CSVRender::Cell::referenceAboutToBeRemoved(const QModelIndex& parent, int s
     bool modified = false;
 
     for (int row = start; row <= end; ++row)
-        if (removeObject(references.data(references.index(row, idColumn)).toString().toUtf8().constData()))
+        if (removeObject(references.getData(row, idColumn).toString().toUtf8().constData()))
             modified = true;
 
     return modified;

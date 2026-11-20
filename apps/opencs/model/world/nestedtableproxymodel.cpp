@@ -143,7 +143,7 @@ void CSMWorld::NestedTableProxyModel::forwardRowsInserted(const QModelIndex& par
 bool CSMWorld::NestedTableProxyModel::indexIsParent(const QModelIndex& index)
 {
     return (index.isValid() && index.column() == mParentColumn
-        && mMainModel->data(mMainModel->index(index.row(), 0)).toString().toUtf8().constData() == mId);
+        && mMainModel->getData(index.row(), 0).toString().toUtf8().constData() == mId);
 }
 
 void CSMWorld::NestedTableProxyModel::forwardRowsAboutToRemoved(const QModelIndex& parent, int first, int last)

@@ -232,9 +232,9 @@ void CSMTools::Search::searchRow(const CSMWorld::IdTableBase* model, int row, CS
         QModelIndex index = model->index(row, *iter);
 
         CSMWorld::UniversalId::Type type
-            = static_cast<CSMWorld::UniversalId::Type>(model->data(model->index(row, mTypeColumn)).toInt());
+            = static_cast<CSMWorld::UniversalId::Type>(model->getData(row, mTypeColumn).toInt());
 
-        CSMWorld::UniversalId id(type, model->data(model->index(row, mIdColumn)).toString().toUtf8().data());
+        CSMWorld::UniversalId id(type, model->getData(row, mIdColumn).toString().toUtf8().data());
 
         bool writable = model->flags(index) & Qt::ItemIsEditable;
 

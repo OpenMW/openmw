@@ -43,8 +43,7 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getDeletableRecords() cons
         int row = model.getModelIndex(*iter, 0).row();
 
         // check record state
-        RecordBase::State state
-            = static_cast<RecordBase::State>(model.data(model.index(row, stateColumnIndex)).toInt());
+        RecordBase::State state = static_cast<RecordBase::State>(model.getData(row, stateColumnIndex).toInt());
 
         if (state == RecordBase::State_Deleted)
             continue;
@@ -54,7 +53,7 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getDeletableRecords() cons
 
         if (dialogueTypeIndex != -1)
         {
-            int type = model.data(model.index(row, dialogueTypeIndex)).toInt();
+            int type = model.getData(row, dialogueTypeIndex).toInt();
 
             if (type != ESM::Dialogue::Topic && type != ESM::Dialogue::Journal)
                 continue;
@@ -84,8 +83,7 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getRevertableRecords() con
         int row = model.getModelIndex(*iter, 0).row();
 
         // check record state
-        RecordBase::State state
-            = static_cast<RecordBase::State>(model.data(model.index(row, stateColumnIndex)).toInt());
+        RecordBase::State state = static_cast<RecordBase::State>(model.getData(row, stateColumnIndex).toInt());
 
         if (state == RecordBase::State_BaseOnly)
             continue;
@@ -228,10 +226,9 @@ void CSMWorld::CommandDispatcher::executeDelete()
         if (mId.getType() == UniversalId::Type_Referenceables)
         {
             macro.push(new CSMWorld::DeleteCommand(model, id,
-                static_cast<CSMWorld::UniversalId::Type>(
-                    model
-                        .data(model.index(model.getModelIndex(id, columnIndex).row(),
-                            model.findColumnIndex(CSMWorld::Columns::ColumnId_RecordType)))
+                static_cast<CSMWorld::UniversalId::Type>(model
+                        .getData(model.getModelIndex(id, columnIndex).row(),
+                            model.findColumnIndex(CSMWorld::Columns::ColumnId_RecordType))
                         .toInt())));
         }
         else

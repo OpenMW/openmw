@@ -268,12 +268,12 @@ CSVWidget::SceneToolRun* CSVRender::WorldspaceWidget::makeRunTool(CSVWidget::Sce
 
     for (int i = 0; i < size; ++i)
     {
-        int state = debugProfiles.data(debugProfiles.index(i, stateColumn)).toInt();
+        int state = debugProfiles.getData(i, stateColumn).toInt();
 
-        const bool defaultValue = debugProfiles.data(debugProfiles.index(i, defaultColumn)).toInt();
+        const bool defaultValue = debugProfiles.getData(i, defaultColumn).toInt();
 
         if (state != CSMWorld::RecordBase::State_Deleted && defaultValue)
-            profiles.emplace_back(debugProfiles.data(debugProfiles.index(i, idColumn)).toString().toUtf8().constData());
+            profiles.emplace_back(debugProfiles.getData(i, idColumn).toString().toUtf8().constData());
     }
 
     std::sort(profiles.begin(), profiles.end());
@@ -585,14 +585,14 @@ void CSVRender::WorldspaceWidget::debugProfileDataChanged(const QModelIndex& top
 
     for (int i = topLeft.row(); i <= bottomRight.row(); ++i)
     {
-        int state = debugProfiles.data(debugProfiles.index(i, stateColumn)).toInt();
+        int state = debugProfiles.getData(i, stateColumn).toInt();
 
         // As of version 0.33 this case can not happen because debug profiles exist only in
         // project or session scope, which means they will never be in deleted state. But we
         // are adding the code for the sake of completeness and to avoid surprises if debug
         // profile ever get extended to content scope.
         if (state == CSMWorld::RecordBase::State_Deleted)
-            mRun->removeProfile(debugProfiles.data(debugProfiles.index(i, idColumn)).toString().toUtf8().constData());
+            mRun->removeProfile(debugProfiles.getData(i, idColumn).toString().toUtf8().constData());
     }
 }
 
@@ -611,7 +611,7 @@ void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved(const QModelIndex
 
     for (int i = start; i <= end; ++i)
     {
-        mRun->removeProfile(debugProfiles.data(debugProfiles.index(i, idColumn)).toString().toUtf8().constData());
+        mRun->removeProfile(debugProfiles.getData(i, idColumn).toString().toUtf8().constData());
     }
 }
 
