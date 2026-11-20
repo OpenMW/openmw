@@ -106,8 +106,7 @@ namespace CSMWorld
     template <typename RecordT>
     QVariant BaseRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        const Record<RecordT>& record
-            = static_cast<const Record<RecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+        const Record<RecordT>& record = data.getRecord<RecordT>(index, mType);
 
         if (column == mBase.mId)
             return QString::fromStdString(record.get().mId.toString());
@@ -133,7 +132,7 @@ namespace CSMWorld
     void BaseRefIdAdapter<RecordT>::setData(
         const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+        Record<RecordT>& record = data.getRecord<RecordT>(index, mType);
 
         if (column == mBase.mModified)
             record.mState = static_cast<RecordBase::State>(value.toInt());
@@ -203,8 +202,7 @@ namespace CSMWorld
     template <typename RecordT>
     QVariant ModelRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         if (column == mModel.mModel)
             return QString::fromStdString(record.get().mModel.getOriginal());
@@ -219,8 +217,7 @@ namespace CSMWorld
     void ModelRefIdAdapter<RecordT>::setData(
         const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         RecordT record2 = record.get();
         if (column == mModel.mModel)
@@ -279,8 +276,7 @@ namespace CSMWorld
     template <typename RecordT>
     QVariant NameRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         if (column == mName.mName)
             return QString::fromUtf8(record.get().mName.c_str());
@@ -295,8 +291,7 @@ namespace CSMWorld
     void NameRefIdAdapter<RecordT>::setData(
         const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         RecordT record2 = record.get();
         if (column == mName.mName)
@@ -352,8 +347,7 @@ namespace CSMWorld
     template <typename RecordT>
     QVariant InventoryRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         if (column == mInventory.mIcon)
             return QString::fromStdString(record.get().mIcon.getOriginal());
@@ -371,8 +365,7 @@ namespace CSMWorld
     void InventoryRefIdAdapter<RecordT>::setData(
         const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         RecordT record2 = record.get();
         if (column == mInventory.mIcon)
@@ -508,8 +501,7 @@ namespace CSMWorld
     QVariant EnchantableRefIdAdapter<RecordT>::getData(
         const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         if (column == mEnchantable.mEnchantment)
             return QString::fromUtf8(record.get().mEnchant.getRefIdString().c_str());
@@ -524,8 +516,7 @@ namespace CSMWorld
     void EnchantableRefIdAdapter<RecordT>::setData(
         const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         RecordT record2 = record.get();
         if (column == mEnchantable.mEnchantment)
@@ -579,8 +570,7 @@ namespace CSMWorld
     template <typename RecordT>
     QVariant ToolRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         if (column == mTools.mQuality)
             return record.get().mData.mQuality;
@@ -595,8 +585,7 @@ namespace CSMWorld
     void ToolRefIdAdapter<RecordT>::setData(
         const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         RecordT record2 = record.get();
         if (column == mTools.mQuality)
@@ -663,8 +652,7 @@ namespace CSMWorld
     template <typename RecordT>
     QVariant ActorRefIdAdapter<RecordT>::getData(const RefIdColumn* column, const RefIdData& data, int index) const
     {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        const Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         if (column == mActors.mHello)
             return record.get().mAiData.mHello;
@@ -702,8 +690,7 @@ namespace CSMWorld
     void ActorRefIdAdapter<RecordT>::setData(
         const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
     {
-        Record<RecordT>& record = static_cast<Record<RecordT>&>(
-            data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
+        Record<RecordT>& record = data.getRecord<RecordT>(index, BaseRefIdAdapter<RecordT>::getType());
 
         RecordT record2 = record.get();
         if (column == mActors.mHello)
@@ -1127,46 +1114,40 @@ namespace CSMWorld
 
         void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             EffectsListAdapter<ESXRecordT>::addRow(record, position);
         }
 
         void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             EffectsListAdapter<ESXRecordT>::removeRow(record, rowToRemove);
         }
 
         void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
             const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             EffectsListAdapter<ESXRecordT>::setTable(record, nestedTable);
         }
 
         NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             return EffectsListAdapter<ESXRecordT>::table(record);
         }
 
         QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
             int subColIndex) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             return EffectsListAdapter<ESXRecordT>::getData(record, subRowIndex, subColIndex);
         }
 
         void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
             int subColIndex) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(row, mType);
             EffectsListAdapter<ESXRecordT>::setData(record, value, subRowIndex, subColIndex);
         }
 
@@ -1178,8 +1159,7 @@ namespace CSMWorld
 
         int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             return EffectsListAdapter<ESXRecordT>::getRowsCount(record);
         }
     };
@@ -1203,8 +1183,7 @@ namespace CSMWorld
 
         void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT container = record.get();
 
             std::vector<ESM::ContItem>& list = container.mInventory.mList;
@@ -1221,8 +1200,7 @@ namespace CSMWorld
 
         void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT container = record.get();
 
             std::vector<ESM::ContItem>& list = container.mInventory.mList;
@@ -1238,20 +1216,17 @@ namespace CSMWorld
         void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
             const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT container = record.get();
 
-            container.mInventory.mList
-                = static_cast<const NestedTableWrapper<std::vector<typename ESM::ContItem>>&>(nestedTable).mNestedTable;
+            container.mInventory.mList = nestedTable.get<std::vector<typename ESM::ContItem>>();
 
             record.setModified(container);
         }
 
         NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             // deleted by dtor of NestedTableStoring
             return new NestedTableWrapper<std::vector<typename ESM::ContItem>>(record.get().mInventory.mList);
@@ -1260,8 +1235,7 @@ namespace CSMWorld
         QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
             int subColIndex) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             const std::vector<ESM::ContItem>& list = record.get().mInventory.mList;
 
@@ -1284,8 +1258,7 @@ namespace CSMWorld
         void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
             int subColIndex) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(row, mType);
             ESXRecordT container = record.get();
             std::vector<ESM::ContItem>& list = container.mInventory.mList;
 
@@ -1313,8 +1286,7 @@ namespace CSMWorld
 
         int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             return static_cast<int>(record.get().mInventory.mList.size());
         }
@@ -1339,8 +1311,7 @@ namespace CSMWorld
 
         void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT caster = record.get();
 
             std::vector<ESM::RefId>& list = caster.mSpells.mList;
@@ -1357,8 +1328,7 @@ namespace CSMWorld
 
         void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT caster = record.get();
 
             std::vector<ESM::RefId>& list = caster.mSpells.mList;
@@ -1374,20 +1344,17 @@ namespace CSMWorld
         void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
             const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT caster = record.get();
 
-            caster.mSpells.mList
-                = static_cast<const NestedTableWrapper<std::vector<typename ESM::RefId>>&>(nestedTable).mNestedTable;
+            caster.mSpells.mList = nestedTable.get<std::vector<typename ESM::RefId>>();
 
             record.setModified(caster);
         }
 
         NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             // deleted by dtor of NestedTableStoring
             return new NestedTableWrapper<std::vector<typename ESM::RefId>>(record.get().mSpells.mList);
@@ -1396,8 +1363,7 @@ namespace CSMWorld
         QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
             int subColIndex) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             const std::vector<ESM::RefId>& list = record.get().mSpells.mList;
 
@@ -1415,8 +1381,7 @@ namespace CSMWorld
         void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
             int subColIndex) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(row, mType);
             ESXRecordT caster = record.get();
             std::vector<ESM::RefId>& list = caster.mSpells.mList;
 
@@ -1435,8 +1400,7 @@ namespace CSMWorld
 
         int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             return static_cast<int>(record.get().mSpells.mList.size());
         }
@@ -1461,8 +1425,7 @@ namespace CSMWorld
 
         void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT traveller = record.get();
 
             std::vector<ESM::Transport::Dest>& list = traveller.mTransport.mList;
@@ -1488,8 +1451,7 @@ namespace CSMWorld
 
         void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT traveller = record.get();
 
             std::vector<ESM::Transport::Dest>& list = traveller.mTransport.mList;
@@ -1505,21 +1467,17 @@ namespace CSMWorld
         void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
             const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT traveller = record.get();
 
-            traveller.mTransport.mList
-                = static_cast<const NestedTableWrapper<std::vector<typename ESM::Transport::Dest>>&>(nestedTable)
-                      .mNestedTable;
+            traveller.mTransport.mList = nestedTable.get<std::vector<typename ESM::Transport::Dest>>();
 
             record.setModified(traveller);
         }
 
         NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             // deleted by dtor of NestedTableStoring
             return new NestedTableWrapper<std::vector<typename ESM::Transport::Dest>>(record.get().mTransport.mList);
@@ -1528,8 +1486,7 @@ namespace CSMWorld
         QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
             int subColIndex) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             const std::vector<ESM::Transport::Dest>& list = record.get().mTransport.mList;
 
@@ -1562,8 +1519,7 @@ namespace CSMWorld
         void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
             int subColIndex) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(row, mType);
             ESXRecordT traveller = record.get();
             std::vector<ESM::Transport::Dest>& list = traveller.mTransport.mList;
 
@@ -1604,8 +1560,7 @@ namespace CSMWorld
 
         int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             return static_cast<int>(record.get().mTransport.mList.size());
         }
@@ -1632,8 +1587,7 @@ namespace CSMWorld
         //        that wasn't used already (in extreme case do not add anything at all?
         void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT actor = record.get();
 
             std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
@@ -1658,8 +1612,7 @@ namespace CSMWorld
 
         void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT actor = record.get();
 
             std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
@@ -1675,21 +1628,17 @@ namespace CSMWorld
         void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
             const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT actor = record.get();
 
-            actor.mAiPackage.mList
-                = static_cast<const NestedTableWrapper<std::vector<typename ESM::AIPackage>>&>(nestedTable)
-                      .mNestedTable;
+            actor.mAiPackage.mList = nestedTable.get<std::vector<typename ESM::AIPackage>>();
 
             record.setModified(actor);
         }
 
         NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             // deleted by dtor of NestedTableStoring
             return new NestedTableWrapper<std::vector<typename ESM::AIPackage>>(record.get().mAiPackage.mList);
@@ -1698,8 +1647,7 @@ namespace CSMWorld
         QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
             int subColIndex) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             const std::vector<ESM::AIPackage>& list = record.get().mAiPackage.mList;
 
@@ -1811,8 +1759,7 @@ namespace CSMWorld
         void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
             int subColIndex) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(row, mType);
             ESXRecordT actor = record.get();
             std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
 
@@ -1960,8 +1907,7 @@ namespace CSMWorld
 
         int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             return static_cast<int>(record.get().mAiPackage.mList.size());
         }
@@ -1986,8 +1932,7 @@ namespace CSMWorld
 
         void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT apparel = record.get();
 
             std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
@@ -2007,8 +1952,7 @@ namespace CSMWorld
 
         void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT apparel = record.get();
 
             std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
@@ -2024,21 +1968,17 @@ namespace CSMWorld
         void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
             const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT apparel = record.get();
 
-            apparel.mParts.mParts
-                = static_cast<const NestedTableWrapper<std::vector<typename ESM::PartReference>>&>(nestedTable)
-                      .mNestedTable;
+            apparel.mParts.mParts = nestedTable.get<std::vector<typename ESM::PartReference>>();
 
             record.setModified(apparel);
         }
 
         NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             // deleted by dtor of NestedTableStoring
             return new NestedTableWrapper<std::vector<typename ESM::PartReference>>(record.get().mParts.mParts);
@@ -2047,8 +1987,7 @@ namespace CSMWorld
         QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
             int subColIndex) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             const std::vector<ESM::PartReference>& list = record.get().mParts.mParts;
 
@@ -2078,8 +2017,7 @@ namespace CSMWorld
         void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
             int subColIndex) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(row, mType);
             ESXRecordT apparel = record.get();
             std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
 
@@ -2108,8 +2046,7 @@ namespace CSMWorld
 
         int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             return static_cast<int>(record.get().mParts.mParts.size());
         }
@@ -2209,8 +2146,7 @@ namespace CSMWorld
         QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
             int subColIndex) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             if (mType == UniversalId::Type_CreatureLevelledList)
             {
@@ -2245,8 +2181,7 @@ namespace CSMWorld
         void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
             int subColIndex) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(row, mType);
             ESXRecordT leveled = record.get();
 
             if (mType == UniversalId::Type_CreatureLevelledList)
@@ -2344,8 +2279,7 @@ namespace CSMWorld
 
         void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT leveled = record.get();
 
             std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
@@ -2364,8 +2298,7 @@ namespace CSMWorld
 
         void removeNestedRow(const RefIdColumn* column, RefIdData& data, int index, int rowToRemove) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT leveled = record.get();
 
             std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
@@ -2381,22 +2314,17 @@ namespace CSMWorld
         void setNestedTable(const RefIdColumn* column, RefIdData& data, int index,
             const NestedTableWrapperBase& nestedTable) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
             ESXRecordT leveled = record.get();
 
-            leveled.mList
-                = static_cast<const NestedTableWrapper<std::vector<typename ESM::LevelledListBase::LevelItem>>&>(
-                    nestedTable)
-                      .mNestedTable;
+            leveled.mList = nestedTable.get<std::vector<typename ESM::LevelledListBase::LevelItem>>();
 
             record.setModified(leveled);
         }
 
         NestedTableWrapperBase* nestedTable(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             // deleted by dtor of NestedTableStoring
             return new NestedTableWrapper<std::vector<typename ESM::LevelledListBase::LevelItem>>(record.get().mList);
@@ -2405,8 +2333,7 @@ namespace CSMWorld
         QVariant getNestedData(const RefIdColumn* column, const RefIdData& data, int index, int subRowIndex,
             int subColIndex) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             const std::vector<ESM::LevelledListBase::LevelItem>& list = record.get().mList;
 
@@ -2429,8 +2356,7 @@ namespace CSMWorld
         void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value, int subRowIndex,
             int subColIndex) const override
         {
-            Record<ESXRecordT>& record
-                = static_cast<Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(row, mType)));
+            Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(row, mType);
             ESXRecordT leveled = record.get();
             std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
 
@@ -2456,8 +2382,7 @@ namespace CSMWorld
 
         int getNestedRowsCount(const RefIdColumn* column, const RefIdData& data, int index) const override
         {
-            const Record<ESXRecordT>& record
-                = static_cast<const Record<ESXRecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
+            const Record<ESXRecordT>& record = data.getRecord<ESXRecordT>(index, mType);
 
             return static_cast<int>(record.get().mList.size());
         }

@@ -172,7 +172,7 @@ namespace CSMWorld
     {
         Pathgrid pathgrid = record.get();
 
-        pathgrid.mEdges = static_cast<const NestedTableWrapper<ESM::Pathgrid::EdgeList>&>(nestedTable).mNestedTable;
+        pathgrid.mEdges = nestedTable.get<ESM::Pathgrid::EdgeList>();
 
         record.setModified(pathgrid);
     }
@@ -399,8 +399,7 @@ namespace CSMWorld
     {
         ESM::Region region = record.get();
 
-        region.mSoundList
-            = static_cast<const NestedTableWrapper<std::vector<ESM::Region::SoundRef>>&>(nestedTable).mNestedTable;
+        region.mSoundList = nestedTable.get<std::vector<ESM::Region::SoundRef>>();
 
         record.setModified(region);
     }
@@ -567,8 +566,7 @@ namespace CSMWorld
     {
         Info info = record.get();
 
-        info.mSelects
-            = static_cast<const NestedTableWrapper<std::vector<ESM::DialogueCondition>>&>(nestedTable).mNestedTable;
+        info.mSelects = nestedTable.get<std::vector<ESM::DialogueCondition>>();
 
         record.setModified(info);
     }
@@ -709,8 +707,7 @@ namespace CSMWorld
     {
         ESM::Race race = record.get();
 
-        race.mData = static_cast<const NestedTableWrapper<std::vector<ESM::Race::RADTstruct>>&>(nestedTable)
-                         .mNestedTable.at(0);
+        race.mData = nestedTable.get<std::vector<ESM::Race::RADTstruct>>().at(0);
 
         record.setModified(race);
     }
@@ -792,8 +789,7 @@ namespace CSMWorld
     {
         ESM::Race race = record.get();
 
-        race.mData = static_cast<const NestedTableWrapper<std::vector<ESM::Race::RADTstruct>>&>(nestedTable)
-                         .mNestedTable.at(0);
+        race.mData = nestedTable.get<std::vector<ESM::Race::RADTstruct>>().at(0);
 
         record.setModified(race);
     }

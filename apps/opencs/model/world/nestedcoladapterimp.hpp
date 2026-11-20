@@ -185,8 +185,7 @@ namespace CSMWorld
         {
             ESXRecordT raceOrBthSgn = record.get();
 
-            raceOrBthSgn.mPowers.mList
-                = static_cast<const NestedTableWrapper<std::vector<ESM::RefId>>&>(nestedTable).mNestedTable;
+            raceOrBthSgn.mPowers.mList = nestedTable.get<std::vector<ESM::RefId>>();
 
             record.setModified(raceOrBthSgn);
         }
@@ -300,8 +299,7 @@ namespace CSMWorld
         {
             ESXRecordT magic = record.get();
 
-            magic.mEffects.mList
-                = static_cast<const NestedTableWrapper<std::vector<ESM::IndexedENAMstruct>>&>(nestedTable).mNestedTable;
+            magic.mEffects.mList = nestedTable.get<std::vector<ESM::IndexedENAMstruct>>();
 
             record.setModified(magic);
         }
