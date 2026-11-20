@@ -26,7 +26,7 @@ std::string CSVWorld::StartScriptCreator::getId() const
 
 CSMWorld::IdTable& CSVWorld::StartScriptCreator::getStartScriptsTable() const
 {
-    return dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(getCollectionId()));
+    return getData().getTableModel<CSMWorld::IdTable>(getCollectionId());
 }
 
 CSVWorld::StartScriptCreator::StartScriptCreator(CSMWorld::Data& worldData, QUndoStack& undoStack,

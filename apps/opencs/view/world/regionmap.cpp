@@ -161,7 +161,7 @@ void CSVWorld::RegionMap::setRegion(const std::string& regionId)
     QAbstractItemModel* regionModel = model();
 
     CSMWorld::IdTable* cellsModel
-        = &dynamic_cast<CSMWorld::IdTable&>(*mDocument.getData().getTableModel(CSMWorld::UniversalId::Type_Cells));
+        = &mDocument.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Cells);
 
     QString regionId2 = QString::fromUtf8(regionId.c_str());
 
@@ -259,7 +259,7 @@ void CSVWorld::RegionMap::createCells()
     QModelIndexList selected = getSelectedCells(false, true);
 
     CSMWorld::IdTable* cellsModel
-        = &dynamic_cast<CSMWorld::IdTable&>(*mDocument.getData().getTableModel(CSMWorld::UniversalId::Type_Cells));
+        = &mDocument.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Cells);
 
     CSMWorld::CommandMacro macro(mDocument.getUndoStack(), selected.size() > 1 ? tr("Create cells") : "");
 
@@ -395,7 +395,7 @@ void CSVWorld::RegionMap::dropEvent(QDropEvent* event)
         QAbstractItemModel* regionModel = model();
 
         CSMWorld::IdTable* cellsModel
-            = &dynamic_cast<CSMWorld::IdTable&>(*mDocument.getData().getTableModel(CSMWorld::UniversalId::Type_Cells));
+            = &mDocument.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Cells);
 
         std::string cellId(regionModel->data(index, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData());
 

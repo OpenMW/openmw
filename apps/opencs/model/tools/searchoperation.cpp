@@ -22,7 +22,7 @@ CSMTools::SearchOperation::SearchOperation(CSMDoc::Document& document)
         CSMWorld::UniversalId::Class_RecordList | CSMWorld::UniversalId::Class_ResourceList);
 
     for (std::vector<CSMWorld::UniversalId::Type>::const_iterator iter(types.begin()); iter != types.end(); ++iter)
-        appendStage(new SearchStage(&dynamic_cast<CSMWorld::IdTableBase&>(*document.getData().getTableModel(*iter))));
+        appendStage(new SearchStage(&document.getData().getTableModel<CSMWorld::IdTableBase>(*iter)));
 
     setDefaultSeverity(CSMDoc::Message::Severity_Info);
 }

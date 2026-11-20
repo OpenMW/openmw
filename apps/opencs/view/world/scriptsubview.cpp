@@ -126,7 +126,7 @@ CSVWorld::ScriptSubView::ScriptSubView(const CSMWorld::UniversalId& id, CSMDoc::
     widget->setLayout(&mLayout);
     setWidget(widget);
 
-    mModel = &dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Scripts));
+    mModel = &document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Scripts);
 
     mColumn = mModel->findColumnIndex(CSMWorld::Columns::ColumnId_ScriptText);
     mIdColumn = mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id);

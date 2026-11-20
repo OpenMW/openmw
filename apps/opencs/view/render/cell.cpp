@@ -193,8 +193,7 @@ CSVRender::Cell::Cell(CSMDoc::Document& document, ObjectMarker* selectionMarker,
 
     if (!mDeleted)
     {
-        CSMWorld::IdTable& references
-            = dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(CSMWorld::UniversalId::Type_References));
+        CSMWorld::IdTable& references = mData.getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_References);
 
         int rows = references.rowCount();
 
@@ -205,8 +204,7 @@ CSVRender::Cell::Cell(CSMDoc::Document& document, ObjectMarker* selectionMarker,
             int landIndex = document.getData().getLand().searchId(mId);
             if (landIndex == -1)
             {
-                CSMWorld::IdTable& landTable
-                    = dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Land));
+                CSMWorld::IdTable& landTable = mData.getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Land);
                 document.getUndoStack().push(new CSMWorld::CreateCommand(landTable, mId.getRefIdString()));
             }
             updateLand();
@@ -260,8 +258,7 @@ bool CSVRender::Cell::referenceDataChanged(const QModelIndex& topLeft, const QMo
     if (mDeleted)
         return false;
 
-    CSMWorld::IdTable& references
-        = dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(CSMWorld::UniversalId::Type_References));
+    CSMWorld::IdTable& references = mData.getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_References);
 
     int idColumn = references.findColumnIndex(CSMWorld::Columns::ColumnId_Id);
     int cellColumn = references.findColumnIndex(CSMWorld::Columns::ColumnId_Cell);
@@ -335,8 +332,7 @@ bool CSVRender::Cell::referenceAboutToBeRemoved(const QModelIndex& parent, int s
     if (mDeleted)
         return false;
 
-    CSMWorld::IdTable& references
-        = dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(CSMWorld::UniversalId::Type_References));
+    CSMWorld::IdTable& references = mData.getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_References);
 
     int idColumn = references.findColumnIndex(CSMWorld::Columns::ColumnId_Id);
 

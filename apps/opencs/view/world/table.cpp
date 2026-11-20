@@ -260,7 +260,7 @@ CSVWorld::Table::Table(const CSMWorld::UniversalId& id, bool createAndDelete, bo
     , mUnselectAfterJump(false)
     , mAutoJump(false)
 {
-    mModel = &dynamic_cast<CSMWorld::IdTableBase&>(*mDocument.getData().getTableModel(id));
+    mModel = &mDocument.getData().getTableModel<CSMWorld::IdTableBase>(id);
 
     bool isInfoTable = id.getType() == CSMWorld::UniversalId::Type_TopicInfos
         || id.getType() == CSMWorld::UniversalId::Type_JournalInfos;

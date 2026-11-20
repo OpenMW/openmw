@@ -1195,7 +1195,7 @@ void CSVRender::InstanceMode::dropEvent(QDropEvent* event)
         std::string cellId = getWorldspaceWidget().getCellId(hit.worldPos);
 
         CSMWorld::IdTree& cellTable
-            = dynamic_cast<CSMWorld::IdTree&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Cells));
+            = document.getData().getTableModel<CSMWorld::IdTree>(CSMWorld::UniversalId::Type_Cells);
 
         const bool noCell = document.getData().getCells().searchId(ESM::RefId::stringRefId(cellId)) == -1;
 
@@ -1308,7 +1308,7 @@ void CSVRender::InstanceMode::deleteSelectedInstances()
 
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& referencesTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_References));
+        = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_References);
     QUndoStack& undoStack = document.getUndoStack();
 
     CSMWorld::CommandMacro macro(undoStack, "Delete Instances");
@@ -1327,7 +1327,7 @@ void CSVRender::InstanceMode::cloneSelectedInstances()
 
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& referencesTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_References));
+        = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_References);
     QUndoStack& undoStack = document.getUndoStack();
 
     CSMWorld::CommandMacro macro(undoStack, "Clone Instances");
