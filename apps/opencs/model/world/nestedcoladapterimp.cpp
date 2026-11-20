@@ -23,6 +23,7 @@
 #include "info.hpp"
 #include "infoselectwrapper.hpp"
 #include "pathgrid.hpp"
+#include "variantconversion.hpp"
 
 namespace CSMWorld
 {
@@ -339,8 +340,7 @@ namespace CSMWorld
             case 0:
             {
                 reactions.erase(iter);
-                reactions.insert(
-                    std::make_pair(ESM::RefId::stringRefId(value.toString().toUtf8().constData()), reaction));
+                reactions.insert(std::make_pair(getRefId(value), reaction));
                 break;
             }
             case 1:
@@ -457,7 +457,7 @@ namespace CSMWorld
         switch (subColIndex)
         {
             case 0:
-                soundRef.mSound = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+                soundRef.mSound = getRefId(value);
                 break;
             case 1:
                 soundRef.mChance = static_cast<uint8_t>(value.toInt());
@@ -636,7 +636,7 @@ namespace CSMWorld
             }
             case 1: // Variable
             {
-                infoSelectWrapper.setVariableName(value.toString().toUtf8().constData());
+                infoSelectWrapper.setVariableName(getString(value));
                 break;
             }
             case 2: // Relation
@@ -1154,7 +1154,7 @@ namespace CSMWorld
         switch (subColIndex)
         {
             case 0:
-                faction.mRanks[subRowIndex] = value.toString().toUtf8().constData();
+                faction.mRanks[subRowIndex] = getString(value);
                 break;
             case 1:
                 rankData.mAttribute1 = value.toInt();

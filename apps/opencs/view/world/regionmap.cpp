@@ -26,6 +26,7 @@
 #include "../../model/world/regionmap.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/universalid.hpp"
+#include "../../model/world/variantconversion.hpp"
 
 void CSVWorld::RegionMap::contextMenuEvent(QContextMenuEvent* event)
 {
@@ -145,7 +146,7 @@ QModelIndexList CSVWorld::RegionMap::getMissingRegionCells() const
 
     for (QModelIndexList::const_iterator iter(unselected.begin()); iter != unselected.end(); ++iter)
     {
-        std::string region = model->data(*iter, CSMWorld::RegionMap::Role_Region).toString().toUtf8().constData();
+        std::string region = CSMWorld::getString(model->data(*iter, CSMWorld::RegionMap::Role_Region));
 
         if (!region.empty() && regions.find(region) != regions.end())
             list.push_back(*iter);
@@ -169,7 +170,7 @@ void CSVWorld::RegionMap::setRegion(const std::string& regionId)
 
     for (QModelIndexList::const_iterator iter(selected.begin()); iter != selected.end(); ++iter)
     {
-        std::string cellId = regionModel->data(*iter, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData();
+        std::string cellId = CSMWorld::getString(regionModel->data(*iter, CSMWorld::RegionMap::Role_CellId));
 
         QModelIndex index
             = cellsModel->getModelIndex(cellId, cellsModel->findColumnIndex(CSMWorld::Columns::ColumnId_Region));
@@ -265,7 +266,7 @@ void CSVWorld::RegionMap::createCells()
 
     for (QModelIndexList::const_iterator iter(selected.begin()); iter != selected.end(); ++iter)
     {
-        std::string cellId = model()->data(*iter, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData();
+        std::string cellId = CSMWorld::getString(model()->data(*iter, CSMWorld::RegionMap::Role_CellId));
 
         macro.push(new CSMWorld::CreateCommand(*cellsModel, cellId));
     }
@@ -298,7 +299,7 @@ void CSVWorld::RegionMap::view()
 
     for (QModelIndexList::const_iterator iter(selected.begin()); iter != selected.end(); ++iter)
     {
-        std::string cellId = model()->data(*iter, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData();
+        std::string cellId = CSMWorld::getString(model()->data(*iter, CSMWorld::RegionMap::Role_CellId));
 
         if (first)
             first = false;
@@ -324,7 +325,7 @@ void CSVWorld::RegionMap::viewInTable()
 
     for (QModelIndexList::const_iterator iter(selected.begin()); iter != selected.end(); ++iter)
     {
-        std::string cellId = model()->data(*iter, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData();
+        std::string cellId = CSMWorld::getString(model()->data(*iter, CSMWorld::RegionMap::Role_CellId));
 
         if (first)
             first = false;
@@ -350,14 +351,14 @@ std::vector<CSMWorld::UniversalId> CSVWorld::RegionMap::getDraggedRecords() cons
     std::vector<CSMWorld::UniversalId> ids;
     for (const QModelIndex& it : selected)
     {
-        ids.emplace_back(CSMWorld::UniversalId::Type_Cell,
-            model()->data(it, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData());
+        ids.emplace_back(
+            CSMWorld::UniversalId::Type_Cell, CSMWorld::getString(model()->data(it, CSMWorld::RegionMap::Role_CellId)));
     }
     selected = getSelectedCells(false, true);
     for (const QModelIndex& it : selected)
     {
         ids.emplace_back(CSMWorld::UniversalId::Type_Cell_Missing,
-            model()->data(it, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData());
+            CSMWorld::getString(model()->data(it, CSMWorld::RegionMap::Role_CellId)));
     }
     return ids;
 }
@@ -397,7 +398,7 @@ void CSVWorld::RegionMap::dropEvent(QDropEvent* event)
         CSMWorld::IdTable* cellsModel
             = &mDocument.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Cells);
 
-        std::string cellId(regionModel->data(index, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData());
+        std::string cellId = CSMWorld::getString(regionModel->data(index, CSMWorld::RegionMap::Role_CellId));
 
         QModelIndex index2(
             cellsModel->getModelIndex(cellId, cellsModel->findColumnIndex(CSMWorld::Columns::ColumnId_Region)));

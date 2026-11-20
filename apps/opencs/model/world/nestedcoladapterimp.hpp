@@ -17,6 +17,7 @@
 #include "idcollection.hpp"
 #include "nestedcolumnadapter.hpp"
 #include "nestedtablewrapper.hpp"
+#include "variantconversion.hpp"
 
 namespace ESM
 {
@@ -228,7 +229,7 @@ namespace CSMWorld
             switch (subColIndex)
             {
                 case 0:
-                    spell = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+                    spell = getRefId(value);
                     break;
                 default:
                     throw std::runtime_error("Spells subcolumn index out of range");

@@ -36,6 +36,7 @@
 #include "refidadapter.hpp"
 #include "refiddata.hpp"
 #include "universalid.hpp"
+#include "variantconversion.hpp"
 
 namespace ESM
 {
@@ -221,7 +222,7 @@ namespace CSMWorld
 
         RecordT record2 = record.get();
         if (column == mModel.mModel)
-            record2.mModel = value.toString().toUtf8().constData();
+            record2.mModel = getString(value);
         else if (column == mModel.mPersistence)
         {
             if (value.toInt() != 0)
@@ -295,9 +296,9 @@ namespace CSMWorld
 
         RecordT record2 = record.get();
         if (column == mName.mName)
-            record2.mName = value.toString().toUtf8().constData();
+            record2.mName = getString(value);
         else if (column == mName.mScript)
-            record2.mScript = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+            record2.mScript = getRefId(value);
         else
         {
             ModelRefIdAdapter<RecordT>::setData(column, data, index, value);
@@ -369,7 +370,7 @@ namespace CSMWorld
 
         RecordT record2 = record.get();
         if (column == mInventory.mIcon)
-            record2.mIcon = value.toString().toUtf8().constData();
+            record2.mIcon = getString(value);
         else if (column == mInventory.mWeight)
             record2.mData.mWeight = value.toFloat();
         else if (column == mInventory.mValue)
@@ -520,7 +521,7 @@ namespace CSMWorld
 
         RecordT record2 = record.get();
         if (column == mEnchantable.mEnchantment)
-            record2.mEnchant = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+            record2.mEnchant = getRefId(value);
         else if (column == mEnchantable.mEnchantmentPoints)
             record2.mData.mEnchant = value.toInt();
         else
@@ -1268,7 +1269,7 @@ namespace CSMWorld
             switch (subColIndex)
             {
                 case 0:
-                    list.at(subRowIndex).mItem = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+                    list.at(subRowIndex).mItem = getRefId(value);
                     break;
 
                 case 1:
@@ -1389,7 +1390,7 @@ namespace CSMWorld
                 throw std::runtime_error("index out of range");
 
             if (subColIndex == 0)
-                list.at(subRowIndex) = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+                list.at(subRowIndex) = getRefId(value);
             else
                 throw std::runtime_error("Trying to access non-existing column in the nested table!");
 
@@ -1529,7 +1530,7 @@ namespace CSMWorld
             switch (subColIndex)
             {
                 case 0:
-                    list.at(subRowIndex).mCellName = value.toString().toUtf8().constData();
+                    list.at(subRowIndex).mCellName = getString(value);
                     break;
                 case 1:
                     list.at(subRowIndex).mPos.pos[0] = value.toFloat();
@@ -1864,7 +1865,7 @@ namespace CSMWorld
                     break; // always save
                 case 15:
                     if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
-                        content.mCellName = std::string(value.toString().toUtf8().constData());
+                        content.mCellName = getString(value);
                     else
                         return; // return without saving
 

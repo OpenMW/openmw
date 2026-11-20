@@ -18,6 +18,7 @@
 #include <apps/opencs/model/world/columns.hpp>
 #include <apps/opencs/model/world/data.hpp>
 #include <apps/opencs/model/world/record.hpp>
+#include <apps/opencs/model/world/variantconversion.hpp>
 #include <apps/opencs/view/render/editmode.hpp>
 #include <apps/opencs/view/render/scenewidget.hpp>
 #include <apps/opencs/view/widget/modebutton.hpp>
@@ -273,7 +274,7 @@ CSVWidget::SceneToolRun* CSVRender::WorldspaceWidget::makeRunTool(CSVWidget::Sce
         const bool defaultValue = debugProfiles.getData(i, defaultColumn).toInt();
 
         if (state != CSMWorld::RecordBase::State_Deleted && defaultValue)
-            profiles.emplace_back(debugProfiles.getData(i, idColumn).toString().toUtf8().constData());
+            profiles.emplace_back(CSMWorld::getString(debugProfiles.getData(i, idColumn)));
     }
 
     std::sort(profiles.begin(), profiles.end());
@@ -592,7 +593,7 @@ void CSVRender::WorldspaceWidget::debugProfileDataChanged(const QModelIndex& top
         // are adding the code for the sake of completeness and to avoid surprises if debug
         // profile ever get extended to content scope.
         if (state == CSMWorld::RecordBase::State_Deleted)
-            mRun->removeProfile(debugProfiles.getData(i, idColumn).toString().toUtf8().constData());
+            mRun->removeProfile(CSMWorld::getString(debugProfiles.getData(i, idColumn)));
     }
 }
 
@@ -611,7 +612,7 @@ void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved(const QModelIndex
 
     for (int i = start; i <= end; ++i)
     {
-        mRun->removeProfile(debugProfiles.getData(i, idColumn).toString().toUtf8().constData());
+        mRun->removeProfile(CSMWorld::getString(debugProfiles.getData(i, idColumn)));
     }
 }
 

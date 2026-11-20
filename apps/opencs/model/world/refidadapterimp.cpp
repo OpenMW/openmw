@@ -357,7 +357,7 @@ void CSMWorld::BookRefIdAdapter::setData(
     else if (column == mSkill)
         book.mData.mSkillId = ESM::Skill::indexToRefId(value.toInt());
     else if (column == mText)
-        book.mText = value.toString().toUtf8().data();
+        book.mText = getString(value);
     else
     {
         EnchantableRefIdAdapter<ESM::Book>::setData(column, data, index, value);
@@ -595,9 +595,9 @@ void CSMWorld::DoorRefIdAdapter::setData(
     ESM::Door door = record.get();
 
     if (column == mOpenSound)
-        door.mOpenSound = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+        door.mOpenSound = getRefId(value);
     else if (column == mCloseSound)
-        door.mCloseSound = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+        door.mCloseSound = getRefId(value);
     else
     {
         NameRefIdAdapter<ESM::Door>::setData(column, data, index, value);
@@ -681,7 +681,7 @@ void CSMWorld::LightRefIdAdapter::setData(
     else if (column == mColumns.mColor)
         light.mData.mColor = value.toInt();
     else if (column == mColumns.mSound)
-        light.mSound = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+        light.mSound = getRefId(value);
     else if (column == mColumns.mEmitterType)
     {
         int mask = ~(ESM::Light::Flicker | ESM::Light::FlickerSlow | ESM::Light::Pulse | ESM::Light::PulseSlow);
@@ -834,15 +834,15 @@ void CSMWorld::NpcRefIdAdapter::setData(
     ESM::NPC npc = record.get();
 
     if (column == mColumns.mRace)
-        npc.mRace = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+        npc.mRace = getRefId(value);
     else if (column == mColumns.mClass)
-        npc.mClass = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+        npc.mClass = getRefId(value);
     else if (column == mColumns.mFaction)
-        npc.mFaction = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+        npc.mFaction = getRefId(value);
     else if (column == mColumns.mHair)
-        npc.mHair = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+        npc.mHair = getRefId(value);
     else if (column == mColumns.mHead)
-        npc.mHead = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+        npc.mHead = getRefId(value);
     else if (column == mColumns.mBloodType)
         npc.mBloodType = value.toInt();
     else if (column == mColumns.mGender)

@@ -18,6 +18,7 @@
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/variantconversion.hpp"
 
 #include "cellarrow.hpp"
 #include "cellborder.hpp"
@@ -269,12 +270,11 @@ bool CSVRender::Cell::referenceDataChanged(const QModelIndex& topLeft, const QMo
 
     for (int i = topLeft.row(); i <= bottomRight.row(); ++i)
     {
-        auto cell = ESM::RefId::stringRefId(references.getData(i, cellColumn).toString().toUtf8().constData());
+        auto cell = CSMWorld::getRefId(references.getData(i, cellColumn));
 
         if (cell == mId)
         {
-            std::string id
-                = Misc::StringUtils::lowerCase(references.getData(i, idColumn).toString().toUtf8().constData());
+            std::string id = Misc::StringUtils::lowerCase(CSMWorld::getString(references.getData(i, idColumn)));
 
             int state = references.getData(i, stateColumn).toInt();
 
@@ -338,7 +338,7 @@ bool CSVRender::Cell::referenceAboutToBeRemoved(const QModelIndex& parent, int s
     bool modified = false;
 
     for (int row = start; row <= end; ++row)
-        if (removeObject(references.getData(row, idColumn).toString().toUtf8().constData()))
+        if (removeObject(CSMWorld::getString(references.getData(row, idColumn))))
             modified = true;
 
     return modified;

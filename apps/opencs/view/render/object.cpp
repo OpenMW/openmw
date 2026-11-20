@@ -20,6 +20,7 @@
 #include <apps/opencs/model/world/refcollection.hpp>
 #include <apps/opencs/model/world/refidcollection.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/model/world/variantconversion.hpp>
 #include <apps/opencs/view/render/tagbase.hpp>
 
 #include "../../model/prefs/state.hpp"
@@ -101,7 +102,7 @@ void CSVRender::Object::update()
     /// \todo check for Deleted state (error 1)
 
     int recordType = referenceables.getData(index, typeIndex).toInt();
-    std::string model = referenceables.getData(index, modelIndex).toString().toUtf8().constData();
+    std::string model = CSMWorld::getString(referenceables.getData(index, modelIndex));
 
     if (recordType == CSMWorld::UniversalId::Type_Light)
     {
@@ -338,8 +339,7 @@ bool CSVRender::Object::referenceDataChanged(const QModelIndex& topLeft, const Q
 
         if (columnIndex >= topLeft.column() && columnIndex <= bottomRight.row())
         {
-            mReferenceableId
-                = ESM::RefId::stringRefId(references.getData(index, columnIndex).toString().toUtf8().constData());
+            mReferenceableId = CSMWorld::getRefId(references.getData(index, columnIndex));
 
             update();
         }

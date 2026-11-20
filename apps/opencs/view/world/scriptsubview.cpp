@@ -24,6 +24,7 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/universalid.hpp"
+#include "../../model/world/variantconversion.hpp"
 
 #include "genericcreator.hpp"
 #include "recordbuttonbar.hpp"
@@ -297,7 +298,7 @@ void CSVWorld::ScriptSubView::dataChanged(const QModelIndex& topLeft, const QMod
 
     for (int i = topLeft.row(); i <= bottomRight.row(); ++i)
     {
-        std::string id = mModel->getData(i, mIdColumn).toString().toUtf8().constData();
+        std::string id = CSMWorld::getString(mModel->getData(i, mIdColumn));
         if (mErrors->clearLocals(id))
             updateRequired = true;
     }
@@ -359,7 +360,7 @@ void CSVWorld::ScriptSubView::rowsAboutToBeRemoved(const QModelIndex& parent, in
 
     for (int i = start; i <= end; ++i)
     {
-        std::string id = mModel->getData(i, mIdColumn).toString().toUtf8().constData();
+        std::string id = CSMWorld::getString(mModel->getData(i, mIdColumn));
         if (mErrors->clearLocals(id))
             updateRequired = true;
     }
@@ -376,7 +377,7 @@ void CSVWorld::ScriptSubView::rowsAboutToBeRemoved(const QModelIndex& parent, in
 void CSVWorld::ScriptSubView::switchToRow(int row)
 {
     int idColumn = mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
-    std::string id = mModel->getData(row, idColumn).toString().toUtf8().constData();
+    std::string id = CSMWorld::getString(mModel->getData(row, idColumn));
     setUniversalId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Script, id));
 
     bool oldSignalsState = mEditor->blockSignals(true);

@@ -19,6 +19,7 @@
 #include "../world/commands.hpp"
 #include "../world/idtablebase.hpp"
 #include "../world/universalid.hpp"
+#include "../world/variantconversion.hpp"
 
 void CSMTools::Search::searchTextCell(const CSMWorld::IdTableBase* model, const QModelIndex& index,
     const CSMWorld::UniversalId& id, bool writable, CSMDoc::Messages& messages) const
@@ -178,8 +179,7 @@ void CSMTools::Search::configure(const CSMWorld::IdTableBase* model)
 
     for (int i = 0; i < columns; ++i)
     {
-        CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>(
-            model->headerData(i, Qt::Horizontal, static_cast<int>(CSMWorld::ColumnBase::Role_Display)).toInt());
+        CSMWorld::ColumnBase::Display display = model->getColumnDisplay(i);
 
         bool consider = false;
 
@@ -234,7 +234,7 @@ void CSMTools::Search::searchRow(const CSMWorld::IdTableBase* model, int row, CS
         CSMWorld::UniversalId::Type type
             = static_cast<CSMWorld::UniversalId::Type>(model->getData(row, mTypeColumn).toInt());
 
-        CSMWorld::UniversalId id(type, model->getData(row, mIdColumn).toString().toUtf8().data());
+        CSMWorld::UniversalId id(type, CSMWorld::getString(model->getData(row, mIdColumn)));
 
         bool writable = model->flags(index) & Qt::ItemIsEditable;
 
@@ -284,7 +284,7 @@ void CSMTools::Search::replace(CSMDoc::Document& document, CSMWorld::IdTableBase
 
         QModelIndex index = model->getModelIndex(id.getId(), column);
 
-        std::string text = model->data(index).toString().toUtf8().constData();
+        std::string text = CSMWorld::getString(model->data(index));
 
         std::string before = text.substr(0, pos);
         std::string after = text.substr(pos + length);

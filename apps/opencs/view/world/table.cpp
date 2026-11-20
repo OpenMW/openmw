@@ -21,6 +21,7 @@
 #include <apps/opencs/model/world/idtableproxymodel.hpp>
 #include <apps/opencs/model/world/record.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/model/world/variantconversion.hpp>
 #include <apps/opencs/view/world/dragrecordtable.hpp>
 
 #include <components/debug/debuglog.hpp>
@@ -469,7 +470,7 @@ std::vector<std::string> CSVWorld::Table::getSelectedIds() const
     for (QModelIndexList::const_iterator iter(selectedRows.begin()); iter != selectedRows.end(); ++iter)
     {
         int row = mProxyModel->mapToSource(mProxyModel->index(iter->row(), 0)).row();
-        ids.emplace_back(mModel->getData(row, columnIndex).toString().toUtf8().constData());
+        ids.emplace_back(CSMWorld::getString(mModel->getData(row, columnIndex)));
     }
     return ids;
 }
@@ -880,7 +881,7 @@ std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::Column
 
         if (display == columndisplay)
         {
-            titles.emplace_back(mModel->headerData(i, Qt::Horizontal).toString().toUtf8().constData());
+            titles.emplace_back(CSMWorld::getString(mModel->headerData(i, Qt::Horizontal)));
         }
     }
     return titles;
