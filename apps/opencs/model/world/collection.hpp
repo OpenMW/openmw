@@ -321,8 +321,8 @@ namespace CSMWorld
     template <typename ESXRecordT>
     Collection<ESXRecordT>::~Collection()
     {
-        for (typename std::vector<Column<ESXRecordT>*>::iterator iter(mColumns.begin()); iter != mColumns.end(); ++iter)
-            delete *iter;
+        for (auto* column : mColumns)
+            delete column;
     }
 
     template <typename ESXRecordT>
@@ -413,9 +413,8 @@ namespace CSMWorld
     template <typename ESXRecordT>
     void Collection<ESXRecordT>::merge()
     {
-        for (typename std::vector<std::unique_ptr<Record<ESXRecordT>>>::iterator iter(mRecords.begin());
-             iter != mRecords.end(); ++iter)
-            (*iter)->merge();
+        for (auto& record : mRecords)
+            record->merge();
 
         purge();
     }

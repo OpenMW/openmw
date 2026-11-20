@@ -888,9 +888,9 @@ void CSMTools::ReferenceableCheckStage::finalCheck(CSMDoc::Messages& messages)
 void CSMTools::ReferenceableCheckStage::inventoryListCheck(
     const std::vector<ESM::ContItem>& itemList, CSMDoc::Messages& messages, const std::string& id)
 {
-    for (size_t i = 0; i < itemList.size(); ++i)
+    for (const auto& contItem : itemList)
     {
-        const ESM::RefId& item = itemList[i].mItem;
+        const ESM::RefId& item = contItem.mItem;
         const auto& itemName = item.getRefIdString();
         CSMWorld::RefIdData::LocalIndex localIndex = mReferencables.searchId(item);
 

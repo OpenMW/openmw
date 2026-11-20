@@ -39,9 +39,9 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getDeletableRecords() cons
 
     int stateColumnIndex = model.findColumnIndex(Columns::ColumnId_Modification);
 
-    for (std::vector<std::string>::const_iterator iter(mSelection.begin()); iter != mSelection.end(); ++iter)
+    for (const auto& recordId : mSelection)
     {
-        int row = model.getModelIndex(*iter, 0).row();
+        int row = model.getModelIndex(recordId, 0).row();
 
         // check record state
         RecordBase::State state = static_cast<RecordBase::State>(model.getData(row, stateColumnIndex).toInt());
@@ -60,7 +60,7 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getDeletableRecords() cons
                 continue;
         }
 
-        result.push_back(*iter);
+        result.push_back(recordId);
     }
 
     return result;
@@ -79,9 +79,9 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getRevertableRecords() con
 
     int stateColumnIndex = model.findColumnIndex(Columns::ColumnId_Modification);
 
-    for (std::vector<std::string>::const_iterator iter(mSelection.begin()); iter != mSelection.end(); ++iter)
+    for (const auto& recordId : mSelection)
     {
-        int row = model.getModelIndex(*iter, 0).row();
+        int row = model.getModelIndex(recordId, 0).row();
 
         // check record state
         RecordBase::State state = static_cast<RecordBase::State>(model.getData(row, stateColumnIndex).toInt());
@@ -89,7 +89,7 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getRevertableRecords() con
         if (state == RecordBase::State_BaseOnly)
             continue;
 
-        result.push_back(*iter);
+        result.push_back(recordId);
     }
 
     return result;
@@ -218,9 +218,9 @@ void CSMWorld::CommandDispatcher::executeDelete()
     int columnIndex = model.findColumnIndex(Columns::ColumnId_Id);
 
     CommandMacro macro(mDocument.getUndoStack(), rows.size() > 1 ? "Delete multiple records" : "");
-    for (std::vector<std::string>::const_iterator iter(rows.begin()); iter != rows.end(); ++iter)
+    for (const auto& rowId : rows)
     {
-        std::string id = getString(model.data(model.getModelIndex(*iter, columnIndex)));
+        std::string id = getString(model.data(model.getModelIndex(rowId, columnIndex)));
 
         if (mId.getType() == UniversalId::Type_Referenceables)
         {
@@ -251,9 +251,9 @@ void CSMWorld::CommandDispatcher::executeRevert()
     int columnIndex = model.findColumnIndex(Columns::ColumnId_Id);
 
     CommandMacro macro(mDocument.getUndoStack(), rows.size() > 1 ? "Revert multiple records" : "");
-    for (std::vector<std::string>::const_iterator iter(rows.begin()); iter != rows.end(); ++iter)
+    for (const auto& rowId : rows)
     {
-        std::string id = getString(model.data(model.getModelIndex(*iter, columnIndex)));
+        std::string id = getString(model.data(model.getModelIndex(rowId, columnIndex)));
 
         macro.push(new CSMWorld::RevertCommand(model, id));
     }
@@ -264,13 +264,13 @@ void CSMWorld::CommandDispatcher::executeExtendedDelete()
     CommandMacro macro(
         mDocument.getUndoStack(), mExtendedTypes.size() > 1 ? tr("Extended delete of multiple records") : "");
 
-    for (std::vector<UniversalId>::const_iterator iter(mExtendedTypes.begin()); iter != mExtendedTypes.end(); ++iter)
+    for (const auto& universalId : mExtendedTypes)
     {
-        if (*iter == mId)
+        if (universalId == mId)
             executeDelete();
-        else if (*iter == UniversalId::Type_References)
+        else if (universalId == UniversalId::Type_References)
         {
-            IdTable& model = mDocument.getData().getTableModel<IdTable>(*iter);
+            IdTable& model = mDocument.getData().getTableModel<IdTable>(universalId);
 
             const RefCollection& collection = mDocument.getData().getReferences();
 
@@ -297,13 +297,13 @@ void CSMWorld::CommandDispatcher::executeExtendedRevert()
     CommandMacro macro(
         mDocument.getUndoStack(), mExtendedTypes.size() > 1 ? tr("Extended revert of multiple records") : "");
 
-    for (std::vector<UniversalId>::const_iterator iter(mExtendedTypes.begin()); iter != mExtendedTypes.end(); ++iter)
+    for (const auto& universalId : mExtendedTypes)
     {
-        if (*iter == mId)
+        if (universalId == mId)
             executeRevert();
-        else if (*iter == UniversalId::Type_References)
+        else if (universalId == UniversalId::Type_References)
         {
-            IdTable& model = mDocument.getData().getTableModel<IdTable>(*iter);
+            IdTable& model = mDocument.getData().getTableModel<IdTable>(universalId);
 
             const RefCollection& collection = mDocument.getData().getReferences();
 

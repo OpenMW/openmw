@@ -151,7 +151,7 @@ void CSMDoc::Loader::loadDocument(CSMDoc::Document* document)
 
 void CSMDoc::Loader::abortLoading(CSMDoc::Document* document)
 {
-    for (std::vector<std::pair<Document*, Stage>>::iterator iter = mDocuments.begin(); iter != mDocuments.end(); ++iter)
+    for (auto iter = mDocuments.begin(); iter != mDocuments.end(); ++iter)
     {
         if (iter->first == document)
         {

@@ -155,9 +155,8 @@ void CSVDoc::LoadingDocument::cancel()
 
 CSVDoc::Loader::~Loader()
 {
-    for (std::map<CSMDoc::Document*, LoadingDocument*>::iterator iter(mDocuments.begin()); iter != mDocuments.end();
-         ++iter)
-        delete iter->second;
+    for (auto& entry : mDocuments)
+        delete entry.second;
 }
 
 void CSVDoc::Loader::add(CSMDoc::Document* document)

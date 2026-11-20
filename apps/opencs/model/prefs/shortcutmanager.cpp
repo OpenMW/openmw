@@ -28,7 +28,7 @@ namespace CSMPrefs
     {
         std::pair<ShortcutMap::iterator, ShortcutMap::iterator> range = mShortcuts.equal_range(shortcut->getName());
 
-        for (ShortcutMap::iterator it = range.first; it != range.second;)
+        for (auto it = range.first; it != range.second;)
         {
             if (it->second == shortcut)
             {
@@ -72,7 +72,7 @@ namespace CSMPrefs
         // Change active shortcuts
         std::pair<ShortcutMap::iterator, ShortcutMap::iterator> rangeS = mShortcuts.equal_range(name);
 
-        for (ShortcutMap::iterator it = rangeS.first; it != rangeS.second; ++it)
+        for (auto it = rangeS.first; it != rangeS.second; ++it)
         {
             it->second->setSequence(sequence);
         }
@@ -107,7 +107,7 @@ namespace CSMPrefs
         // Change active shortcuts
         std::pair<ShortcutMap::iterator, ShortcutMap::iterator> rangeS = mShortcuts.equal_range(name);
 
-        for (ShortcutMap::iterator it = rangeS.first; it != rangeS.second; ++it)
+        for (auto it = rangeS.first; it != rangeS.second; ++it)
         {
             it->second->setModifier(modifier);
         }
@@ -278,9 +278,9 @@ namespace CSMPrefs
         }
 
         // Generate inverse map
-        for (NameMap::const_iterator it = mNames.begin(); it != mNames.end(); ++it)
+        for (const auto& entry : mNames)
         {
-            mKeys.insert(std::make_pair(it->second, it->first));
+            mKeys.insert(std::make_pair(entry.second, entry.first));
         }
     }
 

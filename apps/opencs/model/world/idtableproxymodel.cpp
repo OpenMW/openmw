@@ -38,9 +38,9 @@ void CSMWorld::IdTableProxyModel::updateColumnMap()
     if (mFilter)
     {
         std::vector<int> columns = mFilter->getReferencedColumns();
-        for (std::vector<int>::const_iterator iter(columns.begin()); iter != columns.end(); ++iter)
+        for (const auto& columnId : columns)
             mColumnMap.insert(std::make_pair(
-                *iter, mSourceModel->searchColumnIndex(static_cast<CSMWorld::Columns::ColumnId>(*iter))));
+                columnId, mSourceModel->searchColumnIndex(static_cast<CSMWorld::Columns::ColumnId>(columnId))));
     }
 }
 

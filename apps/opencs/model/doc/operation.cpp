@@ -48,10 +48,10 @@ void CSMDoc::Operation::prepareStages()
     mTotalSteps = 0;
     mError = false;
 
-    for (std::vector<std::pair<Stage*, int>>::iterator iter(mStages.begin()); iter != mStages.end(); ++iter)
+    for (auto& element : mStages)
     {
-        iter->second = iter->first->setup();
-        mTotalSteps += iter->second;
+        element.second = element.first->setup();
+        mTotalSteps += element.second;
     }
 }
 
@@ -71,8 +71,8 @@ CSMDoc::Operation::Operation(State type, bool finalAlways)
 
 CSMDoc::Operation::~Operation()
 {
-    for (std::vector<std::pair<Stage*, int>>::iterator iter(mStages.begin()); iter != mStages.end(); ++iter)
-        delete iter->first;
+    for (auto& element : mStages)
+        delete element.first;
 }
 
 void CSMDoc::Operation::run()

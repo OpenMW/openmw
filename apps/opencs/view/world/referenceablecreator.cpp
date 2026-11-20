@@ -36,9 +36,9 @@ CSVWorld::ReferenceableCreator::ReferenceableCreator(
     mType = new QComboBox(this);
     mType->setMaxVisibleItems(20);
 
-    for (std::vector<CSMWorld::UniversalId::Type>::const_iterator iter(types.begin()); iter != types.end(); ++iter)
+    for (const auto& type : types)
     {
-        CSMWorld::UniversalId id2(*iter, "");
+        CSMWorld::UniversalId id2(type, "");
 
         mType->addItem(Misc::ScalableIcon::load(id2.getIcon().c_str()), id2.getTypeName().c_str(),
             static_cast<int>(id2.getType()));

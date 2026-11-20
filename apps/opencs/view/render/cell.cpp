@@ -218,8 +218,8 @@ CSVRender::Cell::Cell(CSMDoc::Document& document, ObjectMarker* selectionMarker,
 
 CSVRender::Cell::~Cell()
 {
-    for (std::map<std::string, Object*>::iterator iter(mObjects.begin()); iter != mObjects.end(); ++iter)
-        delete iter->second;
+    for (auto& entry : mObjects)
+        delete entry.second;
 
     mCellNode->getParent(0)->removeChild(mCellNode);
 }
@@ -233,7 +233,7 @@ bool CSVRender::Cell::referenceableDataChanged(const QModelIndex& topLeft, const
 {
     bool modified = false;
 
-    for (std::map<std::string, Object*>::iterator iter(mObjects.begin()); iter != mObjects.end(); ++iter)
+    for (auto iter(mObjects.begin()); iter != mObjects.end(); ++iter)
         if (iter->second->referenceableDataChanged(topLeft, bottomRight))
             modified = true;
 
@@ -247,7 +247,7 @@ bool CSVRender::Cell::referenceableAboutToBeRemoved(const QModelIndex& parent, i
 
     bool modified = false;
 
-    for (std::map<std::string, Object*>::iterator iter(mObjects.begin()); iter != mObjects.end(); ++iter)
+    for (auto iter(mObjects.begin()); iter != mObjects.end(); ++iter)
         if (iter->second->referenceableAboutToBeRemoved(parent, start, end))
             modified = true;
 
@@ -310,11 +310,11 @@ bool CSVRender::Cell::referenceDataChanged(const QModelIndex& topLeft, const QMo
     }
 
     // add new objects
-    for (std::map<std::string, bool>::iterator mapIter(ids.begin()); mapIter != ids.end(); ++mapIter)
+    for (auto& entry : ids)
     {
-        if (!mapIter->second)
+        if (!entry.second)
         {
-            mObjects.insert(std::make_pair(mapIter->first, new Object(mData, mCellNode, mapIter->first, false)));
+            mObjects.insert(std::make_pair(entry.first, new Object(mData, mCellNode, entry.first, false)));
 
             modified = true;
         }
@@ -423,9 +423,9 @@ void CSVRender::Cell::landTextureAdded(const QModelIndex& parent, int start, int
 
 void CSVRender::Cell::reloadAssets()
 {
-    for (std::map<std::string, Object*>::const_iterator iter(mObjects.begin()); iter != mObjects.end(); ++iter)
+    for (const auto& entry : mObjects)
     {
-        iter->second->reloadAssets();
+        entry.second->reloadAssets();
     }
 
     if (mTerrain)
@@ -442,7 +442,7 @@ void CSVRender::Cell::setSelection(int elementMask, Selection mode)
 {
     if (elementMask & Mask_Reference)
     {
-        for (std::map<std::string, Object*>::const_iterator iter(mObjects.begin()); iter != mObjects.end(); ++iter)
+        for (const auto& entry : mObjects)
         {
             bool selected = false;
 
@@ -455,13 +455,13 @@ void CSVRender::Cell::setSelection(int elementMask, Selection mode)
                     selected = true;
                     break;
                 case Selection_Invert:
-                    selected = !iter->second->getSelected();
+                    selected = !entry.second->getSelected();
                     break;
             }
 
-            iter->second->setSelected(selected);
+            entry.second->setSelected(selected);
             if (selected)
-                mSelectionMarker->addToSelectionHistory(iter->second->getReferenceId(), false);
+                mSelectionMarker->addToSelectionHistory(entry.second->getReferenceId(), false);
         }
         mSelectionMarker->updateSelectionMarker();
     }
@@ -492,18 +492,18 @@ void CSVRender::Cell::selectAllWithSameParentId(int elementMask)
 {
     std::set<std::string> ids;
 
-    for (std::map<std::string, Object*>::const_iterator iter(mObjects.begin()); iter != mObjects.end(); ++iter)
+    for (const auto& entry : mObjects)
     {
-        if (iter->second->getSelected())
-            ids.insert(iter->second->getReferenceableId());
+        if (entry.second->getSelected())
+            ids.insert(entry.second->getReferenceableId());
     }
 
-    for (std::map<std::string, Object*>::const_iterator iter(mObjects.begin()); iter != mObjects.end(); ++iter)
+    for (const auto& entry : mObjects)
     {
-        if (!iter->second->getSelected() && ids.find(iter->second->getReferenceableId()) != ids.end())
+        if (!entry.second->getSelected() && ids.find(entry.second->getReferenceableId()) != ids.end())
         {
-            iter->second->setSelected(true);
-            mSelectionMarker->addToSelectionHistory(iter->second->getReferenceId(), false);
+            entry.second->setSelected(true);
+            mSelectionMarker->addToSelectionHistory(entry.second->getReferenceId(), false);
         }
     }
     mSelectionMarker->updateSelectionMarker();
@@ -653,9 +653,9 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::Cell::getSelection(unsi
     std::vector<osg::ref_ptr<TagBase>> result;
 
     if (elementMask & Mask_Reference)
-        for (std::map<std::string, Object*>::const_iterator iter(mObjects.begin()); iter != mObjects.end(); ++iter)
-            if (iter->second->getSelected())
-                result.push_back(iter->second->getTag());
+        for (const auto& entry : mObjects)
+            if (entry.second->getSelected())
+                result.push_back(entry.second->getTag());
     if (mPathgrid && elementMask & Mask_Pathgrid)
         if (mPathgrid->isSelected())
             result.emplace_back(mPathgrid->getTag());
@@ -668,9 +668,9 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::Cell::getEdited(unsigne
     std::vector<osg::ref_ptr<TagBase>> result;
 
     if (elementMask & Mask_Reference)
-        for (std::map<std::string, Object*>::const_iterator iter(mObjects.begin()); iter != mObjects.end(); ++iter)
-            if (iter->second->isEdited())
-                result.push_back(iter->second->getTag());
+        for (const auto& entry : mObjects)
+            if (entry.second->isEdited())
+                result.push_back(entry.second->getTag());
 
     return result;
 }
@@ -687,8 +687,8 @@ void CSVRender::Cell::setSubMode(int subMode, unsigned int elementMask)
 void CSVRender::Cell::reset(unsigned int elementMask)
 {
     if (elementMask & Mask_Reference)
-        for (std::map<std::string, Object*>::const_iterator iter(mObjects.begin()); iter != mObjects.end(); ++iter)
-            iter->second->reset();
+        for (const auto& entry : mObjects)
+            entry.second->reset();
     if (mPathgrid && elementMask & Mask_Pathgrid)
         mPathgrid->resetIndicators();
 }

@@ -84,9 +84,8 @@ namespace CSVRender
 
         if (mActive != wasActive)
         {
-            for (std::vector<CSMPrefs::Shortcut*>::iterator it = mShortcuts.begin(); it != mShortcuts.end(); ++it)
+            for (auto* shortcut : mShortcuts)
             {
-                CSMPrefs::Shortcut* shortcut = *it;
                 shortcut->enable(mActive);
             }
         }

@@ -200,9 +200,9 @@ void CSMWorld::IdTable::addRecordWithData(
 
     mIdCollection->appendBlankRecord(refId, type);
 
-    for (std::map<int, QVariant>::const_iterator iter(data.begin()); iter != data.end(); ++iter)
+    for (const auto& entry : data)
     {
-        mIdCollection->setData(index, iter->first, iter->second);
+        mIdCollection->setData(index, entry.first, entry.second);
     }
 
     endInsertRows();

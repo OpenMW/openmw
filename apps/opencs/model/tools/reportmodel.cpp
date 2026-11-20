@@ -200,9 +200,9 @@ int CSMTools::ReportModel::countErrors() const
 {
     int count = 0;
 
-    for (std::vector<CSMDoc::Message>::const_iterator iter(mRows.begin()); iter != mRows.end(); ++iter)
-        if (iter->mSeverity == CSMDoc::Message::Severity_Error
-            || iter->mSeverity == CSMDoc::Message::Severity_SeriousError)
+    for (const auto& message : mRows)
+        if (message.mSeverity == CSMDoc::Message::Severity_Error
+            || message.mSeverity == CSMDoc::Message::Severity_SeriousError)
             ++count;
 
     return count;

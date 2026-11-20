@@ -101,7 +101,7 @@ void CSMDoc::WriteHeaderStage::perform(int stage, Messages& messages)
         std::vector<std::filesystem::path> dependencies = mDocument.getContentFiles();
         std::vector<std::filesystem::path>::const_iterator end(--dependencies.end());
 
-        for (std::vector<std::filesystem::path>::const_iterator iter(dependencies.begin()); iter != end; ++iter)
+        for (auto iter(dependencies.cbegin()); iter != end; ++iter)
         {
             auto name = Files::pathToUnicodeString(iter->filename());
             auto size = std::filesystem::file_size(*iter);
@@ -295,9 +295,9 @@ void CSMDoc::WriteCellCollectionStage::writeReferences(const std::deque<int>& re
 {
     ESM::ESMWriter& writer = mState.getWriter();
 
-    for (std::deque<int>::const_iterator iter(references.begin()); iter != references.end(); ++iter)
+    for (int refIndex : references)
     {
-        const CSMWorld::Record<CSMWorld::CellRef>& ref = mDocument.getData().getReferences().getRecord(*iter);
+        const CSMWorld::Record<CSMWorld::CellRef>& ref = mDocument.getData().getReferences().getRecord(refIndex);
 
         if (ref.isModified() || ref.mState == CSMWorld::RecordBase::State_Deleted)
         {
@@ -360,9 +360,10 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
 
         if (references != nullptr)
         {
-            for (std::deque<int>::const_iterator iter(references->begin()); iter != references->end(); ++iter)
+            for (int refIndex : *references)
             {
-                const CSMWorld::Record<CSMWorld::CellRef>& ref = mDocument.getData().getReferences().getRecord(*iter);
+                const CSMWorld::Record<CSMWorld::CellRef>& ref
+                    = mDocument.getData().getReferences().getRecord(refIndex);
 
                 CSMWorld::CellRef refRecord = ref.get();
 
@@ -373,9 +374,9 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
                     || localIndex.second == CSMWorld::UniversalId::Type_Npc;
 
                 if (isPersistent)
-                    persistentRefs.push_back(*iter);
+                    persistentRefs.push_back(refIndex);
                 else
-                    tempRefs.push_back(*iter);
+                    tempRefs.push_back(refIndex);
 
                 if (refRecord.mNew
                     || (!interior && ref.mState == CSMWorld::RecordBase::State_ModifiedOnly &&

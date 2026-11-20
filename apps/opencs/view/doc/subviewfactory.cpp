@@ -10,9 +10,8 @@
 
 CSVDoc::SubViewFactoryManager::~SubViewFactoryManager()
 {
-    for (std::map<CSMWorld::UniversalId::Type, SubViewFactoryBase*>::iterator iter(mSubViewFactories.begin());
-         iter != mSubViewFactories.end(); ++iter)
-        delete iter->second;
+    for (auto& entry : mSubViewFactories)
+        delete entry.second;
 }
 
 void CSVDoc::SubViewFactoryManager::add(const CSMWorld::UniversalId::Type& id, SubViewFactoryBase* factory)

@@ -23,15 +23,15 @@ void CSVWidget::SceneToolToggle2::adjustToolTip()
 
     bool first = true;
 
-    for (std::map<PushButton*, ButtonDesc>::const_iterator iter(mButtons.begin()); iter != mButtons.end(); ++iter)
-        if (iter->first->isChecked())
+    for (const auto& entry : mButtons)
+        if (entry.first->isChecked())
         {
             if (!first)
                 toolTip += ", ";
             else
                 first = false;
 
-            toolTip += iter->second.mName;
+            toolTip += entry.second.mName;
         }
 
     if (first)
@@ -46,9 +46,9 @@ void CSVWidget::SceneToolToggle2::adjustIcon()
 {
     unsigned int buttonIds = 0;
 
-    for (std::map<PushButton*, ButtonDesc>::const_iterator iter(mButtons.begin()); iter != mButtons.end(); ++iter)
-        if (iter->first->isChecked())
-            buttonIds |= iter->second.mButtonId;
+    for (const auto& entry : mButtons)
+        if (entry.first->isChecked())
+            buttonIds |= entry.second.mButtonId;
 
     std::ostringstream stream;
     stream << mCompositeIcon << buttonIds;
@@ -119,17 +119,17 @@ unsigned int CSVWidget::SceneToolToggle2::getSelectionMask() const
 {
     unsigned int selection = 0;
 
-    for (std::map<PushButton*, ButtonDesc>::const_iterator iter(mButtons.begin()); iter != mButtons.end(); ++iter)
-        if (iter->first->isChecked())
-            selection |= iter->second.mMask;
+    for (const auto& entry : mButtons)
+        if (entry.first->isChecked())
+            selection |= entry.second.mMask;
 
     return selection;
 }
 
 void CSVWidget::SceneToolToggle2::setSelectionMask(unsigned int selection)
 {
-    for (std::map<PushButton*, ButtonDesc>::iterator iter(mButtons.begin()); iter != mButtons.end(); ++iter)
-        iter->first->setChecked(selection & iter->second.mMask);
+    for (auto& entry : mButtons)
+        entry.first->setChecked(selection & entry.second.mMask);
 
     adjustToolTip();
     adjustIcon();

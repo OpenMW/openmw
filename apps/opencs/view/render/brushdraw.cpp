@@ -63,8 +63,7 @@ float CSVRender::BrushDraw::getIntersectionHeight(const osg::Vec3d& point)
 
     mParentNode->accept(visitor);
 
-    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
-         it != intersector->getIntersections().end(); ++it)
+    for (auto it = intersector->getIntersections().begin(); it != intersector->getIntersections().end(); ++it)
     {
         osgUtil::LineSegmentIntersector::Intersection intersection = *it;
 
