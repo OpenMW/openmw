@@ -83,7 +83,7 @@ namespace ESM4
         ESM::FormId mGlobal;
         ESM::FormId mClimate;
         ESM::FormId mWater;
-        float mWaterHeight = sInvalidWaterLevel;
+        float mWaterHeight = 0.f;
 
         std::vector<ESM::FormId> mRegions;
         Lighting mLighting;
@@ -115,7 +115,6 @@ namespace ESM4
         {
             return ESM::ExteriorCellLocation(mX, mY, isExterior() ? mParent : mId);
         }
-        static float sInvalidWaterLevel;
     };
 }
 
