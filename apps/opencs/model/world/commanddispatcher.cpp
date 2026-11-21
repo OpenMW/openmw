@@ -224,11 +224,12 @@ void CSMWorld::CommandDispatcher::executeDelete()
 
         if (mId.getType() == UniversalId::Type_Referenceables)
         {
-            macro.push(new CSMWorld::DeleteCommand(model, id,
-                static_cast<CSMWorld::UniversalId::Type>(model
-                        .getData(model.getModelIndex(id, columnIndex).row(),
-                            model.findColumnIndex(CSMWorld::Columns::ColumnId_RecordType))
-                        .toInt())));
+            const int row = model.getModelIndex(id, columnIndex).row();
+            const int typeIndex = model.findColumnIndex(CSMWorld::Columns::ColumnId_RecordType);
+            CSMWorld::UniversalId::Type type
+                = static_cast<CSMWorld::UniversalId::Type>(model.getData(row, typeIndex).toInt());
+
+            macro.push(new CSMWorld::DeleteCommand(model, id, type));
         }
         else
             mDocument.getUndoStack().push(new CSMWorld::DeleteCommand(model, id));
