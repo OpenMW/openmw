@@ -454,6 +454,19 @@ namespace MWClass
 
         bool female = (npc->mBase->mFlags & ESM::NPC::Female);
 
+        const auto addParts = [&](const std::vector<ESM::PartReference>& parts) {
+            for (const ESM::PartReference& partRef : parts)
+            {
+                const ESM::RefId& partname = (female && !partRef.mFemale.empty()) || (!female && partRef.mMale.empty())
+                    ? partRef.mFemale
+                    : partRef.mMale;
+
+                const ESM::BodyPart* part = esmStore->get<ESM::BodyPart>().search(partname);
+                if (part && !part->mModel.empty())
+                    models.push_back(part->mModel.getNormalized());
+            }
+        };
+
         const MWWorld::CustomData* customData = ptr.getRefData().getCustomData();
         if (customData)
         {
@@ -463,19 +476,6 @@ namespace MWClass
                 MWWorld::ConstContainerStoreIterator equipped = invStore.getSlot(slot);
                 if (equipped != invStore.end())
                 {
-                    const auto addParts = [&](const std::vector<ESM::PartReference>& parts) {
-                        for (const ESM::PartReference& partRef : parts)
-                        {
-                            const ESM::RefId& partname
-                                = (female && !partRef.mFemale.empty()) || (!female && partRef.mMale.empty())
-                                ? partRef.mFemale
-                                : partRef.mMale;
-
-                            const ESM::BodyPart* part = esmStore->get<ESM::BodyPart>().search(partname);
-                            if (part && !part->mModel.empty())
-                                models.push_back(part->mModel.getNormalized());
-                        }
-                    };
                     if (equipped->getType() == ESM::Clothing::sRecordId)
                     {
                         const ESM::Clothing* clothes = equipped->get<ESM::Clothing>()->mBase;
@@ -493,6 +493,16 @@ namespace MWClass
                             models.push_back(model);
                     }
                 }
+            }
+        }
+        else
+        {
+            for (const ESM::ContItem& item : npc->mBase->mInventory.mList)
+            {
+                if (const ESM::Clothing* clothes = esmStore->get<ESM::Clothing>().search(item.mItem))
+                    addParts(clothes->mParts.mParts);
+                else if (const ESM::Armor* armor = esmStore->get<ESM::Armor>().search(item.mItem))
+                    addParts(armor->mParts.mParts);
             }
         }
 
