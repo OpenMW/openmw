@@ -234,15 +234,20 @@ namespace MWWorld
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
         loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder, listener);
+
+        // The load scripts can still write GMSTs, so a translated label can't be shown yet
+        if (listener != nullptr)
+        {
+            listener->setLabel({});
+            listener->setProgressRange(1);
+        }
+
         MWBase::Environment::get().getLuaManager()->contentFilesLoaded();
 
         fillGlobalVariables();
 
         if (listener != nullptr)
-        {
             listener->setLabel("#{OMWEngine:InitializingData}");
-            listener->setProgressRange(1);
-        }
 
         mStore.setUp();
         mStore.validateRecords(mReaders, listener);
