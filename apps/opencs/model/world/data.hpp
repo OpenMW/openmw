@@ -292,6 +292,12 @@ namespace CSMWorld
         /// \note The returned table may either be the model for the ID itself or the model that
         /// contains the record specified by the ID.
 
+        template <typename ModelT>
+        ModelT& getTableModel(const UniversalId& id)
+        {
+            return dynamic_cast<ModelT&>(*getTableModel(id));
+        }
+
         const ActorAdapter* getActorAdapter() const;
 
         ActorAdapter* getActorAdapter();

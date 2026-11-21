@@ -64,6 +64,13 @@ namespace CSMWorld
 
         const NestedRefIdAdapterBase& getNestedAdapter(const ColumnBase& column, UniversalId::Type type) const;
 
+        template <typename... Args>
+        RefIdColumn* addColumn(Args&&... args)
+        {
+            mColumns.emplace_back(std::forward<Args>(args)...);
+            return &mColumns.back();
+        }
+
     public:
         RefIdCollection(const IdCollection<ESM::MagicEffect>& magicEffects);
 

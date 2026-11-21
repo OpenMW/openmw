@@ -304,10 +304,8 @@ void CSVRender::TerrainShapeMode::clearTransientEdits()
 void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-    CSMWorld::IdTable& landTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Land));
-    CSMWorld::IdTable& ltexTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
+    auto& landTable = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Land);
+    auto& ltexTable = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_LandTextures);
 
     int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
     int landnormalsColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandNormalsIndex);

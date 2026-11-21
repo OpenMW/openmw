@@ -7,6 +7,7 @@
 #include <string>
 #include <utility>
 
+#include "columnbase.hpp"
 #include "columns.hpp"
 
 namespace CSMWorld
@@ -64,6 +65,13 @@ namespace CSMWorld
         virtual bool isDeleted(const std::string& id) const = 0;
 
         virtual int getColumnId(int column) const = 0;
+
+        QVariant getData(int row, int column, int role = Qt::DisplayRole) const;
+
+        /// Return the UniversalId for a source-model row.
+        UniversalId getUniversalId(int row) const;
+
+        ColumnBase::Display getColumnDisplay(int column) const;
 
         unsigned int getFeatures() const;
     };

@@ -15,6 +15,7 @@
 
 #include "idcollection.hpp"
 #include "nestedtablewrapper.hpp"
+#include "variantconversion.hpp"
 
 CSMWorld::PotionColumns::PotionColumns(const InventoryColumns& columns)
     : InventoryColumns(columns)
@@ -31,8 +32,7 @@ CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter(const PotionColumns& columns, c
 
 QVariant CSMWorld::PotionRefIdAdapter::getData(const RefIdColumn* column, const RefIdData& data, int index) const
 {
-    const Record<ESM::Potion>& record = static_cast<const Record<ESM::Potion>&>(
-        data.getRecord(RefIdData::LocalIndex(index, UniversalId::Type_Potion)));
+    const auto& record = data.getRecord<ESM::Potion>(index, UniversalId::Type_Potion);
 
     if (column == mAutoCalc)
         return record.get().mData.mFlags & ESM::Potion::Autocalc;
@@ -47,8 +47,7 @@ QVariant CSMWorld::PotionRefIdAdapter::getData(const RefIdColumn* column, const 
 void CSMWorld::PotionRefIdAdapter::setData(
     const RefIdColumn* column, RefIdData& data, int index, const QVariant& value) const
 {
-    Record<ESM::Potion>& record
-        = static_cast<Record<ESM::Potion>&>(data.getRecord(RefIdData::LocalIndex(index, UniversalId::Type_Potion)));
+    auto& record = data.getRecord<ESM::Potion>(index, UniversalId::Type_Potion);
 
     ESM::Potion potion = record.get();
 
@@ -559,7 +558,7 @@ void CSMWorld::CreatureRefIdAdapter::setData(
     else if (column == mColumns.mScale)
         creature.mScale = value.toFloat();
     else if (column == mColumns.mOriginal)
-        creature.mOriginal = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+        creature.mOriginal = getRefId(value);
     else if (column == mColumns.mBloodType)
         creature.mBloodType = value.toInt();
     else
@@ -801,8 +800,7 @@ CSMWorld::NpcRefIdAdapter::NpcRefIdAdapter(const NpcColumns& columns)
 
 QVariant CSMWorld::NpcRefIdAdapter::getData(const RefIdColumn* column, const RefIdData& data, int index) const
 {
-    const Record<ESM::NPC>& record
-        = static_cast<const Record<ESM::NPC>&>(data.getRecord(RefIdData::LocalIndex(index, UniversalId::Type_Npc)));
+    const auto& record = data.getRecord<ESM::NPC>(index, UniversalId::Type_Npc);
 
     if (column == mColumns.mRace)
         return QString::fromUtf8(record.get().mRace.getRefIdString().c_str());
@@ -923,8 +921,7 @@ void CSMWorld::NpcAttributesRefIdAdapter::setNestedTable(
     ESM::NPC npc = record.get();
 
     // store the whole struct
-    npc.mNpdt
-        = static_cast<const NestedTableWrapper<std::vector<ESM::NPC::NPDTstruct52>>&>(nestedTable).mNestedTable.at(0);
+    npc.mNpdt = nestedTable.get<std::vector<ESM::NPC::NPDTstruct52>>().at(0);
 
     record.setModified(npc);
 }

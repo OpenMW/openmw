@@ -30,7 +30,7 @@ opencs_units (model/world
     )
 
 opencs_hdrs (model/world
-    columnimp disabletag idcollection collection info subcellcollection cell nestedtablewrapper record
+    columnimp disabletag idcollection collection info subcellcollection cell nestedtablewrapper record variantconversion
     )
 
 

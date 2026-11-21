@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <QVariant>
@@ -184,6 +185,12 @@ namespace CSMWorld
         ~NestableColumn();
 
         void addColumn(CSMWorld::NestableColumn* column);
+
+        template <typename ColumnT, typename... Args>
+        void addColumn(Args&&... args)
+        {
+            addColumn(new ColumnT(std::forward<Args>(args)...));
+        }
 
         const ColumnBase& nestedColumn(int subColumn) const;
 

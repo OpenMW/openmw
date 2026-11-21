@@ -33,6 +33,7 @@
 #include "info.hpp"
 #include "land.hpp"
 #include "record.hpp"
+#include "variantconversion.hpp"
 
 namespace CSMWorld
 {
@@ -332,7 +333,7 @@ namespace CSMWorld
         {
             ESXRecordT record2 = record.get();
 
-            record2.mName = data.toString().toUtf8().constData();
+            record2.mName = getString(data);
 
             record.setModified(record2);
         }
@@ -872,7 +873,7 @@ namespace CSMWorld
         {
             ESXRecordT record2 = record.get();
 
-            record2.mRegion = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
+            record2.mRegion = getRefId(data);
 
             record.setModified(record2);
         }

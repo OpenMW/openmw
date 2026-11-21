@@ -257,8 +257,7 @@ namespace CSVRender
 
     void Pathgrid::applyPoint(CSMWorld::CommandMacro& commands, const osg::Vec3d& worldPos)
     {
-        CSMWorld::IdTree* model
-            = &dynamic_cast<CSMWorld::IdTree&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Pathgrids));
+        auto* model = &mData.getTableModel<CSMWorld::IdTree>(CSMWorld::UniversalId::Type_Pathgrids);
         const std::string& idString = mId.getRefIdString();
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
