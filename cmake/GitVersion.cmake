@@ -26,6 +26,26 @@ else ()
     message(WARNING "Failed to get valid version information from Git")
 endif ()
 
+execute_process (
+    COMMAND ${GIT_EXECUTABLE} log -1 --format=%cI HEAD
+    WORKING_DIRECTORY ${OpenMW_SOURCE_DIR}
+    RESULT_VARIABLE COMMITDATE_EXITCODE
+    OUTPUT_VARIABLE COMMITDATE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET)
+
+if (COMMITDATE_EXITCODE)
+    message(WARNING "Failed to get the HEAD commit year using ${GIT_EXECUTABLE}, exit code ${COMMITDATE_EXITCODE}. Using configured copyright year ${OPENMW_COPYRIGHT_YEAR}")
+elseif (NOT COMMITDATE MATCHES "^[0-9][0-9][0-9][0-9]-")
+    message(WARNING "Invalid HEAD commit date '${COMMITDATE}' from ${GIT_EXECUTABLE}. Using configured copyright year ${OPENMW_COPYRIGHT_YEAR}")
+else ()
+    string(SUBSTRING "${COMMITDATE}" 0 4 COMMIT_YEAR)
+    if (COMMIT_YEAR GREATER OPENMW_COPYRIGHT_YEAR)
+        message(WARNING "Copyright year ${OPENMW_COPYRIGHT_YEAR} is older than the HEAD commit year ${COMMIT_YEAR}, using ${COMMIT_YEAR} instead")
+        set(OPENMW_COPYRIGHT_YEAR "${COMMIT_YEAR}")
+    endif ()
+endif ()
+
 include(${MACROSFILE})
 
 configure_resource_file(${VERSION_RESOURCE_FILE_IN} ${OpenMW_BINARY_DIR} ${VERSION_RESOURCE_FILE_RELATIVE})

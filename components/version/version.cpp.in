@@ -10,6 +10,11 @@ namespace Version
         return "@OPENMW_VERSION@";
     }
 
+    int getCopyrightYear()
+    {
+        return @OPENMW_COPYRIGHT_YEAR@;
+    }
+
     std::string_view getCommitHash()
     {
         return "@OPENMW_VERSION_COMMITHASH@";
