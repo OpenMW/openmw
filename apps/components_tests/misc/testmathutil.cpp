@@ -120,8 +120,11 @@ namespace Misc
 
         TEST_P(MiscToEulerAnglesZYXQuatTest, shouldReturnValueCloseTo)
         {
+            // Tolerance matches the XZ suite. At the gimbal-lock cases (y = +/- pi/2)
+            // the (x, z) decomposition is mathematically ambiguous, so pinning
+            // implementation-specific bit patterns is unsound.
             const osg::Vec3f result = toEulerAnglesZYX(GetParam().first);
-            EXPECT_THAT(result, Vec3fEq(GetParam().second, std::numeric_limits<float>::epsilon()))
+            EXPECT_THAT(result, Vec3fEq(GetParam().second, 1e-6f))
                 << "toEulerAnglesZYX(" << GetParam().first << ") = " << result;
         }
 

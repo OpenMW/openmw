@@ -46,9 +46,8 @@ namespace LuaUi
         MyGUI::IntCoord atlasCoord;
         if (resource)
         {
-            atlasCoord
-                = MyGUI::IntCoord(static_cast<int>(resource->mOffset.x()), static_cast<int>(resource->mOffset.y()),
-                    static_cast<int>(resource->mSize.x()), static_cast<int>(resource->mSize.y()));
+            atlasCoord = MyGUI::IntCoord(static_cast<int>(resource->mOffset.x), static_cast<int>(resource->mOffset.y),
+                static_cast<int>(resource->mSize.x), static_cast<int>(resource->mSize.y));
             setImageTexture(resource->mPath);
         }
 

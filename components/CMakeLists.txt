@@ -637,6 +637,7 @@ target_link_libraries(components
     Base64
     SQLite3::SQLite3
     smhasher
+    glm::glm
     ${ICU_LIBRARIES}
     ZLIB::ZLIB
     )

@@ -1,5 +1,7 @@
 #include "inputbindings.hpp"
 
+#include <glm/vec2.hpp>
+
 #include <SDL_events.h>
 #include <SDL_gamecontroller.h>
 #include <SDL_mouse.h>
@@ -71,7 +73,7 @@ namespace MWLua
                 = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> int { return e.mDevice; });
             touchpadEvent["finger"]
                 = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> int { return e.mFinger; });
-            touchpadEvent["position"] = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> osg::Vec2f {
+            touchpadEvent["position"] = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> glm::vec2 {
                 return { e.mX, e.mY };
             });
             touchpadEvent["pressure"]

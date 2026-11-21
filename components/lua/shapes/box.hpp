@@ -3,29 +3,29 @@
 
 #include <array>
 
-#include <osg/Matrix>
-#include <osg/Quat>
-#include <osg/Vec3f>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
 
 namespace LuaUtil
 {
     class Box
     {
     public:
-        Box(const osg::Vec3f& center, const osg::Vec3f& halfSize, const osg::Quat& rotation = osg::Quat());
-        Box(const osg::Matrix& transform);
+        Box(const glm::vec3& center, const glm::vec3& halfSize, const glm::quat& rotation = glm::quat(1, 0, 0, 0));
+        Box(const glm::mat4& transform);
 
-        std::array<osg::Vec3f, 8> vertices() const;
+        std::array<glm::vec3, 8> vertices() const;
 
-        osg::Matrix asTransform() const;
+        glm::mat4 asTransform() const;
 
         // TODO: Add `contains` and `intersects` methods
 
         bool operator==(const Box& other) const;
 
-        osg::Vec3f mCenter;
-        osg::Vec3f mHalfSize;
-        osg::Quat mRotation;
+        glm::vec3 mCenter;
+        glm::vec3 mHalfSize;
+        glm::quat mRotation;
     };
 }
 #endif // COMPONENTS_LUA_SHAPES_BOX_H

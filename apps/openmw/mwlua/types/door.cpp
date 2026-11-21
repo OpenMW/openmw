@@ -131,10 +131,11 @@ namespace MWLua
                 world->activateDoor(ptr, MWWorld::DoorState::Closing);
         };
         door["isTeleport"] = [](const Object& o) { return doorPtr(o).getCellRef().getTeleport(); };
-        door["destPosition"]
-            = [](const Object& o) -> osg::Vec3f { return doorPtr(o).getCellRef().getDoorDest().asVec3(); };
+        door["destPosition"] = [](const Object& o) -> glm::vec3 {
+            return Misc::Convert::toGlm(doorPtr(o).getCellRef().getDoorDest().asVec3());
+        };
         door["destRotation"] = [](const Object& o) -> LuaUtil::TransformQ {
-            return { Misc::Convert::makeOsgQuat(doorPtr(o).getCellRef().getDoorDest().rot) };
+            return { Misc::Convert::makeGlmQuat(doorPtr(o).getCellRef().getDoorDest().rot) };
         };
         door["destCell"] = [](sol::this_state thisState, const Object& o) -> sol::object {
             const MWWorld::CellRef& cellRef = doorPtr(o).getCellRef();
@@ -157,10 +158,11 @@ namespace MWLua
     void addESM4DoorBindings(sol::table door, const Context& context)
     {
         door["isTeleport"] = [](const Object& o) { return door4Ptr(o).getCellRef().getTeleport(); };
-        door["destPosition"]
-            = [](const Object& o) -> osg::Vec3f { return door4Ptr(o).getCellRef().getDoorDest().asVec3(); };
+        door["destPosition"] = [](const Object& o) -> glm::vec3 {
+            return Misc::Convert::toGlm(door4Ptr(o).getCellRef().getDoorDest().asVec3());
+        };
         door["destRotation"] = [](const Object& o) -> LuaUtil::TransformQ {
-            return { Misc::Convert::makeOsgQuat(door4Ptr(o).getCellRef().getDoorDest().rot) };
+            return { Misc::Convert::makeGlmQuat(door4Ptr(o).getCellRef().getDoorDest().rot) };
         };
         door["destCell"] = [](sol::this_state lua, const Object& o) -> sol::object {
             const MWWorld::CellRef& cellRef = door4Ptr(o).getCellRef();

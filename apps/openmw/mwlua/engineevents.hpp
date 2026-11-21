@@ -3,7 +3,7 @@
 
 #include <variant>
 
-#include <osg/Vec3f>
+#include <glm/vec3.hpp>
 
 #include <components/esm3/cellref.hpp> // defines RefNum that is used as a unique id
 #include <components/lua/utilpackage.hpp>
@@ -91,14 +91,14 @@ namespace MWLua
         {
             ESM::RefNum mObject;
             ESM::RefNum mActor;
-            osg::Vec3f mPosition;
+            glm::vec3 mPosition;
             LuaUtil::TransformQ mRotation;
         };
         struct OnPlaced
         {
             ESM::RefNum mObject;
             ESM::RefNum mActor;
-            osg::Vec3f mPosition;
+            glm::vec3 mPosition;
             LuaUtil::TransformQ mRotation;
         };
         using Event = std::variant<OnActive, OnInactive, OnConsume, OnActivate, OnUseItem, OnNewExterior, OnTeleported,

@@ -10,6 +10,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include <components/esm3/loadsoun.hpp>
+#include <components/misc/convert.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/pathutil.hpp>
@@ -228,9 +229,10 @@ namespace MWLua
                 MWBase::Environment::get().getSoundManager()->playSound3D(
                     ptr, sound, args.mVolume, args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
             }
-            else if (objectOrPosition.is<osg::Vec3f>())
-                MWBase::Environment::get().getSoundManager()->playSound3D(objectOrPosition.as<osg::Vec3f>(), sound,
-                    args.mVolume, args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
+            else if (objectOrPosition.is<glm::vec3>())
+                MWBase::Environment::get().getSoundManager()->playSound3D(
+                    Misc::Convert::toOsg(objectOrPosition.as<glm::vec3>()), sound, args.mVolume, args.mPitch,
+                    MWSound::Type::Sfx, playMode, args.mTimeOffset);
         };
         api["playSoundFile3d"]
             = [](std::string_view fileName, const sol::object& object, const sol::optional<sol::table>& options) {

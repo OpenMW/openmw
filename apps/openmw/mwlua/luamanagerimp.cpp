@@ -27,6 +27,8 @@
 #include <components/lua_ui/registerscriptsettings.hpp>
 #include <components/lua_ui/util.hpp>
 
+#include <components/misc/convert.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -601,8 +603,8 @@ namespace MWLua
             sol::table hitResult = view.newTable();
             sol::table spellcast = view.newTable();
             hitResult["hit"] = true;
-            hitResult["hitPos"] = position;
-            hitResult["hitNormal"] = normal;
+            hitResult["hitPos"] = Misc::Convert::toGlm(position);
+            hitResult["hitNormal"] = Misc::Convert::toGlm(normal);
             if (!victim.isEmpty())
                 hitResult["hitObject"] = GObject(victim);
             spellcast["id"] = spellId.serializeText();
@@ -627,16 +629,16 @@ namespace MWLua
         const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const osg::Vec3f& position, const osg::Quat& rotation)
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(object);
-        mEngineEvents.addToQueue(
-            EngineEvents::OnDropped{ getId(object), getId(actor), position, LuaUtil::asTransform(rotation) });
+        mEngineEvents.addToQueue(EngineEvents::OnDropped{ getId(object), getId(actor), Misc::Convert::toGlm(position),
+            LuaUtil::asTransform(Misc::Convert::toGlm(rotation)) });
     }
 
     void LuaManager::objectPlaced(
         const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const osg::Vec3f& position, const osg::Quat& rotation)
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(object);
-        mEngineEvents.addToQueue(
-            EngineEvents::OnPlaced{ getId(object), getId(actor), position, LuaUtil::asTransform(rotation) });
+        mEngineEvents.addToQueue(EngineEvents::OnPlaced{ getId(object), getId(actor), Misc::Convert::toGlm(position),
+            LuaUtil::asTransform(Misc::Convert::toGlm(rotation)) });
     }
 
     void LuaManager::animationTextKey(const MWWorld::Ptr& actor, const std::string& key)
@@ -729,7 +731,7 @@ namespace MWLua
             data["strength"] = attackStrength;
             data["windUp"] = attackWindUp;
             data["damage"] = damageTable;
-            data["hitPos"] = hitPos;
+            data["hitPos"] = Misc::Convert::toGlm(hitPos);
             data["successful"] = successful;
             switch (sourceType)
             {

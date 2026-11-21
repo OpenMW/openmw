@@ -208,10 +208,10 @@ namespace LuaUi
     sol::object WidgetExtension::mouseEvent(
         LuaUtil::LuaView& view, int left, int top, MyGUI::MouseButton button = MyGUI::MouseButton::None) const
     {
-        osg::Vec2f position(static_cast<float>(left), static_cast<float>(top));
+        glm::vec2 position(static_cast<float>(left), static_cast<float>(top));
         MyGUI::IntPoint absolutePosition = mWidget->getAbsolutePosition();
-        osg::Vec2f offset = position
-            - osg::Vec2f(static_cast<float>(absolutePosition.left), static_cast<float>(absolutePosition.top));
+        glm::vec2 offset
+            = position - glm::vec2(static_cast<float>(absolutePosition.left), static_cast<float>(absolutePosition.top));
         sol::table table = view.newTable();
         int sdlButton = SDLUtil::myGuiMouseButtonToSdl(button);
         table["position"] = position;
@@ -346,8 +346,8 @@ namespace LuaUi
     {
         mPadding = Padding();
         const LuaUtil::Vec4 value = propertyValue("padding", LuaUtil::Vec4());
-        mPadding = Padding{ static_cast<int>(value.x()), static_cast<int>(value.y()), static_cast<int>(value.z()),
-            static_cast<int>(value.w()) };
+        mPadding = Padding{ static_cast<int>(value.x), static_cast<int>(value.y), static_cast<int>(value.z),
+            static_cast<int>(value.w) };
     }
 
     bool WidgetExtension::setCursor(const std::string& cursor)
@@ -611,8 +611,8 @@ namespace LuaUi
         protectedCall([=, this](LuaUtil::LuaView& view) {
             propagateEvent("mouseWheel", [&](auto w) {
                 sol::table event = view.newTable();
-                event["position"] = osg::Vec2f(left, top);
-                event["delta"] = osg::Vec2f(x, y);
+                event["position"] = glm::vec2(left, top);
+                event["delta"] = glm::vec2(x, y);
                 return event;
             });
         });

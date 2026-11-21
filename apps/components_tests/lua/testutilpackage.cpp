@@ -196,6 +196,7 @@ namespace
         EXPECT_THAT(getAsString(lua, "rot"), HasSubstr("TransformQ"));
         EXPECT_LT(get<float>(lua, "(rot * v(1, 0, 0) - v(0, 0, 1)):length()"), 1e-6);
         EXPECT_LT(get<float>(lua, "(rot * rot:inverse() * v(1, 0, 0) - v(1, 0, 0)):length()"), 1e-6);
+        EXPECT_LT(get<float>(lua, "(T.rotate(math.pi / 2, v(0, 0, 0)) * v(1, 2, 3) - v(1, 2, 3)):length()"), 1e-6);
         lua.safe_script("rz_move_rx = rz * T.move(0, 3, 0) * rx");
         EXPECT_LT(get<float>(lua, "(rz_move_rx * v(1, 2, 3) - v(0, 1, 2)):length()"), 1e-6);
         EXPECT_LT(get<float>(lua, "(rz_move_rx:inverse() * v(0, 1, 2) - v(1, 2, 3)):length()"), 1e-6);

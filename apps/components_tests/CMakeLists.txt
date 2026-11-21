@@ -23,7 +23,9 @@ file(GLOB UNITTEST_SRC_FILES
 
     misc/compression.cpp
     misc/progressreporter.cpp
+    misc/testconvertglm.cpp
     misc/testendianness.cpp
+    misc/testglmexperimental.cpp
     misc/testmathutil.cpp
     misc/testresourcehelpers.cpp
     misc/teststringops.cpp
