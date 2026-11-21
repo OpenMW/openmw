@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#     "click",
+#     "libclang",
+# ]
+# ///
 
 import clang.cindex
 import click

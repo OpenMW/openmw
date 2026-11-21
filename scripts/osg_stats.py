@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#     "click",
+#     "matplotlib",
+#     "numpy",
+#     "termtables",
+# ]
+# ///
 """
 osg_stats.py is a script to analyze OpenSceneGraph log. It parses given file
 and builds timeseries, histograms, plots, calculate statistics for a given

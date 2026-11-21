@@ -21,10 +21,7 @@ declare -rA GROUPED_DEPS=(
     curl
     gcc
     git
-    libclang-dev
     ninja-build
-    python3-clang
-    python3-pip
     unzip
   "
 
@@ -62,6 +59,7 @@ declare -rA GROUPED_DEPS=(
 
   [openmw-integration-tests]="
     ca-certificates
+    curl
     gdb
     git
     git-lfs
@@ -94,7 +92,6 @@ declare -rA GROUPED_DEPS=(
     libswscale7
     libtinyxml2.6.2v5
     libyaml-cpp0.8
-    python3-pip
     xvfb
   "
 
