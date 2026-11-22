@@ -1,11 +1,17 @@
 #include "engine.hpp"
 
+#include <algorithm>
 #include <cerrno>
 #include <chrono>
+#include <fstream>
 #include <future>
 #include <system_error>
 
+#include <osg/BlendFunc>
+#include <osg/Geometry>
+#include <osg/MatrixTransform>
 #include <osg/Stats>
+#include <osg/Texture2D>
 #include <osg/Timer>
 #include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
@@ -96,6 +102,182 @@ namespace
         if (ret != 0)
             Log(Debug::Error) << "SDL error: " << SDL_GetError();
     }
+
+    osg::ref_ptr<osg::Texture2D> readLogoTexture(const std::filesystem::path& path)
+    {
+        std::ifstream stream(path, std::ios_base::in | std::ios_base::binary);
+        if (stream.fail())
+        {
+            Log(Debug::Error) << "Error: Failed to open " << path;
+            return nullptr;
+        }
+
+        osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
+        if (reader == nullptr)
+        {
+            Log(Debug::Error) << "Error: Failed to read " << path << ", no png readerwriter found";
+            return nullptr;
+        }
+
+        osgDB::ReaderWriter::ReadResult result = reader->readImage(stream);
+        if (!result.success())
+        {
+            Log(Debug::Error) << "Error: Failed to read " << path << ": " << result.message() << " code "
+                              << result.status();
+            return nullptr;
+        }
+
+        osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D(result.getImage());
+        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
+        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        texture->setResizeNonPowerOfTwoHint(false);
+
+        return texture;
+    }
+
+    // Creates a unit quad with the given point of it placed at the origin.
+    osg::ref_ptr<osg::Geometry> createLogoQuad(osg::Texture2D* texture, osg::Vec4Array* color, const osg::Vec2f& origin)
+    {
+        osg::ref_ptr<osg::Geometry> quad = osg::createTexturedQuadGeometry(
+            osg::Vec3f(-origin.x(), -origin.y(), 0), osg::Vec3f(1, 0, 0), osg::Vec3f(0, 1, 0));
+        quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture);
+        quad->setColorArray(color, osg::Array::BIND_OVERALL);
+        // The color is changed every frame.
+        quad->setUseDisplayList(false);
+        quad->setDataVariance(osg::Object::DYNAMIC);
+
+        return quad;
+    }
+
+    // Center of the star in the texture coordinates of star.png.
+    const osg::Vec2f sStarCenter(0.6122f, 0.4926f);
+    constexpr double sStarTurnDuration = 2.4;
+    constexpr double sFadeInDelay = 0.5;
+    constexpr double sFadeInDuration = 0.5;
+    constexpr std::chrono::milliseconds sFrameDuration{ 10 };
+
+    // The game data is not available while the VFS is being initialized, so the screen is limited to the logo
+    // stored outside of the VFS.
+    class StartupScreen
+    {
+    public:
+        StartupScreen(osgViewer::Viewer& viewer, SDL_Window* window, const std::filesystem::path& resDir)
+            : mViewer(viewer)
+            , mWindow(window)
+        {
+            // Stereo rendering requires shaders, which are not available yet.
+            if (Stereo::getStereo())
+                return;
+
+            mCamera = new osg::Camera;
+            mCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+            mCamera->setViewMatrix(osg::Matrix::identity());
+            mCamera->setClearColor(osg::Vec4f(0, 0, 0, 1));
+            mCamera->setRenderOrder(osg::Camera::POST_RENDER);
+            mCamera->setCullingActive(false);
+
+            osg::StateSet* stateSet = mCamera->getOrCreateStateSet();
+            stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+            stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+            stateSet->setAttributeAndModes(new osg::BlendFunc);
+
+            mLogo = new osg::MatrixTransform;
+            mCamera->addChild(mLogo);
+
+            if (osg::ref_ptr<osg::Texture2D> moon = readLogoTexture(resDir / "logo" / "moon.png"))
+                mLogo->addChild(createLogoQuad(moon, mColor, osg::Vec2f(0, 0)));
+
+            if (osg::ref_ptr<osg::Texture2D> star = readLogoTexture(resDir / "logo" / "star.png"))
+            {
+                mStar = new osg::MatrixTransform;
+                mStar->addChild(createLogoQuad(star, mColor, sStarCenter));
+                mLogo->addChild(mStar);
+            }
+
+            int width = 0;
+            int height = 0;
+            SDL_GL_GetDrawableSize(mWindow, &width, &height);
+            setSize(width, height);
+
+            mViewer.getSceneData()->asGroup()->addChild(mCamera);
+        }
+
+        ~StartupScreen()
+        {
+            if (mCamera != nullptr)
+                mViewer.getSceneData()->asGroup()->removeChild(mCamera);
+        }
+
+        // Keeps the window responding while the function is running in another thread.
+        template <class Function>
+        void showWhile(Function&& function)
+        {
+            std::future<void> future = std::async(std::launch::async, std::forward<Function>(function));
+            mTimer.setStartTick();
+            while (future.wait_for(sFrameDuration) != std::future_status::ready)
+            {
+                SDL_PumpEvents();
+
+                if (mCamera != nullptr)
+                    draw();
+            }
+
+            future.get();
+        }
+
+    private:
+        void setSize(int width, int height)
+        {
+            mWidth = width;
+            mHeight = height;
+
+            const float size = static_cast<float>(std::min(width, height)) / 4;
+            mCamera->setViewport(0, 0, width, height);
+            mCamera->setProjectionMatrixAsOrtho2D(0, width, 0, height);
+            mLogo->setMatrix(osg::Matrix::scale(size, size, 1)
+                * osg::Matrix::translate(
+                    (static_cast<float>(width) - size) / 2, (static_cast<float>(height) - size) / 2, 0));
+        }
+
+        void draw()
+        {
+            // The window events are left to be handled once the input is set up, so the viewport of the main camera
+            // does not follow the window yet.
+            int width = 0;
+            int height = 0;
+            SDL_GL_GetDrawableSize(mWindow, &width, &height);
+            if (width > 0 && height > 0 && (width != mWidth || height != mHeight))
+                setSize(width, height);
+
+            const double time = mTimer.time_s();
+
+            // The logo stays hidden at first so that it does not flash when the function takes a moment.
+            const double opacity = std::clamp((time - sFadeInDelay) / sFadeInDuration, 0.0, 1.0);
+            mColor->front() = osg::Vec4f(1, 1, 1, static_cast<float>(opacity));
+            mColor->dirty();
+
+            if (mStar != nullptr)
+            {
+                const double angle = -time * 2 * osg::PI / sStarTurnDuration;
+                mStar->setMatrix(osg::Matrix::rotate(angle, osg::Vec3f(0, 0, 1))
+                    * osg::Matrix::translate(sStarCenter.x(), sStarCenter.y(), 0));
+            }
+
+            mViewer.renderingTraversals();
+        }
+
+        osgViewer::Viewer& mViewer;
+        SDL_Window* mWindow;
+        int mWidth = 0;
+        int mHeight = 0;
+        osg::ref_ptr<osg::Camera> mCamera;
+        osg::ref_ptr<osg::MatrixTransform> mLogo;
+        osg::ref_ptr<osg::Vec4Array> mColor = new osg::Vec4Array(1);
+        osg::ref_ptr<osg::MatrixTransform> mStar;
+        osg::Timer mTimer;
+    };
 
     void initStatsHandler(Resource::Profiler& profiler)
     {
@@ -770,7 +952,9 @@ void OMW::Engine::prepareEngine()
 
     mVFS = std::make_unique<VFS::Manager>();
 
-    VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true, &mEncoder.get()->getStatelessEncoder());
+    StartupScreen(*mViewer, mWindow, mResDir).showWhile([&] {
+        VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true, &mEncoder.get()->getStatelessEncoder());
+    });
 
     mResourceSystem = std::make_unique<Resource::ResourceSystem>(
         mVFS.get(), Settings::cells().mCacheExpiryDelay, &mEncoder.get()->getStatelessEncoder());
