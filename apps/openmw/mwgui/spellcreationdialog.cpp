@@ -797,6 +797,8 @@ namespace MWGui
                     = (mType == Spellmaking) ? ESM::MagicEffect::AllowSpellmaking : ESM::MagicEffect::AllowEnchanting;
                 if (!(effect->mData.mFlags & requiredFlags))
                     continue;
+                if (effect->mName.empty()) // effects without names cannot be displayed in MWList
+                    continue;
 
                 if (std::find(knownEffects.begin(), knownEffects.end(), effect) == knownEffects.end())
                     knownEffects.push_back(effect);
