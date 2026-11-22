@@ -408,7 +408,7 @@ namespace MWGui
         }
     }
 
-    void DialogueWindow::onSelectListItem(const std::string& topic, int /*id*/)
+    void DialogueWindow::onSelectListItem(const std::string& topic)
     {
         MWBase::DialogueManager* dialogueManager = MWBase::Environment::get().getDialogueManager();
 
@@ -944,7 +944,7 @@ namespace MWGui
             else if (mControllerFocus == mTopicsList->getItemCount())
                 onGoodbyeActivated();
             else
-                onSelectListItem(mTopicsList->getItemNameAt(mControllerFocus), static_cast<int>(mControllerFocus));
+                onSelectListItem(mTopicsList->getItemNameAt(mControllerFocus));
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B && mChoices.empty())

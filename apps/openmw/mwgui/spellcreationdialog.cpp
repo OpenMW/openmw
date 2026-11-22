@@ -807,22 +807,18 @@ namespace MWGui
 
         mAvailableEffectsList->clear();
 
-        int i = 0;
         for (const auto effect : knownEffects)
-        {
             mAvailableEffectsList->addItem(effect->mName);
-            mButtonMapping[i] = effect->mId;
-            ++i;
-        }
         mAvailableEffectsList->adjustSize();
         mAvailableEffectsList->scrollToTop();
 
         mAvailableButtons.clear();
-        for (const auto effect : knownEffects)
+        for (size_t i = 0; i < knownEffects.size(); ++i)
         {
-            MyGUI::Button* w = mAvailableEffectsList->getItemWidget(effect->mName);
+            const ESM::MagicEffect* effect = knownEffects[i];
+            MyGUI::Button* w = mAvailableEffectsList->getItemWidgetAt(i);
             mAvailableButtons.emplace_back(w);
-
+            w->setUserData(effect->mId);
             ToolTips::createMagicEffectToolTip(w, effect->mId);
         }
 
@@ -889,8 +885,7 @@ namespace MWGui
             return;
         }
 
-        int buttonId = *sender->getUserData<int>();
-        mSelectedKnownEffectId = mButtonMapping[buttonId];
+        mSelectedKnownEffectId = *sender->getUserData<ESM::RefId>();
 
         const ESM::MagicEffect* effect
             = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
