@@ -169,7 +169,9 @@ namespace Gui
     {
         std::string search = getName() + "_item_";
         search += name;
-        return mScrollView->findWidget(search)->castType<MyGUI::Button>();
+        if (MyGUI::Widget* found = mScrollView->findWidget(search))
+            return found->castType<MyGUI::Button>();
+        return nullptr;
     }
 
     void MWList::scrollToTop()
