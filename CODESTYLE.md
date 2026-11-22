@@ -349,7 +349,6 @@ if (count < 0)
 ## Comments
 
 - Classes and functions are documented where their purpose is not obvious; trivial ones such as getters and setters are left undocumented. Doxygen commands such as `\brief` and `\param` are not required.
-- Documentation comments use the `///` style rather than `/** */`.
 
 ## Tests
 
