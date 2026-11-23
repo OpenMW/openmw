@@ -139,6 +139,26 @@ namespace
         return texture;
     }
 
+    // Shown instead of the logo when its files fail to load, so that the window is not left blank.
+    osg::ref_ptr<osg::Texture2D> createSadFaceTexture()
+    {
+        // The rows go from the bottom up.
+        constexpr unsigned char sadFace[]
+            = { 0xff, 0x00, 0x00, 0xff, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x00, 0x00, 0xff };
+
+        osg::ref_ptr<osg::Image> image = new osg::Image;
+        image->allocateImage(4, 4, 1, GL_RED, GL_UNSIGNED_BYTE);
+        std::copy(std::begin(sadFace), std::end(sadFace), image->data());
+
+        osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D(image);
+        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::NEAREST);
+        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::NEAREST);
+        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+
+        return texture;
+    }
+
     osg::ref_ptr<osg::Geometry> createLogoQuad(osg::Texture2D* texture)
     {
         osg::ref_ptr<osg::Geometry> quad
@@ -184,18 +204,21 @@ namespace
             mLogo = new osg::MatrixTransform;
             mCamera->addChild(mLogo);
 
-            if (osg::ref_ptr<osg::Texture2D> moon = readLogoTexture(resDir / "logo" / "moon.png"))
-                mLogo->addChild(createLogoQuad(moon));
-
-            if (osg::ref_ptr<osg::Texture2D> star = readLogoTexture(resDir / "logo" / "star.png"))
+            osg::ref_ptr<osg::Texture2D> moon = readLogoTexture(resDir / "logo" / "moon.png");
+            osg::ref_ptr<osg::Texture2D> star = readLogoTexture(resDir / "logo" / "star.png");
+            if (moon != nullptr && star != nullptr)
             {
                 osg::ref_ptr<osg::Geometry> starQuad = createLogoQuad(star);
                 osg::StateSet* starStateSet = starQuad->getOrCreateStateSet();
                 starStateSet->addUniform(new osg::Uniform("turnCenter", sStarCenter));
                 starStateSet->addUniform(
                     new osg::Uniform("turnSpeed", static_cast<float>(-2 * osg::PI / sStarTurnDuration)));
+
+                mLogo->addChild(createLogoQuad(moon));
                 mLogo->addChild(starQuad);
             }
+            else
+                mLogo->addChild(createLogoQuad(createSadFaceTexture()));
 
             int width = 0;
             int height = 0;
