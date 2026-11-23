@@ -337,7 +337,7 @@ bool CSVRender::Object::referenceDataChanged(const QModelIndex& topLeft, const Q
 
         adjustTransform();
 
-        if (columnIndex >= topLeft.column() && columnIndex <= bottomRight.row())
+        if (columnIndex >= topLeft.column() && columnIndex <= bottomRight.column())
         {
             mReferenceableId = CSMWorld::getRefId(references.getData(index, columnIndex));
 
