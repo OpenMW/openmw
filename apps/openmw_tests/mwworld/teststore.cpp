@@ -950,7 +950,7 @@ namespace
             esmStore.load(*reader, &dummyListener, dialogue);
         }
         esmStore.setUp();
-        esmStore.validateRecords(readers);
+        esmStore.validateRecords(readers, nullptr);
 
         const ESM::RefId chair = ESM::RefId::stringRefId("chair");
         EXPECT_EQ(esmStore.getRefCount(chair), 3);

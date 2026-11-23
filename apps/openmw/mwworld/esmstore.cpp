@@ -550,13 +550,13 @@ namespace MWWorld
         }
     }
 
-    void ESMStore::validateRecords(ESM::ReadersCache& readers)
+    void ESMStore::validateRecords(ESM::ReadersCache& readers, Loading::Listener* listener)
     {
         validate();
-        countAllCellRefsAndMarkKeys(readers);
+        countAllCellRefsAndMarkKeys(readers, listener);
     }
 
-    void ESMStore::countAllCellRefsAndMarkKeys(ESM::ReadersCache& readers)
+    void ESMStore::countAllCellRefsAndMarkKeys(ESM::ReadersCache& readers, Loading::Listener* listener)
     {
         // TODO: We currently need to read entire files here again.
         // We should consider consolidating or deferring this reading.
@@ -569,8 +569,14 @@ namespace MWWorld
         const std::size_t cellCount = cells.getSize();
         const std::size_t interiorCellCount = cells.getIntSize();
         const std::size_t exteriorCellCount = cells.getExtSize();
+        if (listener != nullptr)
+            listener->setProgressRange(cellCount);
         for (std::size_t i = 0; i < cellCount; ++i)
+        {
             readRefs(*cells.at(i), i, refs, refIDs, keyIDs, readers);
+            if (listener != nullptr)
+                listener->setProgress(i + 1);
+        }
         const auto lessByRefNum = [](const Ref& l, const Ref& r) { return l.mRefNum < r.mRefNum; };
         std::stable_sort(refs.begin(), refs.end(), lessByRefNum);
         const auto equalByRefNum = [](const Ref& l, const Ref& r) { return l.mRefNum == r.mRefNum; };

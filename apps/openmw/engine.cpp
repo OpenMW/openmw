@@ -933,10 +933,15 @@ void OMW::Engine::prepareEngine()
     }
 
     listener->loadingOn();
+    listener->setProgressRange(1);
     {
         using namespace std::chrono_literals;
         while (dataLoading.wait_for(50ms) != std::future_status::ready)
+        {
             asyncListener.update();
+            // Keep the window responsive while the loading reports no progress
+            listener->increaseProgress(0);
+        }
         dataLoading.get();
     }
     mSoundManager->warmStoreSounds();
