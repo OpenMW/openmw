@@ -10,7 +10,6 @@
 
 #include <osg/BlendFunc>
 #include <osg/Geometry>
-#include <osg/MatrixTransform>
 #include <osg/Stats>
 #include <osg/Texture2D>
 #include <osg/Timer>
@@ -162,17 +161,20 @@ namespace
         return texture;
     }
 
+    // The logo quads are centered in clip space, which spans from -1 to 1, so the logo takes a quarter of the shorter
+    // side of the window. The shader keeps it square.
+    constexpr float sLogoSize = 0.5f;
+
     osg::ref_ptr<osg::Geometry> createLogoQuad(osg::Texture2D* texture)
     {
-        osg::ref_ptr<osg::Geometry> quad
-            = osg::createTexturedQuadGeometry(osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(0, 1, 0));
+        osg::ref_ptr<osg::Geometry> quad = osg::createTexturedQuadGeometry(
+            osg::Vec3f(-sLogoSize / 2, -sLogoSize / 2, 0), osg::Vec3f(sLogoSize, 0, 0), osg::Vec3f(0, sLogoSize, 0));
         quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture);
 
         return quad;
     }
 
-    // Center of the star in star.png. The logo quads span from 0 to 1, so it's the same in their vertex and texture
-    // coordinates.
+    // Center of the star in the texture coordinates of star.png.
     constexpr glm::vec2 sStarCenter(0.6122f, 0.4926f);
     constexpr double sStarTurnDuration = 2.4;
     constexpr std::chrono::milliseconds sFrameDuration{ 10 };
@@ -200,6 +202,7 @@ namespace
         {
             mCamera = new osg::Camera;
             mCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+            mCamera->setProjectionMatrix(osg::Matrix::identity());
             mCamera->setViewMatrix(osg::Matrix::identity());
             mCamera->setClearColor(osg::Vec4f(0, 0, 0, 1));
             mCamera->setRenderOrder(osg::Camera::POST_RENDER);
@@ -209,15 +212,17 @@ namespace
             shaderManager.setShaderPath(resDir / "shaders");
 
             osg::StateSet* stateSet = mCamera->getOrCreateStateSet();
+            // The aspect ratio is changed in place when the window is resized, so a frame has to be drawn before the
+            // next one starts.
+            stateSet->setDataVariance(osg::Object::DYNAMIC);
             stateSet->setAttributeAndModes(shaderManager.getProgram("logo"));
-            stateSet->addUniform(new osg::Uniform("diffuseMap", 0));
+            stateSet->addUniform(new osg::Uniform("logo", 0));
+            mAspectRatio = new osg::Uniform("aspectRatio", 1.f);
+            stateSet->addUniform(mAspectRatio);
             // Only the star turns.
             stateSet->addUniform(new osg::Uniform("turnSpeed", 0.f));
             stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
             stateSet->setAttributeAndModes(new osg::BlendFunc);
-
-            mLogo = new osg::MatrixTransform;
-            mCamera->addChild(mLogo);
 
             osg::ref_ptr<osg::Texture2D> moon = readLogoTexture(resDir / "logo" / "moon.png");
             osg::ref_ptr<osg::Texture2D> star = readLogoTexture(resDir / "logo" / "star.png");
@@ -225,15 +230,16 @@ namespace
             {
                 osg::ref_ptr<osg::Geometry> starQuad = createLogoQuad(star);
                 osg::StateSet* starStateSet = starQuad->getOrCreateStateSet();
-                starStateSet->addUniform(new osg::Uniform("turnCenter", osg::Vec2f(sStarCenter.x, sStarCenter.y)));
+                const glm::vec2 turnCenter = (sStarCenter - 0.5f) * sLogoSize;
+                starStateSet->addUniform(new osg::Uniform("turnCenter", osg::Vec2f(turnCenter.x, turnCenter.y)));
                 starStateSet->addUniform(
                     new osg::Uniform("turnSpeed", static_cast<float>(-2 * osg::PI / sStarTurnDuration)));
 
-                mLogo->addChild(createLogoQuad(moon));
-                mLogo->addChild(starQuad);
+                mCamera->addChild(createLogoQuad(moon));
+                mCamera->addChild(starQuad);
             }
             else
-                mLogo->addChild(createLogoQuad(createSadFaceTexture()));
+                mCamera->addChild(createLogoQuad(createSadFaceTexture()));
 
             int width = 0;
             int height = 0;
@@ -272,12 +278,8 @@ namespace
             mWidth = width;
             mHeight = height;
 
-            const float size = static_cast<float>(std::min(width, height)) / 4;
             mCamera->setViewport(0, 0, width, height);
-            mCamera->setProjectionMatrixAsOrtho2D(0, width, 0, height);
-            mLogo->setMatrix(osg::Matrix::scale(size, size, 1)
-                * osg::Matrix::translate(
-                    (static_cast<float>(width) - size) / 2, (static_cast<float>(height) - size) / 2, 0));
+            mAspectRatio->set(static_cast<float>(width) / height);
         }
 
         void draw()
@@ -300,7 +302,7 @@ namespace
         int mWidth = 0;
         int mHeight = 0;
         osg::ref_ptr<osg::Camera> mCamera;
-        osg::ref_ptr<osg::MatrixTransform> mLogo;
+        osg::ref_ptr<osg::Uniform> mAspectRatio;
     };
 
     void initStatsHandler(Resource::Profiler& profiler)

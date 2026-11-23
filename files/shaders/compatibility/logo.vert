@@ -1,16 +1,22 @@
 #version 120
 
 uniform float osg_FrameTime;
+uniform float aspectRatio;
 uniform vec2 turnCenter;
 uniform float turnSpeed;
 
-varying vec2 diffuseMapUV;
+varying vec2 logoUV;
 
 void main()
 {
     float angle = turnSpeed * osg_FrameTime;
     mat2 rotation = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
     vec2 position = turnCenter + rotation * (gl_Vertex.xy - turnCenter);
-    gl_Position = gl_ModelViewProjectionMatrix * vec4(position, gl_Vertex.zw);
-    diffuseMapUV = gl_MultiTexCoord0.xy;
+    // Squeezes the logo along the longer side of the window to keep it square.
+    if (aspectRatio > 1.0)
+        position.x /= aspectRatio;
+    else
+        position.y *= aspectRatio;
+    gl_Position = vec4(position, gl_Vertex.zw);
+    logoUV = gl_MultiTexCoord0.xy;
 }
