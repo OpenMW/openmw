@@ -15,6 +15,7 @@
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
+#include <glm/gtc/packing.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
@@ -40,7 +41,8 @@ namespace Misc::Convert
     {
         // Vertices and UV sets may be half-precision.
         // OSG doesn't have a way to pass half-precision data at the moment.
-        return osg::Vec3f(Misc::halfToFloat(values[0]), Misc::halfToFloat(values[1]), Misc::halfToFloat(values[2]));
+        return osg::Vec3f(
+            glm::unpackHalf1x16(values[0]), glm::unpackHalf1x16(values[1]), glm::unpackHalf1x16(values[2]));
     }
 
     inline btVector3 toBullet(const osg::Vec3f& vec)

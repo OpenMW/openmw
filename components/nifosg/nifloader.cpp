@@ -12,13 +12,14 @@
 #include <osg/Switch>
 #include <osg/ValueObject>
 
+#include <glm/gtc/packing.hpp>
+
 #include <yaml-cpp/yaml.h>
 
 // resource
 #include <components/debug/debuglog.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>
-#include <components/misc/float16.hpp>
 #include <components/misc/osguservalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -1835,7 +1836,7 @@ namespace NifOsg
                 if (hasColors)
                     colors.emplace_back(elem.mVertColor[0], elem.mVertColor[1], elem.mVertColor[2], elem.mVertColor[3]);
                 if (hasUV)
-                    uvlist.emplace_back(Misc::halfToFloat(elem.mUV[0]), Misc::halfToFloat(elem.mUV[1]));
+                    uvlist.emplace_back(glm::unpackHalf1x16(elem.mUV[0]), glm::unpackHalf1x16(elem.mUV[1]));
             }
 
             if (vertices.empty() && nifNode->mRecordType == Nif::RC_BSDynamicTriShape)
@@ -1884,7 +1885,7 @@ namespace NifOsg
                         const Nif::BSVertexData& vert = (*vertData)[i];
                         for (int j = 0; j < 4; ++j)
                         {
-                            const float weight = Misc::halfToFloat(vert.mBoneWeights[j]);
+                            const float weight = glm::unpackHalf1x16(vert.mBoneWeights[j]);
                             if (weight == 0.f)
                                 continue;
                             influences[i].emplace_back(vert.mBoneIndices[j], weight);
