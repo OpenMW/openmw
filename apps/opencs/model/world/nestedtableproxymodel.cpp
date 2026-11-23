@@ -5,6 +5,7 @@
 #include <cassert>
 
 #include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/variantconversion.hpp>
 
 CSMWorld::NestedTableProxyModel::NestedTableProxyModel(
     const QModelIndex& parent, ColumnBase::Display columnId, CSMWorld::IdTree* parentModel)
@@ -143,7 +144,7 @@ void CSMWorld::NestedTableProxyModel::forwardRowsInserted(const QModelIndex& par
 bool CSMWorld::NestedTableProxyModel::indexIsParent(const QModelIndex& index)
 {
     return (index.isValid() && index.column() == mParentColumn
-        && mMainModel->getData(index.row(), 0).toString().toUtf8().constData() == mId);
+        && CSMWorld::getString(mMainModel->getData(index.row(), 0)) == mId);
 }
 
 void CSMWorld::NestedTableProxyModel::forwardRowsAboutToRemoved(const QModelIndex& parent, int first, int last)
