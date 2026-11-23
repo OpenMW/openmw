@@ -163,7 +163,7 @@ namespace Gui
 
     MyGUI::Button* MWList::getItemWidgetAt(size_t index)
     {
-        return mScrollView->getChildAt(index)->castType<MyGUI::Button>();
+        return mScrollView->getChildAt(index)->castType<MyGUI::Button>(false);
     }
 
     MyGUI::Button* MWList::getItemWidget(std::string_view name)

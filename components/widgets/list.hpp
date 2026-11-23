@@ -20,7 +20,7 @@ namespace Gui
 
         /**
          * Event: Item selected with the mouse.
-         * signature: void method(std::string itemName, int index)
+         * signature: void method(const std::string& itemName)
          */
         EventHandle_String eventItemSelected;
 
