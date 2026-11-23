@@ -1,6 +1,7 @@
 #include "engine.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <cerrno>
 #include <chrono>
 #include <fstream>
@@ -176,6 +177,18 @@ namespace
     constexpr double sStarTurnDuration = 2.4;
     constexpr std::chrono::milliseconds sFrameDuration{ 10 };
 
+    class KeepAliveListener final : public Loading::Listener
+    {
+    public:
+        void increaseProgress(std::size_t /*increase*/) override { mProgressed = true; }
+
+        // Returns whether there was any progress since the last call.
+        bool takeProgress() { return mProgressed.exchange(false); }
+
+    private:
+        std::atomic<bool> mProgressed{ false };
+    };
+
     // The game data is not available while the VFS is being initialized, so the screen is limited to the logo
     // stored outside of the VFS.
     class StartupScreen
@@ -232,14 +245,21 @@ namespace
 
         ~StartupScreen() { mViewer.getSceneData()->asGroup()->removeChild(mCamera); }
 
-        // Keeps the window responding while the function is running in another thread.
+        // Keeps the window responding while the function is running in another thread and reporting its progress to the
+        // given listener.
         template <class Function>
         void showWhile(Function&& function)
         {
-            std::future<void> future = std::async(std::launch::async, std::forward<Function>(function));
+            KeepAliveListener listener;
+            std::future<void> future
+                = std::async(std::launch::async, std::forward<Function>(function), std::ref(listener));
             while (future.wait_for(sFrameDuration) != std::future_status::ready)
             {
-                SDL_PumpEvents();
+                // The events are only pumped while the function makes progress, so that the OS still sees the window as
+                // frozen if the function gets stuck.
+                if (listener.takeProgress())
+                    SDL_PumpEvents();
+
                 draw();
             }
 
@@ -956,8 +976,9 @@ void OMW::Engine::prepareEngine()
 
     mVFS = std::make_unique<VFS::Manager>();
 
-    StartupScreen(*mViewer, mWindow, mResDir).showWhile([&] {
-        VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true, &mEncoder.get()->getStatelessEncoder());
+    StartupScreen(*mViewer, mWindow, mResDir).showWhile([&](Loading::Listener& listener) {
+        VFS::registerArchives(
+            mVFS.get(), mFileCollections, mArchives, true, &mEncoder.get()->getStatelessEncoder(), &listener);
     });
 
     mResourceSystem = std::make_unique<Resource::ResourceSystem>(

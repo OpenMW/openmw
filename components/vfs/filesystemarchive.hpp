@@ -7,6 +7,11 @@
 #include <filesystem>
 #include <string>
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace VFS
 {
 
@@ -28,7 +33,8 @@ namespace VFS
     class FileSystemArchive : public Archive
     {
     public:
-        FileSystemArchive(const std::filesystem::path& path);
+        /// @param listener Gets the progress for every file found.
+        FileSystemArchive(const std::filesystem::path& path, Loading::Listener* listener = nullptr);
 
         void listResources(FileMap& out) override;
 
