@@ -68,6 +68,8 @@ set(SHADER_FILES
     compatibility/depthclipped.frag
     compatibility/gui.vert
     compatibility/gui.frag
+    compatibility/logo.vert
+    compatibility/logo.frag
     compatibility/debug.vert
     compatibility/debug.frag
     compatibility/sky.vert

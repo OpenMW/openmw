@@ -61,6 +61,8 @@
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/sceneutil/util.hpp>
 
+#include <components/shader/shadermanager.hpp>
+
 #include <components/settings/shadermanager.hpp>
 #include <components/settings/values.hpp>
 
@@ -137,25 +139,19 @@ namespace
         return texture;
     }
 
-    // Creates a unit quad with the given point of it placed at the origin.
-    osg::ref_ptr<osg::Geometry> createLogoQuad(osg::Texture2D* texture, osg::Vec4Array* color, const osg::Vec2f& origin)
+    osg::ref_ptr<osg::Geometry> createLogoQuad(osg::Texture2D* texture)
     {
-        osg::ref_ptr<osg::Geometry> quad = osg::createTexturedQuadGeometry(
-            osg::Vec3f(-origin.x(), -origin.y(), 0), osg::Vec3f(1, 0, 0), osg::Vec3f(0, 1, 0));
+        osg::ref_ptr<osg::Geometry> quad
+            = osg::createTexturedQuadGeometry(osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(0, 1, 0));
         quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture);
-        quad->setColorArray(color, osg::Array::BIND_OVERALL);
-        // The color is changed every frame.
-        quad->setUseDisplayList(false);
-        quad->setDataVariance(osg::Object::DYNAMIC);
 
         return quad;
     }
 
-    // Center of the star in the texture coordinates of star.png.
+    // Center of the star in star.png. The logo quads span from 0 to 1, so it's the same in their vertex and texture
+    // coordinates.
     const osg::Vec2f sStarCenter(0.6122f, 0.4926f);
     constexpr double sStarTurnDuration = 2.4;
-    constexpr double sFadeInDelay = 0.5;
-    constexpr double sFadeInDuration = 0.5;
     constexpr std::chrono::milliseconds sFrameDuration{ 10 };
 
     // The game data is not available while the VFS is being initialized, so the screen is limited to the logo
@@ -167,10 +163,6 @@ namespace
             : mViewer(viewer)
             , mWindow(window)
         {
-            // Stereo rendering requires shaders, which are not available yet.
-            if (Stereo::getStereo())
-                return;
-
             mCamera = new osg::Camera;
             mCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
             mCamera->setViewMatrix(osg::Matrix::identity());
@@ -178,8 +170,14 @@ namespace
             mCamera->setRenderOrder(osg::Camera::POST_RENDER);
             mCamera->setCullingActive(false);
 
+            Shader::ShaderManager shaderManager;
+            shaderManager.setShaderPath(resDir / "shaders");
+
             osg::StateSet* stateSet = mCamera->getOrCreateStateSet();
-            stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+            stateSet->setAttributeAndModes(shaderManager.getProgram("logo"));
+            stateSet->addUniform(new osg::Uniform("diffuseMap", 0));
+            // Only the star turns.
+            stateSet->addUniform(new osg::Uniform("turnSpeed", 0.f));
             stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
             stateSet->setAttributeAndModes(new osg::BlendFunc);
 
@@ -187,13 +185,16 @@ namespace
             mCamera->addChild(mLogo);
 
             if (osg::ref_ptr<osg::Texture2D> moon = readLogoTexture(resDir / "logo" / "moon.png"))
-                mLogo->addChild(createLogoQuad(moon, mColor, osg::Vec2f(0, 0)));
+                mLogo->addChild(createLogoQuad(moon));
 
             if (osg::ref_ptr<osg::Texture2D> star = readLogoTexture(resDir / "logo" / "star.png"))
             {
-                mStar = new osg::MatrixTransform;
-                mStar->addChild(createLogoQuad(star, mColor, sStarCenter));
-                mLogo->addChild(mStar);
+                osg::ref_ptr<osg::Geometry> starQuad = createLogoQuad(star);
+                osg::StateSet* starStateSet = starQuad->getOrCreateStateSet();
+                starStateSet->addUniform(new osg::Uniform("turnCenter", sStarCenter));
+                starStateSet->addUniform(
+                    new osg::Uniform("turnSpeed", static_cast<float>(-2 * osg::PI / sStarTurnDuration)));
+                mLogo->addChild(starQuad);
             }
 
             int width = 0;
@@ -204,24 +205,17 @@ namespace
             mViewer.getSceneData()->asGroup()->addChild(mCamera);
         }
 
-        ~StartupScreen()
-        {
-            if (mCamera != nullptr)
-                mViewer.getSceneData()->asGroup()->removeChild(mCamera);
-        }
+        ~StartupScreen() { mViewer.getSceneData()->asGroup()->removeChild(mCamera); }
 
         // Keeps the window responding while the function is running in another thread.
         template <class Function>
         void showWhile(Function&& function)
         {
             std::future<void> future = std::async(std::launch::async, std::forward<Function>(function));
-            mTimer.setStartTick();
             while (future.wait_for(sFrameDuration) != std::future_status::ready)
             {
                 SDL_PumpEvents();
-
-                if (mCamera != nullptr)
-                    draw();
+                draw();
             }
 
             future.get();
@@ -251,20 +245,8 @@ namespace
             if (width > 0 && height > 0 && (width != mWidth || height != mHeight))
                 setSize(width, height);
 
-            const double time = mTimer.time_s();
-
-            // The logo stays hidden at first so that it does not flash when the function takes a moment.
-            const double opacity = std::clamp((time - sFadeInDelay) / sFadeInDuration, 0.0, 1.0);
-            mColor->front() = osg::Vec4f(1, 1, 1, static_cast<float>(opacity));
-            mColor->dirty();
-
-            if (mStar != nullptr)
-            {
-                const double angle = -time * 2 * osg::PI / sStarTurnDuration;
-                mStar->setMatrix(osg::Matrix::rotate(angle, osg::Vec3f(0, 0, 1))
-                    * osg::Matrix::translate(sStarCenter.x(), sStarCenter.y(), 0));
-            }
-
+            // Moves the frame time the shaders animate the logo by, but leaves the simulation time to Engine::go().
+            mViewer.advance(mViewer.getFrameStamp()->getSimulationTime());
             mViewer.renderingTraversals();
         }
 
@@ -274,9 +256,6 @@ namespace
         int mHeight = 0;
         osg::ref_ptr<osg::Camera> mCamera;
         osg::ref_ptr<osg::MatrixTransform> mLogo;
-        osg::ref_ptr<osg::Vec4Array> mColor = new osg::Vec4Array(1);
-        osg::ref_ptr<osg::MatrixTransform> mStar;
-        osg::Timer mTimer;
     };
 
     void initStatsHandler(Resource::Profiler& profiler)
