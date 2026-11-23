@@ -53,7 +53,7 @@ std::string CSVWorld::InfoCreator::getId() const
 
 void CSVWorld::InfoCreator::configureCreateCommand(CSMWorld::CreateCommand& command) const
 {
-    CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(getCollectionId()));
+    CSMWorld::IdTable& table = getData().getTableModel<CSMWorld::IdTable>(getCollectionId());
 
     CSMWorld::CloneCommand* cloneCommand = dynamic_cast<CSMWorld::CloneCommand*>(&command);
     if (getCollectionId() == CSMWorld::UniversalId::Type_TopicInfos)
@@ -111,7 +111,7 @@ CSVWorld::InfoCreator::InfoCreator(CSMWorld::Data& worldData, QUndoStack& undoSt
 
 void CSVWorld::InfoCreator::cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type)
 {
-    CSMWorld::IdTable& infoTable = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(getCollectionId()));
+    CSMWorld::IdTable& infoTable = getData().getTableModel<CSMWorld::IdTable>(getCollectionId());
 
     int topicColumn = infoTable.findColumnIndex(getCollectionId().getType() == CSMWorld::UniversalId::Type_TopicInfos
             ? CSMWorld::Columns::ColumnId_Topic

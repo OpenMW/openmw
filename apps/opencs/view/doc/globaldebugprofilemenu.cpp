@@ -32,12 +32,12 @@ void CSVDoc::GlobalDebugProfileMenu::rebuild()
 
     for (int i = 0; i < size; ++i)
     {
-        int state = mDebugProfiles->data(mDebugProfiles->index(i, stateColumn)).toInt();
+        int state = mDebugProfiles->getData(i, stateColumn).toInt();
 
-        bool global = mDebugProfiles->data(mDebugProfiles->index(i, globalColumn)).toInt();
+        bool global = mDebugProfiles->getData(i, globalColumn).toInt();
 
         if (state != CSMWorld::RecordBase::State_Deleted && global)
-            ids.push_back(mDebugProfiles->data(mDebugProfiles->index(i, idColumn)).toString());
+            ids.push_back(mDebugProfiles->getData(i, idColumn).toString());
     }
 
     mActions = new QActionGroup(this);

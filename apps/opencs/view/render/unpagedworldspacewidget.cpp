@@ -64,11 +64,10 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget(
     , mDocument(document)
     , mCellId(cellId)
 {
-    mCellsModel
-        = &dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Cells));
+    mCellsModel = &document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Cells);
 
-    mReferenceablesModel = &dynamic_cast<CSMWorld::IdTable&>(
-        *document.getData().getTableModel(CSMWorld::UniversalId::Type_Referenceables));
+    mReferenceablesModel
+        = &document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Referenceables);
 
     connect(mCellsModel, &CSMWorld::IdTable::dataChanged, this, &UnpagedWorldspaceWidget::cellDataChanged);
     connect(mCellsModel, &CSMWorld::IdTable::rowsAboutToBeRemoved, this,

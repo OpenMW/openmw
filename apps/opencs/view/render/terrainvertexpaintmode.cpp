@@ -218,7 +218,7 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Land));
+        = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Land);
 
     std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
 
@@ -354,9 +354,8 @@ bool CSVRender::TerrainVertexPaintMode::allowLandColourEditing(const std::string
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Land));
-    CSMWorld::IdTree& cellTable
-        = dynamic_cast<CSMWorld::IdTree&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Cells));
+        = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Land);
+    CSMWorld::IdTree& cellTable = document.getData().getTableModel<CSMWorld::IdTree>(CSMWorld::UniversalId::Type_Cells);
 
     const ESM::RefId cellRefId = ESM::RefId::stringRefId(cellId);
     const bool noCell = document.getData().getCells().searchId(cellRefId) == -1;

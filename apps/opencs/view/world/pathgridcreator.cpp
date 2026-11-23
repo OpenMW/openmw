@@ -27,7 +27,7 @@ std::string CSVWorld::PathgridCreator::getId() const
 
 CSMWorld::IdTable& CSVWorld::PathgridCreator::getPathgridsTable() const
 {
-    return dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(getCollectionId()));
+    return getData().getTableModel<CSMWorld::IdTable>(getCollectionId());
 }
 
 CSVWorld::PathgridCreator::PathgridCreator(CSMWorld::Data& worldData, QUndoStack& undoStack,

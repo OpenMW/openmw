@@ -14,7 +14,8 @@ class QUndoStack;
 
 void CSVWorld::DialogueCreator::configureCreateCommand(CSMWorld::CreateCommand& command) const
 {
-    int index = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(getCollectionId()))
+    int index = getData()
+                    .getTableModel<CSMWorld::IdTable>(getCollectionId())
                     .findColumnIndex(CSMWorld::Columns::ColumnId_DialogueType);
 
     command.addValue(index, mType);

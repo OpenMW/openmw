@@ -128,9 +128,9 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Land));
+        = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Land);
     CSMWorld::IdTable& ltexTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
+        = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_LandTextures);
 
     mCellId = getWorldspaceWidget().getCellId(hit.worldPos);
 
@@ -174,9 +174,9 @@ bool CSVRender::TerrainTextureMode::primaryEditStartDrag(const QPoint& pos)
 
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Land));
+        = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Land);
     CSMWorld::IdTable& ltexTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
+        = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_LandTextures);
 
     mCellId = getWorldspaceWidget().getCellId(hit.worldPos);
 
@@ -311,7 +311,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Land));
+        = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Land);
 
     mCellId = getWorldspaceWidget().getCellId(hit.worldPos);
     if (allowLandTextureEditing(mCellId))
@@ -631,7 +631,7 @@ void CSVRender::TerrainTextureMode::pushEditToCommand(CSMWorld::LandTexturesColu
     CSMDoc::Document& document, CSMWorld::IdTable& landTable, std::string cellId)
 {
     CSMWorld::IdTable& ltexTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
+        = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_LandTextures);
 
     QVariant changedLand;
     changedLand.setValue(newLandGrid);
@@ -648,9 +648,8 @@ bool CSVRender::TerrainTextureMode::allowLandTextureEditing(const std::string& c
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Land));
-    CSMWorld::IdTree& cellTable
-        = dynamic_cast<CSMWorld::IdTree&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Cells));
+        = document.getData().getTableModel<CSMWorld::IdTable>(CSMWorld::UniversalId::Type_Land);
+    CSMWorld::IdTree& cellTable = document.getData().getTableModel<CSMWorld::IdTree>(CSMWorld::UniversalId::Type_Cells);
 
     const ESM::RefId cellRefId = ESM::RefId::stringRefId(cellId);
     const bool noCell = document.getData().getCells().searchId(cellRefId) == -1;

@@ -284,7 +284,7 @@ namespace CSMWorld
     {
         ESM::BodyPart record2 = record.get();
 
-        record2.mRace = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
+        record2.mRace = getRefId(data);
 
         record.setModified(record2);
     }

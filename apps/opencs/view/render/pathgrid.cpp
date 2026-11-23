@@ -391,8 +391,7 @@ namespace CSVRender
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {
-            CSMWorld::IdTree* model
-                = &dynamic_cast<CSMWorld::IdTree&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Pathgrids));
+            CSMWorld::IdTree* model = &mData.getTableModel<CSMWorld::IdTree>(CSMWorld::UniversalId::Type_Pathgrids);
 
             // Want to remove nodes from end of list first
             std::sort(mSelected.begin(), mSelected.end(), std::greater<int>());
@@ -492,8 +491,7 @@ namespace CSVRender
                 }
             }
 
-            CSMWorld::IdTree* model
-                = &dynamic_cast<CSMWorld::IdTree&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Pathgrids));
+            CSMWorld::IdTree* model = &mData.getTableModel<CSMWorld::IdTree>(CSMWorld::UniversalId::Type_Pathgrids);
             int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
 
             std::set<int, std::greater<int>>::iterator row;
@@ -665,8 +663,7 @@ namespace CSVRender
     void Pathgrid::addEdge(
         CSMWorld::CommandMacro& commands, const CSMWorld::Pathgrid& source, unsigned short node1, unsigned short node2)
     {
-        CSMWorld::IdTree* model
-            = &dynamic_cast<CSMWorld::IdTree&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Pathgrids));
+        CSMWorld::IdTree* model = &mData.getTableModel<CSMWorld::IdTree>(CSMWorld::UniversalId::Type_Pathgrids);
 
         int recordIndex = mPathgridCollection.getIndex(mId);
         int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);

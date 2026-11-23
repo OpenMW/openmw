@@ -249,12 +249,11 @@ void CSVWorld::GenericCreator::create()
         if (mCloneMode)
         {
             command = std::make_unique<CSMWorld::CloneCommand>(
-                dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(mListId)), mClonedId, id, mClonedType);
+                mData.getTableModel<CSMWorld::IdTable>(mListId), mClonedId, id, mClonedType);
         }
         else
         {
-            command = std::make_unique<CSMWorld::CreateCommand>(
-                dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(mListId)), id);
+            command = std::make_unique<CSMWorld::CreateCommand>(mData.getTableModel<CSMWorld::IdTable>(mListId), id);
         }
 
         configureCreateCommand(*command);

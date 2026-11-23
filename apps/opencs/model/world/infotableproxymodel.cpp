@@ -64,14 +64,14 @@ int CSMWorld::InfoTableProxyModel::getFirstInfoRow(int currentRow) const
 
     int row = currentRow;
     int column = mInfoColumnIndex;
-    QString info = toLower(mSourceModel->data(mSourceModel->index(row, column)).toString());
+    QString info = toLower(mSourceModel->getData(row, column).toString());
 
     if (mFirstRowCache.contains(info))
     {
         return mFirstRowCache[info];
     }
 
-    while (--row >= 0 && toLower(mSourceModel->data(mSourceModel->index(row, column)).toString()) == info)
+    while (--row >= 0 && toLower(mSourceModel->getData(row, column).toString()) == info)
         ;
     ++row;
 

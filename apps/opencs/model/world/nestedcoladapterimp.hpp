@@ -17,6 +17,7 @@
 #include "idcollection.hpp"
 #include "nestedcolumnadapter.hpp"
 #include "nestedtablewrapper.hpp"
+#include "variantconversion.hpp"
 
 namespace ESM
 {
@@ -185,8 +186,7 @@ namespace CSMWorld
         {
             ESXRecordT raceOrBthSgn = record.get();
 
-            raceOrBthSgn.mPowers.mList
-                = static_cast<const NestedTableWrapper<std::vector<ESM::RefId>>&>(nestedTable).mNestedTable;
+            raceOrBthSgn.mPowers.mList = nestedTable.get<std::vector<ESM::RefId>>();
 
             record.setModified(raceOrBthSgn);
         }
@@ -229,7 +229,7 @@ namespace CSMWorld
             switch (subColIndex)
             {
                 case 0:
-                    spell = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+                    spell = getRefId(value);
                     break;
                 default:
                     throw std::runtime_error("Spells subcolumn index out of range");
@@ -300,8 +300,7 @@ namespace CSMWorld
         {
             ESXRecordT magic = record.get();
 
-            magic.mEffects.mList
-                = static_cast<const NestedTableWrapper<std::vector<ESM::IndexedENAMstruct>>&>(nestedTable).mNestedTable;
+            magic.mEffects.mList = nestedTable.get<std::vector<ESM::IndexedENAMstruct>>();
 
             record.setModified(magic);
         }
