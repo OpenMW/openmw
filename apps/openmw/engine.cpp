@@ -169,7 +169,7 @@ namespace
     {
         osg::ref_ptr<osg::Geometry> quad = osg::createTexturedQuadGeometry(
             osg::Vec3f(-sLogoSize / 2, -sLogoSize / 2, 0), osg::Vec3f(sLogoSize, 0, 0), osg::Vec3f(0, sLogoSize, 0));
-        quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture);
+        quad->getOrCreateStateSet()->setTextureAttribute(0, texture);
 
         return quad;
     }
