@@ -7,9 +7,12 @@ uniform float turnSpeed;
 
 varying vec2 logoUV;
 
+// The star is upright halfway through the fade-in, see fadeInDelay and fadeInDuration in logo.frag.
+const float uprightTime = 0.75;
+
 void main()
 {
-    float angle = turnSpeed * osg_FrameTime;
+    float angle = turnSpeed * (osg_FrameTime - uprightTime);
     mat2 rotation = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
     vec2 position = turnCenter + rotation * (gl_Vertex.xy - turnCenter);
     // Squeezes the logo along the longer side of the window to keep it square.
