@@ -22,7 +22,7 @@ To contribute code to OpenMW:
 3. Clone your fork locally
 4. [Set up a development environment and build OpenMW](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
 5. Make sure your build of OpenMW runs
-6. Read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference), especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards), and the rest of this document.
+6. Read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference), the [code style guide](CODESTYLE.md), and the rest of this document.
 7. Find an issue that interests you on the [issue tracker](https://gitlab.com/OpenMW/openmw/-/issues/). [The ones tagged "Beginner"](https://gitlab.com/OpenMW/openmw/-/issues/?scope=all&utf8=✓&state=opened&label_name=Beginner) may be good starting points.
 
 Ideally, before you start coding, reach out on [Discord](https://discord.com/servers/openmw-260439894298460160), [IRC](https://web.libera.chat/#openmw), or Matrix (`#openmw-space:openmw.org`) in the development channel (all three are bridged to each other) to discuss the issue and how you plan to tackle it. Alternatively, start the discussion in the GitLab issue itself.
@@ -108,7 +108,7 @@ Code review
 1. Carefully review each line for issues the author may not have thought of, paying special attention to 'special' cases. Often, people build their code with a particular mindset and forget about other configurations or unexpected interactions.
 2. If any changes are workarounds for an issue in an upstream library, make sure the issue was reported upstream so we can eventually drop the workaround when the issue is fixed and the new version of that library is a build dependency.
 3. Make sure MRs do not turn into arguments about hardly related issues. If the MR author disagrees with an established part of the project (e.g. supported build environments), they should open a forum discussion or bug report and in the meantime adjust the MR to adhere to the established way, rather than leaving the MR hanging on a dispute.
-4. Check if the code matches our style guidelines.
+4. Check if the code matches our [style guidelines](CODESTYLE.md).
 5. Check to make sure the commit history is clean. Squashing should be considered if the review process has made the commit history particularly long. Commits that don't build should be avoided because they are a nuisance for ```git bisect```.
 
 Merging
@@ -118,6 +118,8 @@ To be able to merge MRs, commit privileges are required. If you do not have the 
 
 In general case, you should not merge MRs prematurely even if you are sure they just work or if they receive a senior member's approval.
 The rule of thumb is to give at least 24 hours to a couple days of a window for reviews to come through. For more technically involved MRs, 24 hours might not be enough.
+
+If an MR changes the Lua API, whoever merges it also bumps `OPENMW_LUA_API_REVISION` in `CMakeLists.txt`. MR authors don't need to do this, as bumping it during review leads to repeated rebasing.
 
 Dealing with regressions
 ========================
