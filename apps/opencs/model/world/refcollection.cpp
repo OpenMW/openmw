@@ -341,10 +341,10 @@ void CSMWorld::RefCollection::insertRecord(std::unique_ptr<RecordBase> record, i
 
     if (index < size - 1)
     {
-        for (auto& entry : mRefIndex)
+        for (auto& [_, currentIndex] : mRefIndex)
         {
-            if (entry.second >= index)
-                ++(entry.second);
+            if (currentIndex >= index)
+                ++(currentIndex);
         }
     }
 

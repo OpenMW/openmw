@@ -67,9 +67,9 @@ namespace CSMWorld
     template <typename ESXRecordT>
     NestedIdCollection<ESXRecordT>::~NestedIdCollection()
     {
-        for (auto& entry : mAdapters)
+        for (auto& [_, info] : mAdapters)
         {
-            delete entry.second;
+            delete info;
         }
     }
 

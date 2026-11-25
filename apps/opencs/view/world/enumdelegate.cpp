@@ -34,12 +34,12 @@ void CSVWorld::EnumDelegate::setModelDataImp(QWidget* editor, QAbstractItemModel
     {
         QString value = comboBox->currentText();
 
-        for (const auto& entry : mValues)
-            if (entry.second == value)
+        for (const auto& [id, name] : mValues)
+            if (name == value)
             {
                 // do nothing if the value has not changed
-                if (model->data(index).toInt() != entry.first)
-                    addCommands(model, index, entry.first);
+                if (model->data(index).toInt() != id)
+                    addCommands(model, index, id);
                 break;
             }
     }
@@ -71,8 +71,8 @@ QWidget* CSVWorld::EnumDelegate::createEditor(QWidget* parent, const QStyleOptio
 
     QComboBox* comboBox = new QComboBox(parent);
 
-    for (const auto& element : mValues)
-        comboBox->addItem(element.second);
+    for (const auto& [_, name] : mValues)
+        comboBox->addItem(name);
 
     comboBox->setMaxVisibleItems(20);
 

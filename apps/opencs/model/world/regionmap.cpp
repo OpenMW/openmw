@@ -197,12 +197,12 @@ void CSMWorld::RegionMap::updateRegions(const std::vector<ESM::RefId>& regions)
 
     std::sort(regions2.begin(), regions2.end());
 
-    for (const auto& entry : mMap)
+    for (const auto& [coordinates, description] : mMap)
     {
-        if (!entry.second.mRegion.empty()
-            && std::find(regions2.begin(), regions2.end(), entry.second.mRegion) != regions2.end())
+        if (!description.mRegion.empty()
+            && std::find(regions2.begin(), regions2.end(), description.mRegion) != regions2.end())
         {
-            QModelIndex index = getIndex(entry.first);
+            QModelIndex index = getIndex(coordinates);
 
             dataChanged(index, index);
         }

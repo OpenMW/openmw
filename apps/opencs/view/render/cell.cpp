@@ -218,8 +218,8 @@ CSVRender::Cell::Cell(CSMDoc::Document& document, ObjectMarker* selectionMarker,
 
 CSVRender::Cell::~Cell()
 {
-    for (auto& entry : mObjects)
-        delete entry.second;
+    for (auto& [_, cell] : mObjects)
+        delete cell;
 
     mCellNode->getParent(0)->removeChild(mCellNode);
 }
@@ -310,11 +310,11 @@ bool CSVRender::Cell::referenceDataChanged(const QModelIndex& topLeft, const QMo
     }
 
     // add new objects
-    for (auto& entry : ids)
+    for (auto& [id, deleted] : ids)
     {
-        if (!entry.second)
+        if (!deleted)
         {
-            mObjects.insert(std::make_pair(entry.first, new Object(mData, mCellNode, entry.first, false)));
+            mObjects.insert(std::make_pair(id, new Object(mData, mCellNode, id, false)));
 
             modified = true;
         }
@@ -423,9 +423,9 @@ void CSVRender::Cell::landTextureAdded(const QModelIndex& parent, int start, int
 
 void CSVRender::Cell::reloadAssets()
 {
-    for (const auto& entry : mObjects)
+    for (const auto& [_, object] : mObjects)
     {
-        entry.second->reloadAssets();
+        object->reloadAssets();
     }
 
     if (mTerrain)
@@ -442,7 +442,7 @@ void CSVRender::Cell::setSelection(int elementMask, Selection mode)
 {
     if (elementMask & Mask_Reference)
     {
-        for (const auto& entry : mObjects)
+        for (const auto& [_, object] : mObjects)
         {
             bool selected = false;
 
@@ -455,13 +455,13 @@ void CSVRender::Cell::setSelection(int elementMask, Selection mode)
                     selected = true;
                     break;
                 case Selection_Invert:
-                    selected = !entry.second->getSelected();
+                    selected = !object->getSelected();
                     break;
             }
 
-            entry.second->setSelected(selected);
+            object->setSelected(selected);
             if (selected)
-                mSelectionMarker->addToSelectionHistory(entry.second->getReferenceId(), false);
+                mSelectionMarker->addToSelectionHistory(object->getReferenceId(), false);
         }
         mSelectionMarker->updateSelectionMarker();
     }
@@ -492,18 +492,18 @@ void CSVRender::Cell::selectAllWithSameParentId(int elementMask)
 {
     std::set<std::string> ids;
 
-    for (const auto& entry : mObjects)
+    for (const auto& [_, object] : mObjects)
     {
-        if (entry.second->getSelected())
-            ids.insert(entry.second->getReferenceableId());
+        if (object->getSelected())
+            ids.insert(object->getReferenceableId());
     }
 
-    for (const auto& entry : mObjects)
+    for (const auto& [_, object] : mObjects)
     {
-        if (!entry.second->getSelected() && ids.find(entry.second->getReferenceableId()) != ids.end())
+        if (!object->getSelected() && ids.find(object->getReferenceableId()) != ids.end())
         {
-            entry.second->setSelected(true);
-            mSelectionMarker->addToSelectionHistory(entry.second->getReferenceId(), false);
+            object->setSelected(true);
+            mSelectionMarker->addToSelectionHistory(object->getReferenceId(), false);
         }
     }
     mSelectionMarker->updateSelectionMarker();
@@ -653,9 +653,9 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::Cell::getSelection(unsi
     std::vector<osg::ref_ptr<TagBase>> result;
 
     if (elementMask & Mask_Reference)
-        for (const auto& entry : mObjects)
-            if (entry.second->getSelected())
-                result.push_back(entry.second->getTag());
+        for (const auto& [_, object] : mObjects)
+            if (object->getSelected())
+                result.push_back(object->getTag());
     if (mPathgrid && elementMask & Mask_Pathgrid)
         if (mPathgrid->isSelected())
             result.emplace_back(mPathgrid->getTag());
@@ -668,9 +668,9 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::Cell::getEdited(unsigne
     std::vector<osg::ref_ptr<TagBase>> result;
 
     if (elementMask & Mask_Reference)
-        for (const auto& entry : mObjects)
-            if (entry.second->isEdited())
-                result.push_back(entry.second->getTag());
+        for (const auto& [_, object] : mObjects)
+            if (object->isEdited())
+                result.push_back(object->getTag());
 
     return result;
 }
@@ -687,8 +687,8 @@ void CSVRender::Cell::setSubMode(int subMode, unsigned int elementMask)
 void CSVRender::Cell::reset(unsigned int elementMask)
 {
     if (elementMask & Mask_Reference)
-        for (const auto& entry : mObjects)
-            entry.second->reset();
+        for (const auto& [_, object] : mObjects)
+            object->reset();
     if (mPathgrid && elementMask & Mask_Pathgrid)
         mPathgrid->resetIndicators();
 }

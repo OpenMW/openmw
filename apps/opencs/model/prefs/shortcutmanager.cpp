@@ -278,9 +278,9 @@ namespace CSMPrefs
         }
 
         // Generate inverse map
-        for (const auto& entry : mNames)
+        for (const auto& [buttonId, buttonName] : mNames)
         {
-            mKeys.insert(std::make_pair(entry.second, entry.first));
+            mKeys.insert(std::make_pair(buttonName, buttonId));
         }
     }
 

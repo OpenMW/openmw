@@ -10,8 +10,8 @@
 
 CSVDoc::SubViewFactoryManager::~SubViewFactoryManager()
 {
-    for (auto& entry : mSubViewFactories)
-        delete entry.second;
+    for (auto& [_, factory] : mSubViewFactories)
+        delete factory;
 }
 
 void CSVDoc::SubViewFactoryManager::add(const CSMWorld::UniversalId::Type& id, SubViewFactoryBase* factory)

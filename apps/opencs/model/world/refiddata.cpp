@@ -50,12 +50,12 @@ CSMWorld::RefIdData::RefIdData()
 
 CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::globalToLocalIndex(int index) const
 {
-    for (const auto& entry : mRecordContainers)
+    for (const auto& [dataType, data] : mRecordContainers)
     {
-        if (index < entry.second->getSize())
-            return LocalIndex(index, entry.first);
+        if (index < data->getSize())
+            return LocalIndex(index, dataType);
 
-        index -= entry.second->getSize();
+        index -= data->getSize();
     }
 
     throw std::runtime_error("RefIdData index out of range");
@@ -207,11 +207,11 @@ int CSMWorld::RefIdData::getAppendIndex(UniversalId::Type type) const
 {
     int index = 0;
 
-    for (const auto& entry : mRecordContainers)
+    for (const auto& [dataType, data] : mRecordContainers)
     {
-        index += entry.second->getSize();
+        index += data->getSize();
 
-        if (type == entry.first)
+        if (type == dataType)
             break;
     }
 
