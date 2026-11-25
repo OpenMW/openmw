@@ -21,8 +21,8 @@ CSMTools::SearchOperation::SearchOperation(CSMDoc::Document& document)
     std::vector<CSMWorld::UniversalId::Type> types = CSMWorld::UniversalId::listTypes(
         CSMWorld::UniversalId::Class_RecordList | CSMWorld::UniversalId::Class_ResourceList);
 
-    for (std::vector<CSMWorld::UniversalId::Type>::const_iterator iter(types.begin()); iter != types.end(); ++iter)
-        appendStage(new SearchStage(&document.getData().getTableModel<CSMWorld::IdTableBase>(*iter)));
+    for (const auto& type : types)
+        appendStage(new SearchStage(&document.getData().getTableModel<CSMWorld::IdTableBase>(type)));
 
     setDefaultSeverity(CSMDoc::Message::Severity_Info);
 }

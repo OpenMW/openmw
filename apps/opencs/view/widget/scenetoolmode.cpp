@@ -49,7 +49,7 @@ void CSVWidget::SceneToolMode::adjustToolTip(const ModeButton* activeMode)
 
 void CSVWidget::SceneToolMode::setButton(std::map<ModeButton*, std::string>::iterator iter)
 {
-    for (std::map<ModeButton*, std::string>::const_iterator iter2 = mButtons.begin(); iter2 != mButtons.end(); ++iter2)
+    for (auto iter2 = mButtons.cbegin(); iter2 != mButtons.end(); ++iter2)
         iter2->first->setChecked(iter2 == iter);
 
     setIcon(iter->first->icon());
@@ -138,7 +138,7 @@ std::string CSVWidget::SceneToolMode::getCurrentId() const
 
 void CSVWidget::SceneToolMode::setButton(const std::string& id)
 {
-    for (std::map<ModeButton*, std::string>::iterator iter = mButtons.begin(); iter != mButtons.end(); ++iter)
+    for (auto iter = mButtons.begin(); iter != mButtons.end(); ++iter)
         if (iter->second == id)
         {
             setButton(iter);

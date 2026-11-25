@@ -122,14 +122,13 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
 
     if (modified)
     {
-        for (std::map<CSMWorld::CellCoordinates, Cell*>::const_iterator iter(mCells.begin()); iter != mCells.end();
-             ++iter)
+        for (const auto& [_, cell] : mCells)
         {
             int mask = 0;
 
             for (int i = CellArrow::Direction_North; i <= CellArrow::Direction_East; i *= 2)
             {
-                CSMWorld::CellCoordinates coordinates(iter->second->getCoordinates());
+                CSMWorld::CellCoordinates coordinates(cell->getCoordinates());
 
                 switch (i)
                 {
@@ -151,7 +150,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                     mask |= i;
             }
 
-            iter->second->setCellArrows(mask);
+            cell->setCellArrows(mask);
         }
     }
 
@@ -254,14 +253,14 @@ void CSVRender::PagedWorldspaceWidget::handleInteractionPress(const WorldspaceHi
 void CSVRender::PagedWorldspaceWidget::referenceableDataChanged(
     const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::iterator iter(mCells.begin()); iter != mCells.end(); ++iter)
+    for (auto iter(mCells.begin()); iter != mCells.end(); ++iter)
         if (iter->second->referenceableDataChanged(topLeft, bottomRight))
             flagAsModified();
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceableAboutToBeRemoved(const QModelIndex& parent, int start, int end)
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::iterator iter(mCells.begin()); iter != mCells.end(); ++iter)
+    for (auto iter(mCells.begin()); iter != mCells.end(); ++iter)
         if (iter->second->referenceableAboutToBeRemoved(parent, start, end))
             flagAsModified();
 }
@@ -271,33 +270,33 @@ void CSVRender::PagedWorldspaceWidget::referenceableAdded(const QModelIndex& par
     CSMWorld::IdTable& referenceables = dynamic_cast<CSMWorld::IdTable&>(
         *mDocument.getData().getTableModel(CSMWorld::UniversalId::Type_Referenceables));
 
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::iterator iter(mCells.begin()); iter != mCells.end(); ++iter)
+    for (auto& [_, cell] : mCells)
     {
         QModelIndex topLeft = referenceables.index(start, 0);
         QModelIndex bottomRight = referenceables.index(end, referenceables.columnCount());
 
-        if (iter->second->referenceableDataChanged(topLeft, bottomRight))
+        if (cell->referenceableDataChanged(topLeft, bottomRight))
             flagAsModified();
     }
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::iterator iter(mCells.begin()); iter != mCells.end(); ++iter)
+    for (auto iter(mCells.begin()); iter != mCells.end(); ++iter)
         if (iter->second->referenceDataChanged(topLeft, bottomRight))
             flagAsModified();
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceAboutToBeRemoved(const QModelIndex& parent, int start, int end)
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::iterator iter(mCells.begin()); iter != mCells.end(); ++iter)
+    for (auto iter(mCells.begin()); iter != mCells.end(); ++iter)
         if (iter->second->referenceAboutToBeRemoved(parent, start, end))
             flagAsModified();
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceAdded(const QModelIndex& parent, int start, int end)
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::iterator iter(mCells.begin()); iter != mCells.end(); ++iter)
+    for (auto iter(mCells.begin()); iter != mCells.end(); ++iter)
         if (iter->second->referenceAdded(parent, start, end))
             flagAsModified();
 }
@@ -590,9 +589,9 @@ CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget(QWidget* parent, CSMDoc:
 
 CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::iterator iter(mCells.begin()); iter != mCells.end(); ++iter)
+    for (auto& [_, cell] : mCells)
     {
-        delete iter->second;
+        delete cell;
     }
 }
 
@@ -747,8 +746,8 @@ unsigned int CSVRender::PagedWorldspaceWidget::getVisibilityMask() const
 
 void CSVRender::PagedWorldspaceWidget::clearSelection(int elementMask)
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::iterator iter = mCells.begin(); iter != mCells.end(); ++iter)
-        iter->second->setSelection(elementMask, Cell::Selection_Clear);
+    for (auto& [_, cell] : mCells)
+        cell->setSelection(elementMask, Cell::Selection_Clear);
 
     flagAsModified();
     mSelectionMarker->detachMarker();
@@ -756,24 +755,24 @@ void CSVRender::PagedWorldspaceWidget::clearSelection(int elementMask)
 
 void CSVRender::PagedWorldspaceWidget::invertSelection(int elementMask)
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::iterator iter = mCells.begin(); iter != mCells.end(); ++iter)
-        iter->second->setSelection(elementMask, Cell::Selection_Invert);
+    for (auto& [_, cell] : mCells)
+        cell->setSelection(elementMask, Cell::Selection_Invert);
 
     flagAsModified();
 }
 
 void CSVRender::PagedWorldspaceWidget::selectAll(int elementMask)
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::iterator iter = mCells.begin(); iter != mCells.end(); ++iter)
-        iter->second->setSelection(elementMask, Cell::Selection_All);
+    for (auto& [_, cell] : mCells)
+        cell->setSelection(elementMask, Cell::Selection_All);
 
     flagAsModified();
 }
 
 void CSVRender::PagedWorldspaceWidget::selectAllWithSameParentId(int elementMask)
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::iterator iter = mCells.begin(); iter != mCells.end(); ++iter)
-        iter->second->selectAllWithSameParentId(elementMask);
+    for (auto& [_, cell] : mCells)
+        cell->selectAllWithSameParentId(elementMask);
 
     flagAsModified();
 }
@@ -868,9 +867,9 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::PagedWorldspaceWidget::
 {
     std::vector<osg::ref_ptr<CSVRender::TagBase>> result;
 
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::const_iterator iter = mCells.begin(); iter != mCells.end(); ++iter)
+    for (const auto& [_, cell] : mCells)
     {
-        std::vector<osg::ref_ptr<CSVRender::TagBase>> cellResult = iter->second->getSelection(elementMask);
+        std::vector<osg::ref_ptr<CSVRender::TagBase>> cellResult = cell->getSelection(elementMask);
 
         result.insert(result.end(), cellResult.begin(), cellResult.end());
     }
@@ -895,9 +894,9 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::PagedWorldspaceWidget::
 {
     std::vector<osg::ref_ptr<CSVRender::TagBase>> result;
 
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::const_iterator iter = mCells.begin(); iter != mCells.end(); ++iter)
+    for (const auto& [_, cell] : mCells)
     {
-        std::vector<osg::ref_ptr<CSVRender::TagBase>> cellResult = iter->second->getEdited(elementMask);
+        std::vector<osg::ref_ptr<CSVRender::TagBase>> cellResult = cell->getEdited(elementMask);
 
         result.insert(result.end(), cellResult.begin(), cellResult.end());
     }
@@ -907,15 +906,15 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::PagedWorldspaceWidget::
 
 void CSVRender::PagedWorldspaceWidget::setSubMode(int subMode, unsigned int elementMask)
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::const_iterator iter = mCells.begin(); iter != mCells.end(); ++iter)
-        iter->second->setSubMode(subMode, elementMask);
+    for (const auto& [_, cell] : mCells)
+        cell->setSubMode(subMode, elementMask);
     mSelectionMarker->updateSelectionMarker();
 }
 
 void CSVRender::PagedWorldspaceWidget::reset(unsigned int elementMask)
 {
-    for (std::map<CSMWorld::CellCoordinates, Cell*>::const_iterator iter = mCells.begin(); iter != mCells.end(); ++iter)
-        iter->second->reset(elementMask);
+    for (const auto& [_, cell] : mCells)
+        cell->reset(elementMask);
 }
 
 CSVWidget::SceneToolToggle2* CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector(

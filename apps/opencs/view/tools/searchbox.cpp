@@ -55,8 +55,8 @@ CSVTools::SearchBox::SearchBox(QWidget* parent)
         = CSMWorld::Columns::getEnums(CSMWorld::Columns::ColumnId_Modification);
     states.resize(states.size() - 1); // ignore erased state
 
-    for (std::vector<std::pair<int, std::string>>::const_iterator iter(states.begin()); iter != states.end(); ++iter)
-        mRecordState.addItem(QString::fromUtf8(iter->second.c_str()));
+    for (const auto& [_, stateId] : states)
+        mRecordState.addItem(QString::fromUtf8(stateId.c_str()));
 
     mMode.addItem(tr("Text"));
     mMode.addItem(tr("Text (RegEx)"));

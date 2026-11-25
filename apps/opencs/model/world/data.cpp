@@ -686,8 +686,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
 
 CSMWorld::Data::~Data()
 {
-    for (std::vector<QAbstractItemModel*>::iterator iter(mModels.begin()); iter != mModels.end(); ++iter)
-        delete *iter;
+    for (auto* model : mModels)
+        delete model;
 }
 
 std::shared_ptr<Resource::ResourceSystem> CSMWorld::Data::getResourceSystem()

@@ -42,8 +42,8 @@ CSMDoc::DocumentManager::~DocumentManager()
     mLoader.hasThingsToDo().wakeAll();
     mLoaderThread.wait();
 
-    for (std::vector<Document*>::iterator iter(mDocuments.begin()); iter != mDocuments.end(); ++iter)
-        delete *iter;
+    for (auto* document : mDocuments)
+        delete document;
 }
 
 bool CSMDoc::DocumentManager::isEmpty()

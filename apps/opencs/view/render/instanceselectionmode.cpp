@@ -424,10 +424,10 @@ namespace CSVRender
         CSMWorld::IdTable& referencesTable = dynamic_cast<CSMWorld::IdTable&>(
             *getWorldspaceWidget().getDocument().getData().getTableModel(CSMWorld::UniversalId::Type_References));
 
-        for (std::vector<osg::ref_ptr<TagBase>>::iterator iter = selection.begin(); iter != selection.end(); ++iter)
+        for (auto& selectedTag : selection)
         {
             CSMWorld::DeleteCommand* command = new CSMWorld::DeleteCommand(
-                referencesTable, static_cast<ObjectTag*>(iter->get())->mObject->getReferenceId());
+                referencesTable, static_cast<ObjectTag*>(selectedTag.get())->mObject->getReferenceId());
 
             getWorldspaceWidget().getDocument().getUndoStack().push(command);
         }

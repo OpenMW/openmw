@@ -45,9 +45,9 @@ void CSVDoc::GlobalDebugProfileMenu::rebuild()
 
     std::sort(ids.begin(), ids.end());
 
-    for (std::vector<QString>::const_iterator iter(ids.begin()); iter != ids.end(); ++iter)
+    for (const auto& universalId : ids)
     {
-        mActions->addAction(addAction(*iter));
+        mActions->addAction(addAction(universalId));
     }
 }
 

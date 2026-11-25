@@ -95,7 +95,7 @@ namespace CSMPrefs
             assert(shortcutListIt != mWidgetShortcuts.end());
 
             // Deactivate in case events are missed
-            for (ShortcutList::iterator it = shortcutListIt->second.begin(); it != shortcutListIt->second.end(); ++it)
+            for (auto it = shortcutListIt->second.begin(); it != shortcutListIt->second.end(); ++it)
             {
                 Shortcut* shortcut = *it;
 
@@ -152,7 +152,7 @@ namespace CSMPrefs
             assert(shortcutListIt != mWidgetShortcuts.end());
 
             // Find potential activations
-            for (ShortcutList::iterator it = shortcutListIt->second.begin(); it != shortcutListIt->second.end(); ++it)
+            for (auto it = shortcutListIt->second.begin(); it != shortcutListIt->second.end(); ++it)
             {
                 Shortcut* shortcut = *it;
 
@@ -222,7 +222,7 @@ namespace CSMPrefs
             ShortcutMap::iterator shortcutListIt = mWidgetShortcuts.find(widget);
             assert(shortcutListIt != mWidgetShortcuts.end());
 
-            for (ShortcutList::iterator it = shortcutListIt->second.begin(); it != shortcutListIt->second.end(); ++it)
+            for (auto it = shortcutListIt->second.begin(); it != shortcutListIt->second.end(); ++it)
             {
                 Shortcut* shortcut = *it;
 

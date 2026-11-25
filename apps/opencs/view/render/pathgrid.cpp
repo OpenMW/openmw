@@ -399,10 +399,10 @@ namespace CSVRender
             int recordIndex = mPathgridCollection.getIndex(mId);
             int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
 
-            for (std::vector<unsigned short>::iterator row = mSelected.begin(); row != mSelected.end(); ++row)
+            for (unsigned short pointIndex : mSelected)
             {
                 commands.push(new CSMWorld::DeleteNestedCommand(
-                    *model, mId.getRefIdString(), static_cast<int>(*row), parentColumn));
+                    *model, mId.getRefIdString(), static_cast<int>(pointIndex), parentColumn));
             }
 
             // Fix/remove edges
@@ -543,11 +543,11 @@ namespace CSVRender
             {
                 temp = *source;
 
-                for (NodeList::iterator it = mSelected.begin(); it != mSelected.end(); ++it)
+                for (unsigned short pointIndex : mSelected)
                 {
-                    temp.mPoints[*it].mX += mMoveOffset.x();
-                    temp.mPoints[*it].mY += mMoveOffset.y();
-                    temp.mPoints[*it].mZ += mMoveOffset.z();
+                    temp.mPoints[pointIndex].mX += mMoveOffset.x();
+                    temp.mPoints[pointIndex].mY += mMoveOffset.y();
+                    temp.mPoints[pointIndex].mZ += mMoveOffset.z();
                 }
 
                 source = &temp;

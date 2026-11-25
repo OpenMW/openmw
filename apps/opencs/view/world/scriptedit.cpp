@@ -235,17 +235,17 @@ void CSVWorld::ScriptEdit::dropEvent(QDropEvent* event)
     {
         std::vector<CSMWorld::UniversalId> records(mime->getData());
 
-        for (std::vector<CSMWorld::UniversalId>::iterator it = records.begin(); it != records.end(); ++it)
+        for (auto& universalId : records)
         {
-            if (mAllowedTypes.contains(it->getType()))
+            if (mAllowedTypes.contains(universalId.getType()))
             {
-                if (stringNeedsQuote(it->getId()))
+                if (stringNeedsQuote(universalId.getId()))
                 {
-                    insertPlainText(QString::fromUtf8(('"' + it->getId() + '"').c_str()));
+                    insertPlainText(QString::fromUtf8(('"' + universalId.getId() + '"').c_str()));
                 }
                 else
                 {
-                    insertPlainText(QString::fromUtf8(it->getId().c_str()));
+                    insertPlainText(QString::fromUtf8(universalId.getId().c_str()));
                 }
             }
         }
@@ -439,7 +439,7 @@ void CSVWorld::ScriptEdit::contextMenuEvent(QContextMenuEvent* event)
 
     // remove redo/undo since they are disabled
     QList<QAction*> menuActions = menu->actions();
-    for (QList<QAction*>::iterator i = menuActions.begin(); i < menuActions.end(); ++i)
+    for (auto i = menuActions.begin(); i < menuActions.end(); ++i)
     {
         if ((*i)->text().contains("Undo") || (*i)->text().contains("Redo"))
         {

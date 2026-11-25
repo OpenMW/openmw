@@ -171,14 +171,14 @@ void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::Universal
         CSMWorld::TableMimeData::convertEnums(CSMWorld::UniversalId::Type_Referenceable));
     bool hasRefIdDisplay = !refIdColumns.empty();
 
-    for (std::vector<CSMWorld::UniversalId>::iterator it(types.begin()); it != types.end(); ++it)
+    for (auto& universalId : types)
     {
-        CSMWorld::UniversalId::Type type = it->getType();
+        CSMWorld::UniversalId::Type type = universalId.getType();
         std::vector<std::string> col = mTable->getColumnsWithDisplay(CSMWorld::TableMimeData::convertEnums(type));
         if (!col.empty())
         {
             CSVFilter::FilterData filterData;
-            filterData.searchData = it->getId();
+            filterData.searchData = universalId.getId();
             filterData.columns = std::move(col);
             sourceFilter.emplace_back(filterData);
         }
@@ -186,7 +186,7 @@ void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::Universal
         if (hasRefIdDisplay && CSMWorld::TableMimeData::isReferencable(type))
         {
             CSVFilter::FilterData filterData;
-            filterData.searchData = it->getId();
+            filterData.searchData = universalId.getId();
             filterData.columns = refIdColumns;
             sourceFilter.emplace_back(filterData);
         }

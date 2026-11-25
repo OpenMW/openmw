@@ -133,9 +133,9 @@ osg::Vec3f CSVRender::InstanceMode::getSelectionCenter(const std::vector<osg::re
     osg::Vec3f center = osg::Vec3f(0, 0, 0);
     int objectCount = 0;
 
-    for (std::vector<osg::ref_ptr<TagBase>>::const_iterator iter(selection.begin()); iter != selection.end(); ++iter)
+    for (const auto& selectedTag : selection)
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(iter->get()))
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(selectedTag.get()))
         {
             const ESM::Position& position = objectTag->mObject->getPosition();
             center += osg::Vec3f(position.pos[0], position.pos[1], position.pos[2]);
@@ -568,9 +568,9 @@ bool CSVRender::InstanceMode::primaryEditStartDrag(const QPoint& pos)
 
     mObjectsAtDragStart.clear();
 
-    for (std::vector<osg::ref_ptr<TagBase>>::iterator iter(selection.begin()); iter != selection.end(); ++iter)
+    for (auto& selectedTag : selection)
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(iter->get()))
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(selectedTag.get()))
         {
             if (mSubModeId == "move")
             {
@@ -648,9 +648,9 @@ bool CSVRender::InstanceMode::secondaryEditStartDrag(const QPoint& pos)
 
     mObjectsAtDragStart.clear();
 
-    for (std::vector<osg::ref_ptr<TagBase>>::iterator iter(selection.begin()); iter != selection.end(); ++iter)
+    for (auto& selectedTag : selection)
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(iter->get()))
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(selectedTag.get()))
         {
             if (mSubModeId == "move")
             {
@@ -1056,9 +1056,9 @@ void CSVRender::InstanceMode::dragCompleted(const QPoint& pos)
     CSMWorld::CommandMacro macro(undoStack, description);
 
     // Is this even supposed to be here?
-    for (std::vector<osg::ref_ptr<TagBase>>::iterator iter(selection.begin()); iter != selection.end(); ++iter)
+    for (auto& selectedTag : selection)
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(iter->get()))
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(selectedTag.get()))
         {
             if (mDragMode == DragMode_Rotate_Snap)
             {
@@ -1125,7 +1125,7 @@ void CSVRender::InstanceMode::dragWheel(int diff, double speedFactor)
 
         int j = 0;
 
-        for (std::vector<osg::ref_ptr<TagBase>>::iterator iter(selection.begin()); iter != selection.end(); ++iter, j++)
+        for (auto iter(selection.begin()); iter != selection.end(); ++iter, j++)
         {
             if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(iter->get()))
             {
@@ -1253,8 +1253,8 @@ void CSVRender::InstanceMode::dropEvent(QDropEvent* event)
 
         std::vector<CSMWorld::UniversalId> ids = mime->getData();
 
-        for (std::vector<CSMWorld::UniversalId>::const_iterator iter(ids.begin()); iter != ids.end(); ++iter)
-            if (mime->isReferencable(iter->getType()))
+        for (const auto& universalId : ids)
+            if (mime->isReferencable(universalId.getType()))
             {
                 // create reference
                 std::unique_ptr<CSMWorld::CreateCommand> createCommand(
@@ -1269,7 +1269,7 @@ void CSVRender::InstanceMode::dropEvent(QDropEvent* event)
                 createCommand->addValue(
                     referencesTable.findColumnIndex(CSMWorld::Columns::ColumnId_PositionZPos), hit.worldPos.z());
                 createCommand->addValue(referencesTable.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId),
-                    QString::fromUtf8(iter->getId().c_str()));
+                    QString::fromUtf8(universalId.getId().c_str()));
 
                 document.getUndoStack().push(createCommand.release());
 

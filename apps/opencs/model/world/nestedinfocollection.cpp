@@ -19,10 +19,9 @@ namespace CSMWorld
 {
     NestedInfoCollection::~NestedInfoCollection()
     {
-        for (std::map<const ColumnBase*, NestedColumnAdapter<Info>*>::iterator iter(mAdapters.begin());
-             iter != mAdapters.end(); ++iter)
+        for (auto& [_, info] : mAdapters)
         {
-            delete (*iter).second;
+            delete info;
         }
     }
 

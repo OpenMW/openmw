@@ -447,8 +447,8 @@ CSVWorld::Table::Table(const CSMWorld::UniversalId& id, bool createAndDelete, bo
 
 void CSVWorld::Table::setEditLock(bool locked)
 {
-    for (std::vector<CommandDelegate*>::iterator iter(mDelegates.begin()); iter != mDelegates.end(); ++iter)
-        (*iter)->setEditLock(locked);
+    for (auto* delegate : mDelegates)
+        delegate->setEditLock(locked);
 
     DragRecordTable::setEditLock(locked);
     mDispatcher->setEditLock(locked);
@@ -467,9 +467,9 @@ std::vector<std::string> CSVWorld::Table::getSelectedIds() const
     QModelIndexList selectedRows = selectionModel()->selectedRows();
     int columnIndex = mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
 
-    for (QModelIndexList::const_iterator iter(selectedRows.begin()); iter != selectedRows.end(); ++iter)
+    for (const auto& modelIndex : selectedRows)
     {
-        int row = mProxyModel->mapToSource(mProxyModel->index(iter->row(), 0)).row();
+        int row = mProxyModel->mapToSource(mProxyModel->index(modelIndex.row(), 0)).row();
         ids.emplace_back(CSMWorld::getString(mModel->getData(row, columnIndex)));
     }
     return ids;

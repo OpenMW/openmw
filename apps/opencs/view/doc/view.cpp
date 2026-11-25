@@ -475,8 +475,8 @@ void CSVDoc::View::updateActions()
     bool editing = !(mDocument->getState() & CSMDoc::State_Locked);
     bool running = mDocument->getState() & CSMDoc::State_Running;
 
-    for (std::vector<QAction*>::iterator iter(mEditingActions.begin()); iter != mEditingActions.end(); ++iter)
-        (*iter)->setEnabled(editing);
+    for (auto* action : mEditingActions)
+        action->setEnabled(editing);
 
     mUndo->setEnabled(editing && mDocument->getUndoStack().canUndo());
     mRedo->setEnabled(editing && mDocument->getUndoStack().canRedo());
@@ -576,8 +576,8 @@ void CSVDoc::View::updateDocumentState()
 
     QList<CSVDoc::SubView*> subViews = findChildren<CSVDoc::SubView*>();
 
-    for (QList<CSVDoc::SubView*>::iterator iter(subViews.begin()); iter != subViews.end(); ++iter)
-        (*iter)->setEditLock(state & CSMDoc::State_Locked);
+    for (auto* subView : subViews)
+        subView->setEditLock(state & CSMDoc::State_Locked);
 }
 
 void CSVDoc::View::updateProgress(int current, int max, int type, int threads)
@@ -1111,9 +1111,9 @@ void CSVDoc::View::updateScrollbar()
         rect = this->rect();
 
     int newWidth = 0;
-    for (int i = 0; i < mSubViews.size(); ++i)
+    for (auto* subView : mSubViews)
     {
-        newWidth += mSubViews[i]->width();
+        newWidth += subView->width();
     }
 
     int frameWidth = frameGeometry().width() - width();

@@ -628,9 +628,9 @@ void CSMPrefs::State::resetCategory(const std::string& category)
 
 void CSMPrefs::State::resetAll()
 {
-    for (Collection::iterator iter = mCategories.begin(); iter != mCategories.end(); ++iter)
+    for (auto& [categoryId, _] : mCategories)
     {
-        resetCategory(iter->first);
+        resetCategory(categoryId);
     }
 }
 

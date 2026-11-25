@@ -22,15 +22,15 @@ void CSVWidget::SceneToolToggle::adjustToolTip()
 
     bool first = true;
 
-    for (std::map<PushButton*, ButtonDesc>::const_iterator iter(mButtons.begin()); iter != mButtons.end(); ++iter)
-        if (iter->first->isChecked())
+    for (const auto& [button, description] : mButtons)
+        if (button->isChecked())
         {
             if (!first)
                 toolTip += ", ";
             else
                 first = false;
 
-            toolTip += iter->second.mName;
+            toolTip += description.mName;
         }
 
     if (first)
@@ -54,12 +54,11 @@ void CSVWidget::SceneToolToggle::adjustIcon()
         {
             QPainter painter(&pixmap);
 
-            for (std::map<PushButton*, ButtonDesc>::const_iterator iter(mButtons.begin()); iter != mButtons.end();
-                 ++iter)
-                if (iter->first->isChecked())
+            for (const auto& [button, description] : mButtons)
+                if (button->isChecked())
                 {
                     painter.drawImage(
-                        getIconBox(iter->second.mIndex), QImage(QString::fromUtf8(iter->second.mSmallIcon.c_str())));
+                        getIconBox(description.mIndex), QImage(QString::fromUtf8(description.mSmallIcon.c_str())));
                 }
         }
 
@@ -173,17 +172,17 @@ unsigned int CSVWidget::SceneToolToggle::getSelectionMask() const
 {
     unsigned int selection = 0;
 
-    for (std::map<PushButton*, ButtonDesc>::const_iterator iter(mButtons.begin()); iter != mButtons.end(); ++iter)
-        if (iter->first->isChecked())
-            selection |= iter->second.mMask;
+    for (const auto& [button, description] : mButtons)
+        if (button->isChecked())
+            selection |= description.mMask;
 
     return selection;
 }
 
 void CSVWidget::SceneToolToggle::setSelectionMask(unsigned int selection)
 {
-    for (std::map<PushButton*, ButtonDesc>::iterator iter(mButtons.begin()); iter != mButtons.end(); ++iter)
-        iter->first->setChecked(selection & iter->second.mMask);
+    for (auto& [button, description] : mButtons)
+        button->setChecked(selection & description.mMask);
 
     adjustToolTip();
     adjustIcon();

@@ -47,9 +47,8 @@ void CSMTools::FactionCheckStage::perform(int stage, CSMDoc::Messages& messages)
 
     // test for invalid attributes
     std::map<ESM::RefId, int> attributeCount;
-    for (size_t i = 0; i < faction.mData.mAttribute.size(); ++i)
+    for (const ESM::RefId& attribute : faction.mData.mAttribute)
     {
-        ESM::RefId attribute = faction.mData.mAttribute[i];
         if (!attribute.empty())
         {
             auto it = attributeCount.find(attribute);

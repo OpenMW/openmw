@@ -163,8 +163,8 @@ CSMTools::Tools::~Tools()
     // for the thread to finish, and deletes the operation. The holders are
     // QObject children of Tools and are destroyed automatically.
 
-    for (std::map<int, ReportModel*>::iterator iter(mReports.begin()); iter != mReports.end(); ++iter)
-        delete iter->second;
+    for (auto& [_, report] : mReports)
+        delete report;
 }
 
 CSMWorld::UniversalId CSMTools::Tools::runVerifier(const CSMWorld::UniversalId& reportId)

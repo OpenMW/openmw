@@ -50,13 +50,12 @@ CSMWorld::RefIdData::RefIdData()
 
 CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::globalToLocalIndex(int index) const
 {
-    for (std::map<UniversalId::Type, RefIdDataContainerBase*>::const_iterator iter(mRecordContainers.begin());
-         iter != mRecordContainers.end(); ++iter)
+    for (const auto& [dataType, data] : mRecordContainers)
     {
-        if (index < iter->second->getSize())
-            return LocalIndex(index, iter->first);
+        if (index < data->getSize())
+            return LocalIndex(index, dataType);
 
-        index -= iter->second->getSize();
+        index -= data->getSize();
     }
 
     throw std::runtime_error("RefIdData index out of range");
@@ -71,8 +70,7 @@ int CSMWorld::RefIdData::localToGlobalIndex(const LocalIndex& index) const
 
     int globalIndex = index.first;
 
-    for (std::map<UniversalId::Type, RefIdDataContainerBase*>::const_iterator iter(mRecordContainers.begin());
-         iter != end; ++iter)
+    for (auto iter(mRecordContainers.cbegin()); iter != end; ++iter)
         globalIndex += iter->second->getSize();
 
     return globalIndex;
@@ -209,12 +207,11 @@ int CSMWorld::RefIdData::getAppendIndex(UniversalId::Type type) const
 {
     int index = 0;
 
-    for (std::map<UniversalId::Type, RefIdDataContainerBase*>::const_iterator iter(mRecordContainers.begin());
-         iter != mRecordContainers.end(); ++iter)
+    for (const auto& [dataType, data] : mRecordContainers)
     {
-        index += iter->second->getSize();
+        index += data->getSize();
 
-        if (type == iter->first)
+        if (type == dataType)
             break;
     }
 

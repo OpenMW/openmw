@@ -39,17 +39,14 @@ void CSVDoc::ViewManager::updateIndices()
 {
     std::map<CSMDoc::Document*, std::pair<int, int>> documents;
 
-    for (std::vector<View*>::const_iterator iter(mViews.begin()); iter != mViews.end(); ++iter)
+    for (auto* view : mViews)
     {
-        std::map<CSMDoc::Document*, std::pair<int, int>>::iterator document = documents.find((*iter)->getDocument());
+        std::map<CSMDoc::Document*, std::pair<int, int>>::iterator document = documents.find(view->getDocument());
 
         if (document == documents.end())
-            document = documents
-                           .insert(std::make_pair(
-                               (*iter)->getDocument(), std::make_pair(0, countViews((*iter)->getDocument()))))
-                           .first;
+            document = documents.emplace(view->getDocument(), std::make_pair(0, countViews(view->getDocument()))).first;
 
-        (*iter)->setIndex(document->second.first++, document->second.second);
+        view->setIndex(document->second.first++, document->second.second);
     }
 }
 
@@ -73,10 +70,9 @@ CSVDoc::ViewManager::ViewManager(CSMDoc::DocumentManager& documentManager)
     mDelegateFactories->add(CSMWorld::ColumnBase::Display_Colour, new CSVWorld::ColorDelegateFactory());
 
     std::vector<CSMWorld::ColumnBase::Display> idCompletionColumns = CSMWorld::IdCompletionManager::getDisplayTypes();
-    for (std::vector<CSMWorld::ColumnBase::Display>::const_iterator current = idCompletionColumns.begin();
-         current != idCompletionColumns.end(); ++current)
+    for (const auto& display : idCompletionColumns)
     {
-        mDelegateFactories->add(*current, new CSVWorld::IdCompletionDelegateFactory());
+        mDelegateFactories->add(display, new CSVWorld::IdCompletionDelegateFactory());
     }
 
     struct Mapping
@@ -143,8 +139,8 @@ CSVDoc::ViewManager::~ViewManager()
 {
     delete mDelegateFactories;
 
-    for (std::vector<View*>::iterator iter(mViews.begin()); iter != mViews.end(); ++iter)
-        delete *iter;
+    for (auto* view : mViews)
+        delete view;
 }
 
 CSVDoc::View* CSVDoc::ViewManager::addView(CSMDoc::Document* document)
@@ -189,8 +185,8 @@ int CSVDoc::ViewManager::countViews(const CSMDoc::Document* document) const
 {
     int count = 0;
 
-    for (std::vector<View*>::const_iterator iter(mViews.begin()); iter != mViews.end(); ++iter)
-        if ((*iter)->getDocument() == document)
+    for (auto* view : mViews)
+        if (view->getDocument() == document)
             ++count;
 
     return count;
@@ -223,7 +219,7 @@ bool CSVDoc::ViewManager::closeRequest(View* view)
 // NOTE: This method assumes that it is called only if the last document
 void CSVDoc::ViewManager::removeDocAndView(CSMDoc::Document* document)
 {
-    for (std::vector<View*>::iterator iter(mViews.begin()); iter != mViews.end(); ++iter)
+    for (auto iter(mViews.begin()); iter != mViews.end(); ++iter)
     {
         // the first match should also be the only match
         if ((*iter)->getDocument() == document)
@@ -364,16 +360,16 @@ bool CSVDoc::ViewManager::showSaveInProgressMessageBox(CSVDoc::View* view)
 
 void CSVDoc::ViewManager::documentStateChanged(int state, CSMDoc::Document* document)
 {
-    for (std::vector<View*>::const_iterator iter(mViews.begin()); iter != mViews.end(); ++iter)
-        if ((*iter)->getDocument() == document)
-            (*iter)->updateDocumentState();
+    for (auto* view : mViews)
+        if (view->getDocument() == document)
+            view->updateDocumentState();
 }
 
 void CSVDoc::ViewManager::progress(int current, int max, int type, int threads, CSMDoc::Document* document)
 {
-    for (std::vector<View*>::const_iterator iter(mViews.begin()); iter != mViews.end(); ++iter)
-        if ((*iter)->getDocument() == document)
-            (*iter)->updateProgress(current, max, type, threads);
+    for (auto* view : mViews)
+        if (view->getDocument() == document)
+            view->updateProgress(current, max, type, threads);
 }
 
 void CSVDoc::ViewManager::onExitWarningHandler(int state, CSMDoc::Document* document)
