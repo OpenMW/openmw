@@ -24,11 +24,12 @@ namespace MWWorld
         /// Search for the given reference in the given reclist from
         /// ESMStore. Insert the reference into the list if a match is
         /// found. If not, throw an exception.
+        /// An existing reference with the same RefNum is replaced only if replaceExisting is set.
         /// Moved to cpp file, as we require a custom compare operator for it,
         /// and the build will fail with an ugly three-way cyclic header dependence
         /// so we need to pass the instantiation of the method to the linker, when
         /// all methods are known.
-        void load(ESM::CellRef& ref, bool deleted, const MWWorld::ESMStore& esmStore);
+        void load(ESM::CellRef& ref, bool deleted, bool replaceExisting, const MWWorld::ESMStore& esmStore);
 
         void load(const ESM4::Reference& ref, const MWWorld::ESMStore& esmStore, CellStore& cellStore);
         void load(const ESM4::ActorCharacter& ref, const MWWorld::ESMStore& esmStore, CellStore& cellStore);
