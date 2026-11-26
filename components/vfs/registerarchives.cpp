@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
 
 #include <components/vfs/bsaarchive.hpp>
 #include <components/vfs/filesystemarchive.hpp>
@@ -14,7 +15,8 @@ namespace VFS
 {
 
     void registerArchives(VFS::Manager* vfs, const Files::Collections& collections,
-        const std::vector<std::string>& archives, bool useLooseFiles, const ToUTF8::StatelessUtf8Encoder* encoder)
+        const std::vector<std::string>& archives, bool useLooseFiles, const ToUTF8::StatelessUtf8Encoder* encoder,
+        Loading::Listener* listener)
     {
         const Files::PathContainer& dataDirs = collections.getPaths();
 
@@ -26,6 +28,8 @@ namespace VFS
                 const auto archivePath = collections.getPath(*archive);
                 Log(Debug::Info) << "Adding BSA archive " << archivePath;
                 vfs->addArchive(makeBsaArchive(archivePath, encoder));
+                if (listener != nullptr)
+                    listener->increaseProgress();
             }
             else
             {
@@ -42,7 +46,7 @@ namespace VFS
                 {
                     Log(Debug::Info) << "Adding data directory " << dataDir;
                     // Last data dir has the highest priority
-                    vfs->addArchive(std::make_unique<FileSystemArchive>(dataDir));
+                    vfs->addArchive(std::make_unique<FileSystemArchive>(dataDir, listener));
                 }
                 else
                     Log(Debug::Info) << "Ignoring duplicate data directory " << dataDir;

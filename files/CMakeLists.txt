@@ -8,3 +8,5 @@ if (NOT DEFINED OPENMW_RESOURCES_ROOT)
 endif()
 
 copy_resource_file("launcher/images/openmw.png" "${OPENMW_RESOURCES_ROOT}" "resources/openmw.png")
+copy_resource_file("logo/moon.png" "${OPENMW_RESOURCES_ROOT}" "resources/logo/moon.png")
+copy_resource_file("logo/star.png" "${OPENMW_RESOURCES_ROOT}" "resources/logo/star.png")
