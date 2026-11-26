@@ -7,11 +7,12 @@
 #include <components/debug/debuglog.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
 
 namespace VFS
 {
 
-    FileSystemArchive::FileSystemArchive(const std::filesystem::path& path)
+    FileSystemArchive::FileSystemArchive(const std::filesystem::path& path, Loading::Listener* listener)
         : mPath(path)
     {
         const auto str = mPath.u8string();
@@ -39,6 +40,9 @@ namespace VFS
                     Log(Debug::Warning)
                         << "Found duplicate file for '" << proper
                         << "', please check your file system for two files with the same name in different cases.";
+
+                if (listener != nullptr)
+                    listener->increaseProgress();
             }
 
             // Exception thrown by the operator++ may not contain the context of the error like what exact path caused
