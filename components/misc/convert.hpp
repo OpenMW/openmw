@@ -4,6 +4,8 @@
 #include <components/esm/position.hpp>
 #include <components/esm3/loadpgrd.hpp>
 
+#include <components/misc/float16.hpp>
+
 #include <LinearMath/btQuaternion.h>
 #include <LinearMath/btTransform.h>
 #include <LinearMath/btVector3.h>
@@ -13,6 +15,7 @@
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
+#include <glm/gtc/packing.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
@@ -32,6 +35,14 @@ namespace Misc::Convert
     inline osg::Vec3f makeOsgVec3f(const ESM::Pathgrid::Point& value)
     {
         return osg::Vec3f(static_cast<float>(value.mX), static_cast<float>(value.mY), static_cast<float>(value.mZ));
+    }
+
+    inline osg::Vec3f makeOsgVec3f(const Misc::float16_t* values)
+    {
+        // Vertices and UV sets may be half-precision.
+        // OSG doesn't have a way to pass half-precision data at the moment.
+        return osg::Vec3f(
+            glm::unpackHalf1x16(values[0]), glm::unpackHalf1x16(values[1]), glm::unpackHalf1x16(values[2]));
     }
 
     inline btVector3 toBullet(const osg::Vec3f& vec)

@@ -27,6 +27,20 @@ namespace
         mesh.preallocateIndices(static_cast<int>(data.mNumTriangles) * 3);
     }
 
+    void bsVertDataToBtTriangleMesh(
+        btTriangleMesh& mesh, const std::vector<Nif::BSVertexData>& data, bool fullPrecision, int numIndices)
+    {
+        // FIXME: copying vertices/indices individually is unreasonable
+        mesh.preallocateVertices(static_cast<int>(data.size()));
+        for (const auto& elem : data)
+        {
+            const osg::Vec3f vertex = fullPrecision ? Misc::Convert::makeOsgVec3f(elem.mVertex.ptr())
+                                                    : Misc::Convert::makeOsgVec3f(elem.mHalfVertex.data());
+            mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
+        }
+        mesh.preallocateIndices(numIndices);
+    }
+
     void trianglesToBtTriangleMesh(btTriangleMesh& mesh, const std::vector<unsigned short>& triangles)
     {
         for (std::size_t i = 0; i < triangles.size(); i += 3)
@@ -610,6 +624,56 @@ namespace Nif
         mAlphaProperty.post(nif);
         if (!mSkin.empty())
             nif.setUseSkinning(true);
+    }
+
+    std::unique_ptr<btCollisionShape> BSTriShape::getCollisionShape() const
+    {
+        const std::vector<BSVertexData>* vertData = &mVertData;
+        const BSVertexDesc* vertDesc = &mVertDesc;
+        std::vector<const std::vector<unsigned short>*> triangleLists;
+
+        const NiSkinPartition* partitions = nullptr;
+        if (!mSkin.empty()
+            && (mSkin->mRecordType == RC_NiSkinInstance || mSkin->mRecordType == RC_BSDismemberSkinInstance))
+            partitions = static_cast<const NiSkinInstance*>(mSkin.getPtr())->getPartitions();
+
+        // Skinned SSE
+        if (partitions != nullptr && !partitions->mVertexData.empty())
+        {
+            vertData = &partitions->mVertexData;
+            vertDesc = &partitions->mVertexDesc;
+
+            triangleLists.reserve(partitions->mPartitions.size());
+            for (const auto& partition : partitions->mPartitions)
+                triangleLists.push_back(&partition.mTrueTriangles);
+        }
+        // FO4 and unskinned SSE
+        else
+            triangleLists.push_back(&mTriangles);
+
+        if (!(vertDesc->mFlags & BSVertexDesc::VertexAttribute::Vertex))
+            return nullptr;
+
+        std::size_t numIndices = 0;
+        for (const auto* triangles : triangleLists)
+            numIndices += triangles->size();
+        if (numIndices < 3)
+            return nullptr;
+
+        auto mesh = std::make_unique<btTriangleMesh>();
+        const bool fullPrecision = vertDesc->mFlags & BSVertexDesc::VertexAttribute::Full_Precision;
+        bsVertDataToBtTriangleMesh(*mesh, *vertData, fullPrecision, static_cast<int>(numIndices));
+
+        for (const auto* triangles : triangleLists)
+            trianglesToBtTriangleMesh(*mesh, *triangles);
+
+        if (mesh->getNumTriangles() == 0)
+            return nullptr;
+
+        auto shape = std::make_unique<Resource::TriangleMeshShape>(mesh.get(), true);
+        std::ignore = mesh.release();
+
+        return shape;
     }
 
     void BSDynamicTriShape::read(NIFStream* nif)

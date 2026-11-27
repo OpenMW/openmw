@@ -237,11 +237,7 @@ namespace NifBullet
             args.mAvoid = true;
 
         if (args.mGenerateCollision)
-        {
-            auto geometry = dynamic_cast<const Nif::NiGeometry*>(&node);
-            if (geometry)
-                handleGeometry(*geometry, parent, args);
-        }
+            handleGeometry(node, parent, args);
 
         // For NiNodes, loop through children
         if (const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(&node))
@@ -264,24 +260,38 @@ namespace NifBullet
     }
 
     void BulletNifLoader::handleGeometry(
-        const Nif::NiGeometry& niGeometry, const Nif::Parent* nodeParent, HandleNodeArgs args)
+        const Nif::NiAVObject& geometry, const Nif::Parent* nodeParent, HandleNodeArgs args)
     {
         // This flag comes from BSXFlags
-        if (args.mHasMarkers && Misc::StringUtils::ciStartsWith(niGeometry.mName, "EditorMarker"))
+        if (args.mHasMarkers && Misc::StringUtils::ciStartsWith(geometry.mName, "EditorMarker"))
             return;
 
         // This flag comes from Morrowind
-        if (args.mHasTriMarkers && Misc::StringUtils::ciStartsWith(niGeometry.mName, "Tri EditorMarker"))
+        if (args.mHasTriMarkers && Misc::StringUtils::ciStartsWith(geometry.mName, "Tri EditorMarker"))
             return;
 
-        if (!niGeometry.mSkin.empty())
-            args.mAnimated = false;
+        std::unique_ptr<btCollisionShape> childShape;
+        if (Nif::isTypeNiGeometry(geometry.mRecordType))
+        {
+            const Nif::NiGeometry& niGeometry = static_cast<const Nif::NiGeometry&>(geometry);
+            if (!niGeometry.mSkin.empty())
+                args.mAnimated = false;
+            childShape = niGeometry.getCollisionShape();
+        }
+        else if (Nif::isTypeBSGeometry(geometry.mRecordType))
+        {
+            const Nif::BSTriShape& bsTriShape = static_cast<const Nif::BSTriShape&>(geometry);
+            if (!bsTriShape.mSkin.empty())
+                args.mAnimated = false;
+            childShape = bsTriShape.getCollisionShape();
+        }
+        else
+            return;
 
-        std::unique_ptr<btCollisionShape> childShape = niGeometry.getCollisionShape();
         if (childShape == nullptr)
             return;
 
-        osg::Matrixf transform = niGeometry.mTransform.toMatrix();
+        osg::Matrixf transform = geometry.mTransform.toMatrix();
         for (const Nif::Parent* parent = nodeParent; parent != nullptr; parent = parent->mParent)
             transform *= parent->mNiNode.mTransform.toMatrix();
 
@@ -312,7 +322,7 @@ namespace NifBullet
                 mCompoundShape.reset(new btCompoundShape);
 
             if (args.mAnimated)
-                mShape->mAnimatedShapes.emplace(niGeometry.mRecordIndex, mCompoundShape->getNumChildShapes());
+                mShape->mAnimatedShapes.emplace(geometry.mRecordIndex, mCompoundShape->getNumChildShapes());
             mCompoundShape->addChildShape(trans, childShape.get());
         }
         else
