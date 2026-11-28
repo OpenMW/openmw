@@ -7,6 +7,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollBar.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/settings/values.hpp>
@@ -797,8 +798,11 @@ namespace MWGui
                     = (mType == Spellmaking) ? ESM::MagicEffect::AllowSpellmaking : ESM::MagicEffect::AllowEnchanting;
                 if (!(effect->mData.mFlags & requiredFlags))
                     continue;
-                if (effect->mName.empty()) // effects without names cannot be displayed in MWList
+                if (effect->mName.empty())
+                {
+                    Log(Debug::Warning) << "Cannot render nameless magic effect " << effect->mId;
                     continue;
+                }
 
                 if (std::find(knownEffects.begin(), knownEffects.end(), effect) == knownEffects.end())
                     knownEffects.push_back(effect);
