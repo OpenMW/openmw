@@ -20,8 +20,6 @@
 
 #include <SDL.h>
 
-#include <glm/vec2.hpp>
-
 #include <components/debug/debuglog.hpp>
 #include <components/debug/gldebug.hpp>
 
@@ -175,7 +173,7 @@ namespace
     }
 
     // Center of the star in the texture coordinates of star.png.
-    constexpr glm::vec2 sStarCenter(0.6122f, 0.4926f);
+    const osg::Vec2f sStarCenter(0.6122f, 0.4926f);
     constexpr double sStarTurnDuration = 2.4;
     constexpr std::chrono::milliseconds sFrameDuration{ 10 };
 
@@ -230,8 +228,8 @@ namespace
             {
                 osg::ref_ptr<osg::Geometry> starQuad = createLogoQuad(star);
                 osg::StateSet* starStateSet = starQuad->getOrCreateStateSet();
-                const glm::vec2 turnCenter = (sStarCenter - 0.5f) * sLogoSize;
-                starStateSet->addUniform(new osg::Uniform("turnCenter", osg::Vec2f(turnCenter.x, turnCenter.y)));
+                const osg::Vec2f turnCenter = (sStarCenter - osg::Vec2f(0.5f, 0.5f)) * sLogoSize;
+                starStateSet->addUniform(new osg::Uniform("turnCenter", turnCenter));
                 starStateSet->addUniform(
                     new osg::Uniform("turnSpeed", static_cast<float>(-2 * osg::PI / sStarTurnDuration)));
 
