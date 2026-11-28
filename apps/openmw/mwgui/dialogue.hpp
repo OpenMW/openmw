@@ -169,7 +169,7 @@ namespace MWGui
         bool isCompanion(const MWWorld::Ptr& actor);
         bool isCompanion();
 
-        void onSelectListItem(const std::string& topic, int id);
+        void onSelectListItem(const std::string& topic);
         void onByeClicked(MyGUI::Widget* sender);
         void onMouseWheel(MyGUI::Widget* sender, int rel);
         void onWindowResize(MyGUI::Window* sender);

@@ -7,6 +7,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollBar.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/settings/values.hpp>
@@ -797,6 +798,11 @@ namespace MWGui
                     = (mType == Spellmaking) ? ESM::MagicEffect::AllowSpellmaking : ESM::MagicEffect::AllowEnchanting;
                 if (!(effect->mData.mFlags & requiredFlags))
                     continue;
+                if (effect->mName.empty())
+                {
+                    Log(Debug::Warning) << "Cannot render nameless magic effect " << effect->mId;
+                    continue;
+                }
 
                 if (std::find(knownEffects.begin(), knownEffects.end(), effect) == knownEffects.end())
                     knownEffects.push_back(effect);
@@ -807,22 +813,18 @@ namespace MWGui
 
         mAvailableEffectsList->clear();
 
-        int i = 0;
         for (const auto effect : knownEffects)
-        {
             mAvailableEffectsList->addItem(effect->mName);
-            mButtonMapping[i] = effect->mId;
-            ++i;
-        }
         mAvailableEffectsList->adjustSize();
         mAvailableEffectsList->scrollToTop();
 
         mAvailableButtons.clear();
-        for (const auto effect : knownEffects)
+        for (size_t i = 0; i < knownEffects.size(); ++i)
         {
-            MyGUI::Button* w = mAvailableEffectsList->getItemWidget(effect->mName);
+            const ESM::MagicEffect* effect = knownEffects[i];
+            MyGUI::Button* w = mAvailableEffectsList->getItemWidgetAt(i);
             mAvailableButtons.emplace_back(w);
-
+            w->setUserData(effect->mId);
             ToolTips::createMagicEffectToolTip(w, effect->mId);
         }
 
@@ -889,8 +891,7 @@ namespace MWGui
             return;
         }
 
-        int buttonId = *sender->getUserData<int>();
-        mSelectedKnownEffectId = mButtonMapping[buttonId];
+        mSelectedKnownEffectId = *sender->getUserData<ESM::RefId>();
 
         const ESM::MagicEffect* effect
             = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(mSelectedKnownEffectId);

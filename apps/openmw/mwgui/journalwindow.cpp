@@ -440,7 +440,7 @@ namespace
             MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
-        void notifyTopicSelected(const std::string& topicIdString, int id)
+        void notifyTopicSelected(const std::string& topicIdString)
         {
             ESM::RefId topic = ESM::RefId::stringRefId(topicIdString);
             const MWBase::Journal* journal = MWBase::Environment::get().getJournal();
@@ -449,7 +449,7 @@ namespace
                 notifyTopicClicked(it->second);
         }
 
-        void notifyQuestClicked(const std::string& name, int id)
+        void notifyQuestClicked(const std::string& name)
         {
             std::shared_ptr<MWGui::TypesetBook> book = createQuestBook(name);
 
@@ -773,14 +773,14 @@ namespace
                     // Choose a quest
                     Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
                     if (mSelectedQuest < list->getItemCount())
-                        notifyQuestClicked(list->getItemNameAt(mSelectedQuest), 0);
+                        notifyQuestClicked(list->getItemNameAt(mSelectedQuest));
                 }
                 else if (mTopicsMode)
                 {
                     // Choose a topic
                     Gui::MWList* list = getWidget<Gui::MWList>(TopicsList);
                     if (mSelectedQuest < list->getItemCount())
-                        notifyTopicSelected(list->getItemNameAt(mSelectedQuest), 0);
+                        notifyTopicSelected(list->getItemNameAt(mSelectedQuest));
                 }
                 else
                 {

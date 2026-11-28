@@ -56,7 +56,6 @@ namespace Gui
         }
 
         mItemHeight = 0;
-        int i = 0;
         for (const auto& item : mItems)
         {
             mItemHeight += item.mVPadding;
@@ -77,7 +76,6 @@ namespace Gui
                 // Morrowind list item text widgets are typically 18 pixels tall
                 int height = button->getTextSize().height + 2;
                 button->setSize(MyGUI::IntSize(button->getSize().width, height));
-                button->setUserData(i);
 
                 mItemHeight += height;
             }
@@ -91,7 +89,6 @@ namespace Gui
                 mItemHeight += 18;
             }
             mItemHeight += item.mVPadding;
-            ++i;
         }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
@@ -160,16 +157,22 @@ namespace Gui
     void MWList::onItemSelected(MyGUI::Widget* sender)
     {
         std::string name = sender->castType<MyGUI::Button>()->getCaption();
-        int id = *sender->getUserData<int>();
-        eventItemSelected(name, id);
+        eventItemSelected(name);
         eventWidgetSelected(sender);
+    }
+
+    MyGUI::Button* MWList::getItemWidgetAt(size_t index)
+    {
+        return mScrollView->getChildAt(index)->castType<MyGUI::Button>(false);
     }
 
     MyGUI::Button* MWList::getItemWidget(std::string_view name)
     {
         std::string search = getName() + "_item_";
         search += name;
-        return mScrollView->findWidget(search)->castType<MyGUI::Button>();
+        if (MyGUI::Widget* found = mScrollView->findWidget(search))
+            return found->castType<MyGUI::Button>();
+        return nullptr;
     }
 
     void MWList::scrollToTop()

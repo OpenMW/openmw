@@ -15,14 +15,14 @@ namespace Gui
     public:
         MWList();
 
-        typedef MyGUI::delegates::MultiDelegate<const std::string&, int> EventHandle_StringInt;
+        typedef MyGUI::delegates::MultiDelegate<const std::string&> EventHandle_String;
         typedef MyGUI::delegates::MultiDelegate<MyGUI::Widget*> EventHandle_Widget;
 
         /**
          * Event: Item selected with the mouse.
-         * signature: void method(std::string itemName, int index)
+         * signature: void method(const std::string& itemName)
          */
-        EventHandle_StringInt eventItemSelected;
+        EventHandle_String eventItemSelected;
 
         /**
          * Event: Item selected with the mouse.
@@ -44,6 +44,7 @@ namespace Gui
                                                      ///< at the place where the separator is
         void clear();
 
+        MyGUI::Button* getItemWidgetAt(size_t index);
         MyGUI::Button* getItemWidget(std::string_view name);
         ///< get widget for an item name, useful to set up tooltip
 
