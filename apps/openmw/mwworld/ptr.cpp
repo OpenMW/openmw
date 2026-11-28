@@ -8,9 +8,10 @@ namespace MWWorld
 {
     SafePtr::SafePtr(const Ptr& ptr)
         : mId(ptr.getCellRef().getRefNum())
-        , mPtr(ptr)
         , mLastUpdate(MWBase::Environment::get().getWorldModel()->getPtrRegistryRevision())
     {
+        if (mId.isSet())
+            mPtr = ptr;
     }
 
     std::string SafePtr::toString() const
